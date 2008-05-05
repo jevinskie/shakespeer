@@ -20,7 +20,6 @@
  */
 
 #import "SPTransferController.h"
-#import "SPFinishedTransferController.h"
 #import "SPApplicationController.h"
 #import "SPMainWindowController.h"
 #import "SPHubController.h"
@@ -42,7 +41,7 @@
     self = [super init];
     if(self)
     {
-        [NSBundle loadNibNamed:@"Transfers" owner:self];
+        [NSBundle loadNibNamed:@"Uploads" owner:self];
         transfers = [[NSMutableArray alloc] init];
 
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -121,6 +120,11 @@
     }
     
     [[transferTable headerView] setMenu:columnsMenu];
+    
+    // Don't show downloads in table
+    [arrayController setFilterPredicate:
+        [NSPredicate predicateWithFormat:@"state BETWEEN {1, 3}"]];
+    [arrayController rearrangeObjects];
 }
 
 - (NSView *)view
@@ -130,7 +134,7 @@
 
 - (NSString *)title
 {
-    return @"Transfers";
+    return @"Uploads";
 }
 
 - (NSImage *)image
@@ -248,9 +252,6 @@
     SPTransferItem *tr = [self findTransferItemWithTargetFilename:targetFilename];
     if(tr)
     {
-        SPTransferItem *finished = [[tr copy] autorelease];
-        [[SPFinishedTransferController sharedFinishedTransferController] addItem:finished];
-
         [self willChangeValueForKey:@"transfers"];
         [tr setStatus:@"Finished, idle"];
         [tr setState:SPTransferState_Idle];
@@ -265,9 +266,6 @@
     SPTransferItem *tr = [self findTransferItemWithNick:nick directions:DIR_DOWNLOAD];
     if(tr)
     {
-        SPTransferItem *finished = [[tr copy] autorelease];
-        [[SPFinishedTransferController sharedFinishedTransferController] addItem:finished];
-
         [self willChangeValueForKey:@"transfers"];
         [tr setStatus:@"Finished, idle"];
         [tr setState:SPTransferState_Idle];

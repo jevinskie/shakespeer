@@ -24,7 +24,6 @@
 @class SPSideBar;
 @class SPPublicHubsController;
 @class SPTransferController;
-@class SPFinishedTransferController;
 @class MenuButton;
 
 @interface SPMainWindowController : NSWindowController
@@ -34,7 +33,6 @@
     id bookmarkController;
     id queueController;
     SPTransferController *transferController;
-    SPFinishedTransferController *finishedTransferController;
     NSString *passwordHub, *passwordNick;
     NSTimer *statusMessageTimer;
     NSMutableDictionary *privateChats;
@@ -100,7 +98,6 @@
 - (IBAction)openTransfers:(id)sender;
 - (IBAction)showTransfers:(id)sender;
 - (IBAction)toggleColumn:(id)sender;
-- (IBAction)openFinishedTransfers:(id)sender;
 - (IBAction)quickSearchExecute:(id)sender;
 - (IBAction)showQueue:(id)sender;
 - (IBAction)acceptPassword:(id)sender;

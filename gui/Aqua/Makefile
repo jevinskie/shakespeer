@@ -16,7 +16,7 @@ SOURCES=FilteringArrayController.m \
 	   NSStringExtensions.m \
 	   SPApplicationController.m SPBookmarkController.m \
 	   SPChatWindowController.m \
-	   SPFilelistController.m SPFinishedTransferController.m \
+	   SPFilelistController.m \
 	   SPHubController.m SPLog.m \
 	   SPMainWindowController-Toolbar.m SPMainWindowController.m \
 	   SPPreferenceController.m SPPublicHubsController.m \

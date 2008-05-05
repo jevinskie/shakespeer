@@ -33,7 +33,6 @@
 #import "SPSideBar.h"
 #import "SPPublicHubsController.h"
 #import "SPTransferController.h"
-#import "SPFinishedTransferController.h"
 #import "SPUserDefaultKeys.h"
 #import "SPNotificationNames.h"
 #import "MenuButton.h"
@@ -79,7 +78,9 @@
     [self openBookmarks:self];
     [self showQueue:self];
     [self openTransfers:self];
-    [self openFinishedTransfers:self];
+    
+    // Show bookmarks at startup
+    // TODO: Remember last view instead
     [self openBookmarks:self];
 
     contextMenuButton = [[MenuButton alloc] init];
@@ -191,6 +192,11 @@
     }
     
     [[transferDrawerTable headerView] setMenu:columnsMenu];
+    
+    // Only show active downloads and uploads in table
+    [transferArrayController setFilterPredicate:
+        [NSPredicate predicateWithFormat:@"state BETWEEN {0, 1}"]];
+    [transferArrayController rearrangeObjects];
 }
 
 - (void)dealloc
@@ -609,13 +615,6 @@
         [sender setState:NSOffState];
         [transferDrawerTable removeTableColumn:tc];
     }
-}
-
-- (IBAction)openFinishedTransfers:(id)sender
-{
-    finishedTransferController = [SPFinishedTransferController sharedFinishedTransferController];
-    [sideBar addItem:finishedTransferController];
-    [sideBar displayItem:finishedTransferController];
 }
 
 - (IBAction)showQueue:(id)sender

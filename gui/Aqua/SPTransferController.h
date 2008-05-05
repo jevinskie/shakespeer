@@ -44,23 +44,22 @@
     int direction;
 }
 
+- (id)copy;
 - (id)initWithNick:(NSString *)aNick
           filename:(NSString *)aFilename
               size:(unsigned long long)aSize
         hubAddress:(NSString *)aHubAddress
          direction:(int)aDirection;
-- (id)copy;
-
+- (NSString *)nick;
+- (void)setStatus:(NSString *)aStatusString;
+- (NSString *)targetFilename;
+- (void)setFilename:(NSString *)aFilename;
+- (unsigned long long)size;
+- (void)setSize:(unsigned long long)aSize;
+- (void)setSpeed:(unsigned int)aSpeed;
 - (unsigned int)ETA;
 - (float)ratio;
-- (void)setStatus:(NSString *)aStatusString;
-- (void)setSpeed:(unsigned int)aSpeed;
 - (void)setOffset:(unsigned long long)anOffset;
-- (NSString *)targetFilename;
-- (NSString *)nick;
-- (void)setFilename:(NSString *)aFilename;
-- (void)setSize:(unsigned long long)aSize;
-- (unsigned long long)size;
 - (void)setState:(int)aState;
 - (int)direction;
 

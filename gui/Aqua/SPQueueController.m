@@ -38,7 +38,7 @@
     self = [super init];
     if(self)
     {
-        [NSBundle loadNibNamed:@"Queue" owner:self];
+        [NSBundle loadNibNamed:@"Downloads" owner:self];
 
         rootItems = [[NSMutableArray alloc] init];
 
@@ -186,7 +186,7 @@
 
 - (NSString *)title
 {
-    return @"Download Queue";
+    return @"Downloads";
 }
 
 - (NSMenu *)menu

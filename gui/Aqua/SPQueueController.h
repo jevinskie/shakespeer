@@ -48,28 +48,28 @@
 - (NSString *)path;
 - (NSString *)target;
 - (NSString *)tth;
-- (NSAttributedString *)attributedTTH;
-- (NSNumber *)priority;
-- (NSAttributedString *)priorityString;
-- (void)setPriority:(NSNumber *)aPriority;
 - (void)setTTH:(NSString *)aTTH;
+- (NSAttributedString *)attributedTTH;
 - (NSNumber *)size;
 - (NSNumber *)exactSize;
 - (void)setSize:(NSNumber *)aSize;
+- (NSNumber *)priority;
+- (NSAttributedString *)priorityString;
+- (void)setPriority:(NSNumber *)aPriority;
+- (NSAttributedString *)status;
+- (void)setStatus:(NSString *)aStatusString;
 - (void)addSource:(NSString *)sourcePath nick:(NSString *)nick;
 - (void)removeSourceForNick:(NSString *)nick;
 - (NSArray *)nicks;
 - (NSMutableArray *)children;
-- (void)setIsFilelist:(BOOL)aFlag;
-- (BOOL)isFilelist;
-- (void)setIsDirectory;
-- (BOOL)isDirectory;
 - (NSString *)users;
 - (int)filetype;
-- (void)setStatus:(NSString *)aStatusString;
-- (NSAttributedString *)status;
-- (void)setFinished;
+- (BOOL)isDirectory;
+- (void)setIsDirectory;
+- (BOOL)isFilelist;
+- (void)setIsFilelist:(BOOL)aFlag;
 - (BOOL)isFinished;
+- (void)setFinished;
 
 @end
 

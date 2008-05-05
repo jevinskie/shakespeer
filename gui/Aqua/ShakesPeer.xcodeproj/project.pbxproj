@@ -22,16 +22,15 @@
 		FC7E1A48097E6AA30087431A /* Bookmarks.nib in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A2E097E6AA30087431A /* Bookmarks.nib */; };
 		FC7E1A49097E6AA30087431A /* ChatWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A30097E6AA30087431A /* ChatWindow.nib */; };
 		FC7E1A4A097E6AA30087431A /* DirectoryListing.nib in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A32097E6AA30087431A /* DirectoryListing.nib */; };
-		FC7E1A4B097E6AA30087431A /* FinishedTransfers.nib in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A34097E6AA30087431A /* FinishedTransfers.nib */; };
 		FC7E1A4C097E6AA30087431A /* Hub.nib in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A36097E6AA30087431A /* Hub.nib */; };
 		FC7E1A4D097E6AA30087431A /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A38097E6AA30087431A /* MainMenu.nib */; };
 		FC7E1A4E097E6AA30087431A /* MainWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A3A097E6AA30087431A /* MainWindow.nib */; };
 		FC7E1A4F097E6AA30087431A /* MessagePanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A3C097E6AA30087431A /* MessagePanel.nib */; };
 		FC7E1A50097E6AA30087431A /* Preferences.nib in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A3E097E6AA30087431A /* Preferences.nib */; };
 		FC7E1A51097E6AA30087431A /* PublicHubs.nib in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A40097E6AA30087431A /* PublicHubs.nib */; };
-		FC7E1A52097E6AA30087431A /* Queue.nib in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A42097E6AA30087431A /* Queue.nib */; };
+		FC7E1A52097E6AA30087431A /* Downloads.nib in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A42097E6AA30087431A /* Downloads.nib */; };
 		FC7E1A53097E6AA30087431A /* SearchWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A44097E6AA30087431A /* SearchWindow.nib */; };
-		FC7E1A54097E6AA30087431A /* Transfers.nib in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A46097E6AA30087431A /* Transfers.nib */; };
+		FC7E1A54097E6AA30087431A /* Uploads.nib in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A46097E6AA30087431A /* Uploads.nib */; };
 		FC7E1A89097E6ADC0087431A /* action.png in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A55097E6ADC0087431A /* action.png */; };
 		FC7E1A8A097E6ADC0087431A /* advanced-prefs.png in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A56097E6ADC0087431A /* advanced-prefs.png */; };
 		FC7E1A8B097E6ADC0087431A /* bookmarks.png in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A57097E6ADC0087431A /* bookmarks.png */; };
@@ -40,7 +39,6 @@
 		FC7E1A8E097E6ADC0087431A /* connect.png in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A5A097E6ADC0087431A /* connect.png */; };
 		FC7E1A8F097E6ADC0087431A /* download.png in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A5B097E6ADC0087431A /* download.png */; };
 		FC7E1A90097E6ADC0087431A /* error.png in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A5C097E6ADC0087431A /* error.png */; };
-		FC7E1A91097E6ADC0087431A /* finished_transfers.png in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A5D097E6ADC0087431A /* finished_transfers.png */; };
 		FC7E1A92097E6ADC0087431A /* highlight_blue.tiff in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A5E097E6ADC0087431A /* highlight_blue.tiff */; };
 		FC7E1A93097E6ADC0087431A /* highlight_grey.tiff in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A5F097E6ADC0087431A /* highlight_grey.tiff */; };
 		FC7E1A94097E6ADC0087431A /* identity.png in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A60097E6ADC0087431A /* identity.png */; };
@@ -88,7 +86,6 @@
 		FC7E1B07097E6B3F0087431A /* SPBookmarkController.m in Sources */ = {isa = PBXBuildFile; fileRef = FC7E1ACF097E6B3E0087431A /* SPBookmarkController.m */; };
 		FC7E1B08097E6B3F0087431A /* SPChatWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = FC7E1AD1097E6B3E0087431A /* SPChatWindowController.m */; };
 		FC7E1B09097E6B3F0087431A /* SPFilelistController.m in Sources */ = {isa = PBXBuildFile; fileRef = FC7E1AD3097E6B3E0087431A /* SPFilelistController.m */; };
-		FC7E1B0A097E6B3F0087431A /* SPFinishedTransferController.m in Sources */ = {isa = PBXBuildFile; fileRef = FC7E1AD5097E6B3E0087431A /* SPFinishedTransferController.m */; };
 		FC7E1B0B097E6B3F0087431A /* SPGrowlBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = FC7E1AD7097E6B3E0087431A /* SPGrowlBridge.m */; };
 		FC7E1B0C097E6B3F0087431A /* SPHubController.m in Sources */ = {isa = PBXBuildFile; fileRef = FC7E1AD9097E6B3E0087431A /* SPHubController.m */; };
 		FC7E1B0D097E6B3F0087431A /* SPLog.m in Sources */ = {isa = PBXBuildFile; fileRef = FC7E1ADB097E6B3E0087431A /* SPLog.m */; };
@@ -184,16 +181,15 @@
 		FC7E1A2F097E6AA30087431A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/Bookmarks.nib; sourceTree = "<group>"; };
 		FC7E1A31097E6AA30087431A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/ChatWindow.nib; sourceTree = "<group>"; };
 		FC7E1A33097E6AA30087431A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/DirectoryListing.nib; sourceTree = "<group>"; };
-		FC7E1A35097E6AA30087431A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/FinishedTransfers.nib; sourceTree = "<group>"; };
 		FC7E1A37097E6AA30087431A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/Hub.nib; sourceTree = "<group>"; };
 		FC7E1A39097E6AA30087431A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/MainMenu.nib; sourceTree = "<group>"; };
 		FC7E1A3B097E6AA30087431A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/MainWindow.nib; sourceTree = "<group>"; };
 		FC7E1A3D097E6AA30087431A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/MessagePanel.nib; sourceTree = "<group>"; };
 		FC7E1A3F097E6AA30087431A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/Preferences.nib; sourceTree = "<group>"; };
 		FC7E1A41097E6AA30087431A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/PublicHubs.nib; sourceTree = "<group>"; };
-		FC7E1A43097E6AA30087431A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/Queue.nib; sourceTree = "<group>"; };
+		FC7E1A43097E6AA30087431A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/Downloads.nib; sourceTree = "<group>"; };
 		FC7E1A45097E6AA30087431A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/SearchWindow.nib; sourceTree = "<group>"; };
-		FC7E1A47097E6AA30087431A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/Transfers.nib; sourceTree = "<group>"; };
+		FC7E1A47097E6AA30087431A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/Uploads.nib; sourceTree = "<group>"; };
 		FC7E1A55097E6ADC0087431A /* action.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = action.png; path = Resources/Images/action.png; sourceTree = "<group>"; };
 		FC7E1A56097E6ADC0087431A /* advanced-prefs.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "advanced-prefs.png"; path = "Resources/Images/advanced-prefs.png"; sourceTree = "<group>"; };
 		FC7E1A57097E6ADC0087431A /* bookmarks.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = bookmarks.png; path = Resources/Images/bookmarks.png; sourceTree = "<group>"; };
@@ -202,7 +198,6 @@
 		FC7E1A5A097E6ADC0087431A /* connect.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = connect.png; path = Resources/Images/connect.png; sourceTree = "<group>"; };
 		FC7E1A5B097E6ADC0087431A /* download.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = download.png; path = Resources/Images/download.png; sourceTree = "<group>"; };
 		FC7E1A5C097E6ADC0087431A /* error.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = error.png; path = Resources/Images/error.png; sourceTree = "<group>"; };
-		FC7E1A5D097E6ADC0087431A /* finished_transfers.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = finished_transfers.png; path = Resources/Images/finished_transfers.png; sourceTree = "<group>"; };
 		FC7E1A5E097E6ADC0087431A /* highlight_blue.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = highlight_blue.tiff; path = Resources/Images/highlight_blue.tiff; sourceTree = "<group>"; };
 		FC7E1A5F097E6ADC0087431A /* highlight_grey.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = highlight_grey.tiff; path = Resources/Images/highlight_grey.tiff; sourceTree = "<group>"; };
 		FC7E1A60097E6ADC0087431A /* identity.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = identity.png; path = Resources/Images/identity.png; sourceTree = "<group>"; };
@@ -260,8 +255,6 @@
 		FC7E1AD1097E6B3E0087431A /* SPChatWindowController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SPChatWindowController.m; sourceTree = "<group>"; };
 		FC7E1AD2097E6B3E0087431A /* SPFilelistController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SPFilelistController.h; sourceTree = "<group>"; };
 		FC7E1AD3097E6B3E0087431A /* SPFilelistController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SPFilelistController.m; sourceTree = "<group>"; };
-		FC7E1AD4097E6B3E0087431A /* SPFinishedTransferController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SPFinishedTransferController.h; sourceTree = "<group>"; };
-		FC7E1AD5097E6B3E0087431A /* SPFinishedTransferController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SPFinishedTransferController.m; sourceTree = "<group>"; };
 		FC7E1AD6097E6B3E0087431A /* SPGrowlBridge.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SPGrowlBridge.h; sourceTree = "<group>"; };
 		FC7E1AD7097E6B3E0087431A /* SPGrowlBridge.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SPGrowlBridge.m; sourceTree = "<group>"; };
 		FC7E1AD8097E6B3E0087431A /* SPHubController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SPHubController.h; sourceTree = "<group>"; };
@@ -333,6 +326,89 @@
 			name = Toolbar;
 			sourceTree = "<group>";
 		};
+		280318150ADA87AA000CC734 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				FC7E1ABF097E6B3E0087431A /* FilteringArrayController.h */,
+				FC7E1AC0097E6B3E0087431A /* FilteringArrayController.m */,
+				FC7E1ACC097E6B3E0087431A /* SPApplicationController.h */,
+				FC7E1ACD097E6B3E0087431A /* SPApplicationController.m */,
+				FC7E1ACE097E6B3E0087431A /* SPBookmarkController.h */,
+				FC7E1ACF097E6B3E0087431A /* SPBookmarkController.m */,
+				FC7E1AD0097E6B3E0087431A /* SPChatWindowController.h */,
+				FC7E1AD1097E6B3E0087431A /* SPChatWindowController.m */,
+				FC7E1AD2097E6B3E0087431A /* SPFilelistController.h */,
+				FC7E1AD3097E6B3E0087431A /* SPFilelistController.m */,
+				FC7E1AD8097E6B3E0087431A /* SPHubController.h */,
+				FC7E1AD9097E6B3E0087431A /* SPHubController.m */,
+				FC7E1ADC097E6B3E0087431A /* SPMainWindowController-Toolbar.h */,
+				FC7E1ADD097E6B3E0087431A /* SPMainWindowController-Toolbar.m */,
+				FC7E1ADE097E6B3E0087431A /* SPMainWindowController.h */,
+				FC7E1ADF097E6B3E0087431A /* SPMainWindowController.m */,
+				FC7E1AE4097E6B3E0087431A /* SPPreferenceController.h */,
+				FC7E1AE5097E6B3E0087431A /* SPPreferenceController.m */,
+				FC7E1AE6097E6B3E0087431A /* SPPublicHubsController.h */,
+				FC7E1AE7097E6B3E0087431A /* SPPublicHubsController.m */,
+				FC7E1AE8097E6B3E0087431A /* SPQueueController.h */,
+				FC7E1AE9097E6B3E0087431A /* SPQueueController.m */,
+				FC7E1AEA097E6B3E0087431A /* SPSearchWindowController.h */,
+				FC7E1AEB097E6B3E0087431A /* SPSearchWindowController.m */,
+				FC7E1AF0097E6B3E0087431A /* SPTransferController.h */,
+				FC7E1AF1097E6B3E0087431A /* SPTransferController.m */,
+			);
+			name = Controllers;
+			sourceTree = "<group>";
+		};
+		280318170ADA8800000CC734 /* Other sources */ = {
+			isa = PBXGroup;
+			children = (
+				28D1DFA20A2A023000F9F9EE /* SPKeychain.h */,
+				28D1DFA30A2A023000F9F9EE /* SPKeychain.m */,
+				28F0ACF70A29E7E100FFEC99 /* MHSysTree.h */,
+				28F0ACF80A29E7E100FFEC99 /* MHSysTree.m */,
+				FF05422C09CCB9070032DE2D /* SPClientBridge.h */,
+				FF05422D09CCB9070032DE2D /* SPClientBridge.m */,
+				FC834CE509A867EE006F1549 /* SPNotificationNames.h */,
+				FC834CE609A867EE006F1549 /* SPNotificationNames.m */,
+				FC834CE709A867EE006F1549 /* SPUserDefaultKeys.h */,
+				FC834CE809A867EE006F1549 /* SPUserDefaultKeys.m */,
+				FC7E1AC1097E6B3E0087431A /* main.m */,
+				FC7E1AC2097E6B3E0087431A /* MenuButton.h */,
+				FC7E1AC3097E6B3E0087431A /* MenuButton.m */,
+				FC7E1AC4097E6B3E0087431A /* NSMenu-UserCommandAdditions.h */,
+				FC7E1AC5097E6B3E0087431A /* NSMenu-UserCommandAdditions.m */,
+				FC7E1AC6097E6B3E0087431A /* NSMutableAttributedString-SmileyAdditions.h */,
+				FC7E1AC7097E6B3E0087431A /* NSMutableAttributedString-SmileyAdditions.m */,
+				FC7E1AC8097E6B3E0087431A /* NSStringExtensions.h */,
+				FC7E1AC9097E6B3E0087431A /* NSStringExtensions.m */,
+				FC7E1ACA097E6B3E0087431A /* SidebarCell.h */,
+				FC7E1ACB097E6B3E0087431A /* SidebarCell.m */,
+				FC7E1AD6097E6B3E0087431A /* SPGrowlBridge.h */,
+				FC7E1AD7097E6B3E0087431A /* SPGrowlBridge.m */,
+				FC7E1ADA097E6B3E0087431A /* SPLog.h */,
+				FC7E1ADB097E6B3E0087431A /* SPLog.m */,
+				FC7E1AE0097E6B3E0087431A /* SPMessagePanel.h */,
+				FC7E1AE1097E6B3E0087431A /* SPMessagePanel.m */,
+				FC7E1AE2097E6B3E0087431A /* SPOutlineView.h */,
+				FC7E1AE3097E6B3E0087431A /* SPOutlineView.m */,
+				FC7E1AEC097E6B3E0087431A /* SPSideBar.h */,
+				FC7E1AED097E6B3E0087431A /* SPSideBar.m */,
+				FC7E1AEE097E6B3E0087431A /* SPTableView.h */,
+				FC7E1AEF097E6B3E0087431A /* SPTableView.m */,
+				FC7E1AF2097E6B3E0087431A /* SPTransformers.h */,
+				FC7E1AF3097E6B3E0087431A /* SPTransformers.m */,
+				FC7E1AF4097E6B3E0087431A /* SPUser.h */,
+				FC7E1AF5097E6B3E0087431A /* SPUser.m */,
+				FC7E1AF6097E6B3F0087431A /* SPUserCommand.h */,
+				FC7E1AF7097E6B3F0087431A /* SPUserCommand.m */,
+				FC7E1AF8097E6B3F0087431A /* URLMutableAttributedString.h */,
+				FC7E1AF9097E6B3F0087431A /* URLMutableAttributedString.m */,
+				FC7E1AFA097E6B3F0087431A /* URLTextView.h */,
+				FC7E1AFB097E6B3F0087431A /* URLTextView.m */,
+			);
+			name = "Other sources";
+			sourceTree = "<group>";
+		};
 		2805B9270A02BDA000F65FBC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -387,7 +463,6 @@
 				FC7E1A5A097E6ADC0087431A /* connect.png */,
 				FC7E1A5B097E6ADC0087431A /* download.png */,
 				FC7E1A5C097E6ADC0087431A /* error.png */,
-				FC7E1A5D097E6ADC0087431A /* finished_transfers.png */,
 				FC7E1A5E097E6ADC0087431A /* highlight_blue.tiff */,
 				FC7E1A5F097E6ADC0087431A /* highlight_grey.tiff */,
 				FC7E1A60097E6ADC0087431A /* identity.png */,
@@ -416,16 +491,15 @@
 				FC7E1A2E097E6AA30087431A /* Bookmarks.nib */,
 				FC7E1A30097E6AA30087431A /* ChatWindow.nib */,
 				FC7E1A32097E6AA30087431A /* DirectoryListing.nib */,
-				FC7E1A34097E6AA30087431A /* FinishedTransfers.nib */,
 				FC7E1A36097E6AA30087431A /* Hub.nib */,
 				FC7E1A38097E6AA30087431A /* MainMenu.nib */,
 				FC7E1A3A097E6AA30087431A /* MainWindow.nib */,
 				FC7E1A3C097E6AA30087431A /* MessagePanel.nib */,
 				FC7E1A3E097E6AA30087431A /* Preferences.nib */,
 				FC7E1A40097E6AA30087431A /* PublicHubs.nib */,
-				FC7E1A42097E6AA30087431A /* Queue.nib */,
+				FC7E1A42097E6AA30087431A /* Downloads.nib */,
 				FC7E1A44097E6AA30087431A /* SearchWindow.nib */,
-				FC7E1A46097E6AA30087431A /* Transfers.nib */,
+				FC7E1A46097E6AA30087431A /* Uploads.nib */,
 			);
 			name = Nibs;
 			sourceTree = "<group>";
@@ -460,77 +534,8 @@
 		FC7E1ABC097E6AF10087431A /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				28D1DFA20A2A023000F9F9EE /* SPKeychain.h */,
-				28D1DFA30A2A023000F9F9EE /* SPKeychain.m */,
-				28F0ACF70A29E7E100FFEC99 /* MHSysTree.h */,
-				28F0ACF80A29E7E100FFEC99 /* MHSysTree.m */,
-				FF05422C09CCB9070032DE2D /* SPClientBridge.h */,
-				FF05422D09CCB9070032DE2D /* SPClientBridge.m */,
-				FC834CE509A867EE006F1549 /* SPNotificationNames.h */,
-				FC834CE609A867EE006F1549 /* SPNotificationNames.m */,
-				FC834CE709A867EE006F1549 /* SPUserDefaultKeys.h */,
-				FC834CE809A867EE006F1549 /* SPUserDefaultKeys.m */,
-				FC7E1ABF097E6B3E0087431A /* FilteringArrayController.h */,
-				FC7E1AC0097E6B3E0087431A /* FilteringArrayController.m */,
-				FC7E1AC1097E6B3E0087431A /* main.m */,
-				FC7E1AC2097E6B3E0087431A /* MenuButton.h */,
-				FC7E1AC3097E6B3E0087431A /* MenuButton.m */,
-				FC7E1AC4097E6B3E0087431A /* NSMenu-UserCommandAdditions.h */,
-				FC7E1AC5097E6B3E0087431A /* NSMenu-UserCommandAdditions.m */,
-				FC7E1AC6097E6B3E0087431A /* NSMutableAttributedString-SmileyAdditions.h */,
-				FC7E1AC7097E6B3E0087431A /* NSMutableAttributedString-SmileyAdditions.m */,
-				FC7E1AC8097E6B3E0087431A /* NSStringExtensions.h */,
-				FC7E1AC9097E6B3E0087431A /* NSStringExtensions.m */,
-				FC7E1ACA097E6B3E0087431A /* SidebarCell.h */,
-				FC7E1ACB097E6B3E0087431A /* SidebarCell.m */,
-				FC7E1ACC097E6B3E0087431A /* SPApplicationController.h */,
-				FC7E1ACD097E6B3E0087431A /* SPApplicationController.m */,
-				FC7E1ACE097E6B3E0087431A /* SPBookmarkController.h */,
-				FC7E1ACF097E6B3E0087431A /* SPBookmarkController.m */,
-				FC7E1AD0097E6B3E0087431A /* SPChatWindowController.h */,
-				FC7E1AD1097E6B3E0087431A /* SPChatWindowController.m */,
-				FC7E1AD2097E6B3E0087431A /* SPFilelistController.h */,
-				FC7E1AD3097E6B3E0087431A /* SPFilelistController.m */,
-				FC7E1AD4097E6B3E0087431A /* SPFinishedTransferController.h */,
-				FC7E1AD5097E6B3E0087431A /* SPFinishedTransferController.m */,
-				FC7E1AD6097E6B3E0087431A /* SPGrowlBridge.h */,
-				FC7E1AD7097E6B3E0087431A /* SPGrowlBridge.m */,
-				FC7E1AD8097E6B3E0087431A /* SPHubController.h */,
-				FC7E1AD9097E6B3E0087431A /* SPHubController.m */,
-				FC7E1ADA097E6B3E0087431A /* SPLog.h */,
-				FC7E1ADB097E6B3E0087431A /* SPLog.m */,
-				FC7E1ADC097E6B3E0087431A /* SPMainWindowController-Toolbar.h */,
-				FC7E1ADD097E6B3E0087431A /* SPMainWindowController-Toolbar.m */,
-				FC7E1ADE097E6B3E0087431A /* SPMainWindowController.h */,
-				FC7E1ADF097E6B3E0087431A /* SPMainWindowController.m */,
-				FC7E1AE0097E6B3E0087431A /* SPMessagePanel.h */,
-				FC7E1AE1097E6B3E0087431A /* SPMessagePanel.m */,
-				FC7E1AE2097E6B3E0087431A /* SPOutlineView.h */,
-				FC7E1AE3097E6B3E0087431A /* SPOutlineView.m */,
-				FC7E1AE4097E6B3E0087431A /* SPPreferenceController.h */,
-				FC7E1AE5097E6B3E0087431A /* SPPreferenceController.m */,
-				FC7E1AE6097E6B3E0087431A /* SPPublicHubsController.h */,
-				FC7E1AE7097E6B3E0087431A /* SPPublicHubsController.m */,
-				FC7E1AE8097E6B3E0087431A /* SPQueueController.h */,
-				FC7E1AE9097E6B3E0087431A /* SPQueueController.m */,
-				FC7E1AEA097E6B3E0087431A /* SPSearchWindowController.h */,
-				FC7E1AEB097E6B3E0087431A /* SPSearchWindowController.m */,
-				FC7E1AEC097E6B3E0087431A /* SPSideBar.h */,
-				FC7E1AED097E6B3E0087431A /* SPSideBar.m */,
-				FC7E1AEE097E6B3E0087431A /* SPTableView.h */,
-				FC7E1AEF097E6B3E0087431A /* SPTableView.m */,
-				FC7E1AF0097E6B3E0087431A /* SPTransferController.h */,
-				FC7E1AF1097E6B3E0087431A /* SPTransferController.m */,
-				FC7E1AF2097E6B3E0087431A /* SPTransformers.h */,
-				FC7E1AF3097E6B3E0087431A /* SPTransformers.m */,
-				FC7E1AF4097E6B3E0087431A /* SPUser.h */,
-				FC7E1AF5097E6B3E0087431A /* SPUser.m */,
-				FC7E1AF6097E6B3F0087431A /* SPUserCommand.h */,
-				FC7E1AF7097E6B3F0087431A /* SPUserCommand.m */,
-				FC7E1AF8097E6B3F0087431A /* URLMutableAttributedString.h */,
-				FC7E1AF9097E6B3F0087431A /* URLMutableAttributedString.m */,
-				FC7E1AFA097E6B3F0087431A /* URLTextView.h */,
-				FC7E1AFB097E6B3F0087431A /* URLTextView.m */,
+				280318170ADA8800000CC734 /* Other sources */,
+				280318150ADA87AA000CC734 /* Controllers */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -633,16 +638,15 @@
 				FC7E1A48097E6AA30087431A /* Bookmarks.nib in Resources */,
 				FC7E1A49097E6AA30087431A /* ChatWindow.nib in Resources */,
 				FC7E1A4A097E6AA30087431A /* DirectoryListing.nib in Resources */,
-				FC7E1A4B097E6AA30087431A /* FinishedTransfers.nib in Resources */,
 				FC7E1A4C097E6AA30087431A /* Hub.nib in Resources */,
 				FC7E1A4D097E6AA30087431A /* MainMenu.nib in Resources */,
 				FC7E1A4E097E6AA30087431A /* MainWindow.nib in Resources */,
 				FC7E1A4F097E6AA30087431A /* MessagePanel.nib in Resources */,
 				FC7E1A50097E6AA30087431A /* Preferences.nib in Resources */,
 				FC7E1A51097E6AA30087431A /* PublicHubs.nib in Resources */,
-				FC7E1A52097E6AA30087431A /* Queue.nib in Resources */,
+				FC7E1A52097E6AA30087431A /* Downloads.nib in Resources */,
 				FC7E1A53097E6AA30087431A /* SearchWindow.nib in Resources */,
-				FC7E1A54097E6AA30087431A /* Transfers.nib in Resources */,
+				FC7E1A54097E6AA30087431A /* Uploads.nib in Resources */,
 				FC7E1A89097E6ADC0087431A /* action.png in Resources */,
 				FC7E1A8A097E6ADC0087431A /* advanced-prefs.png in Resources */,
 				FC7E1A8B097E6ADC0087431A /* bookmarks.png in Resources */,
@@ -651,7 +655,6 @@
 				FC7E1A8E097E6ADC0087431A /* connect.png in Resources */,
 				FC7E1A8F097E6ADC0087431A /* download.png in Resources */,
 				FC7E1A90097E6ADC0087431A /* error.png in Resources */,
-				FC7E1A91097E6ADC0087431A /* finished_transfers.png in Resources */,
 				FC7E1A92097E6ADC0087431A /* highlight_blue.tiff in Resources */,
 				FC7E1A93097E6ADC0087431A /* highlight_grey.tiff in Resources */,
 				FC7E1A94097E6ADC0087431A /* identity.png in Resources */,
@@ -732,7 +735,6 @@
 				FC7E1B07097E6B3F0087431A /* SPBookmarkController.m in Sources */,
 				FC7E1B08097E6B3F0087431A /* SPChatWindowController.m in Sources */,
 				FC7E1B09097E6B3F0087431A /* SPFilelistController.m in Sources */,
-				FC7E1B0A097E6B3F0087431A /* SPFinishedTransferController.m in Sources */,
 				FC7E1B0B097E6B3F0087431A /* SPGrowlBridge.m in Sources */,
 				FC7E1B0C097E6B3F0087431A /* SPHubController.m in Sources */,
 				FC7E1B0D097E6B3F0087431A /* SPLog.m in Sources */,
@@ -805,14 +807,6 @@
 			name = DirectoryListing.nib;
 			sourceTree = "<group>";
 		};
-		FC7E1A34097E6AA30087431A /* FinishedTransfers.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				FC7E1A35097E6AA30087431A /* English */,
-			);
-			name = FinishedTransfers.nib;
-			sourceTree = "<group>";
-		};
 		FC7E1A36097E6AA30087431A /* Hub.nib */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -861,12 +855,12 @@
 			name = PublicHubs.nib;
 			sourceTree = "<group>";
 		};
-		FC7E1A42097E6AA30087431A /* Queue.nib */ = {
+		FC7E1A42097E6AA30087431A /* Downloads.nib */ = {
 			isa = PBXVariantGroup;
 			children = (
 				FC7E1A43097E6AA30087431A /* English */,
 			);
-			name = Queue.nib;
+			name = Downloads.nib;
 			sourceTree = "<group>";
 		};
 		FC7E1A44097E6AA30087431A /* SearchWindow.nib */ = {
@@ -877,12 +871,12 @@
 			name = SearchWindow.nib;
 			sourceTree = "<group>";
 		};
-		FC7E1A46097E6AA30087431A /* Transfers.nib */ = {
+		FC7E1A46097E6AA30087431A /* Uploads.nib */ = {
 			isa = PBXVariantGroup;
 			children = (
 				FC7E1A47097E6AA30087431A /* English */,
 			);
-			name = Transfers.nib;
+			name = Uploads.nib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

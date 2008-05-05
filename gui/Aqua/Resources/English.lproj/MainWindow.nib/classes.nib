@@ -29,7 +29,6 @@
                 connectExecute = id; 
                 connectShow = id; 
                 openBookmarks = id; 
-                openFinishedTransfers = id; 
                 openHublist = id; 
                 openTransfers = id; 
                 privateMessage = id; 
