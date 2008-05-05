@@ -153,16 +153,16 @@ void queue_free(queue_t *queue)
     }
 }
 
-int queue_has_source_for_nick(const char *nick)
+bool queue_has_source_for_nick(const char *nick)
 {
     queue_t *queue = queue_get_next_source_for_nick(nick);
     g_debug("queue = %p", queue);
     if(queue)
     {
         queue_free(queue);
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 
 /* Add a file to the download queue. Adds both a target and a source.
@@ -602,7 +602,7 @@ void test_add_file(void)
 
     /* there shouldn't be any more sources for foo, the one and only file is
      * already active */
-    fail_unless(queue_has_source_for_nick("foo") == 0);
+    fail_unless(!queue_has_source_for_nick("foo"));
 
     test_teardown();
 
@@ -635,7 +635,7 @@ void test_add_source(void)
     queue_set_target_active(q, 1);
 
     /* this file is being downloaded from "bar", nothing to do for "foo" */
-    fail_unless(queue_has_source_for_nick("foo") == 0);
+    fail_unless(!queue_has_source_for_nick("foo"));
     queue_free(q);
 
     got_target_removed_notification = 0;
@@ -643,8 +643,8 @@ void test_add_source(void)
     fail_unless(got_target_removed_notification == 1);
 
     /* the target is removed, nothing to do for both sources */
-    fail_unless(queue_has_source_for_nick("foo") == 0);
-    fail_unless(queue_has_source_for_nick("bar") == 0);
+    fail_unless(!queue_has_source_for_nick("foo"));
+    fail_unless(!queue_has_source_for_nick("bar"));
 
     test_teardown();
 

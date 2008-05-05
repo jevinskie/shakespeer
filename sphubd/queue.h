@@ -127,7 +127,7 @@ void queue_set_size(queue_t *queue, uint64_t size);
 void queue_set_target_active(queue_t *queue, int flag);
 void queue_set_filelist_active(queue_t *queue, int flag);
 queue_t *queue_get_next_source_for_nick(const char *nick);
-int queue_has_source_for_nick(const char *nick);
+bool queue_has_source_for_nick(const char *nick);
 int queue_set_target_filename(queue_t *queue, const char *filename);
 void queue_set_source_filename(queue_t *queue, const char *filename);
 int queue_remove_directory(const char *target_directory);

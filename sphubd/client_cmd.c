@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Martin Hedenfalk <martin@bzero.se>
+ * Copyright 2005-2006 Martin Hedenfalk <martin@bzero.se>
  *
  * This file is part of ShakesPeer.
  *
