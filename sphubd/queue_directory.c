@@ -96,7 +96,7 @@ int queue_resolve_directory(const char *nick,
         /* FIXME: might need to do this asynchronously */
         /* FIXME: no need to keep the whole filelist in memory (parse
          * incrementally) */
-        fl_dir_t *root = fl_parse(filelist_path);
+        fl_dir_t *root = fl_parse(filelist_path, NULL);
         if(root)
         {
             fl_dir_t *fl = fl_find_directory(root, source_directory);

@@ -1,5 +1,4 @@
-/* vim: ft=objc
- *
+/*
  * Copyright 2005 Martin Hedenfalk <martin@bzero.se>
  *
  * This file is part of ShakesPeer.
@@ -25,6 +24,7 @@
 #import "SPTransformers.h"
 #import "SPSideBar.h"
 #import "SPOutlineView.h"
+#import "SPMainWindowController.h"
 
 #import "SPUserDefaultKeys.h"
 
@@ -47,9 +47,13 @@
                                                               selector:@selector(caseInsensitiveCompare:)] autorelease];
         [filelist setSortDescriptors:[NSArray arrayWithObjects:sd1, sd2, nil]];
 
-        root = fl_parse([aPath UTF8String]);
+	xerr_t *err = NULL;
+        root = fl_parse([aPath UTF8String], &err);
         if (root == NULL) {
-            NSLog(@"Failed to parse filelist from %@", aPath);
+	    [[SPMainWindowController sharedMainWindowController]
+		statusMessage:[NSString stringWithFormat:@"Failed to load %@'s filelist: %s", aNick, xerr_msg(err)]
+			  hub:nil];
+	    xerr_free(err);
         }
         else {
             rootItems = [[self setFiles:root] retain];
@@ -153,7 +157,6 @@
 
 - (void)dealloc
 {
-    NSLog(@"SPFilelistController dealloc");
     [nick release];
     [hubAddress release];
 

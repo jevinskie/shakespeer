@@ -1,24 +1,21 @@
 /*
- * Copyright 2005-2006 Martin Hedenfalk <martin@bzero.se>
+ * Copyright (c) 2005-2007 Martin Hedenfalk <martin@bzero.se>
  *
- * This file is part of ShakesPeer.
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
  *
- * ShakesPeer is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * ShakesPeer is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with ShakesPeer; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * $Id: filelist.c,v 1.31 2006/04/09 12:54:31 mhe Exp $
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include <assert.h>
 #include <errno.h>
@@ -26,32 +23,80 @@
 #include <stdlib.h>
 
 #include "filelist.h"
+#include "log.h"
+#include "xerr.h"
+#include "bz2.h"
+#include "he3.h"
 
-fl_dir_t *fl_parse(const char *filename)
+/* Parse the filelist in the given file. Handles both xml and old-style dclst
+ * filelists. Compressed files are automatically decompressed. If there
+ * already is a decompressed filelist with mtime > original, no decompression
+ * is necessary.
+ */
+fl_dir_t *fl_parse(const char *filename, xerr_t **err)
 {
-    const char *slash = strrchr(filename, '/');
-    if(slash++ == 0)
-        slash = filename;
-    if(strncmp(slash, "MyList", 6) == 0)
-        return fl_parse_dclst(filename);
-    else
-        return fl_parse_xml(filename);
-}
+    /* Check type of filelist.
+     */
+    int type = is_filelist(filename);
+    return_val_if_fail(type != FILELIST_NONE, NULL);
 
-#if 0
-void fl_sort_recursive(fl_dir_t *dir)
-{
-    dir->files = g_list_sort(dir->files, fl_sort_func);
-    GList *f_iter = dir->files;
-    while(f_iter)
+    /* Check for a compressed filelist.
+     */
+    char *filename_noext = strdup(filename);
+    char *ext = strrchr(filename_noext, '.');
+    if(ext && (strcmp(ext, ".bz2") == 0 || strcmp(ext, ".DcLst") == 0))
     {
-        fl_file_t *f = f_iter->data;
-        if(f->dir)
-            fl_sort_recursive(f->dir);
-        f_iter = g_list_next(f_iter);
+	/* strip the .bz2 or .DcLst suffix */
+	*ext++ = 0;
+
+	/* Check for existing decompressed filelist.
+	 */
+	bool need_decompression = true;
+	struct stat stbuf;
+	if(stat(filename_noext, &stbuf) == 0)
+	{
+	    struct stat stbuf_orig;
+	    if(stat(filename, &stbuf_orig) != 0)
+	    {
+		/* huh!? original doesn't exist? */
+		WARNING("%s: %s", filename, strerror(errno));
+		free(filename_noext);
+		return NULL;
+	    }
+
+	    /* compare modification times */
+	    if(stbuf.st_mtime >= stbuf_orig.st_mtime)
+	    {
+		/* decompressed filelist up-to-date */
+		need_decompression = false;
+		DEBUG("re-using decompressed filelist [%s]", filename_noext);
+	    }
+	}
+
+	if(need_decompression)
+	{
+	    /* decompress the filelist */
+	    DEBUG("decompressing filelist [%s] -> [%s]", filename, filename_noext);
+	    if(strcmp(ext, "bz2") == 0)
+		bz2_decode(filename, filename_noext, err);
+	    else
+		he3_decode(filename, filename_noext, err);
+	    if(err && *err)
+	    {
+		WARNING("failed to decompress filelist: %s", xerr_msg(*err));
+		return NULL;
+	    }
+	}
     }
+
+    /* FIXME: should pass the xerr_t to the parse functions too */
+    if(type == FILELIST_DCLST)
+        return fl_parse_dclst(filename_noext);
+    else
+        return fl_parse_xml(filename_noext);
+
+    free(filename_noext);
 }
-#endif
 
 static void fl_free_file(fl_file_t *flf)
 {

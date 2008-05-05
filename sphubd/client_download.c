@@ -246,36 +246,11 @@ void cc_finish_download(cc_t *cc)
 
     if(cc->current_queue->is_filelist)
     {
-        char *filepath = cc->current_queue->target_filename;
-        char *filepath_noext = strdup(filepath);
-        char *ext = strrchr(filepath_noext, '.');
-        return_if_fail(ext);
-        /* strip the .bz2 or .DcLst suffix */
-        *ext++ = 0;
-
-        /* decompress the filelist */
-        DEBUG("decompressing filelist [%s] -> [%s]",
-                filepath, filepath_noext);
-        xerr_t *err = 0;
-        if(strcmp(ext, "bz2") == 0)
-            bz2_decode(filepath, filepath_noext, &err);
-        else
-            he3_decode(filepath, filepath_noext, &err);
-        if(err)
-        {
-            WARNING("failed to decompress filelist: %s", xerr_msg(err));
-            ui_send_status_message(NULL, cc->hub->address,
-                    "failed to decompress filelist: %s", xerr_msg(err));
-            xerr_free(err);
-        }
-        else
-        {
-            nc_send_filelist_finished_notification(nc_default(),
-                    cc->hub->address, cc->current_queue->nick,
-                    filepath_noext, cc->current_queue->auto_matched);
-        }
-
-        free(filepath_noext);
+	nc_send_filelist_finished_notification(nc_default(),
+	    cc->hub->address,
+	    cc->current_queue->nick,
+	    cc->current_queue->target_filename,
+	    cc->current_queue->auto_matched);
     }
     else if(cc->fetch_leaves != 1)
     {

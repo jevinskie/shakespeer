@@ -91,6 +91,7 @@ static void ui_send_stored_filelists_state(ui_t *ui)
     DIR *fsdir;
     struct dirent *dp;
     time_t now = time(0);
+    int limit = 100;
 
     fsdir = opendir(global_working_directory);
     if(fsdir == 0)
@@ -105,66 +106,81 @@ static void ui_send_stored_filelists_state(ui_t *ui)
         const char *filename = dp->d_name;
         int type = is_filelist(filename);
 
-        if(type != FILELIST_NONE)
-        {
-            static const void *rx_xml = NULL;
-            static const void *rx_dclst = NULL;
-            const void *rx = NULL;
+        if(type == FILELIST_NONE)
+		continue;
 
-	    /* While we're at it, delete old filelists.
-	     */
-	    struct stat stbuf;
-	    char *path;
-	    asprintf(&path, "%s/%s", global_working_directory, filename);
-	    if(stat(path, &stbuf) == 0)
+	static const void *rx_xml = NULL;
+	static const void *rx_dclst = NULL;
+	const void *rx = NULL;
+
+	/* While we're at it, delete old filelists.
+	 */
+	struct stat stbuf;
+	char *path;
+	asprintf(&path, "%s/%s", global_working_directory, filename);
+	if(stat(path, &stbuf) == 0)
+	{
+	    /* expire filelist after 24 hours */
+	    if(stbuf.st_mtime + 24*3600 < now)
 	    {
-		/* expire filelist after 24 hours */
-		if(stbuf.st_mtime + 24*3600 < now)
-		{
-		    if(unlink(path) != 0)
-			WARNING(" %s: %s", path, strerror(errno));
-		    free(path);
-		    continue;
-		}
+		DEBUG("removing expired filelist [%]", path);
+		if(unlink(path) != 0)
+		    WARNING(" %s: %s", path, strerror(errno));
+		free(path);
+		continue;
 	    }
-	    else
-		WARNING("%s: %s", path, strerror(errno));
+	}
+	else
+	    WARNING("%s: %s", path, strerror(errno));
+
+	/* there's no use keeping uncompressed filelists around */
+	if(!str_has_suffix(filename, ".bz2") && !str_has_suffix(filename, ".DcLst"))
+	{
+	    DEBUG("removing uncompressed filelist [%s]", path);
+	    if(unlink(path) != 0)
+		WARNING(" %s: %s", path, strerror(errno));
 	    free(path);
+	    continue;
+	}
+	free(path);
 
-            if(type == FILELIST_XML && str_has_suffix(filename, ".bz2"))
-            {
-                if(rx_xml == NULL)
-                {
-                    rx_xml = rx_compile("files\\.xml\\.(.+)\\.bz2");
-                    assert(rx_xml);
-                }
-                rx = rx_xml;
-            }
-            else if(type == FILELIST_DCLST && str_has_suffix(filename, ".DcLst"))
-            {
-                if(rx_dclst == NULL)
-                {
-                    rx_dclst = rx_compile("MyList\\.(.+)\\.DcLst");
-                    assert(rx_dclst);
-                }
-                rx = rx_dclst;
-            }
+	/* limit number of stored filelist sent to ui */
+	if(--limit < 0)
+	    continue;
 
-            if(rx)
-            {
-                rx_subs_t *subs = rx_search_precompiled(filename, rx);
-                if(subs && subs->nsubs == 1)
-                {
-                    if(nicks->length)
-                    {
-                        dstring_append(nicks, " ");
-                    }
-                    dstring_append(nicks, subs->subs[0]);
-                }
+	if(type == FILELIST_XML && str_has_suffix(filename, ".bz2"))
+	{
+	    if(rx_xml == NULL)
+	    {
+		rx_xml = rx_compile("files\\.xml\\.(.+)\\.bz2");
+		assert(rx_xml);
+	    }
+	    rx = rx_xml;
+	}
+	else if(type == FILELIST_DCLST && str_has_suffix(filename, ".DcLst"))
+	{
+	    if(rx_dclst == NULL)
+	    {
+		rx_dclst = rx_compile("MyList\\.(.+)\\.DcLst");
+		assert(rx_dclst);
+	    }
+	    rx = rx_dclst;
+	}
 
-                rx_free_subs(subs);
-            }
-        }
+	if(rx)
+	{
+	    rx_subs_t *subs = rx_search_precompiled(filename, rx);
+	    if(subs && subs->nsubs == 1)
+	    {
+		if(nicks->length)
+		{
+		    dstring_append(nicks, " ");
+		}
+		dstring_append(nicks, subs->subs[0]);
+	    }
+
+	    rx_free_subs(subs);
+	}
     }
 
     closedir(fsdir);

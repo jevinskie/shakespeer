@@ -490,7 +490,7 @@ char *str_shorten_path(const char *path, int maxlen)
     return p;
 }
 
-/* looks for an existing (decompressed) filelist from nick in the working
+/* looks for an existing (compressed) filelist from nick in the working
  * directory returns a malloced string if found (either xml or dclst type)
  *
  * returns NULL if not found
@@ -505,13 +505,13 @@ char *find_filelist(const char *working_directory, const char *nick)
 
     /* first check for an xml filelist */
     char *filelist_path;
-    asprintf(&filelist_path, "%s/files.xml.%s", working_directory, xnick);
+    asprintf(&filelist_path, "%s/files.xml.%s.bz2", working_directory, xnick);
 
     if(access(filelist_path, F_OK) != 0)
     {
         /* nope, look for a dclst filelist */
         free(filelist_path);
-        asprintf(&filelist_path, "%s/MyList.%s", working_directory, xnick);
+        asprintf(&filelist_path, "%s/MyList.%s.DcLst", working_directory, xnick);
 
         if(access(filelist_path, F_OK) != 0)
         {
