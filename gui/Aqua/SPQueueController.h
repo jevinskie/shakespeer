@@ -41,6 +41,11 @@
     BOOL isFilelist;
     BOOL isDirectory;
     BOOL isFinished;
+	
+	// when a download is requested to be removed by the user, this is set to make it
+	// easy to identify user-removed downloads from finished downloads later when the
+	// action is complete (it is aborted) and it needs to be removed from the table.
+	BOOL isWaitingToBeRemoved;
 }
 - (id)initWithTarget:(NSString *)aTarget;
 - (NSString *)filename;
@@ -70,6 +75,8 @@
 - (void)setIsFilelist:(BOOL)aFlag;
 - (BOOL)isFinished;
 - (void)setFinished;
+- (BOOL)isWaitingToBeRemoved;
+- (void)setIsWaitingToBeRemoved:(BOOL)waitingToBeRemoved;
 
 @end
 
@@ -112,11 +119,15 @@
     NSMutableArray *rootItems;
 }
 
+// called when the user removes a download 
 - (IBAction)removeFromQueue:(id)sender;
+
 - (IBAction)removeSource:(id)sender;
 - (IBAction)removeUserFromQueue:(id)sender;
+
 - (IBAction)clearAllFinishedDownloads:(id)sender;
 - (void)clearAllFinishedDownloadsRecursivelyInArray:(NSMutableArray *)anArray;
+
 - (IBAction)setPriority:(id)sender;
 - (IBAction)searchByTTH:(id)sender;
 - (IBAction)searchForAlternates:(id)sender;

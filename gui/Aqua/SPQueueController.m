@@ -407,7 +407,11 @@
     while(i != NSNotFound)
     {
         SPQueueItem *qi = [tableView itemAtRow:i];
-
+        
+        // set the download as pending removal from the queue, once we have
+        // the notification from the backend that the download is aborted.
+        [qi setIsWaitingToBeRemoved:YES];
+        
         if([qi isFilelist])
         {
             [[SPApplicationController sharedApplicationController] removeFilelistForNick:[[qi nicks] objectAtIndex:0]];
@@ -415,7 +419,6 @@
         else if([qi isDirectory])
         {
             [[SPApplicationController sharedApplicationController] removeDirectory:[qi target]];
-
         }
         else
         {
@@ -860,8 +863,13 @@
         SPQueueItem *qi = [self findItemWithFilename:[targetFilename lastPathComponent] inArray:parentArray];
         if(qi)
         {
-            /* [parentArray removeObject:qi]; */
-            [self setFinished:qi];
+            if ([qi isWaitingToBeRemoved]) {
+                // download was aborted by the user, so remove it.
+                [parentArray removeObject:qi];
+            }
+            else
+                [self setFinished:qi];
+                
             [tableView reloadData];
         }
     }
@@ -1177,6 +1185,16 @@
 - (BOOL)isFinished
 {
     return isFinished;
+}
+
+- (BOOL)isWaitingToBeRemoved
+{
+    return isWaitingToBeRemoved;
+}
+
+- (void)setIsWaitingToBeRemoved:(BOOL)waitingToBeRemoved
+{
+    isWaitingToBeRemoved = waitingToBeRemoved;
 }
 
 @end
