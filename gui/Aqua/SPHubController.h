@@ -46,7 +46,7 @@
     NSString *address;
     NSString *nick;
     NSString *descriptionString;
-    NSArray *users;
+    NSMutableArray *users;
     NSArray *filter;
     NSArray *filteredUsers;
     MHSysTree *usersTree;

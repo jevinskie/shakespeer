@@ -966,5 +966,13 @@
     return nil;
 }
 
+- (void)tableView:(NSTableView *)tableView
+sortDescriptorsDidChange:(NSArray *)oldDescriptors
+{
+	NSArray *newDescriptors = [tableView sortDescriptors];
+	[users sortUsingDescriptors:newDescriptors];
+	[tableView reloadData];
+}
+
 @end
 
