@@ -21,10 +21,11 @@ REPO_URL	?= http://darcs.bzero.se/$(REPO)
 ifneq ($(TAG),)
 TAG_OPTION=--tag=$(TAG)
 RELEASE_DIR=release-build-$(TAG)
+DIST_VERSION:=$(VERSION)
 else
 TAG_OPTION=
 RELEASE_DIR=release-build-HEAD
-VERSION:=snapshot-$(shell date +"%Y%m%d")
+DIST_VERSION:=snapshot-$(shell date +"%Y%m%d")
 endif
 
 tag-release:
@@ -43,16 +44,20 @@ release:
 	  cd $(REPO) ; \
 	fi && $(MAKE) all BUILD_PROFILE=release && $(MAKE) check
 
-tag-dmg: tag-release
+release-package:
+	@echo Creating disk image...
 	cd $(RELEASE_DIR)/$(REPO) && \
-		/bin/sh support/mkdmg "$(VERSION)" . ../.. $(REPO)
+		/bin/sh support/mkdmg "$(DIST_VERSION)" . ../.. $(REPO)
+	@echo Creating source tarball...
+	darcs dist --repodir=$(RELEASE_DIR)/$(REPO) -d $(PACKAGE)-$(DIST_VERSION) && \
+	mv $(RELEASE_DIR)/$(REPO)/$(PACKAGE)-$(DIST_VERSION).tar.gz .
 
-dmg: release
-	cd $(RELEASE_DIR)/$(REPO) && \
-		/bin/sh support/mkdmg "$(VERSION)" . ../.. $(REPO)
+tag-dmg: tag-release release-package
+
+dmg: release release-package
 
 dist:
-	darcs dist -d $(PACKAGE)-$(VERSION)
+	darcs dist -d $(PACKAGE)-$(DIST_VERSION)
 
 version.h: version.mk
 	echo '#ifndef _version_h_' > version.h
