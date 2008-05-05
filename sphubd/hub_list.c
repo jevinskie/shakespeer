@@ -311,7 +311,7 @@ void hub_user_command_pop(hub_t *hub)
             hub_user_commands_list);
     if(uc)
     {
-        TAILQ_REMOVE(&hub->user_commands_head, uc,  uc_link);
+        TAILQ_REMOVE(&hub->user_commands_head, uc,  link);
         hub_user_command_free(uc);
         --hub->num_user_commands;
     }
@@ -324,7 +324,7 @@ void hub_user_command_push(hub_t *hub, int type, int context,
 
     hub_user_command_t *uc = hub_user_command_new(type, context,
             description, command);
-    TAILQ_INSERT_TAIL(&hub->user_commands_head, uc,  uc_link);
+    TAILQ_INSERT_TAIL(&hub->user_commands_head, uc,  link);
     ++hub->num_user_commands;
 }
 

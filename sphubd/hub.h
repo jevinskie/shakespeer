@@ -69,7 +69,7 @@ struct hub_message
 typedef struct hub_user_command hub_user_command_t;
 struct hub_user_command
 {
-    TAILQ_ENTRY(hub_user_command) uc_link;
+    TAILQ_ENTRY(hub_user_command) link;
     int type;
     int context;
     char *description;

@@ -69,7 +69,7 @@ static void ui_send_hub_state(hub_t *hub, void *user_data)
 
     g_debug("sending user-commands");
     hub_user_command_t *uc;
-    TAILQ_FOREACH(uc, &hub->user_commands_head, uc_link)
+    TAILQ_FOREACH(uc, &hub->user_commands_head, link)
     {
         ui_send_user_command(ui, hub->address,
                 uc->type, uc->context, uc->description, uc->command);
