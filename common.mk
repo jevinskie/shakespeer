@@ -17,6 +17,7 @@ CFLAGS+=-g -O3 -Wall -Werror -DVERSION=\"$(VERSION)\" -DPACKAGE=\"$(PACKAGE)\"
 CFLAGS+=-I$(TOP)/splib -I${TOP}/spclient
 
 os := $(shell uname)
+os_ver := $(shell uname -r | cut -c 1)
 
 ifeq ($(os),Linux)
 # Required for asprintf on Linux
@@ -37,8 +38,13 @@ endif
 # Build a Universal Binary on Mac OS X
 ifeq ($(os),Darwin)
 ifeq ($(BUILD_PROFILE),release)
+ifeq ($(shell test $(os_ver) -ge 9 && echo yes || echo no),yes)
+UB_CFLAGS=-arch i386 -arch ppc
+UB_LDFLAGS=-arch ppc -arch i386
+else
 UB_CFLAGS=-isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386 -arch ppc
 UB_LDFLAGS=-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386
+endif
 endif
 endif
 
