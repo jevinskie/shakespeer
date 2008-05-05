@@ -829,6 +829,14 @@ static int ui_cb_expect_shared_paths(ui_t *ui, int expected_shared_paths)
 	DEBUG("expecting %i shared paths, init level = %i",
 		expected_shared_paths, global_init_completion);
 	global_expected_shared_paths = expected_shared_paths;
+
+	if(global_expected_shared_paths == 0 && global_init_completion >= 100)
+	{
+		DEBUG("no shared paths to wait for");
+		global_init_completion = 200;
+		ui_send_init_completion(ui, global_init_completion);
+	}
+
 	return 0;
 }
 
