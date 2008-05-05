@@ -44,7 +44,8 @@ SOURCES = \
 	SidebarCell.m \
 	URLMutableAttributedString.m \
 	URLTextView.m \
-	main.m
+	main.m \
+	UKCrashReporter.m
 
 SPApplicationController.o SPClientBridge.o: $(TOP)/version.mk
 
@@ -93,6 +94,7 @@ app_bundle.stamp: ShakesPeer
 	cp -f Resources/Info.plist ShakesPeer.app/Contents
 	cp -fR Resources/English.lproj/*[^~].nib $(RES)/English.lproj
 	cp -f Resources/English.lproj/InfoPlist.strings $(RES)/English.lproj
+	cp -f Resources/English.lproj/UKCrashReporter.strings $(RES)/English.lproj
 	cp -f Resources/Credits.rtf $(RES)
 	cp -f Resources/Images/*.png $(RES)
 	cp -f Resources/Images/*.tiff $(RES)

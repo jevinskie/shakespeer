@@ -38,6 +38,7 @@
 #import "SPClientBridge.h"
 #import "SPNotificationNames.h"
 #import "SPUserDefaultKeys.h"
+#import "UKCrashReporter.h"
 
 #include "nmdc.h"
 #include "log.h"
@@ -431,6 +432,11 @@ else {
 
     [self performSelectorOnMainThread:@selector(loadGUInibs) withObject:nil waitUntilDone:NO];
 }
+ 
+ - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
+ {
+	 UKCrashReporterCheckForCrash();
+ }
 
 - (void)applicationWillFinishLaunching:(NSNotification *)aNotification
 {
