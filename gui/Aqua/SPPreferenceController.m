@@ -427,23 +427,23 @@ static float ToolbarHeightForWindow(NSWindow *window)
     return nil;
 }
 
+- (IBAction)setDownloadFolder:(id)sender
+{
+    NSString *path = [[sender stringValue] stringByAbbreviatingWithTildeInPath];
+    NSLog(@"setDownloadFolder: path = %@", path);
+    [[NSUserDefaults standardUserDefaults] setObject:path forKey:SPPrefsDownloadFolder];
+    [[SPApplicationController sharedApplicationController] setDownloadFolder:path];
+}
+
 - (IBAction)selectDownloadFolder:(id)sender
 {
-    NSString *path = [self selectFolder];
+    NSString *path = [[self selectFolder] stringByAbbreviatingWithTildeInPath];
+    NSLog(@"selectDownloadFolder: path = %@", path);
     if(path)
     {
         [downloadFolder setStringValue:path];
         [[NSUserDefaults standardUserDefaults] setObject:path forKey:SPPrefsDownloadFolder];
-    }
-}
-
-- (IBAction)selectCompleteFolder:(id)sender
-{
-    NSString *path = [self selectFolder];
-    if(path)
-    {
-        [completeFolder setStringValue:path];
-        [[NSUserDefaults standardUserDefaults] setObject:path forKey:SPPrefsCompleteFolder];
+        [[SPApplicationController sharedApplicationController] setDownloadFolder:path];
     }
 }
 

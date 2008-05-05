@@ -29,7 +29,6 @@
     IBOutlet NSView *advancedView;
 
     IBOutlet NSTextField *downloadFolder;
-    IBOutlet NSTextField *completeFolder;
     IBOutlet NSTextField *emailField;
     IBOutlet NSTextField *descriptionField;
     IBOutlet NSComboBox *speedField;
@@ -62,8 +61,8 @@
 - (IBAction)addSharedPath:(id)sender;
 - (IBAction)removeSharedPath:(id)sender;
 - (IBAction)updateSharedPaths:(id)sender;
+- (IBAction)setDownloadFolder:(id)sender;
 - (IBAction)selectDownloadFolder:(id)sender;
-- (IBAction)selectCompleteFolder:(id)sender;
 - (IBAction)setPort:(id)sender;
 - (IBAction)setIPAddress:(id)sender;
 - (IBAction)updateUserInfo:(id)sender;

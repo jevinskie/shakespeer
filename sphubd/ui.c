@@ -763,23 +763,15 @@ static int ui_cb_set_hash_prio(ui_t *ui, unsigned int prio)
     return 0;
 }
 
-static int ui_cb_set_storage_directory(ui_t *ui, const char *storage_directory)
-{
-    if(storage_directory)
-    {
-        free(global_storage_directory);
-        global_storage_directory = strdup(storage_directory);
-    }
-
-    return 0;
-}
-
 static int ui_cb_set_download_directory(ui_t *ui, const char *download_directory)
 {
     if(download_directory)
     {
         free(global_download_directory);
-        global_download_directory = strdup(download_directory);
+        free(global_storage_directory);
+
+        global_storage_directory = tilde_expand_path(download_directory);
+        asprintf(&global_download_directory, "%s/Incomplete", global_storage_directory);
     }
 
     return 0;
@@ -840,7 +832,6 @@ void ui_accept_connection(int fd, short condition, void *data)
     ui->cb_resume_hashing = ui_cb_resume_hashing;
     ui->cb_set_auto_search = ui_cb_set_auto_search;
     ui->cb_set_hash_prio = ui_cb_set_hash_prio;
-    ui->cb_set_storage_directory = ui_cb_set_storage_directory;
     ui->cb_set_download_directory = ui_cb_set_download_directory;
 
     /* add the channel to the list of connected uis.  */

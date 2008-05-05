@@ -590,7 +590,7 @@
         SPQueueItem *qi = [tableView itemAtRow:i];
 
         NSString *downloadFolder = [[NSUserDefaults standardUserDefaults]
-            stringForKey:SPPrefsCompleteFolder];
+            stringForKey:SPPrefsDownloadFolder];
         NSString *path = [NSString stringWithFormat:@"%@/%@",
                  downloadFolder, [qi target]];
         [[NSWorkspace sharedWorkspace] openFile:path];
@@ -608,7 +608,7 @@
         SPQueueItem *qi = [tableView itemAtRow:i];
 
         NSString *downloadFolder = [[NSUserDefaults standardUserDefaults]
-            stringForKey:SPPrefsCompleteFolder];
+            stringForKey:SPPrefsDownloadFolder];
         NSString *path = [NSString stringWithFormat:@"%@/%@",
                  downloadFolder, [qi target]];
         [[NSWorkspace sharedWorkspace] selectFile:path

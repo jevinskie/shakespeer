@@ -5,10 +5,10 @@
             ACTIONS = {
                 addSharedPath = id; 
                 removeSharedPath = id; 
-                selectCompleteFolder = id; 
                 selectDownloadFolder = id; 
                 setAutoSearchNewSources = id; 
                 setConnectionMode = id; 
+                setDownloadFolder = id; 
                 setFollowRedirects = id; 
                 setHashingPriority = id; 
                 setIPAddress = id; 
@@ -26,7 +26,6 @@
             OUTLETS = {
                 IPAddressField = NSTextField; 
                 advancedView = NSView; 
-                completeFolder = NSTextField; 
                 descriptionField = NSTextField; 
                 downloadFolder = NSTextField; 
                 emailField = NSTextField; 

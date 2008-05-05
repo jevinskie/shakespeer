@@ -64,8 +64,7 @@ static SPApplicationController *mySharedApplicationController = nil;
         sp_register_callbacks(sp);
 
         NSDictionary *appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
-            [@"~/Desktop/ShakesPeer Downloads/Incomplete" stringByExpandingTildeInPath], SPPrefsDownloadFolder,
-            [@"~/Desktop/ShakesPeer Downloads" stringByExpandingTildeInPath], SPPrefsCompleteFolder,
+            [@"~/Desktop/ShakesPeer Downloads" stringByExpandingTildeInPath], SPPrefsDownloadFolder,
             @"unconfigured-shakespeer-user", SPPrefsNickname,
             @"", SPPrefsEmail,
             @"DSL", SPPrefsSpeed,
@@ -96,7 +95,7 @@ static SPApplicationController *mySharedApplicationController = nil;
 
         [[NSApplication sharedApplication] setDelegate:self];
 
-        lastTag = 1;
+        lastSearchID = 1;
 
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(serverDiedNotification:)
@@ -222,8 +221,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
     [self setFollowHubRedirects:[[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsFollowHubRedirects]];
     [self setAutoSearchNewSources:[[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsAutoSearchNewSources]];
     [self setHashingPriority:[[NSUserDefaults standardUserDefaults] integerForKey:SPPrefsHashingPriority]];
-    [self setDownloadFolder:[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsCompleteFolder]];
-    [self setIncompleteFolder:[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsDownloadFolder]];
+    [self setDownloadFolder:[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsDownloadFolder]];
 
     return YES;
 }
@@ -472,9 +470,9 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 {
     char *search_string = nmdc_escape([aSearchString UTF8String]);
     sp_send_search(sp, [aHubAddress UTF8String], search_string,
-            aSize, aSizeRestriction, aFileType, lastTag);
+            aSize, aSizeRestriction, aFileType, lastSearchID);
     free(search_string);
-    return lastTag++;
+    return lastSearchID++;
 }
 
 - (int)searchAllHubsForString:(NSString *)aSearchString
@@ -483,23 +481,23 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
                       fileType:(int)aFileType
 {
     char *search_string = nmdc_escape([aSearchString UTF8String]);
-    sp_send_search_all(sp, search_string, aSize, aSizeRestriction, aFileType, lastTag);
+    sp_send_search_all(sp, search_string, aSize, aSizeRestriction, aFileType, lastSearchID);
     free(search_string);
-    return lastTag++;
+    return lastSearchID++;
 }
 
 - (int)searchHub:(NSString *)aHubAddress forTTH:(NSString *)aTTH
 {
     sp_send_search(sp, [aHubAddress UTF8String], [[NSString stringWithFormat:@"TTH:%@", aTTH] UTF8String],
-            0ULL, SHARE_SIZE_MIN, SHARE_TYPE_TTH, lastTag);
-    return lastTag++;
+            0ULL, SHARE_SIZE_MIN, SHARE_TYPE_TTH, lastSearchID);
+    return lastSearchID++;
 }
 
 - (int)searchAllHubsForTTH:(NSString *)aTTH
 {
     sp_send_search_all(sp, [[NSString stringWithFormat:@"TTH:%@", aTTH] UTF8String], 0ULL, SHARE_SIZE_MIN,
-            SHARE_TYPE_TTH, lastTag);
-    return lastTag++;
+            SHARE_TYPE_TTH, lastSearchID);
+    return lastSearchID++;
 }
 
 - (void)downloadFile:(NSString *)aFilename withSize:(NSNumber *)aSize
@@ -667,12 +665,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 
 - (void)setDownloadFolder:(NSString *)downloadFolder
 {
-    sp_send_set_storage_directory(sp, [downloadFolder UTF8String]);
-}
-
-- (void)setIncompleteFolder:(NSString *)incompleteFolder
-{
-    sp_send_set_download_directory(sp, [incompleteFolder UTF8String]);
+    sp_send_set_download_directory(sp, [downloadFolder UTF8String]);
 }
 
 #pragma mark -

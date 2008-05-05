@@ -21,8 +21,7 @@
 
 #import "SPUserDefaultKeys.h"
 
-NSString *SPPrefsDownloadFolder = @"downloadFolder";
-NSString *SPPrefsCompleteFolder = @"completeFolder";
+NSString *SPPrefsDownloadFolder = @"completeFolder";
 NSString *SPPrefsNickname = @"nick";
 NSString *SPPrefsSpeed = @"speed";
 NSString *SPPrefsEmail = @"email";
