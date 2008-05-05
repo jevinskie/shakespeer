@@ -136,6 +136,9 @@ int io_connect_async(struct sockaddr_in *remote_addr,
     flags = fcntl(fd, F_GETFL, 0);
     fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 
+    int on = 1;
+    setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (void *)&on, sizeof(on));
+
     int rc = connect(fd, (struct sockaddr *)remote_addr,
             sizeof(struct sockaddr_in)); 
     if(rc != 0 && errno != EINPROGRESS)
