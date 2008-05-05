@@ -73,26 +73,35 @@ Growl.framework: Growl-$(GROWL_VERSION)-SDK.dmg
 	cp -RP $$p/Frameworks/Growl.framework . && \
 	hdiutil detach $$p
 
+APP=ShakesPeer.app
+CONTENTS=$(APP)/Contents
+RES=$(CONTENTS)/Resources
+FRAMEWORKS=$(CONTENTS)/Frameworks
+
 app_bundle.stamp: ShakesPeer
-	${MAKE} -C Resources all
+	$(MAKE) -C Resources all
 	@echo "------------------------------"
 	@echo "Creating application bundle..."
 	@echo "------------------------------"
 	mkdir -p ShakesPeer.app/Contents/MacOS
-	mkdir -p ShakesPeer.app/Contents/Frameworks
-	mkdir -p ShakesPeer.app/Contents/Resources/English.lproj
+	mkdir -p $(FRAMEWORKS)
+	mkdir -p $(RES)/English.lproj
 	cp -f Resources/Info.plist ShakesPeer.app/Contents
-	cp -fR Resources/English.lproj/*[^~].nib ShakesPeer.app/Contents/Resources/English.lproj
-	cp -f Resources/English.lproj/InfoPlist.strings ShakesPeer.app/Contents/Resources/English.lproj
-	cp -f Resources/Images/*.png ShakesPeer.app/Contents/Resources 
-	cp -f Resources/Images/*.tiff ShakesPeer.app/Contents/Resources 
-	cp -f Resources/Images/*.tif ShakesPeer.app/Contents/Resources 
-	cp -f Resources/Images/Smileys/*.png ShakesPeer.app/Contents/Resources 
-	cp -f Resources/Images/shakespeer.icns ShakesPeer.app/Contents/Resources 
-	cp -f ../../sphubd/sphubd ShakesPeer.app/Contents/Resources
-	cp -f ../../sphubd/sphashd ShakesPeer.app/Contents/Resources
+	cp -fR Resources/English.lproj/*[^~].nib $(RES)/English.lproj
+	cp -f Resources/English.lproj/InfoPlist.strings $(RES)/English.lproj
+	cp -f Resources/Images/*.png $(RES)
+	cp -f Resources/Images/*.tiff $(RES)
+	cp -f Resources/Images/*.tif $(RES)
+	cp -f Resources/Images/Smileys/*.png $(RES)
+	cp -f Resources/Images/shakespeer.icns $(RES)
+	cp -f ../../sphubd/sphubd $(RES)
+	cp -f ../../sphubd/sphashd $(RES)
 	cp -f ShakesPeer ShakesPeer.app/Contents/MacOS
-	test -d ShakesPeer.app/Contents/Frameworks/Growl.framework || cp -RP Growl.framework ShakesPeer.app/Contents/Frameworks
+	test -d $(FRAMEWORKS)/Growl.framework || \
+		cp -RP Growl.framework $(FRAMEWORKS)
+	for a in recover upgrade; do \
+		cp -f ../../db-install/bin/db_$$a  $(RES) ; \
+	done
 
 install:
 
