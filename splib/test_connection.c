@@ -65,16 +65,23 @@ int test_connection(int port)
         return TC_RET_PRIVPORT;
     }
 
-    char *url;
+    char *url = NULL;
     asprintf(&url, "%s?port=%u", TC_BASE_URL, port);
 
-    dstring_t *ds = dstring_new_from_url(url);
-    free(url);
+    if (url)
+    {
+        dstring_t *ds = dstring_new_from_url(url);
+        free(url);
 
-    int rc = test_connection_string(ds->string);
-    dstring_free(ds, 1);
-
-    return rc;
+        if (ds)
+        {
+            int rc = test_connection_string(ds->string);
+            dstring_free(ds, 1);
+            return rc;
+        }
+    }
+    
+    return TC_RET_INTERNAL;
 }
 
 #ifdef TEST
