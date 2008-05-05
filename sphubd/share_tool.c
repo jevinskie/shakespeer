@@ -5,13 +5,15 @@
 #include <signal.h>
 #include <string.h>
 
+#include <event.h>
+
+#include "share.h"
 #include "log.h"
 #include "xstr.h"
 
 #include "globals.h"
 #include "notifications.h"
 #include "sphashd_client.h"
-#include "dbenv.h"
 
 #define CLRON "\e[34m"
 #define CLROFF "\e[0m"
@@ -21,6 +23,12 @@ static char *search_string = NULL;
 static int save_filelist_flag = 0;
 
 void initiate_search(void);
+
+int ui_send_status_message(void *ui, const char *hub_address, const char *message, ...)
+{
+	printf("%s\n", message);
+	return 0;
+}
 
 static void show_share_stats(void)
 {
@@ -84,9 +92,8 @@ static void shutdown_event(int fd, short why, void *data)
     show_share_stats();
 
     /* share_close(global_share); */
-    tthdb_close();
+    tth_store_close();
     global_share = 0;
-    close_default_db_environment();
 
     /* be nice to valgrind */
     free(global_working_directory);
@@ -170,6 +177,9 @@ int main(int argc, char **argv)
     argv0_path = absolute_path(p);
     free(p);
 
+	global_incomplete_directory = ".";
+	global_download_directory = ".";
+
     const char *debug_level = "debug";
     int c;
     while((c = getopt(argc, argv, "w:d:s:fh")) != EOF)
@@ -205,7 +215,8 @@ int main(int argc, char **argv)
     global_share = share_new();
     assert(global_share);
     share_tth_init_notifications(global_share);
-    tthdb_open();
+
+    tth_store_init();
     /* the share depends on libevent */
     event_init();
 
@@ -245,7 +256,7 @@ int main(int argc, char **argv)
     event_dispatch();
 
     hs_shutdown();
-    tthdb_close();
+    tth_store_close();
     /* share_close(global_share); */
 
     return 0;
