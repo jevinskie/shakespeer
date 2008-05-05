@@ -33,6 +33,7 @@
     [keypressBuffer release];
     [bufferTimer invalidate];
     [bufferTimer release];
+    [typeSearchTableColumn release];
     
     [super dealloc];
 }
@@ -60,7 +61,10 @@
 
 - (void)setTypeSearchTableColumn:(NSTableColumn *)tableColumn
 {
-    typeSearchTableColumn = tableColumn;
+    if (tableColumn != typeSearchTableColumn) {
+        [typeSearchTableColumn release];
+        typeSearchTableColumn = [tableColumn retain];
+    }
 }
 
 // handles keypresses
@@ -110,7 +114,7 @@
         else if ([[currentItem valueForKey:[typeSearchTableColumn identifier]] isKindOfClass:[NSString class]])
             theString = [currentItem valueForKey:[typeSearchTableColumn identifier]];
         else
-            break;
+            continue;
         
         // use lowercaseString to make matches case insensitive
         if ([[theString lowercaseString] hasPrefix:[searchString lowercaseString]]) {
