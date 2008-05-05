@@ -293,7 +293,7 @@ static void handle_download_finished_notification(nc_t *nc, const char *channel,
     return_if_fail(qt);
 
     queue_directory_t *qd = NULL;
-    if(qt->target_directory[0])
+    if(qt->target_directory)
     {
         /* this target belongs to a directory download */
         qd = queue_db_lookup_directory(qt->target_directory);
@@ -347,7 +347,7 @@ static void handle_download_finished_notification(nc_t *nc, const char *channel,
     }
     else
     {
-        if(qd && qd->nleft == 1 && !global_move_partial_directories)
+        if(qd && qd->nleft == 1 && global_move_partial_directories)
         {
             /* the directory is complete, remove the (filesystem) directory */
             char *target_directory;

@@ -714,12 +714,6 @@ int queue_remove_target(const char *target_filename)
 		}
 	}
 
-	if(queue_db_remove_target(target_filename) != 0)
-		return -1;
-
-	/* target removed, now remove all its sources */
-	queue_remove_sources(target_filename);
-
 	/* If we're downloading a directory, check if the whole directory is
 	 * complete. */
 	if(qd)
@@ -731,6 +725,12 @@ int queue_remove_target(const char *target_filename)
 			queue_db_remove_directory(qt->target_directory);
 		}
 	}
+
+	if(queue_db_remove_target(target_filename) != 0)
+		return -1;
+
+	/* target removed, now remove all its sources */
+	queue_remove_sources(target_filename);
 
 	return 0;
 }
