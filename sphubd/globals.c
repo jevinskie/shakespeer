@@ -18,3 +18,9 @@ char *global_id_tag = 0;
 char *global_id_generator = 0;
 char *global_id_lock = 0;
 
+/* If true, complete files in partially downloaded directories are moved to the
+ * "complete" download directory (global_storage_directory). Otherwise the
+ * files are moved once the whole directory is complete (all files are done).
+ */
+bool global_move_partial_directories = true;
+

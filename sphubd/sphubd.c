@@ -314,27 +314,75 @@ static void handle_download_finished_notification(nc_t *nc, const char *channel,
         return;
     }
 
+    queue_target_t *qt = queue_lookup_target(notification->filename);
+    return_if_fail(qt);
+
+    queue_directory_t *qd = NULL;
+    if(qt->target_directory[0])
+    {
+        /* this target belongs to a directory download */
+        qd = queue_db_lookup_directory(qt->target_directory);
+        return_if_fail(qd);
+        if(qd->nleft > 1 && !global_move_partial_directories)
+        {
+            /* There are more than this file left in the directory, and we
+             * don't want to move partial directories. */
+            g_debug("skipping moving partial directory [%s]",
+                    qd->target_directory);
+            return;
+        }
+    }
+
     char *source = 0;
-    asprintf(&source, "%s/%s",
-            global_download_directory, notification->filename);
     char *target = 0;
-    asprintf(&target, "%s/%s",
-            global_storage_directory, notification->filename);
+
+    if(global_move_partial_directories || qd == NULL)
+    {
+        asprintf(&source, "%s/%s",
+                global_download_directory, notification->filename);
+        asprintf(&target, "%s/%s",
+                global_storage_directory, notification->filename);
+
+        /* make sure the target directory exists */
+        char *dir = strdup(target);
+        char *e = strrchr(dir, '/');
+        assert(e);
+        *e = 0;
+        mkpath(dir);
+        free(dir);
+    }
+    else
+    {
+        return_if_fail(qd->nleft == 1);
+        asprintf(&source, "%s/%s",
+                global_download_directory, qd->target_directory);
+        asprintf(&target, "%s/%s",
+                global_storage_directory, qd->target_directory);
+    }
 
     g_debug("moving [%s] to download directory [%s]", source, target);
-
-    /* make sure the target directory exists */
-    char *dir = strdup(target);
-    char *e = strrchr(dir, '/');
-    assert(e);
-    *e = 0;
-    mkpath(dir);
-    free(dir);
 
     if(rename(source, target) != 0)
     {
         ui_send_status_message(NULL, NULL, "Unable to move file %s: %s",
                 source, strerror(errno));
+    }
+    else
+    {
+        if(qd && qd->nleft == 1 && !global_move_partial_directories)
+        {
+            /* the directory is complete, remove the (filesystem) directory */
+            char *target_directory;
+            asprintf(&target_directory, "%s/%s",
+                    global_download_directory, qd->target_directory);
+            if(rmdir(target_directory) != 0)
+            {
+                ui_send_status_message(NULL, NULL,
+                        "Unable to remove directory %s: %s",
+                        target_directory, strerror(errno));
+            }
+            free(target_directory);
+        }
     }
 
     free(target);

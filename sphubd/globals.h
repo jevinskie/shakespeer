@@ -20,5 +20,7 @@ extern char *global_id_tag;
 extern char *global_id_generator;
 extern char *global_id_lock;
 
+extern bool global_move_partial_directories;
+
 #endif
 
