@@ -3,7 +3,7 @@ verbose = True
 
 [project]
 target = svn:target
-start-revision = INITIAL
+start-revision = 64
 root-directory = /Users/hakan/shakespeer
 state-file = tailor.state
 source = darcs:source
