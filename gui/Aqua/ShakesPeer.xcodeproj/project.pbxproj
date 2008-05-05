@@ -1100,7 +1100,7 @@
 				2805B8E30A02B42C00F65FBC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		2805B8EB0A02B46E00F65FBC /* Build configuration list for PBXLegacyTarget "spclient" */ = {
 			isa = XCConfigurationList;
@@ -1109,7 +1109,7 @@
 				2805B8ED0A02B46E00F65FBC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		2805B8F50A02B4BD00F65FBC /* Build configuration list for PBXLegacyTarget "sphubd" */ = {
 			isa = XCConfigurationList;
@@ -1118,7 +1118,7 @@
 				2805B8F70A02B4BD00F65FBC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		FC7E1A17097E69F00087431A /* Build configuration list for PBXProject "ShakesPeer" */ = {
 			isa = XCConfigurationList;
@@ -1127,7 +1127,7 @@
 				FC7E1A19097E69F00087431A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		FC7E1A27097E6A300087431A /* Build configuration list for PBXNativeTarget "shakepeer" */ = {
 			isa = XCConfigurationList;
@@ -1136,7 +1136,7 @@
 				FC7E1A29097E6A300087431A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};
