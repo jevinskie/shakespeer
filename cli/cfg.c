@@ -69,7 +69,7 @@ cfg_t *parse_config(void)
         CFG_STR("download-directory", "~/shakespeer_downloads", CFGF_NONE),
         CFG_STR("working-directory", "~/.shakespeer", CFGF_NONE),
 #endif
-        CFG_STR("external-variables-address", "http://shakespeer.sourceforge.net/ip.shtml", CFGF_NONE),
+        CFG_STR("external-variables-address", "http://shakespeer.bzero.se/ip.shtml", CFGF_NONE),
         CFG_STR("sphubd-executable-path", "/usr/local/bin/sphubd", CFGF_NONE),
         CFG_STR("info-color", "\e[34m", CFGF_NONE),
         CFG_STR("info2-color", "\e[34m", CFGF_NONE),
