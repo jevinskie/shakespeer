@@ -13,7 +13,7 @@ check_PROGRAMS = rx_test bloom_test args_test util_test tiger_test \
 TOP=..
 include ${TOP}/common.mk
 
-CFLAGS += $(HEADLESS_CFLAGS)
+CFLAGS += $(HEADLESS_CFLAGS) -DICONV_CONST=$(ICONV_CONST)
 LDFLAGS += $(HEADLESS_LDFLAGS)
 
 all-local: libsplib.a

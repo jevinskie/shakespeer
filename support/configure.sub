@@ -1,4 +1,4 @@
-# Copyright (c) 2006-2007 Martin Hedenfalk <martin@bzero.se>
+# Copyright (c) 2006-2008 Martin Hedenfalk <martin@bzero.se>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -20,8 +20,8 @@ CC=${CC:-cc}
 
 log()
 {
-	echo $* >&2
-	echo >&2
+	/bin/echo $* >&2
+	/bin/echo >&2
 }
 
 logfile()
@@ -32,7 +32,7 @@ logfile()
 msg()
 {
 	log $*
-	echo $* >&4
+	/bin/echo $* >&4
 }
 
 checking()
@@ -42,7 +42,7 @@ checking()
 
 out()
 {
-	echo $* >&3
+	/bin/echo $* >&3
 }
 
 check_lib()
@@ -329,5 +329,28 @@ search_bdb()
 	return 1
 }
 
-# vim: noet:sw=8:ft=sh
+check_iconv_constness()
+{
+	checking if iconv uses const parameter...
+	old_CFLAGS=$CFLAGS
+	CFLAGS="-Wall -Werror $CFLAGS"
+	try_compile <<EOF
+#include <iconv.h>
+int main(void) {
+iconv_t cd;
+const char *inp; char *outp;
+size_t inbytesleft, outbytesleft;
+size_t rc = iconv(cd, &inp, &inbytesleft, &outp, &outbytesleft);
+return rc; }
+EOF
+	rc=$?
+	CFLAGS=$old_CFLAGS
+	if test $rc -ne 0; then
+		msg no
+		out ICONV_CONST=
+	else
+		msg yes
+		out ICONV_CONST=const
+	fi
+}
 

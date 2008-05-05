@@ -31,12 +31,6 @@
 
 #include "log.h"
 
-#ifdef _LIBICONV_VERSION
-# define ICONV_CONST const
-#else
-# define ICONV_CONST
-#endif
-
 char *iconv_string_full(const char *string, ssize_t length,
                         const char *src_encoding,
                         const char *dst_encoding,

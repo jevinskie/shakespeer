@@ -40,12 +40,6 @@
 #include "xstr.h"
 #include "xerr.h"
 
-#ifdef _LIBICONV_VERSION
-# define ICONV_CONST const
-#else
-# define ICONV_CONST
-#endif
-
 /* So far unused */
 int xml_iconv_convert(void *data, const char *s)
 {
