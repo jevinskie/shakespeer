@@ -1,22 +1,15 @@
 default: all
 
 -include ${TOP}/config.mk
+
+# Force building local Berkeley DB
+HAS_BDB=no
+
 include ${TOP}/version.mk
 include ${TOP}/extern.mk
 
 # set to yes if you want to build the command line interface
 WANT_CLI=yes
-
-os := $(shell uname)
-
-#ifeq (${os},Darwin)
-# default config for Mac OS X (Tiger)
-HAS_BDB=no
-#HAS_BZIP2=yes
-#HAS_ICONV=yes
-#HAS_EXPAT=no
-#HAS_LIBEVENT=no
-#endif
 
 CFLAGS+=-g -O2 -Wall -Werror -DVERSION=\"${VERSION}\" -DPACKAGE=\"${PACKAGE}\"
 CFLAGS+=-I${TOP}/splib -I${TOP}/spclient

@@ -18,8 +18,6 @@ all-local: .tecla.build confuse/libconfuse.a ${bin_PROGRAMS}
 confuse/libconfuse.a:
 	${MAKE} -C confuse libconfuse.a
 
-#cmd.c: .tecla.build
-
 LIBTECLA_VERSION=1.6.1
 LIBTECLA_URL=http://www.astro.caltech.edu/~mcs/tecla/libtecla-${LIBTECLA_VERSION}.tar.gz 
 libtecla-${LIBTECLA_VERSION}.tar.gz:
