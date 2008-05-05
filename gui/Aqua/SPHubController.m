@@ -410,10 +410,11 @@
             {
                 /* Ouch, operator status changed, which affects sort ordering. */
                 /* Remove and re-insert the entry. */
+                [user retain];
                 [usersTree removeObject:user];
-
                 [user setIsOperator:newOperatorFlag];
                 [usersTree addObject:user];
+                [user release];
             }
 
             /* Now update the attributes. */
