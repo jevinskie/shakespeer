@@ -17,7 +17,7 @@ Portability
 The core servers (sphubd and sphashd) are written in C. Actually C99 with GCC
 extensions, so GCC is required for compilation. Otherwise they should be quite
 portable across Unix-like operating systems. At least Darwin (Mac OS X), Linux
-and FreeBSD are supported.
+and OpenBSD are supported.
 
 There are currently two user interfaces: one command line client and the
 graphical user interface for Mac OS X. The command line client should be
@@ -32,16 +32,13 @@ The sphubd process is responsible for hub communication, peer communication
 for search results and communicating events to the UI.
 
 Persistence of the download queue and file hashes (TTHs) is achieved with
-SQLite. SQLite is a small embedded SQL database that require no administration.
-The interface to the SQLite database is implemented in sphubd/db.c
+simple text-based database logfiles.
 
 No threads are used. This is a very important design choice, and is what
-separates ShakesPeer from most other DC implementations. IMHO, threads are
-evil. They are difficult. Either you lock too much or you don't lock enough.
-Debugging dead-locks and race conditions is a pain in the ...
+separates ShakesPeer from most other DC implementations. Preemptive threads
+are a PITA.
 
-FIXME: describe glib event loop, non-blocking sockets...
-
+FIXME: describe event loops ...
 
 sphashd
 -------
@@ -52,5 +49,4 @@ reducing the priority of the sphashd process enables the user to actually use
 the computer for other tasks. Note that if no other programs use the CPU,
 sphashd will still use near 100% CPU, but will "step aside" as soon as another
 process is running.
-
 
