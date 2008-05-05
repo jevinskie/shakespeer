@@ -458,6 +458,8 @@ void tth_store_set_active_inode(struct tth_store *store, const char *tth, uint64
 
 #include "unit_test.h"
 
+#include "unit_test.h"
+
 int main(void)
 {
 	sp_log_set_level("debug");
