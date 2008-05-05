@@ -66,16 +66,16 @@ ShakesPeer: Growl.framework $(OBJS) \
 	$(CC) $(OBJS) -o $@ $(CFLAGS) $(UB_CFLAGS) $(LDFLAGS) $(LIBS) \
 	$(FRAMEWORKS) -bind_at_load
 
-GROWL_VERSION=0.7.4
+GROWL_VERSION=1.1.1
 
 Growl-$(GROWL_VERSION)-SDK.dmg:
 	ftp http://growl.info/files/Growl-$(GROWL_VERSION)-SDK.dmg
 
 Growl.framework: Growl-$(GROWL_VERSION)-SDK.dmg
 	p=`hdiutil attach Growl-$(GROWL_VERSION)-SDK.dmg -private | \
-		awk '$$1 ~ /^\/dev/ && $$2 == "Apple_HFS" {print $$3}'` && \
-	cp -RP $$p/Frameworks/Growl.framework . && \
-	hdiutil detach $$p
+		sed -n 's/^\/dev\/disk.*[[:space:]]*Apple_HFS[[:space:]]*\(.*\)/\1/p'` && \
+	cp -RP "$$p/Frameworks/Growl.framework" . && \
+	hdiutil detach "$$p"
 
 APP=ShakesPeer.app
 CONTENTS=$(APP)/Contents
