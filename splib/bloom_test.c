@@ -89,7 +89,7 @@ int main(void)
 
     char *filename = "foobarbaz";
     bloom_add_filename(b, filename);
-    fail_unless(bloom_filled_percent(b) > 0.0);
+    fail_unless(bloom_filled_bits(b) > 0);
     unsigned min_bits_set = (strlen(filename) - BLOOM_MINLENGTH + 1) * 5;
     fail_unless(bloom_filled_bits(b) <= min_bits_set);
 
@@ -126,7 +126,7 @@ int main(void)
     b = bloom_create(128);
     filename = "fööbär";
     bloom_add_filename(b, filename);
-    fail_unless(bloom_filled_percent(b) > 0.0);
+    fail_unless(bloom_filled_bits(b) > 0);
     min_bits_set = (strlen(filename) - BLOOM_MINLENGTH + 1) * 5;
     fail_unless(bloom_filled_bits(b) <= min_bits_set);
 
