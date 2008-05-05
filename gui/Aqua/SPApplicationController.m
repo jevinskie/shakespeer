@@ -435,7 +435,12 @@ else {
  
  - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
  {
-	 UKCrashReporterCheckForCrash();
+	 NSLog(@"applicationDidFinishLaunching: checking for recent sphubd crashes");
+	 UKCrashReporterCheckForCrash(@"sphubd");
+	 NSLog(@"applicationDidFinishLaunching: checking for recent sphashd crashes");
+	 UKCrashReporterCheckForCrash(@"sphashd");
+	 NSLog(@"applicationDidFinishLaunching: checking for recent gui crashes");
+	 UKCrashReporterCheckForCrash(nil);
  }
 
 - (void)applicationWillFinishLaunching:(NSNotification *)aNotification

@@ -5,6 +5,7 @@
 //  Created by Uli Kusterer on Sat Feb 04 2006.
 //  Copyright (c) 2006 M. Uli Kusterer. All rights reserved.
 //
+//  Modified 2007-09-17 by martin@bzero.se for use in ShakesPeer.
 
 // -----------------------------------------------------------------------------
 //	Headers:
@@ -31,7 +32,7 @@
 //		application.
 // -----------------------------------------------------------------------------
 
-void	UKCrashReporterCheckForCrash()
+void	UKCrashReporterCheckForCrash(NSString *appName)
 {
 	NS_DURING
 		// Try whether the classes we need to talk to the CGI are present:
@@ -41,7 +42,8 @@ void	UKCrashReporterCheckForCrash()
 			NS_VOIDRETURN;
 		
 		// Get the log file, it's last change date and last report date:
-		NSString*		appName = [[[NSBundle mainBundle] infoDictionary] objectForKey: @"CFBundleExecutable"];
+		if(appName == nil)
+			appName = [[[NSBundle mainBundle] infoDictionary] objectForKey: @"CFBundleExecutable"];
 		NSString*		crashLogsFolder = [@"~/Library/Logs/CrashReporter/" stringByExpandingTildeInPath];
 		NSString*		crashLogName = [appName stringByAppendingString: @".crash.log"];
 		NSString*		crashLogPath = [crashLogsFolder stringByAppendingPathComponent: crashLogName];

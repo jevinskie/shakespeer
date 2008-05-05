@@ -5,6 +5,7 @@
 //  Created by Uli Kusterer on Sat Feb 04 2006.
 //  Copyright (c) 2006 M. Uli Kusterer. All rights reserved.
 //
+//  Modified 2007-09-17 by martin@bzero.se for use in ShakesPeer.
 
 // -----------------------------------------------------------------------------
 //	Headers:
@@ -25,4 +26,4 @@
 	URLs for different locales that way, in case a crash is caused by an error
 	in a localized file.
 */
-void	UKCrashReporterCheckForCrash();
+void	UKCrashReporterCheckForCrash(NSString *appName);
