@@ -93,8 +93,7 @@ static char *strdup(const char *s)
 # endif
 #endif
 
-#ifndef HAVE_STRNDUP
-static char *strndup(const char *s, size_t n)
+static char *xstrndup(const char *s, size_t n)
 {
     char *r;
 
@@ -106,7 +105,6 @@ static char *strndup(const char *s, size_t n)
     r[n] = 0;
     return r;
 }
-#endif
 
 #ifndef HAVE_STRCASECMP
 /* Implementation from GNU glibc 2.3.1
@@ -147,7 +145,7 @@ DLLIMPORT cfg_opt_t *cfg_getopt(cfg_t *cfg, const char *name)
             break;
         if(len)
         {
-            secname = strndup(name, len);
+            secname = xstrndup(name, len);
             sec = cfg_getsec(sec, secname);
             if(sec == 0)
                 cfg_error(cfg, _("no such option '%s'"), secname);
@@ -1551,7 +1549,7 @@ static cfg_opt_t *cfg_getopt_array(cfg_opt_t *rootopts, int cfg_flags, const cha
         if(len)
         {
             cfg_opt_t *secopt;
-            secname = strndup(name, len);
+            secname = xstrndup(name, len);
             secopt = cfg_getopt_array(opts, cfg_flags, secname);
             free(secname);
             if(secopt == 0)
