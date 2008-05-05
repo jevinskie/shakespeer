@@ -21,6 +21,12 @@ HAS_BDB=no
 CFLAGS+=-g -O2 -Wall -Werror -DVERSION=\"${VERSION}\" -DPACKAGE=\"${PACKAGE}\"
 CFLAGS+=-I${TOP}/splib -I${TOP}/spclient
 
+ifeq (${os},Linux)
+# Required for large file support on Linux
+CFLAGS+=-D_FILE_OFFSET_BITS=64
+endif
+
+# Disable for public releases
 CFLAGS+=-DCOREDUMPS_ENABLED=1
 
 # Build a Universal Binary on Mac OS X
