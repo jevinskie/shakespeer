@@ -36,6 +36,7 @@ NSString *SPPrefsUploadSlotsPerHub = @"uploadSlotsPerHub";
 NSString *SPPrefsPort = @"port";
 NSString *SPPrefsSharedPaths = @"sharedPaths";
 NSString *SPPrefsRecentHubs = @"recentHubs";
+NSString *SPPrefsHublists = @"hublists";
 NSString *SPPrefsHublistURL = @"hublistURL";
 NSString *SPPrefsKeepServerRunning = @"keepServerRunning";
 NSString *SPPrefsConnectionMode = @"connectionMode";

@@ -36,6 +36,7 @@ extern NSString *SPPrefsUploadSlotsPerHub;
 extern NSString *SPPrefsPort;
 extern NSString *SPPrefsSharedPaths;
 extern NSString *SPPrefsRecentHubs;
+extern NSString *SPPrefsHublists;
 extern NSString *SPPrefsHublistURL;
 extern NSString *SPPrefsKeepServerRunning;
 extern NSString *SPPrefsConnectionMode;

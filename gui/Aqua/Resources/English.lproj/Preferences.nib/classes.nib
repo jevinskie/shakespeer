@@ -11,6 +11,7 @@
                 setConnectionMode = id; 
                 setFollowRedirects = id; 
                 setHashingPriority = id; 
+                setHublistURL = id; 
                 setIPAddress = id; 
                 setLogLevel = id; 
                 setPort = id; 
@@ -29,6 +30,8 @@
                 descriptionField = NSTextField; 
                 downloadFolderButton = NSPopUpButton; 
                 emailField = NSTextField; 
+                hublistsComboBox = NSComboBox; 
+                hublistsController = NSArrayController; 
                 identityView = NSView; 
                 incompleteFolderButton = NSPopUpButton; 
                 networkView = NSView; 
@@ -40,7 +43,6 @@
                 slotsPerHubButton = NSButton; 
                 speedField = NSComboBox; 
                 testConnectionProgress = NSProgressIndicator; 
-                testPortButton = NSButton; 
                 testResults = NSTextField; 
                 updateSharedPathsIndicator = NSProgressIndicator; 
             }; 

@@ -86,7 +86,8 @@ static float ToolbarHeightForWindow(NSWindow *window)
                                                  selector:@selector(shareStatsNotification:)
                                                      name:SPNotificationShareStats
                                                    object:nil];
-
+        
+        // Load shared paths
         sharedPaths = [[NSMutableArray alloc] init];
         [self setTotalShareSize:0LL];
 
@@ -650,6 +651,14 @@ static float ToolbarHeightForWindow(NSWindow *window)
     NSString *incompleteFolder = [[NSUserDefaults standardUserDefaults] objectForKey:SPPrefsIncompleteFolder];
     [[incompleteFolderButton itemAtIndex:0] setTitle:incompleteFolder];
     [[incompleteFolderButton itemAtIndex:0] setImage:[self smallIconForPath:incompleteFolder]];
+}
+
+- (IBAction)setHublistURL:(id)sender
+{
+    if([hublistsComboBox indexOfItemWithObjectValue:[sender stringValue]] == NSNotFound)
+    {
+        [hublistsController insertObject:[sender stringValue] atArrangedObjectIndex:0];
+    }
 }
 
 @end

@@ -23,37 +23,39 @@
 
 @interface SPPreferenceController : NSWindowController
 {
+    // Identity
     IBOutlet NSView *identityView;
-    IBOutlet NSView *networkView;
-    IBOutlet NSView *sharesView;
-    IBOutlet NSView *advancedView;
-    
-    IBOutlet NSPopUpButton *downloadFolderButton;
-    IBOutlet NSPopUpButton *incompleteFolderButton;
-    
     IBOutlet NSTextField *emailField;
     IBOutlet NSTextField *descriptionField;
     IBOutlet NSComboBox *speedField;
-    IBOutlet NSTextField *testResults;
-    IBOutlet NSProgressIndicator *testConnectionProgress;
-    IBOutlet NSTextField *portField;
-    IBOutlet NSButton *testPortButton;
-    IBOutlet NSTextField *IPAddressField;
-    IBOutlet NSButton *slotsPerHubButton;
-    IBOutlet NSTextField *slotsField;
-
-    IBOutlet NSProgressIndicator *updateSharedPathsIndicator;
+    
+    // Share
+    IBOutlet NSView *sharesView;
     IBOutlet NSArrayController *sharedPathsController;
-
+    IBOutlet NSProgressIndicator *updateSharedPathsIndicator;
+    IBOutlet NSPopUpButton *downloadFolderButton;
+    IBOutlet NSPopUpButton *incompleteFolderButton;
+    IBOutlet NSTextField *slotsField;
+    IBOutlet NSButton *slotsPerHubButton;
     IBOutlet NSTextField *rescanShareField;
-
+    
+    // Network
+    IBOutlet NSView *networkView;
+    IBOutlet NSTextField *portField;
+    IBOutlet NSTextField *IPAddressField;
+    IBOutlet NSProgressIndicator *testConnectionProgress;
+    IBOutlet NSTextField *testResults;
+    
+    // Advanced
+    IBOutlet NSView *advancedView;
+    IBOutlet NSComboBox *hublistsComboBox;
+    IBOutlet NSArrayController *hublistsController;
+    
+    NSArray *predefinedDownloadLocations;
+    NSMutableArray *sharedPaths;
     NSView *blankView;
     NSToolbar *prefsToolbar;
-    
     NSDictionary *prefItems;
-    NSMutableArray *sharedPaths;
-    NSArray *predefinedDownloadLocations;
-
     uint64_t totalShareSize;
     BOOL testInProgress;
     BOOL hashingPaused;
@@ -79,6 +81,7 @@
 - (IBAction)togglePauseHashing:(id)sender;
 - (IBAction)setAutoSearchNewSources:(id)sender;
 - (IBAction)setHashingPriority:(id)sender;
+- (IBAction)setHublistURL:(id)sender;
 
 - (void)switchToView:(NSView *)view;
 - (void)switchToItem:(id)item;
