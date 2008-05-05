@@ -29,6 +29,8 @@
 #include <errno.h>
 #include <time.h>
 
+#include <evdns.h>
+
 #include "base32.h"
 #include "client.h"
 #include "globals.h"
@@ -483,6 +485,7 @@ int main(int argc, char **argv)
 
     /* Initialize the event library */
     event_init();
+    evdns_init();
     /* need two priorities */
     event_priority_init(2);
     g_message("using libevent version %s, method %s",

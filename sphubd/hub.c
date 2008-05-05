@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2005 Martin Hedenfalk <martin@bzero.se>
+ * Copyright 2004-2006 Martin Hedenfalk <martin@bzero.se>
  *
  * This file is part of ShakesPeer.
  *
@@ -32,10 +32,11 @@
 #include <errno.h>
 #include <time.h>
 
+#include <evdns.h>
+
 #include "client.h"
 #include "log.h"
 #include "encoding.h"
-#include "eres.h"
 #include "globals.h"
 #include "hub.h"
 #include "nmdc.h"
@@ -328,22 +329,25 @@ static void hub_connect_async(hub_connect_data_t *hcd, struct in_addr *addr)
     }
 }
 
-static void hub_lookup_event(int error, struct hostent *host, int af,
-        void *user_data)
+static void hub_lookup_event(int result, char type, int count, int ttl,
+    void *addresses, void *user_data)
 {
     hub_connect_data_t *hcd = user_data;
     return_if_fail(hcd);
 
-    if(host == NULL)
+    if(result == DNS_ERR_NONE)
     {
-        const char *errmsg = error == -1 ? strerror(errno) : hstrerror(error);
-        g_warning("Failed to lookup '%s': %s", hcd->address, errmsg);
-        ui_send_status_message(NULL, hcd->address,
-                "Failed to lookup '%s': %s", hcd->address, errmsg);
+	struct in_addr *addrs = addresses;
+	return_if_fail(addrs);
+	return_if_fail(count >= 1);
+        hub_connect_async(hcd, &addrs[0]);
     }
     else
     {
-        hub_connect_async(hcd, (struct in_addr *)host->h_addr);
+        const char *errmsg = evdns_err_to_string(result);
+        g_warning("Failed to lookup '%s': %s", hcd->address, errmsg);
+        ui_send_status_message(NULL, hcd->address,
+                "Failed to lookup '%s': %s", hcd->address, errmsg);
     }
 }
 
@@ -391,13 +395,13 @@ int hub_connect(const char *hubname, const char *nick, const char *email,
     }
     else
     {
-        int rc = eres_query(host, AF_INET, hub_lookup_event, hcd);
+        int rc = evdns_resolve_ipv4(host, 0, hub_lookup_event, hcd);
         free(host);
-        if(rc == -1)
+        if(rc != DNS_ERR_NONE)
         {
-            g_warning("Failed to lookup '%s': %s", hubname, hstrerror(h_errno));
+            g_warning("Failed to lookup '%s': %s", hubname, evdns_err_to_string(rc));
             ui_send_status_message(NULL, hubname, "Failed to lookup '%s': %s",
-                    hubname, hstrerror(h_errno));
+                    hubname, evdns_err_to_string(rc));
             hcd_free(hcd);
             return -1;
         }
