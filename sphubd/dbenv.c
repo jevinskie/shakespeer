@@ -117,7 +117,7 @@ static DB_ENV *get_default_db_environment(void)
         }
 
         default_db_env->set_flags(default_db_env,
-                DB_AUTO_COMMIT | DB_TXN_NOSYNC | DB_LOG_AUTOREMOVE, 1);
+                DB_AUTO_COMMIT | DB_TXN_WRITE_NOSYNC | DB_LOG_AUTOREMOVE, 1);
     }
 
     return default_db_env;
