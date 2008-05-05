@@ -277,6 +277,11 @@
     NSLog(@"setEncoding: sender = %@", sender);
 }
 
+- (void)tableDidRecieveEnterKey:(id)sender
+{
+    [self connectToSelectedBookmark:sender];
+}
+
 #pragma mark -
 #pragma mark New bookmark sheet window
 

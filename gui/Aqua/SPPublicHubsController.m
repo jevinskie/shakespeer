@@ -293,5 +293,10 @@
     }
 }
 
+- (void)tableDidRecieveEnterKey:(id)sender
+{
+    [self tableDoubleActionConnect:sender];
+}
+
 @end
 

@@ -38,6 +38,7 @@
             }; 
             SUPERCLASS = NSObject; 
         }, 
+        {CLASS = SPTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {CLASS = XBorderedView; LANGUAGE = ObjC; SUPERCLASS = NSView; }
     ); 
     IBVersion = 1; 

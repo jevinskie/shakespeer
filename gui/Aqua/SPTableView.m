@@ -39,5 +39,26 @@
     return [self menu];
 }
 
+/* method to detect an enter key press to connect to the selected hub,
+the code is from http://www.cocoadev.com/index.pl?DetectDeleteKeyPressInNSOutlineView */
+- (BOOL)performKeyEquivalent:(NSEvent *)theEvent
+{
+    NSString *chars = [theEvent charactersIgnoringModifiers];
+    
+    if ([theEvent type] == NSKeyDown && [chars length] == 1) {
+        int val = [chars characterAtIndex:0];
+        
+        // check for the enter key
+        if (val == 13) {
+            if ([[self delegate] respondsToSelector:@selector(tableDidRecieveEnterKey:)]) {
+                [[self delegate] performSelector:@selector(tableDidRecieveEnterKey:) withObject:self];
+                return YES;
+            }
+        }
+    }
+    
+    return [super performKeyEquivalent:theEvent];
+}
+
 @end
 
