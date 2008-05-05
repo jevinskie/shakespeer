@@ -29,9 +29,9 @@ define unpack
 	}
 endef
 
-EVENT_VER=1.3b
+EVENT_VER=1.3d
 EVENT_URL=http://monkey.org/~provos/libevent-$(EVENT_VER).tar.gz
-EVENT_MD5=7fc864faee87dbe1ed5e34ab8787172c
+EVENT_MD5=664a429247e7737162bd667e166b2761
 libevent-$(EVENT_VER).tar.gz:
 	$(call download,libevent,$(EVENT_VER),$(EVENT_URL),$(EVENT_MD5))
 libevent: libevent-build-$(EVENT_VER)/stamp
