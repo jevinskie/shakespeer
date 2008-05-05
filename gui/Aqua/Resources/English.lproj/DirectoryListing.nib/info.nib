@@ -7,11 +7,11 @@
 	<key>IBEditorPositions</key>
 	<dict>
 		<key>106</key>
-		<string>502 269 97 87 0 0 1024 746 </string>
+		<string>502 269 64 68 0 0 1024 746 </string>
 		<key>36</key>
 		<string>80 413 196 49 0 0 1024 746 </string>
 		<key>52</key>
-		<string>160 414 704 198 0 0 1024 746 </string>
+		<string>160 416 704 198 0 0 1024 746 </string>
 	</dict>
 	<key>IBFramework Version</key>
 	<string>446.1</string>

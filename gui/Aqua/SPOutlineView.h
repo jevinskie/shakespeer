@@ -23,6 +23,13 @@
 
 @interface SPOutlineView : NSOutlineView
 {
+    NSTableColumn *typeSearchTableColumn;
+    NSMutableString *keypressBuffer;
+    NSTimer *bufferTimer;
 }
+
+- (void)setTypeSearchTableColumn:(NSTableColumn *)tableColumn;
+- (void)clearKeypressBuffer;
+- (void)selectItemInArray:(NSArray *)rootArray byString:(NSString *)searchString;
 
 @end

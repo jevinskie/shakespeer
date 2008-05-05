@@ -30,6 +30,7 @@
                 filelistView = NSView; 
                 filterField = NSSearchField; 
                 flatButton = NSButton; 
+                tcFilename = NSTableColumn; 
                 tcSize = NSTableColumn; 
                 tcTTH = NSTableColumn; 
             }; 

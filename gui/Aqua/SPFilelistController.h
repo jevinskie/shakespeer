@@ -36,6 +36,7 @@
     IBOutlet NSMenu *columnsMenu;
     IBOutlet NSTableColumn *tcSize;
     IBOutlet NSTableColumn *tcTTH;
+    IBOutlet NSTableColumn *tcFilename;
 
     NSMutableArray *rootItems;
     NSMutableArray *arrangedRootItems;
