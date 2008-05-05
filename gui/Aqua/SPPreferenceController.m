@@ -29,8 +29,7 @@
 
 static float ToolbarHeightForWindow(NSWindow *window);
 
-/* this code is from the apple documentation...
- */
+/* this code is from the apple documentation... */
 static float ToolbarHeightForWindow(NSWindow *window)
 {
     NSToolbar *toolbar = [window toolbar];
@@ -54,6 +53,23 @@ static float ToolbarHeightForWindow(NSWindow *window)
     self = [super initWithWindowNibName:@"Preferences"];
     if(self)
     {
+        // Define preference labels and identifiers
+        prefItems = [[NSDictionary alloc] initWithObjectsAndKeys:
+            @"Identity", @"IdentityItem",
+            @"Share", @"ShareItem",
+            @"Network", @"NetworkItem",
+            @"Advanced", @"AdvancedItem",
+            nil];
+        
+        // Define default download locations
+        predefinedDownloadLocations = [[NSArray alloc] initWithObjects:
+            @"~/Desktop",
+            @"~/Documents",
+            @"~/Movies",
+            @"~/Music",
+            @"~/Pictures",
+            nil];
+        
         /* Setup toolbar */
         blankView = [[NSView alloc] init];
         prefsToolbar = [[NSToolbar alloc] initWithIdentifier:@"prefsToolbar"];
@@ -62,42 +78,10 @@ static float ToolbarHeightForWindow(NSWindow *window)
         [prefsToolbar setAllowsUserCustomization:NO];
         [prefsToolbar setAutosavesConfiguration:NO];
         [[self window] setToolbar:prefsToolbar];
-
-
-        NSString *lastPrefsPane = [[NSUserDefaults standardUserDefaults] stringForKey:@"lastPrefsPane"];
-        if(lastPrefsPane)
-        {
-            if([lastPrefsPane isEqualToString:@"identity"])
-            {
-                [prefsToolbar setSelectedItemIdentifier:@"IdentityItem"];
-                [[self window] setContentSize:[identityView frame].size];
-                [[self window] setContentView:identityView];
-            }
-            else if([lastPrefsPane isEqualToString:@"shares"])
-            {
-                [prefsToolbar setSelectedItemIdentifier:@"ShareItem"];
-                [[self window] setContentSize:[sharesView frame].size];
-                [[self window] setContentView:sharesView];
-            }
-            else if([lastPrefsPane isEqualToString:@"network"])
-            {
-                [prefsToolbar setSelectedItemIdentifier:@"NetworkItem"];
-                [[self window] setContentSize:[networkView frame].size];
-                [[self window] setContentView:networkView];
-            }
-            else if([lastPrefsPane isEqualToString:@"advanced"])
-            {
-                [prefsToolbar setSelectedItemIdentifier:@"AdvancedItem"];
-                [[self window] setContentSize:[advancedView frame].size];
-                [[self window] setContentView:advancedView];
-            }
-        }
-        else
-        {
-            [prefsToolbar setSelectedItemIdentifier:@"IdentityItem"];
-            [[self window] setContentSize:[identityView frame].size];
-            [[self window] setContentView:identityView];
-        }
+        
+        // Default view is "Identity"
+        [prefsToolbar setSelectedItemIdentifier:@"IdentityItem"];
+        [self switchToView:identityView];
 
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(shareStatsNotification:)
@@ -122,14 +106,6 @@ static float ToolbarHeightForWindow(NSWindow *window)
 
 - (void)awakeFromNib
 {
-    predefinedDownloadLocations = [[NSMutableArray alloc] initWithObjects:
-        @"~/Desktop",
-        @"~/Documents",
-        @"~/Movies",
-        @"~/Music",
-        @"~/Pictures",
-        nil];
-    
     // Localize predefined download location names and add icons
     NSEnumerator *e = [predefinedDownloadLocations objectEnumerator];
     NSString *path;
@@ -165,6 +141,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 {
     [sharedPaths release];
     [predefinedDownloadLocations release];
+    [prefItems release];
     [super dealloc];
 }
 
@@ -206,73 +183,54 @@ static float ToolbarHeightForWindow(NSWindow *window)
     [[self window] setFrame:aFrame display:YES animate:YES];
 }
 
-- (void)prefsInitView:(NSView *)aView
+- (void)switchToView:(NSView *)view
 {
-    NSSize newSize;
-
-    newSize = [aView frame].size;
-
+    NSSize newSize = [view frame].size;
+    
     [[self window] setContentView:blankView];
     [self resizeWindowToSize:newSize];
-    [[self window] setContentView:aView];
+    [[self window] setContentView:view];
 }
 
-- (void)prefsInitIdentityView:(id)sender
+- (void)switchToItem:(NSToolbarItem *)item
 {
-    [self prefsInitView:identityView];
-    [[NSUserDefaults standardUserDefaults] setObject:@"identity" forKey:@"lastPrefsPane"];
-}
-
-- (void)prefsInitSharesView:(id)sender
-{
-    [self prefsInitView:sharesView];
-    [[NSUserDefaults standardUserDefaults] setObject:@"shares" forKey:@"lastPrefsPane"];
-}
-
-- (void)prefsInitNetworkView:(id)sender
-{
-    [self prefsInitView:networkView];
-    [[NSUserDefaults standardUserDefaults] setObject:@"network" forKey:@"lastPrefsPane"];
-}
-
-- (void)prefsInitAdvancedView:(id)sender
-{
-    [self prefsInitView:advancedView];
-    [[NSUserDefaults standardUserDefaults] setObject:@"advanced" forKey:@"lastPrefsPane"];
+    NSView *view = nil;
+    
+    if([[item itemIdentifier] isEqualToString:@"IdentityItem"])
+    {
+        view = identityView;
+    }
+    else if([[item itemIdentifier] isEqualToString:@"ShareItem"])
+    {
+        view = sharesView;
+    }
+    else if([[item itemIdentifier] isEqualToString:@"NetworkItem"])
+    {
+        view = networkView;
+    }
+    else if([[item itemIdentifier] isEqualToString:@"AdvancedItem"])
+    {
+        view = advancedView;
+    }
+    
+    if(view)
+    {
+        [self switchToView:view];
+        [prefsToolbar setSelectedItemIdentifier:[item itemIdentifier]];
+        [[NSUserDefaults standardUserDefaults] setObject:[item itemIdentifier] forKey:@"lastPrefPane"];
+    }
 }
 
 - (NSToolbarItem *)toolbar:(NSToolbar *)toolbar itemForItemIdentifier:(NSString *)itemIdentifier willBeInsertedIntoToolbar:(BOOL)flag
 {
     NSToolbarItem *item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
 
-    [item setTag:0];
     [item setTarget:self];
-
-    if([itemIdentifier isEqualToString:@"IdentityItem"])
-    {
-        [item setLabel:@"Identity"];
-        [item setImage:[NSImage imageNamed:@"identity"]];
-        [item setAction:@selector(prefsInitIdentityView:)];
-    }
-    else if([itemIdentifier isEqualToString:@"ShareItem"])
-    {
-        [item setLabel:@"Share"];
-        [item setImage:[NSImage imageNamed:@"share"]];
-        [item setAction:@selector(prefsInitSharesView:)];
-    }
-    else if([itemIdentifier isEqualToString:@"NetworkItem"])
-    {
-        [item setLabel:@"Network"];
-        [item setImage:[NSImage imageNamed:@"network"]];
-        [item setAction:@selector(prefsInitNetworkView:)];
-    }
-    else if([itemIdentifier isEqualToString:@"AdvancedItem"])
-    {
-        [item setLabel:@"Advanced"];
-        [item setImage:[NSImage imageNamed:@"advanced-prefs"]];
-        [item setAction:@selector(prefsInitAdvancedView:)];
-    }
+    [item setLabel:[prefItems objectForKey:itemIdentifier]];
     [item setPaletteLabel:[item label]];
+    [item setImage:[NSImage imageNamed:itemIdentifier]];
+    [item setAction:@selector(switchToItem:)];
+    
     return [item autorelease];
 }
 
@@ -280,15 +238,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 {
     if(toolbar == prefsToolbar)
     {
-        return [NSArray arrayWithObjects:
-            NSToolbarSeparatorItemIdentifier,
-            NSToolbarSpaceItemIdentifier,
-            NSToolbarFlexibleSpaceItemIdentifier,
-            @"IdentityItem",
-            @"ShareItem",
-            @"NetworkItem",
-            @"AdvancedItem",
-            nil];
+        return [prefItems allKeys];
     }
     return nil;
 }
@@ -297,12 +247,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 {
     if(toolbar == prefsToolbar)
     {
-        return [NSArray arrayWithObjects:
-            @"IdentityItem",
-            @"ShareItem",
-            @"NetworkItem",
-            @"AdvancedItem",
-            nil];
+        return [prefItems allKeys];
     }
     return nil;
 }
@@ -311,17 +256,12 @@ static float ToolbarHeightForWindow(NSWindow *window)
 {
     if(toolbar == prefsToolbar)
     {
-        return [NSArray arrayWithObjects:
-            @"IdentityItem",
-            @"ShareItem",
-            @"NetworkItem",
-            @"AdvancedItem",
-            nil];
+        return [prefItems allKeys];
     }
     return nil;
 }
 
-#pragma mark -
+# pragma mark -
 
 - (void)addSharedPathsPath:(NSString *)aPath
 {
@@ -503,11 +443,9 @@ static float ToolbarHeightForWindow(NSWindow *window)
         case 5:
             path = @"~/Pictures"; break;
         case 6: // Other…
-        {
             path = [[self selectFolder] stringByAbbreviatingWithTildeInPath];
             [downloadFolderButton selectItemAtIndex:0];
             break;
-        }
     }
     if(path)
     {

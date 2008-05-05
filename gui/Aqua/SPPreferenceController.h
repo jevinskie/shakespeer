@@ -50,8 +50,9 @@
     NSView *blankView;
     NSToolbar *prefsToolbar;
     
+    NSDictionary *prefItems;
     NSMutableArray *sharedPaths;
-    NSMutableArray *predefinedDownloadLocations;
+    NSArray *predefinedDownloadLocations;
 
     uint64_t totalShareSize;
     BOOL testInProgress;
@@ -79,6 +80,8 @@
 - (IBAction)setAutoSearchNewSources:(id)sender;
 - (IBAction)setHashingPriority:(id)sender;
 
+- (void)switchToView:(NSView *)view;
+- (void)switchToItem:(NSToolbarItem *)item;
 - (void)show;
 - (void)close;
 - (BOOL)isKeyWindow;
