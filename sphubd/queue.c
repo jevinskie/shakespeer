@@ -297,8 +297,10 @@ int queue_add_filelist(const char *nick, int auto_matched_filelist)
         }
 #endif
 
+    queue_filelist_t *qfx = queue_lookup_filelist(nick);
+
     int rc = queue_db_add_filelist(nick, &qf);
-    if(rc == 0)
+    if(rc == 0 && qfx == NULL)
     {
         nc_send_filelist_added_notification(nc_default(), nick, qf.priority);
     }
@@ -532,6 +534,8 @@ void test_setup(void)
 
     fail_unless(queue_add("foo", "remote/path/to/file.img", 17471142,
                 "file.img", "IP4CTCABTUE6ZHZLFS2OP5W7EMN3LMFS65H7D2Y") == 0);
+
+    got_filelist_notification = 0;
 }
 
 void test_teardown(void)
@@ -704,6 +708,26 @@ void test_priorities(void)
     puts("PASS: queue: priorities");
 }
 
+void test_filelist_dups(void)
+{
+    test_setup();
+
+    fail_unless(queue_add_filelist("bar", 0) == 0);
+    fail_unless(got_filelist_notification == 1);
+
+    /* check that we can get the filelist */
+    queue_filelist_t *qf = queue_lookup_filelist("bar");
+    fail_unless(qf);
+
+    /* If we add the filelist again, we should not get a duplicate notification */
+    got_filelist_notification = 0;
+    fail_unless(queue_add_filelist("bar", 0) == 0);
+    fail_unless(got_filelist_notification == 0);
+
+    test_teardown();
+    puts("PASS: queue: filelist duplicates");
+}
+
 int main(void)
 {
     sp_log_set_level("debug");
@@ -717,6 +741,7 @@ int main(void)
     test_add_source();
     test_queue_order();
     test_priorities();
+    test_filelist_dups();
 
     return 0;
 }
