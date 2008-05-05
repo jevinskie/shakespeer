@@ -341,7 +341,7 @@
 #pragma mark -
 #pragma mark Sphubd notifications
 
-- (SPUser *)findUser:(NSString *)aNick
+- (SPUser *)findUserWithNick:(NSString *)aNick
 {
     SPUser *cmpUser = [SPUser userWithNick:aNick
                                description:nil
@@ -355,11 +355,9 @@
 
     if(user == nil)
     {
+        // no regular user found, let's see if there's any op with this nick.
         [cmpUser setIsOperator:YES];
         user = [usersTree find:cmpUser];
-
-        if(user == nil)
-            NSLog(@"Ouch! Unable to find user [%@]", aNick);
     }
 
     return user;
@@ -396,9 +394,12 @@
     if([[userinfo objectForKey:@"hubAddress"] isEqualToString:address])
     {
         NSString *theNick = [userinfo objectForKey:@"nick"];
-        SPUser *user = [self findUser:theNick];
-        if(user)
-        {
+        SPUser *user = [self findUserWithNick:theNick];
+        if (!user) {
+            // for ops, we get a user-update notification before we even know they exist.
+            [self userLoginNotification:aNotification];
+        }
+        else {
             totsize -= [user size];
             BOOL oldOperatorFlag = [user isOperator];
             BOOL newOperatorFlag = [[userinfo objectForKey:@"isOperator"] boolValue];
@@ -432,10 +433,6 @@
 
             needUpdating = YES;
         }
-        else
-        {
-            [self userLoginNotification:aNotification];
-        }
     }
 }
 
@@ -444,7 +441,7 @@
     if([[[aNotification userInfo] objectForKey:@"hubAddress"] isEqualToString:address])
     {
         NSString *theNick = [[aNotification userInfo] objectForKey:@"nick"];
-        SPUser *user = [self findUser:theNick];
+        SPUser *user = [self findUserWithNick:theNick];
         if(user)
         {
             totsize -= [user size];
