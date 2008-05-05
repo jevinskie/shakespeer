@@ -39,5 +39,5 @@ open sp.plist
 read -e -n 1 -p "Upload to sourceforge? (y/N)" sure
 test "$sure" = "n" -o "$sure" = "N" -o -z "$sure" && exit
 
-scp sp.plist shell.sf.net\:/home/users/m/mh/mhe/shakespeer_web/
+scp sp.plist mhe@shell.sf.net\:/home/users/m/mh/mhe/shakespeer_web/
 
