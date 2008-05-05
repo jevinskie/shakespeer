@@ -9,7 +9,7 @@ include ${TOP}/version.mk
 include ${TOP}/extern.mk
 
 # set to yes if you want to build the command line interface
-WANT_CLI=yes
+WANT_CLI=no
 
 CFLAGS+=-g -O2 -Wall -Werror -DVERSION=\"${VERSION}\" -DPACKAGE=\"${PACKAGE}\"
 CFLAGS+=-I${TOP}/splib -I${TOP}/spclient
