@@ -69,15 +69,23 @@ static void handle_tth_available_notification(nc_t *nc,
 {
     share_file_t *file = data->file;
 
-    const char *filename = strrchr(file->partial_path, '/');
-    if(filename++ == NULL)
-        filename = file->partial_path;
+    if(data->tth == NULL)
+    {
+	ui_send_status_message(NULL, NULL, "hashing failed for %s%s",
+	    file->mp->local_root, file->partial_path);
+    }
+    else
+    {
+	const char *filename = strrchr(file->partial_path, '/');
+	if(filename++ == NULL)
+	    filename = file->partial_path;
 
-    ui_send_status_message(NULL, NULL, "finished hashing %s (%.2lf MiB/s)",
-            filename, data->mibs_per_sec);
+	ui_send_status_message(NULL, NULL, "finished hashing %s (%.2lf MiB/s)",
+		filename, data->mibs_per_sec);
 
-    hub_set_need_myinfo_update(true);
-    ui_schedule_share_stats_update();
+	hub_set_need_myinfo_update(true);
+	ui_schedule_share_stats_update();
+    }
 }
 
 static void handle_share_scan_finished_notification(nc_t *nc,

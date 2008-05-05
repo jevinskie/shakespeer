@@ -85,22 +85,14 @@ static void hs_finish_file(hs_t *hs, const char *filename,
     }
     else
     {
-        if(hash_base32 && leaves_base64)
-        {
-            nc_send_tth_available_notification(nc_default(),
-                    file, hash_base32, leaves_base64, mibs_per_sec);
-        }
+	nc_send_tth_available_notification(nc_default(),
+	    file, hash_base32, leaves_base64, mibs_per_sec);
 
         SLIST_REMOVE(hs->unfinished_list, file, share_file, link);
     }
 
-    if(SLIST_FIRST(hs->unfinished_list) == NULL)
-    {
-        if(hs->paused == 0)
-        {
-            hs_start_hash_feeder();
-        }
-    }
+    if(SLIST_FIRST(hs->unfinished_list) == NULL && !hs->paused)
+	hs_start_hash_feeder();
 }
 
 static int hashd_cb_add_hash(hs_t *hs, const char *filename,
@@ -121,7 +113,7 @@ static int hashd_cb_fail_hash(hs_t *hs, const char *filename)
     return_val_if_fail(hs, -1);
     return_val_if_fail(filename, -1);
 
-    INFO("tth failed for file '%s'\n", filename);
+    INFO("tth failed for file '%s'", filename);
     hs_finish_file(hs, filename, NULL, NULL, 0.0);
 
     return 0;
@@ -148,10 +140,8 @@ static void hs_restart_connection(hs_t *hs)
     return_if_fail(hs);
 
     hs_start();
-    if(hs->paused == 0)
-    {
+    if(!hs->paused)
         hs_start_hash_feeder();
-    }
 }
 
 static void hs_in_event(struct bufferevent *bufev, void *data)
@@ -225,7 +215,7 @@ static void hs_feed_server(hs_t *hs)
              * hashed all files. So we wait to add more files until next
              * registering event occurs (should another directory be added).
              */
-            hs->finished = 1;
+            hs->finished = true;
         }
     }
 }
@@ -234,8 +224,8 @@ void hs_start_hash_feeder(void)
 {
     return_if_fail(global_hash_server);
 
-    global_hash_server->finished = 0;
-    global_hash_server->paused = 0;
+    global_hash_server->finished = false;
+    global_hash_server->paused = false;
 
     if(global_hash_server->fd == -1)
     {
@@ -357,7 +347,7 @@ int hs_stop(void)
         }
     }
 
-    global_hash_server->paused = 1;
+    global_hash_server->paused = true;
 
     return 0;
 }

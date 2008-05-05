@@ -34,13 +34,28 @@
 
 /***** handling TTHs and leaf data *****/
 
-void handle_tth_available_notification(nc_t *nc,
+static void handle_tth_available_notification(nc_t *nc,
         const char *channel,
         nc_tth_available_t *notification,
         void *user_data)
 {
     share_t *share = user_data;
     share_file_t *file = notification->file;
+
+    char *local_path = share_complete_path(file);
+
+    /* We're about to move the file from the unhashed to the hashed tree. */
+    /* Start by removing it from the unhashed tree. */
+    if(share_lookup_unhashed_file(share, local_path) != NULL)
+	RB_REMOVE(file_tree, &share->unhashed_files, file);
+    else
+	WARNING("File [%s] not in unhashed tree!?", local_path);
+
+    if(notification->tth == NULL)
+    {
+	/* hashing failed for some reason (eg, permission denied) */
+	goto fail;
+    }
 
     /* Find the modification time of the file, so we can detect changes when we
      * re-scan this file. FIXME: should probably store the mtime as it is when
@@ -49,11 +64,10 @@ void handle_tth_available_notification(nc_t *nc,
      * won't detect this modification.
      */
     struct stat stbuf;
-    char *local_path = share_complete_path(file);
     if(stat(local_path, &stbuf) != 0)
     {
 	WARNING("%s: failed to lookup mtime: %s", local_path, strerror(errno));
-	goto done;
+	goto fail;
     }
 
     struct tth_entry *te = tth_store_lookup(global_tth_store,
@@ -72,13 +86,6 @@ void handle_tth_available_notification(nc_t *nc,
 
     share->uptodate = false;
 
-    /* We're about to move the file from the unhashed to the hashed tree. */
-    /* Start by removing it from the unhashed tree. */
-    if(share_lookup_unhashed_file(share, local_path) != NULL)
-	RB_REMOVE(file_tree, &share->unhashed_files, file);
-    else
-	WARNING("File [%s] not in unhashed tree!?", local_path);
-
     if(te == NULL)
     {
 	/* there was no previous conflicting TTH */
@@ -96,10 +103,7 @@ void handle_tth_available_notification(nc_t *nc,
 	    file->mp->stats.dupsize += file->size;
 
 	    /* there is no need to keep a duplicate around */
-	    /* remove it from the inode hash */
-	    share_remove_from_inode_table(share, file);
-	    share_file_free(file);
-	    goto done;
+	    goto fail;
 	}
 	else
 	{
@@ -117,6 +121,8 @@ void handle_tth_available_notification(nc_t *nc,
         RB_INSERT(file_tree, &share->files, file);
     }
 
+    free(local_path);
+
     /* update mountpoint statistics */
     file->mp->stats.size += file->size;
     file->mp->stats.nfiles++;
@@ -127,9 +133,12 @@ void handle_tth_available_notification(nc_t *nc,
 	filename = file->partial_path;
     bloom_add_filename(share->bloom, filename);
 
-done:
-    free(local_path);
     return;
+
+fail:
+    free(local_path);
+    share_remove_from_inode_table(share, file);
+    share_file_free(file);
 }
 
 void share_tth_init_notifications(share_t *share)
