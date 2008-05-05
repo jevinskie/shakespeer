@@ -324,6 +324,8 @@ static void share_scan_event(int fd, short why, void *user_data)
         if(d == NULL)
         {
             INFO("Done scanning directory [%s]", ctx->mp->local_root);
+	    INFO("bloom filter is %.1f%% filled",
+		bloom_filled_percent(ctx->share->bloom));
             nc_send_share_scan_finished_notification(nc_default(),
                     ctx->mp->local_root);
             ctx->share->uptodate = 0;

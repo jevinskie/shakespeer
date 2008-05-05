@@ -39,10 +39,12 @@ void share_create_bloom(share_t *share)
     share->bloom = bloom_create(32768);
 
     share_file_t *f;
-    RB_FOREACH(f, file_tree, &share->unhashed_files)
+    RB_FOREACH(f, file_tree, &share->files)
     {
         bloom_add_filename(share->bloom, f->name);
     }
+
+    INFO("bloom filter is %.1f%% filled", bloom_filled_percent(share->bloom));
 }
 
 static void share_bloom_handle_did_remove_share_notification(
