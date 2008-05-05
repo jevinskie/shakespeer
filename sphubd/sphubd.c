@@ -520,6 +520,10 @@ int main(int argc, char **argv)
     signal_set(&sigint_event, SIGINT, shutdown_sphubd_event, NULL);
     signal_add(&sigint_event, NULL);
 
+    /* disable SIGPIPE, we deal with it ourselves
+     */
+    signal(SIGPIPE, SIG_IGN);
+
     hub_list_init();
     cc_list_init();
     ui_list_init();
