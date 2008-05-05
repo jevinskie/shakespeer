@@ -247,7 +247,7 @@ static void share_scan_context(share_scan_state_t *ctx,
     DIR *fsdir;
     struct dirent *dp;
 
-    if(strcmp(dirpath, global_download_directory) == 0)
+    if(strcmp(dirpath, global_incomplete_directory) == 0)
     {
 	g_info("Refused to share incomplete download directory [%s]",
 	    dirpath);
