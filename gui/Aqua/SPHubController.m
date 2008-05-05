@@ -223,6 +223,7 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     
     [users release];
+    [filteredUsers release];
     [usersTree release];
     [address release];
     [name release];
@@ -559,7 +560,7 @@
     int row = [userTable selectedRow];
     if(row != -1)
     {
-        SPUser *user = [users objectAtIndex:row];
+        SPUser *user = [filteredUsers objectAtIndex:row];
 
         NSMutableDictionary *parameters = [NSMutableDictionary dictionaryWithCapacity:1];
         [parameters setObject:[user nick] forKey:@"nick"];
@@ -626,7 +627,7 @@
     if(row == -1)
         return;
 
-    SPUser *user = [users objectAtIndex:row];
+    SPUser *user = [filteredUsers objectAtIndex:row];
     if(user)
     {
         [[SPApplicationController sharedApplicationController] grantExtraSlotToNick:[user nick]];
@@ -789,7 +790,7 @@
     if(row == -1)
         return;
 
-    SPUser *user = [users objectAtIndex:row];
+    SPUser *user = [filteredUsers objectAtIndex:row];
     if(user)
     {
         [[SPApplicationController sharedApplicationController] downloadFilelistFromUser:[user nick]
@@ -815,7 +816,7 @@
     if(row == -1)
         return;
 
-    SPUser *user = [users objectAtIndex:row];
+    SPUser *user = [filteredUsers objectAtIndex:row];
     if(user)
     {
         sendNotification(SPNotificationStartChat,
