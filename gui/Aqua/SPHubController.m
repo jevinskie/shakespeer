@@ -651,19 +651,23 @@
 {
     NSMutableString *message = [[[sender stringValue] mutableCopy] autorelease];
 
-    if([message hasPrefix:@"/"] && ![message hasPrefix:@"/me "])
-    {
+    if ([message hasPrefix:@"/"] && ![message hasPrefix:@"/me "]) {
         /* this is a command */
         NSArray *args = [message componentsSeparatedByString:@" "];
         NSString *cmd = [args objectAtIndex:0];
-        if([cmd isEqualToString:@"/fav"] || [cmd isEqualToString:@"/favorite"])
-        {
+        
+        // COMMAND: /fav
+        if ([cmd isEqualToString:@"/fav"] || [cmd isEqualToString:@"/favorite"]) {
             [self bookmarkHub:self];
         }
+        
+        // COMMAND: /clear
         else if([cmd isEqualToString:@"/clear"])
         {
             [[chatView textStorage] setAttributedString:[[[NSMutableAttributedString alloc] initWithString:@""] autorelease]];
         }
+        
+        // COMMAND: /help
         else if([cmd isEqualToString:@"/help"])
         {
             [self addStatusMessage:@"Available commands:\n"
@@ -674,8 +678,11 @@
               "  /join <address>: connect to a hub\n"
               "  /search <keywords>: search for keywords\n"
               "  /userlist <nick>: load nicks filelist\n"
-              "  /reconnect: reconnect to disconnected hub\n"];
+              "  /reconnect: reconnect to disconnected hub\n"
+              "  /np: show current track in iTunes\n"];
         }
+        
+        // COMMAND: /pm
         else if([cmd isEqualToString:@"/pm"])
         {
             if([args count] == 2)
@@ -689,10 +696,14 @@
             else
                 [self addStatusMessage:@"No nick specified\n"];
         }
+        
+        // COMMAND: /refresh
         else if([cmd isEqualToString:@"/refresh"])
         {
             [[SPPreferenceController sharedPreferences] updateAllSharedPaths];
         }
+        
+        // COMMAND: /join
         else if([cmd isEqualToString:@"/join"])
         {
             if([args count] >= 2)
@@ -706,6 +717,8 @@
             else
                 [self addStatusMessage:@"No hub address specified\n"];
         }
+        
+        // COMMAND: /search
         else if([cmd isEqualToString:@"/search"])
         {
             if([args count] > 1)
@@ -722,6 +735,8 @@
                 [self addStatusMessage:@"No search keywords specified\n"];
             }
         }
+        
+        // COMMAND: /userlist
         else if([cmd isEqualToString:@"/userlist"])
         {
             if([args count] >= 2)
@@ -737,6 +752,8 @@
                 [self addStatusMessage:@"No nick specified\n"];
             }
         }
+        
+        // COMMAND: /reconnect
         else if([cmd isEqualToString:@"/reconnect"])
         {
             if(disconnected == NO)
@@ -752,25 +769,58 @@
                                                                                  encoding:encoding];
             }
         }
+        
+        // COMMAND: /np
+        else if([cmd isEqualToString:@"/np"]) {
+            // Display the current playing track in iTunes
+            NSString *path = [[NSBundle mainBundle] pathForResource:@"np" ofType:@"scpt"];
+            if (path != nil) {
+                // Create the URL for the script
+                NSURL* url = [NSURL fileURLWithPath:path];
+                if (url != nil) {
+                    // Set up an error dict and the script
+                    NSDictionary *errors;
+                    NSAppleScript* appleScript = [[NSAppleScript alloc] initWithContentsOfURL:url error:&errors];
+                    if (appleScript != nil) {
+                        // Run the script
+                        NSAppleEventDescriptor *returnDescriptor = [appleScript executeAndReturnError:&errors];
+                        [appleScript release];
+                        if (returnDescriptor != nil) {
+                            // We got some results
+                            NSString *theTitle = [[returnDescriptor descriptorAtIndex:1] stringValue];
+                            NSString *theArtist = [[returnDescriptor descriptorAtIndex:2] stringValue];
+                            NSString *theMessage;
+                            if (!theTitle || !theArtist)
+                                theMessage = @"/me isn't listening to anything";
+                            else
+                                theMessage = [NSString stringWithFormat:@"/me is listening to %@ by %@", theTitle, theArtist];
+                            [[SPApplicationController sharedApplicationController] sendPublicMessage:theMessage
+                                                                                               toHub:address];
+                        }
+                        else {
+                            // Something went wrong
+                            NSLog(@"Script error: %@", [errors objectForKey: @"NSAppleScriptErrorMessage"]);
+                        } // returnDescriptor
+                    } // appleScript
+                } // url
+            } // path
+        } // np
         else
         {
             [self addStatusMessage:[NSString stringWithFormat:@"Unknown command: %@\n", cmd]];
         }
     }
-    else
-    {
-        if(disconnected)
-        {
+    else {
+        if(disconnected) {
             [self addStatusMessage:@"Disconnected from hub, use /reconnect to reconnect\n"];
         }
-        else
-        {
+        else {
             [[SPApplicationController sharedApplicationController] sendPublicMessage:message
                                                                                toHub:address];
         }
     }
-    [sender setStringValue:@""];
 
+    [sender setStringValue:@""];
     [self focusChatInput];
 }
 

@@ -29,6 +29,7 @@
 		28C74ED40ADBECDF00BACE5C /* PublicHubs.nib in Resources */ = {isa = PBXBuildFile; fileRef = 28C74EC50ADBECDF00BACE5C /* PublicHubs.nib */; };
 		28C74ED50ADBECDF00BACE5C /* SearchWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = 28C74EC70ADBECDF00BACE5C /* SearchWindow.nib */; };
 		28C74ED60ADBECDF00BACE5C /* Uploads.nib in Resources */ = {isa = PBXBuildFile; fileRef = 28C74EC90ADBECDF00BACE5C /* Uploads.nib */; };
+		28C7E8280B1DF40400C8DD15 /* np.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 28C7E8270B1DF40300C8DD15 /* np.scpt */; };
 		28D1DFA50A2A023000F9F9EE /* SPKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D1DFA30A2A023000F9F9EE /* SPKeychain.m */; };
 		28F0ACFA0A29E7E100FFEC99 /* MHSysTree.m in Sources */ = {isa = PBXBuildFile; fileRef = 28F0ACF80A29E7E100FFEC99 /* MHSysTree.m */; };
 		FC7E1A89097E6ADC0087431A /* action.png in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A55097E6ADC0087431A /* action.png */; };
@@ -184,6 +185,7 @@
 		28C74EC60ADBECDF00BACE5C /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/PublicHubs.nib; sourceTree = "<group>"; };
 		28C74EC80ADBECDF00BACE5C /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/SearchWindow.nib; sourceTree = "<group>"; };
 		28C74ECA0ADBECDF00BACE5C /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/Uploads.nib; sourceTree = "<group>"; };
+		28C7E8270B1DF40300C8DD15 /* np.scpt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.scpt; name = np.scpt; path = Resources/np.scpt; sourceTree = "<group>"; };
 		28D1DFA20A2A023000F9F9EE /* SPKeychain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPKeychain.h; sourceTree = "<group>"; };
 		28D1DFA30A2A023000F9F9EE /* SPKeychain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPKeychain.m; sourceTree = "<group>"; };
 		28F0ACF70A29E7E100FFEC99 /* MHSysTree.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MHSysTree.h; sourceTree = "<group>"; };
@@ -429,6 +431,14 @@
 			name = Preferences;
 			sourceTree = "<group>";
 		};
+		28C7E8220B1DF3E900C8DD15 /* Scripts */ = {
+			isa = PBXGroup;
+			children = (
+				28C7E8270B1DF40300C8DD15 /* np.scpt */,
+			);
+			name = Scripts;
+			sourceTree = "<group>";
+		};
 		FC7E1A14097E69F00087431A = {
 			isa = PBXGroup;
 			children = (
@@ -455,6 +465,7 @@
 			children = (
 				FC7E1A2D097E6A6D0087431A /* Nibs */,
 				FC7E1A2C097E6A670087431A /* Images */,
+				28C7E8220B1DF3E900C8DD15 /* Scripts */,
 				280313FD0AD9D258000CC734 /* Credits.rtf */,
 			);
 			name = Resources;
@@ -643,6 +654,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				28C7E8280B1DF40400C8DD15 /* np.scpt in Resources */,
 				FC7E1A89097E6ADC0087431A /* action.png in Resources */,
 				FC7E1A8A097E6ADC0087431A /* AdvancedItem.png in Resources */,
 				FC7E1A8B097E6ADC0087431A /* bookmarks.png in Resources */,
