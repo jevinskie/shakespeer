@@ -30,45 +30,54 @@
 #include "log.h"
 #include "xstr.h"
 
-static void cc_download_request_failed(cc_t *cc, const char *reason)
+static void
+cc_download_request_failed(cc_t *cc, const char *reason)
 {
-    return_if_fail(cc->current_queue);
-    if(cc->current_queue)
-    {
-        ui_send_status_message(NULL, cc->hub ? cc->hub->address : NULL,
-                "Download request for %s from %s failed: %s",
-                cc->current_queue->source_filename, cc->nick,
-                (reason && reason[0]) ? reason : "unknown reason");
+	return_if_fail(cc->current_queue);
+	if(cc->current_queue)
+	{
+		ui_send_status_message(NULL, cc->hub ? cc->hub->address : NULL,
+			"Download request for %s from %s failed: %s",
+			cc->current_queue->source_filename, cc->nick,
+			(reason && reason[0]) ? reason : "unknown reason");
 
-        queue_remove_source(cc->current_queue->target_filename, cc->nick);
-        queue_set_target_active(cc->current_queue, 0);
+		queue_set_active(cc->current_queue, 0);
+		if(!cc->current_queue->is_filelist)
+		{
+			queue_remove_source(cc->current_queue->target_filename,
+				cc->nick);
+		}
 
-        queue_free(cc->current_queue);
-        cc->current_queue = NULL;
+		queue_free(cc->current_queue);
+		cc->current_queue = NULL;
 
-        /* Request another file if there is one in queue for us */
-        cc_request_download(cc);
-    }
+		/* Request another file if there is one in queue for us */
+		cc_request_download(cc);
+	}
 }
 
 /* $Failed error message */
 /* $Error [error message] */
-static int cc_cmd_Failed(void *data, int argc, char **argv)
+static int
+cc_cmd_Failed(void *data, int argc, char **argv)
 {
-    cc_t *cc = data;
-    cc_download_request_failed(cc, argv[0]);
+	cc_t *cc = data;
+	cc_download_request_failed(cc, argv[0]);
 
-    return 0;
+	return 0;
 }
 
 /* $MaxedOut */
-static int cc_cmd_MaxedOut(void *data, int argc, char **argv)
+static int
+cc_cmd_MaxedOut(void *data, int argc, char **argv)
 {
-    cc_t *cc = data;
+	cc_t *cc = data;
 
-    ui_send_status_message(NULL, cc->hub ? cc->hub->address : NULL, "Nick %s has no free slots", cc->nick);
+	ui_send_status_message(NULL,
+		cc->hub ? cc->hub->address : NULL,
+		"Nick %s has no free slots", cc->nick);
 
-    return -1;
+	return -1;
 }
 
 /* $Send */

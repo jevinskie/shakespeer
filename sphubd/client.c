@@ -92,7 +92,7 @@ void cc_free(cc_t *cc)
             }
             else if(cc->direction && cc->current_queue)
             {
-                queue_set_target_active(cc->current_queue, 0);
+		queue_set_active(cc->current_queue, 0);
                 if(cc->state == CC_STATE_BUSY)
                 {
                     ui_send_transfer_aborted(NULL,
@@ -102,11 +102,13 @@ void cc_free(cc_t *cc)
                 cc->current_queue = NULL;
             }
         }
+
         if(cc->current_queue)
         {
             WARNING("cc->current_queue still allocated (state inconsistency?)");
             queue_free(cc->current_queue);
         }
+
         free(cc->local_filename);
         free(cc->nick);
         free(cc);
@@ -224,8 +226,6 @@ void cc_close_connection(cc_t *cc)
 
     if(cc->local_fd != -1)
         close(cc->local_fd);
-
-    /* FIXME: must clean up any allocated slots if transfer broken */
 
     INFO("removing client connection with nick [%s]",
             cc->nick ? cc->nick : "unknown");

@@ -234,10 +234,7 @@ cc_request_download(cc_t *cc)
     cc->offset = queue->offset;
 
     /* tell the download queue that we're now handling this request */
-    if(queue->is_filelist)
-        queue_set_filelist_active(queue, 1);
-    else
-        queue_set_target_active(queue, 1);
+    queue_set_active(queue, 1);
 
     return 0;
 }
