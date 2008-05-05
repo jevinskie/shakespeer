@@ -155,6 +155,17 @@ void print_command(const char *command, const char *fmt, ...)
         g_debug("%s $Lock %s|", prestr, hex);
         free(hex);
     }
+    else if(str_has_prefix(command, "add-hash$"))
+    {
+	char *f = strchr(command + 9, '$');
+	if(f)
+	{
+	    f = strchr(f + 1, '$');
+	    char *l = xstrndup(command, f - command);
+	    g_debug("%s %s", prestr, l);
+	    free(l);
+	}
+    }
     else if(str_has_prefix(command, "$MyPass"))
         g_debug("%s $MyPass ...|", prestr);
     else
