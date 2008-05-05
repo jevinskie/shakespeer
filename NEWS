@@ -2,6 +2,7 @@ New in version 0.9.4:
 
 * Uses ShakesPeer-specific tag
 * Fixed buggy upload slots limit
+* New database backend: FILE HASHES ARE LOST
 
 New in version 0.9.3:
 
