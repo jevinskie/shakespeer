@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "globals.h"
 #include "queue.h"
@@ -28,6 +29,7 @@
 int main(int argc, char **argv)
 {
     int i;
+    int n = argc > 1 ? atoi(argv[1]) : 1000;
 
     sp_log_set_level("debug");
 
@@ -47,17 +49,53 @@ int main(int argc, char **argv)
     char local_filename[64] = "/var/media/local/file____";
     uint64_t size;
 
-    srand(time(0));
+    srandom(time(0) * getpid());
 
-    for(i = 0; i < 1000; i++)
+    for(i = 0; i < n; i++)
     {
-	sprintf(nick + 4, "%04i", i);
+	sprintf(nick + 4, "%06li", random());
+
+	if((random() % 7) == 0)
+	{
+	    g_debug("++++ ADDING filelist for %s", nick);
+	    queue_add_filelist(nick, true);
+	    continue;
+	}
+
 	sprintf(tth + 26, "%04i", i);
 	sprintf(remote_filename + 17, "%04i", i);
 	sprintf(local_filename + 21, "%04i", i);
 	size = random();
 
-	queue_add(nick, remote_filename, size, local_filename, tth);
+	if((random() % 47) == 0)
+	{
+	    g_debug("!!!! CRASHING");
+	    kill(getpid(), SIGKILL);
+	}
+	else if((random() % 3) == 0)
+	{
+	    g_debug("---- REMOVING target %i", i);
+	    queue_remove_target(local_filename);
+	}
+	else
+	{
+	    if((random() % 3) == 0)
+	    {
+		g_debug("++++ ADDING target %i", i);
+		queue_add(nick, remote_filename, size, local_filename, tth);
+	    }
+	    else
+	    {
+		queue_source_t qs;
+		memset(&qs, 0, sizeof(queue_source_t));
+		strlcpy(qs.target_filename, local_filename, QUEUE_TARGET_MAXPATH);
+		strlcpy(qs.source_filename, remote_filename, QUEUE_TARGET_MAXPATH);
+
+		g_debug("++++ ADDING source %i", i);
+		queue_add_source(nick, &qs);
+	    }
+	}
+	g_debug("done");
     }
 
     struct timeval tv_end;
