@@ -125,9 +125,9 @@ int sp_in_event(int fd, short why, void *data)
 {
     sp_t *sp = data;
 
-    if(evbuffer_read(sp->input, fd, 4096) == -1)
+    int rc = evbuffer_read(sp->input, fd, 4096);
+    if(rc == -1 || rc == 0 /* EOF */)
     {
-        /* sp_close_connection(ui); */
         return -1;
     }
 
