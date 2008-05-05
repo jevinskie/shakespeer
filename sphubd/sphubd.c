@@ -395,7 +395,8 @@ int main(int argc, char **argv)
             case 'h':
                 printf("syntax: sphubd -d <none|warning|message|info|debug>\n"
                         "               -w <working directory>\n"
-                        "               -p <ui listen port>\n");
+                        "               -p <ui listen port>\n"
+			"               -f\n");
                 return 2;
             case '?':
             default:
