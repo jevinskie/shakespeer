@@ -346,7 +346,7 @@ int io_exec_and_connect_unix(const char *filename, const char *program_path,
                 assert(expanded_filename);
                 execl(expanded_program_path, expanded_program_path,
                         "-w", basedir,
-                        "-d", sp_log_get_level(), NULL);
+                        "-d", sp_log_get_level(), (char *)NULL);
                 g_warning("failed to execute %s: %s",
                         expanded_program_path, strerror(errno));
                 free(expanded_filename);
