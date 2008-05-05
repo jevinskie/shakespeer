@@ -73,37 +73,28 @@ NSString *SPPublicHubDataType = @"SPPublicHubDataType";
 
 - (void)awakeFromNib
 {
-    [tcName retain];
-    [tcDescription retain];
-    [tcAddress retain];
-    [tcLocation retain];
-    [tcUsers retain];
-    [tcMinshare retain];
-    [tcMinslots retain];
-    [tcMaxhubs retain];
+    NSArray *availableColumns = [hubTable tableColumns];
+    NSEnumerator *e = [availableColumns objectEnumerator];
+    NSTableColumn *currentColumn;
     
-    NSArray *tcs = [hubTable tableColumns];
-    NSEnumerator *e = [tcs objectEnumerator];
-    NSTableColumn *tc;
-    while ((tc = [e nextObject]) != nil) {
-        [[tc dataCell] setWraps:YES];
+    allTableColumns = [[NSMutableArray array] retain];
+    columnsMenu = [[NSMenu alloc] init];
+    
+    while ((currentColumn = [e nextObject])) {
+        [[currentColumn dataCell] setWraps:YES];
         
-        if (tc == tcName)
-            [[columnsMenu itemWithTag:0] setState:NSOnState];
-        else if (tc == tcDescription)
-            [[columnsMenu itemWithTag:1] setState:NSOnState];
-        else if (tc == tcAddress)
-            [[columnsMenu itemWithTag:2] setState:NSOnState];
-        else if (tc == tcLocation)
-            [[columnsMenu itemWithTag:3] setState:NSOnState];
-        else if (tc == tcUsers)
-            [[columnsMenu itemWithTag:4] setState:NSOnState];
-        else if (tc == tcMinshare)
-            [[columnsMenu itemWithTag:5] setState:NSOnState];
-        else if (tc == tcMinslots)
-            [[columnsMenu itemWithTag:6] setState:NSOnState];
-        else if (tc == tcMaxhubs)
-            [[columnsMenu itemWithTag:7] setState:NSOnState];
+        // hold on to column so it isn't released if hidden
+        [allTableColumns addObject:currentColumn];
+        
+        // setup a menuitem for it
+        NSString *columnName = [[currentColumn headerCell] stringValue];
+        NSMenuItem *newColumn = [[[NSMenuItem alloc] initWithTitle:columnName action:@selector(toggleColumn:) keyEquivalent:@""] autorelease];
+        [newColumn setTarget:self];
+        [newColumn setRepresentedObject:currentColumn];
+        [newColumn setState:NSOnState];
+        
+        // add it to the context menu
+        [columnsMenu addItem:newColumn];
     }
     
     [[hubTable headerView] setMenu:columnsMenu];
@@ -134,16 +125,8 @@ NSString *SPPublicHubDataType = @"SPPublicHubDataType";
     // Free top level nib-file objects
     [hubListView release];
     [arrayController release];
-    
-    // Free table columns
-    [tcName release];
-    [tcDescription release];
-    [tcAddress release];
-    [tcLocation release];
-    [tcUsers release];
-    [tcMinshare release];
-    [tcMinslots release];
-    [tcMaxhubs release];
+    [allTableColumns release];
+    [columnsMenu release];
 
     // Free other objects
     [hubs release];
@@ -358,18 +341,8 @@ done:
 
 - (IBAction)toggleColumn:(id)sender
 {
-    NSTableColumn *tc = nil;
-    switch([sender tag]) {
-        case 0: tc = tcName; break;
-        case 1: tc = tcDescription; break;
-        case 2: tc = tcAddress; break;
-        case 3: tc = tcLocation; break;
-        case 4: tc = tcUsers; break;
-        case 5: tc = tcMinshare; break;
-        case 6: tc = tcMinslots; break;
-        case 7: tc = tcMaxhubs; break;
-    }
-    if (tc == nil)
+    NSTableColumn *tc = [sender representedObject];
+    if (!tc)
         return;
     
     if ([sender state] == NSOffState) {

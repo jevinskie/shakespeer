@@ -40,15 +40,8 @@
     
     IBOutlet NSMenu *contextMenu;
     
-    IBOutlet NSMenu *columnsMenu;
-    IBOutlet NSTableColumn *tcName;
-    IBOutlet NSTableColumn *tcDescription;
-    IBOutlet NSTableColumn *tcAddress;
-    IBOutlet NSTableColumn *tcLocation;
-    IBOutlet NSTableColumn *tcUsers;
-    IBOutlet NSTableColumn *tcMinshare;
-    IBOutlet NSTableColumn *tcMinslots;
-    IBOutlet NSTableColumn *tcMaxhubs;
+    NSMenu *columnsMenu;
+    NSMutableArray *allTableColumns;
         
     NSMutableArray *hubs;
     BOOL refreshInProgress;

@@ -37,19 +37,10 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 arrayController = FilteringArrayController; 
-                columnsMenu = NSMenu; 
                 contextMenu = NSMenu; 
                 hubListView = NSView; 
                 hubTable = NSTableView; 
                 refreshButton = NSButton; 
-                tcAddress = NSTableColumn; 
-                tcDescription = NSTableColumn; 
-                tcLocation = NSTableColumn; 
-                tcMaxhubs = NSTableColumn; 
-                tcMinshare = NSTableColumn; 
-                tcMinslots = NSTableColumn; 
-                tcName = NSTableColumn; 
-                tcUsers = NSTableColumn; 
             }; 
             SUPERCLASS = NSObject; 
         }, 
