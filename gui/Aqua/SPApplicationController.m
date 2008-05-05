@@ -36,13 +36,9 @@
 #import "SPLog.h"
 #import "SPMainWindowController.h"
 #import "SPClientBridge.h"
-
 #import "SPNotificationNames.h"
 #import "SPUserDefaultKeys.h"
 
-#ifdef HAVE_CONFIG_H
-# include "../../config.h"
-#endif
 #include "nmdc.h"
 #include "log.h"
 
@@ -118,6 +114,40 @@ static SPApplicationController *mySharedApplicationController = nil;
                                                    object:nil];
     }
     return self;
+}
+
+- (void)registerUrlHandler
+{
+    [[NSAppleEventManager sharedAppleEventManager]
+        setEventHandler:self
+            andSelector:@selector(getUrl:withReplyEvent:)
+          forEventClass:kInternetEventClass
+             andEventID:kAEGetURL];
+}
+
+- (void)getUrl:(NSAppleEventDescriptor *)event
+withReplyEvent:(NSAppleEventDescriptor *)replyEvent
+{
+    NSString *urlString = [[event paramDescriptorForKeyword:keyDirectObject] stringValue];
+    NSURL *url = [NSURL URLWithString:urlString];
+    if(url == nil)
+    {
+        NSLog(@"Malformed URL: %@", urlString);
+    }
+    else
+    {
+        NSString *address = nil;
+        if([url port])
+            address = [NSString stringWithFormat:@"%@:%@", [url host], [url port]];
+        else
+            address = [url host];
+
+        [self connectWithAddress:address
+                            nick:[url user]
+                     description:nil
+                        password:[url password]
+                        encoding:nil];
+    }
 }
 
 + (SPApplicationController *)sharedApplicationController
@@ -376,6 +406,12 @@ static SPApplicationController *mySharedApplicationController = nil;
     [menuItemPrevSidebarItem setKeyEquivalentModifierMask:NSCommandKeyMask];
 
     [self performSelectorOnMainThread:@selector(loadGUInibs) withObject:nil waitUntilDone:NO];
+}
+
+- (void)applicationWillFinishLaunching:(NSNotification *)aNotification
+{
+    NSLog(@"registering url handler");
+    [self registerUrlHandler];
 }
 
 #pragma mark -
