@@ -497,8 +497,9 @@ void hub_reconnect_event_func(int fd, short condition, void *data)
 
     return_if_fail(hub);
 
-    hub_connect(hub->address, hub->me->nick, hub->me->email, hub->me->description,
-            hub->me->speed, hub->me->passive, NULL, hub->encoding);
+    hub_connect(hub->address, hub->me->nick, hub->me->email,
+	hub->me->description, hub->me->speed, hub->me->passive,
+	hub->password, hub->encoding);
 }
 
 static void hub_schedule_reconnect_event(hub_t *hub)
