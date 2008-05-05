@@ -156,8 +156,8 @@ void queue_trigger_connect_targets(queue_connect_callback_t connect_callback,
         if(qt == NULL)
         {
             WARNING("Target [%s] not available!?", qs->target_filename);
-            WARNING("Source = [%s]", qs->source_filename);
-            WARNING("INCONSISTENT QUEUE DATABASE!");
+            WARNING("Removing source [%s] without target", qs->source_filename);
+	    queue_remove_source(qs->target_filename, qs->nick);
             continue;
         }
 
