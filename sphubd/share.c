@@ -166,7 +166,15 @@ int share_remove(share_t *share, const char *local_root, bool is_rescan)
 
     share->uptodate = false;
 
-    share_remove_mountpoint(share, mp);
+    if(mp->scan_in_progress)
+    {
+	WARNING("removing mountpoint currently scanning, delaying removal");
+	mp->removed = true;
+    }
+    else
+    {
+	share_remove_mountpoint(share, mp);
+    }
 
     nc_send_did_remove_share_notification(nc_default(), local_root, is_rescan);
 

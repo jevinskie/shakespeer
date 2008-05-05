@@ -105,7 +105,8 @@ struct share_mountpoint
     char *virtual_root;  /* music */
 
     share_stats_t stats;
-    int scan_in_progress;
+    bool scan_in_progress;
+    bool removed; /* set to true if removed, so a scanner can abort */
 };
 
 typedef SLIST_HEAD(share_file_list, share_file) share_file_list_t;

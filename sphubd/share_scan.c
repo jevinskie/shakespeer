@@ -350,6 +350,16 @@ static void share_scan_event(int fd, short why, void *user_data)
     share_scan_state_t *ctx = user_data;
     int i;
 
+    /* check if the share currently being scanned has been removed */
+    if(ctx->mp->removed)
+    {
+	WARNING("aborting scanning of removed share [%s]", ctx->mp->local_root);
+	share_remove_mountpoint(ctx->share, ctx->mp);
+	ctx->share->scanning--;
+	free(ctx);
+	return;
+    }
+
     /* Scan 5 directories in each event. */
     for(i = 0; i < 5; i++)
     {
@@ -361,8 +371,8 @@ static void share_scan_event(int fd, short why, void *user_data)
 		bloom_filled_percent(ctx->share->bloom));
             nc_send_share_scan_finished_notification(nc_default(),
                     ctx->mp->local_root);
-            ctx->share->uptodate = 0;
-            ctx->mp->scan_in_progress = 0;
+            ctx->share->uptodate = false;
+            ctx->mp->scan_in_progress = false;
             free(ctx);
 
 	    ctx->share->scanning--;
@@ -401,7 +411,7 @@ int share_scan(share_t *share, share_mountpoint_t *mp)
 {
     return_val_if_fail(share, -1);
     return_val_if_fail(mp, -1);
-    return_val_if_fail(mp->scan_in_progress == 0, -1);
+    return_val_if_fail(!mp->scan_in_progress, -1);
 
     /* Keep a counter to indicate for the myinfo update event that
      * we should wait until rescanning is done. Otherwise we risk
@@ -417,7 +427,7 @@ int share_scan(share_t *share, share_mountpoint_t *mp)
 
     /* reset mountpoint statistics */
     memset(&mp->stats, 0, sizeof(share_stats_t));
-    mp->scan_in_progress = 1;
+    mp->scan_in_progress = true;
 
     share_scan_push_directory(ctx, mp->local_root);
     share_scan_schedule_event(ctx);
