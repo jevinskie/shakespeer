@@ -28,7 +28,7 @@
 #include "test_connection.h"
 
 /* please don't abuse, otherwise I'll have to disable this feature */
-#define TC_BASE_URL "http://www.stacken.kth.se/~mhe/checkport3.php"
+#define TC_BASE_URL "http://shakespeer.bzero.se/checkport"
 
 static int test_connection_string(const char *string)
 {
