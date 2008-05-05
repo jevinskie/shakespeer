@@ -365,7 +365,10 @@ static void cc_err_event(struct bufferevent *bufev, short why, void *data)
     if((why & EVBUFFER_EOF) == EVBUFFER_EOF)
 	INFO("end-of-file on connection %i", cc->fd);
     else
-	INFO("error condition 0x%02X on connection %i", why, cc->fd);
+    {
+	INFO("error condition 0x%02X on connection %i (errno = %i/%s)",
+	    why, cc->fd, errno, strerror(errno));
+    }
 
     cc_close_connection(cc);
 }
