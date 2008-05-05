@@ -276,6 +276,9 @@ static int share_save_xml(share_t *share, const char *filename, xerr_t **err)
 {
     int rc = 0;
 
+    g_return_val_if_fail(global_id_generator, -1);
+    g_return_val_if_fail(global_id_version, -1);
+
     g_debug("saving XML filelist to %s...", filename);
     FILE *fp = fopen(filename, "w");
     if(fp == 0)
@@ -295,8 +298,9 @@ static int share_save_xml(share_t *share, const char *filename, xerr_t **err)
 
         fprintf(fp,
                 "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>\r\n"
-                "<FileListing Version=\"1\" CID=\"%s\" Base=\"/\" Generator=\"DC++ %s\">\r\n",
-                share->cid, global_dcpp_version);
+                "<FileListing Version=\"1\" CID=\"%s\" Base=\"/\""
+                " Generator=\"%s %s\">\r\n",
+                share->cid, global_id_generator, global_id_version);
         share_save_file(share, &ctx);
         fprintf(fp, "</FileListing>\r\n");
         fclose(fp);

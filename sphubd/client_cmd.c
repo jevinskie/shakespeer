@@ -579,7 +579,7 @@ static int cc_cmd_MyNick(void *data, int argc, char **argv)
     {
         cc_send_command(cc, "$MyNick %s|", cc->hub->me->nick);
 
-        char *lock_pk = nmdc_makelock_pk(global_dcpp_version);
+        char *lock_pk = nmdc_makelock_pk(global_id_lock, global_id_version);
         /* Can't use cc_send_command here, 'cause the lock shouldn't be
          * converted from utf-8 */
         cc_send_command_as_is(cc, "$Lock %s|", lock_pk);

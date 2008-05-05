@@ -54,32 +54,13 @@ static char *nmdc_quote(char *str, int len)
     return result;
 }
 
-char *nmdc_makelock_pk(const char *dcpp_version)
+char *nmdc_makelock_pk(const char *id, const char *version)
 {
-    if(dcpp_version)
-    {
-        char *lock_pk;
-        asprintf(&lock_pk, "EXTENDEDPROTOCOLABCABCABCABCABCABC"
-                " Pk=DCPLUSPLUS%sABCABC", dcpp_version);
-        return lock_pk;
-    }
+    char *lock_pk;
+    asprintf(&lock_pk, "EXTENDEDPROTOCOLABCABCABCABCABCABC Pk=%s%sABCABC",
+            id, version);
 
-    int lock_len = 80 + random() % (134-80);
-    dstring_t *s = dstring_new(NULL);
-
-    int i;
-    for(i = 0; i < lock_len; i++)
-        dstring_append_char(s, 'a' + random() % ('z' - 'a'));
-
-    dstring_append(s, " Pk=");
-
-    for(i = 0; i < 16; i++)
-        dstring_append_char(s, 'a' + random() % ('z' - 'a'));
-
-    char *subst = nmdc_quote(s->string, s->length);
-    dstring_free(s, 1);
-
-    return subst;
+    return lock_pk;
 }
 
 /* lock needs to be at least 1 character

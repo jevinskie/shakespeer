@@ -22,7 +22,7 @@
 #define _nmdc_h_
 
 char *nmdc_lock2key(const char *lock);
-char *nmdc_makelock_pk(const char *dcpp_version);
+char *nmdc_makelock_pk(const char *id, const char *version);
 char *nmdc_escape(const char *str);
 char *nmdc_unescape(const char *str);
 

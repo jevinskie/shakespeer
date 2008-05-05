@@ -405,7 +405,7 @@ static void cc_add_channel(int fd, int incoming_connection, hub_t *hub,
     {
         return_if_fail(hub);
         cc_send_command(cc, "$MyNick %s|", hub->me->nick);
-        char *lock_pk = nmdc_makelock_pk(global_dcpp_version);
+        char *lock_pk = nmdc_makelock_pk(global_id_lock, global_id_version);
         cc_send_command(cc, "$Lock %s|", lock_pk);
         free(lock_pk);
     }

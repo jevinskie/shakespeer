@@ -79,11 +79,12 @@ void hub_set_idle_timeout(hub_t *hub)
     evtimer_add(&hub->idle_timeout_event, &tv);
 }
 
-static char *dcpp_tag(hub_t *hub)
+static char *hub_make_tag(hub_t *hub)
 {
     char *tag = 0;
-    asprintf(&tag, "<++ V:%s,M:%c,H:%d/%d/%d,S:%d>",
-            global_dcpp_version,
+    asprintf(&tag, "<%s V:%s,M:%c,H:%d/%d/%d,S:%d>",
+            global_id_tag,
+            global_id_version,
             hub->me->passive ? 'P' : 'A',
             hub_count_normal(), hub_count_registered(), hub_count_operator(),
             hub_count_slots());
@@ -141,7 +142,7 @@ void hub_send_myinfo(hub_t *hub)
     share_stats_t stats;
     share_get_stats(global_share, &stats);
 
-    char *tag = dcpp_tag(hub);
+    char *tag = hub_make_tag(hub);
     char *myinfo_string = 0;
     asprintf(&myinfo_string, "$MyINFO $ALL %s %s%s$ $%s\x01$%s$%llu$|",
             hub->me->nick,
