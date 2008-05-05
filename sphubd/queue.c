@@ -527,8 +527,10 @@ void handle_queue_target_removed_notification(nc_t *nc, const char *channel,
 
 void test_setup(void)
 {
-    global_working_directory = "/tmp";
-    unlink("/tmp/queue.db");
+    global_working_directory = "/tmp/sp-queue-test.d";
+    system("/bin/rm -rf /tmp/sp-queue-test.d");
+    system("mkdir /tmp/sp-queue-test.d");
+
     fail_unless(queue_init() == 0);
 
     fail_unless(queue_add("foo", "remote/path/to/file.img", 17471142,
@@ -540,6 +542,7 @@ void test_setup(void)
 void test_teardown(void)
 {
     queue_close();
+    system("/bin/rm -rf /tmp/sp-queue-test.d");
 }
 
 /* Just add a file to the queue and check that we can get it back. */

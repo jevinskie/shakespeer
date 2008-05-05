@@ -22,12 +22,9 @@ int sp_send_string(sp_t *sp, const char *string)
 
 void setup(void)
 {
-    const char *working_directory = "/tmp";
-
-    unlink("/tmp/queue.db");
-    unlink("/tmp/share.db");
-    unlink("/tmp/tth.db");
-    unlink("/tmp/slots.db");
+    const char *working_directory = "/tmp/sp-ui_connect-test.d";
+    system("/bin/rm -rf /tmp/sp-ui_connect-test.d");
+    system("mkdir /tmp/sp-ui_connect-test.d");
 
     sp = sp_create(NULL);
     fail_unless(sp);
@@ -38,7 +35,7 @@ void setup(void)
 
 void teardown(void)
 {
-    FILE *fp = fopen("/tmp/sphubd.pid", "r");
+    FILE *fp = fopen("/tmp/sp-ui_connect-test.d/sphubd.pid", "r");
     fail_unless(fp);
     int sphubd_pid = -1;
     fail_unless(fscanf(fp, "%i", &sphubd_pid) == 1);
@@ -46,7 +43,7 @@ void teardown(void)
     fclose(fp);
     printf("sphubd is running as pid %i\n", sphubd_pid);
 
-    fp = fopen("/tmp/sphashd.pid", "r");
+    fp = fopen("/tmp/sp-ui_connect-test.d/sphashd.pid", "r");
     fail_unless(fp);
     int sphashd_pid = -1;
     fail_unless(fscanf(fp, "%i", &sphashd_pid) == 1);
@@ -58,6 +55,8 @@ void teardown(void)
     sleep(1);
     fail_unless(kill(sphubd_pid, 0) == -1);
     fail_unless(kill(sphashd_pid, 0) == -1);
+
+    system("/bin/rm -rf /tmp/sp-ui_connect-test.d");
 }
 
 int main(void)

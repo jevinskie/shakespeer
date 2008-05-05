@@ -828,9 +828,11 @@ queue_directory_t *queue_db_lookup_unresolved_directory_by_nick(const char *nick
 
 int main(void)
 {
-    global_working_directory = "/tmp";
     sp_log_set_level("debug");
-    unlink("/tmp/queue.db");
+
+    global_working_directory = "/tmp/sp-queue_db-test.d";
+    system("/bin/rm -rf /tmp/sp-queue_db-test.d");
+    system("mkdir /tmp/sp-queue_db-test.d");
 
     fail_unless(queue_init() == 0);
 
@@ -931,6 +933,7 @@ int main(void)
     fail_unless(queue_add_target(&qt) == 0);
 
     fail_unless(queue_close() == 0);
+    system("/bin/rm -rf /tmp/sp-queue_db-test.d");
 
     return 0;
 }

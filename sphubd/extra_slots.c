@@ -168,9 +168,11 @@ unsigned extra_slots_get_for_user(const char *nick)
 
 int main(void)
 {
-    sp_log_set_level("warning");
-    global_working_directory = "/tmp";
-    system("rm -f /tmp/slots.db");
+    sp_log_set_level("debug");
+    global_working_directory = "/tmp/sp-slots-test.d";
+    system("/bin/rm -rf /tmp/sp-slots-test.d");
+    system("mkdir /tmp/sp-slots-test.d");
+
     fail_unless(extra_slots_init() == 0);
 
     fail_unless(extra_slots_get_for_user("foo") == 0);
@@ -208,6 +210,7 @@ int main(void)
     fail_unless(extra_slots_grant("bar", -1) == -1);
 
     extra_slots_close();
+    system("/bin/rm -rf /tmp/sp-slots-test.d");
 
     return 0;
 }

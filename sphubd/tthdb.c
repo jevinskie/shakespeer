@@ -328,9 +328,10 @@ struct
 
 int main(void)
 {
-    global_working_directory = "/tmp";
+    global_working_directory = "/tmp/sp-tthdb-test.d";
     sp_log_set_level("debug");
-    unlink("/tmp/tth.db");
+    system("/bin/rm -rf /tmp/sp-tthdb-test.d");
+    system("mkdir /tmp/sp-tthdb-test.d");
 
     fail_unless(tthdb_open() == 0);
 
@@ -416,6 +417,7 @@ int main(void)
     fail_unless(ti->mtime == dup_mtime);
 
     fail_unless(tthdb_close() == 0);
+    system("/bin/rm -rf /tmp/sp-tthdb-test.d");
 
     return 0;
 }

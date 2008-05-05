@@ -214,8 +214,10 @@ void queue_auto_search_init(void)
 
 void test_setup(void)
 {
-    global_working_directory = "/tmp";
-    system("rm -f /tmp/queue.db");
+    global_working_directory = "/tmp/sp-queue_auto_search-test.d";
+    system("/bin/rm -rf /tmp/sp-queue_auto_search-test.d");
+    system("mkdir /tmp/sp-queue_auto_search-test.d");
+
     fail_unless(queue_init() == 0);
 
     fail_unless(queue_add("foo", "remote/path/to/file.img", 17471142,
@@ -225,6 +227,7 @@ void test_setup(void)
 void test_teardown(void)
 {
     queue_close();
+    system("/bin/rm -rf /tmp/sp-queue_auto_search-test.d");
 }
 
 int main(void)

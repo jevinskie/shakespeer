@@ -286,21 +286,30 @@ void handle_queue_target_removed_notification(nc_t *nc, const char *channel,
 
 void test_setup(void)
 {
-    global_working_directory = "/tmp";
-    unlink("/tmp/queue.db");
+    global_working_directory = "/tmp/sp-queue_directory-test.d";
+    system("/bin/rm -rf /tmp/sp-queue_directory-test.d");
+    system("mkdir /tmp/sp-queue_directory-test.d");
+
     fail_unless(queue_init() == 0);
 }
 
 void test_teardown(void)
 {
     queue_close();
+    system("/bin/rm -rf /tmp/sp-queue_directory-test.d");
 }
 
 /* create a sample filelist for the "bar" user */
 void test_create_filelist(void)
 {
     /* create a filelist in our working directory */
-    FILE *fp = fopen("/tmp/files.xml.bar", "w");
+    char *fl_path;
+    asprintf(&fl_path, "%s/files.xml.bar", global_working_directory);
+
+    FILE *fp = fopen(fl_path, "w");
+    free(fl_path);
+    fail_unless(fp);
+
     fprintf(fp,
             "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>\n"
             "<FileListing Version=\"1\" CID=\"NOFUKZZSPMR4M\" Base=\"/\" Generator=\"DC++ 0.674\">\n"

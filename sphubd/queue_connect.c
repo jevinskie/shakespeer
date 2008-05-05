@@ -269,14 +269,16 @@ static int connect_trigger_callback(const char *nick, void *user_data)
 
 void test_setup(void)
 {
-    global_working_directory = "/tmp";
-    unlink("/tmp/queue.db");
+    global_working_directory = "/tmp/sp-queue_connect-test.d";
+    system("/bin/rm -rf /tmp/sp-queue_connect-test.d");
+    system("mkdir /tmp/sp-queue_connect-test.d");
     fail_unless(queue_init() == 0);
 }
 
 void test_teardown(void)
 {
     queue_close();
+    system("/bin/rm -rf /tmp/sp-queue_connect-test.d");
 }
 
 void test_trigger_target(void)
