@@ -323,20 +323,19 @@ int tth_store_load_leafdata(struct tth_store *store, struct tth_entry *entry)
 	buf += 40;
 	len -= 40;
 
-	unsigned leafdata_len = strcspn(buf, ":");
-	if(buf[leafdata_len] != ':')
+	unsigned base64_len = strcspn(buf, ":");
+	if(buf[base64_len] == ':')
 	{
-		WARNING("missing delimiter at end of leafdata: [%s]", buf);
-		goto failed;
+		WARNING("excessive fields in tth database, truncating");
+		buf[base64_len] = 0;
 	}
 
-	buf[leafdata_len] = 0; /* nul-terminate base64 encoded leafdata */
-
-	entry->leafdata = malloc(leafdata_len);
+	entry->leafdata = malloc(base64_len);
 	assert(entry->leafdata);
-	int outlen = base64_pton(buf,
-		(unsigned char *)entry->leafdata, leafdata_len);
-	if(outlen <= 0)
+
+	entry->leafdata_len = base64_pton(buf,
+		(unsigned char *)entry->leafdata, base64_len);
+	if(entry->leafdata_len <= 0)
 	{
 		WARNING("invalid base64 encoded leafdata");
 		free(entry->leafdata);
