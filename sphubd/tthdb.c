@@ -168,13 +168,12 @@ static int tthdb_put(const char *tth, struct tthdb_data *tthdata, int flags)
 
     if(rc == 0 || rc == DB_KEYEXIST)
     {
-	g_debug("committing transaction");
-	txn->commit(txn, 0);
+        txn->commit(txn, 0);
     }
     else
     {
-	g_warning("aborting transaction");
-	txn->abort(txn);
+        g_warning("aborting transaction");
+        txn->abort(txn);
     }
 
     return rc;

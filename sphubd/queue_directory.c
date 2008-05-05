@@ -31,6 +31,7 @@
 #include "log.h"
 #include "notifications.h"
 #include "xstr.h"
+#include "dbenv.h"
 
 extern DB *queue_target_db;
 extern DB *queue_source_db;
@@ -205,8 +206,12 @@ int queue_remove_directory(const char *target_directory)
     /* Loop through all targets and look for targets belonging to the
      * target_directory. This is a possibly expensive operation.
      */
-    DBC *qtc;
-    queue_target_db->cursor(queue_target_db, NULL, &qtc, 0);
+    DB_TXN *txn = NULL;
+    return_val_if_fail(db_transaction(&txn) == 0, -1);
+
+    DBC *qtc = NULL;
+    queue_target_db->cursor(queue_target_db, txn, &qtc, 0);
+    txn_return_val_if_fail(qtc, -1);
 
     DBT key, val;
     memset(&key, 0, sizeof(DBT));
@@ -222,12 +227,20 @@ int queue_remove_directory(const char *target_directory)
         {
             queue_remove_sources(qt->filename);
             g_debug("removing target [%s]", qt->filename);
-            qtc->c_del(qtc, 0);
+            if(qtc->c_del(qtc, 0) != 0)
+            {
+                g_warning("failed to remove target [%s]", qt->filename);
+                qtc->c_close(qtc);
+                txn->abort(txn);
+                return -1;
+            }
         }
     }
 
-    qtc->c_close(qtc);
+    txn_return_val_if_fail(qtc->c_close(qtc) == 0, -1);
+    return_val_if_fail(txn->commit(txn, 0) == 0, -1);
 
+    /* FIXME: shouldn't the directory removal be part of the transaction? */
     queue_db_remove_directory(target_directory);
 
     return 0;
@@ -295,7 +308,7 @@ void test_setup(void)
 
 void test_teardown(void)
 {
-    queue_close();
+    fail_unless(queue_close() == 0);
     system("/bin/rm -rf /tmp/sp-queue_directory-test.d");
 }
 
@@ -354,7 +367,7 @@ void test_add_directory_no_filelist(void)
 
     /* we got it */ 
     test_create_filelist();
-    queue_remove_filelist("bar");
+    fail_unless(queue_remove_filelist("bar") == 0);
 
     /* Next queue should be the placeholder directory. This time we have the
      * filelist, so resolving it should be successful. */
@@ -378,6 +391,7 @@ void test_add_directory_no_filelist(void)
     fail_unless(nfiles == 3);
 
     test_teardown();
+    puts("PASSED: add directory w/o filelist");
 }
 
 /* Add a directory from a user whose filelist we've already downloaded.
@@ -437,6 +451,35 @@ void test_add_directory_existing_filelist(void)
     fail_unless(got_directory_removed_notification == 1);
 
     test_teardown();
+    puts("PASSED: add directory w/ existing filelist");
+}
+
+void test_remove_directory(void)
+{
+    test_setup();
+    test_create_filelist();
+
+    /* there should be nothing in the queue to start with */
+    queue_t *q = queue_get_next_source_for_nick("bar");
+    fail_unless(q == NULL);
+
+    /* add a directory */
+    fail_unless(queue_add_directory("bar", "source\\directory",
+                "target/directory") == 0);
+
+    /* now we should have a directory to download */
+    q = queue_get_next_source_for_nick("bar");
+    fail_unless(q);
+
+    /* and remove the directory */
+    fail_unless(queue_remove_directory("target/directory") == 0);
+
+    /* again, nothing in the queue */
+    q = queue_get_next_source_for_nick("bar");
+    fail_unless(q == NULL);
+
+    test_teardown();
+    puts("PASSED: remove directory");
 }
 
 int main(void)
@@ -454,6 +497,7 @@ int main(void)
 
     test_add_directory_no_filelist();
     test_add_directory_existing_filelist();
+    test_remove_directory();
 
     return 0;
 }
