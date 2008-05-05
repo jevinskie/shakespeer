@@ -53,7 +53,7 @@ void registerSPTransformers(void)
 
 + (Class)transformedValueClass
 {
-    return [NSAttributedString self];
+    return [NSAttributedString class];
 }
 
 + (BOOL)supportsReverseTransformation
@@ -73,7 +73,7 @@ void registerSPTransformers(void)
 
 + (Class)transformedValueClass
 {
-    return [NSAttributedString self];
+    return [NSAttributedString class];
 }
 
 + (BOOL)supportsReverseTransformation
@@ -103,7 +103,7 @@ void registerSPTransformers(void)
 
 + (Class)transformedValueClass
 {
-    return [NSAttributedString self];
+    return [NSAttributedString class];
 }
 
 + (BOOL)supportsReverseTransformation
@@ -155,7 +155,7 @@ void registerSPTransformers(void)
 
 + (Class)transformedValueClass
 {
-    return [NSImage self];
+    return [NSImage class];
 }
 
 + (BOOL)supportsReverseTransformation
@@ -230,7 +230,7 @@ void registerSPTransformers(void)
 
 + (Class)transformedValueClass
 {
-    return [NSImage self];
+    return [NSImage class];
 }
 
 + (BOOL)supportsReverseTransformation
@@ -278,7 +278,7 @@ void registerSPTransformers(void)
 
 + (Class)transformedValueClass
 {
-    return [NSImage self];
+    return [NSImage class];
 }
 
 + (BOOL)supportsReverseTransformation
@@ -320,7 +320,7 @@ void registerSPTransformers(void)
 
 + (Class)transformedValueClass
 {
-    return [NSImage self];
+    return [NSImage class];
 }
 
 + (BOOL)supportsReverseTransformation
@@ -354,7 +354,7 @@ void registerSPTransformers(void)
 
 + (Class)transformedValueClass
 {
-    return [NSAttributedString self];
+    return [NSAttributedString class];
 }
 
 + (BOOL)supportsReverseTransformation
