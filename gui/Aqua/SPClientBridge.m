@@ -49,8 +49,7 @@ static int spcb_port(sp_t *sp, int port)
 }
 
 static int spcb_share_stats(sp_t *sp, const char *path,
-        unsigned long long size, unsigned long long totsize,
-        unsigned long long dupsize,
+        uint64_t size, uint64_t totsize, uint64_t dupsize,
         unsigned nfiles, unsigned ntotfiles, unsigned nduplicates)
 {
     sendNotification(SPNotificationShareStats,
@@ -94,7 +93,7 @@ static int spcb_queue_add_directory(sp_t *sp, const char *target_directory,
 }
 
 static int spcb_queue_add_target(sp_t *sp,
-        const char *local_filename, unsigned long long size,
+        const char *local_filename, uint64_t size,
         const char *tth, unsigned int priority)
 {
     sendNotification(SPNotificationQueueAdd,
@@ -210,7 +209,7 @@ static int spcb_connection_failed(sp_t *sp, const char *hub_address)
 }
 
 static int spcb_download_starting(sp_t *sp, const char *hub_address, const char *nick,
-        const char *remote_filename, const char *local_filename, unsigned long long filesize)
+        const char *remote_filename, const char *local_filename, uint64_t filesize)
 {
     sendNotification(SPNotificationDownloadStarting,
             @"hubAddress", [NSString stringWithUTF8String:hub_address],
@@ -223,7 +222,7 @@ static int spcb_download_starting(sp_t *sp, const char *hub_address, const char 
 }
 
 static int spcb_upload_starting(sp_t *sp, const char *hub_address, const char *nick,
-        const char *local_filename, unsigned long long filesize)
+        const char *local_filename, uint64_t filesize)
 {
     sendNotification(SPNotificationUploadStarting,
             @"hubAddress", [NSString stringWithUTF8String:hub_address],
@@ -235,8 +234,8 @@ static int spcb_upload_starting(sp_t *sp, const char *hub_address, const char *n
 }
 
 static int spcb_transfer_stats(sp_t *sp, const char *local_filename,
-        unsigned long long offset,
-        unsigned long long filesize, unsigned bytes_per_sec)
+        uint64_t offset,
+        uint64_t filesize, unsigned bytes_per_sec)
 {
     sendNotification(SPNotificationTransferStats,
             @"targetFilename", [NSString stringWithUTF8String:local_filename],
@@ -248,7 +247,7 @@ static int spcb_transfer_stats(sp_t *sp, const char *local_filename,
 }
 
 static int spcb_search_response(sp_t *sp, int id, const char *hub_address, const char *nick,
-        const char *filename, int filetype, unsigned long long size, int openslots, int totalslots, const char *tth,
+        const char *filename, int filetype, uint64_t size, int openslots, int totalslots, const char *tth,
         const char *speed)
 {
     sendNotification(SPNotificationSearchResponse,
@@ -323,7 +322,7 @@ static int spcb_status_message(sp_t *sp, const char *hub_address, const char *me
 
 static int spcb_user_login(sp_t *sp, const char *hub_address, const char *nick,
         const char *description, const char *tag, const char *speed,
-        const char *email, unsigned long long share_size, int is_operator,
+        const char *email, uint64_t share_size, int is_operator,
         unsigned int extra_slots)
 {
     sendNotification(SPNotificationUserLogin,
@@ -342,7 +341,7 @@ static int spcb_user_login(sp_t *sp, const char *hub_address, const char *nick,
 
 static int spcb_user_update(sp_t *sp, const char *hub_address, const char *nick,
         const char *description, const char *tag, const char *speed,
-        const char *email, unsigned long long share_size, int is_operator,
+        const char *email, uint64_t share_size, int is_operator,
         unsigned int extra_slots)
 {
     sendNotification(SPNotificationUserUpdate,

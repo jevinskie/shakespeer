@@ -388,7 +388,7 @@ int share_file_cmp(share_file_t *a, share_file_t *b)
     return share_path_cmp(a->path, b->path);
 }
 
-unsigned share_inode_hash(unsigned long long inode)
+unsigned share_inode_hash(uint64_t inode)
 {
     return (unsigned)inode % SHARE_INODE_BUCKETS;
 }
@@ -418,8 +418,7 @@ share_file_t *share_lookup_unhashed_file(share_t *share, const char *local_path)
     return RB_FIND(file_tree, &share->unhashed_files, &find);
 }
 
-share_file_t *share_lookup_file_by_inode(share_t *share,
-        unsigned long long inode)
+share_file_t *share_lookup_file_by_inode(share_t *share, uint64_t inode)
 {
     share_file_t *f;
     LIST_FOREACH(f, &share->inodes[share_inode_hash(inode)], inode_link)
@@ -433,10 +432,10 @@ share_file_t *share_lookup_file_by_inode(share_t *share,
 
 char *share_get_cid(share_t *share)
 {
-    unsigned long long u1 = random();
-    unsigned long long u2 = random();
-    unsigned long long cid = (u1 << 32) | u2;
-    char *cid_string = base32_encode((char *)&cid, sizeof(unsigned long long));
+    uint64_t u1 = random();
+    uint64_t u2 = random();
+    uint64_t cid = (u1 << 32) | u2;
+    char *cid_string = base32_encode((char *)&cid, sizeof(uint64_t));
 
     return cid_string;
 }

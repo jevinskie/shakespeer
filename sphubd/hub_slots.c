@@ -57,7 +57,7 @@ void hub_free_upload_slot(hub_t *hub, const char *nick, slot_state_t slot_state)
  * slot). Returns -1 if no slot was available.
  */
 slot_state_t hub_request_upload_slot(hub_t *hub, const char *nick,
-        const char *filename, unsigned long long int size)
+        const char *filename, uint64_t size)
 {
     if(filename == NULL || is_filelist(filename) || size < 64*1024)
     {

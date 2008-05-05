@@ -22,6 +22,7 @@
 #define _util_h_
 
 #include <sys/types.h> /* for size_t */
+#include <stdint.h>
 
 #define FILELIST_NONE 0
 #define FILELIST_DCLST 1
@@ -50,7 +51,7 @@ typedef enum share_size_restriction
     SHARE_SIZE_EQUAL /* special case, not supported by DC protocol */
 } share_size_restriction_t;
 
-char *str_size_human(unsigned long long int size);
+char *str_size_human(uint64_t size);
 void print_command(const char *command, const char *fmt, ...)
     __attribute__ (( format(printf, 2, 3) ));
 char *tilde_expand_path(const char *path);

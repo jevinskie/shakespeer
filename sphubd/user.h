@@ -22,6 +22,7 @@
 #define _user_h_
 
 #include "sys_queue.h"
+#include <stdint.h>
 
 struct hub;
 
@@ -35,7 +36,7 @@ struct user
     char *speed;
     char *description;
     char *email;
-    unsigned long long shared_size;
+    uint64_t shared_size;
     int is_operator;
     int passive;
     struct hub *hub;
@@ -44,7 +45,7 @@ struct user
 };
 
 user_t *user_new(const char *nick, const char *tag, const char *speed, const char *description,
-        const char *email, unsigned long long shared_size, struct hub *hub);
+        const char *email, uint64_t shared_size, struct hub *hub);
 user_t *user_new_from_myinfo(const char *myinfo, struct hub *hub);
 void user_free(void *data);
 void user_set_ip(user_t *user, const char *ip);

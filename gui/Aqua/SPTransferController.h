@@ -34,8 +34,8 @@
     NSString *status;
     NSAttributedString *filename;
     NSAttributedString *pathname;
-    unsigned long long exactSize;
-    unsigned long long offset;
+    uint64_t exactSize;
+    uint64_t offset;
     unsigned int speed;
     NSString *targetFilename;
     NSString *hubAddress;
@@ -47,19 +47,19 @@
 - (id)copy;
 - (id)initWithNick:(NSString *)aNick
           filename:(NSString *)aFilename
-              size:(unsigned long long)aSize
+              size:(uint64_t)aSize
         hubAddress:(NSString *)aHubAddress
          direction:(int)aDirection;
 - (NSString *)nick;
 - (void)setStatus:(NSString *)aStatusString;
 - (NSString *)targetFilename;
 - (void)setFilename:(NSString *)aFilename;
-- (unsigned long long)size;
-- (void)setSize:(unsigned long long)aSize;
+- (uint64_t)size;
+- (void)setSize:(uint64_t)aSize;
 - (void)setSpeed:(unsigned int)aSpeed;
 - (unsigned int)ETA;
 - (float)ratio;
-- (void)setOffset:(unsigned long long)anOffset;
+- (void)setOffset:(uint64_t)anOffset;
 - (void)setState:(int)aState;
 - (int)direction;
 

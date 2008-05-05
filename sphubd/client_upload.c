@@ -128,8 +128,7 @@ int cc_start_upload(cc_t *cc)
  * returns 0 on success, or -1 on error
  */
 int cc_upload_prepare(cc_t *cc, const char *filename,
-        unsigned long long offset, unsigned long long bytes_to_transfer,
-        xerr_t **err)
+        uint64_t offset, uint64_t bytes_to_transfer, xerr_t **err)
 {
     char *local_filename = 0;
     int fl_type = 0;
@@ -202,7 +201,7 @@ int cc_upload_prepare(cc_t *cc, const char *filename,
         {
             g_message("%s: Request for too many bytes: st_size = %llu,"
                     " offset = %llu, bytes_to_transfer = %llu",
-                    local_filename, (unsigned long long)stbuf.st_size,
+                    local_filename, (uint64_t)stbuf.st_size,
                     offset, bytes_to_transfer);
             free(local_filename);
             xerr_set(err, -1, "File Not Available");

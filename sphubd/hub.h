@@ -26,6 +26,7 @@
 #include <sys/time.h>
 #include <event.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "user.h"
 
@@ -163,7 +164,7 @@ void hub_user_command_push(hub_t *hub, int type, int context, const char *descri
  */
 extern int hub_default_slots;
 void hub_free_upload_slot(hub_t *hub, const char *nick, slot_state_t slot_state);
-slot_state_t hub_request_upload_slot(hub_t *hub, const char *nick, const char *filename, unsigned long long int size);
+slot_state_t hub_request_upload_slot(hub_t *hub, const char *nick, const char *filename, uint64_t size);
 void hub_set_slots(hub_t *hub, int slots);
 void hub_all_set_slots(int slots);
 void hub_set_slots_global(int slots);

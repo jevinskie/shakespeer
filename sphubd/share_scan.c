@@ -55,7 +55,7 @@ struct share_scan_state
     share_mountpoint_t *mp;
 };
 
-#define SHARE_STAT_TO_INODE(st) (unsigned long long)(((unsigned long long)st->st_dev << 32) | st->st_ino)
+#define SHARE_STAT_TO_INODE(st) (uint64_t)(((uint64_t)st->st_dev << 32) | st->st_ino)
 
 static void share_scan_schedule_event(share_scan_state_t *ctx);
 

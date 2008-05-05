@@ -36,12 +36,12 @@ struct queue_target /* indexed by filename */
 {
     char filename[QUEUE_TARGET_MAXPATH];
     char target_directory[QUEUE_TARGET_MAXPATH];
-    unsigned long long size;
+    uint64_t size;
     char tth[40];
     unsigned flags;
     time_t ctime;
     int priority;
-    unsigned long long seq;
+    uint64_t seq;
 };
 
 typedef struct queue_source queue_source_t;
@@ -76,13 +76,13 @@ struct queue
     char *source_filename;
     char *target_filename;
     char *tth;
-    unsigned long long size;
-    unsigned long long offset;
+    uint64_t size;
+    uint64_t offset;
     int is_filelist;
     int is_directory;
     int auto_matched;
-    long long target_id;
-    long long source_id;
+    int64_t target_id;
+    int64_t source_id;
 };
 
 int queue_init(void);
@@ -115,10 +115,10 @@ int queue_db_remove_directory(const char *target_directory);
 queue_filelist_t *queue_lookup_filelist(const char *nick);
 
 int queue_add_internal(const char *nick, const char *remote_filename,
-        unsigned long long int size, const char *local_filename, const char *tth,
+        uint64_t size, const char *local_filename, const char *tth,
         int auto_matched_filelist, const char *target_directory);
 
-void queue_set_size(queue_t *queue, unsigned long long int size);
+void queue_set_size(queue_t *queue, uint64_t size);
 void queue_set_target_active(queue_t *queue, int flag);
 void queue_set_filelist_active(queue_t *queue, int flag);
 queue_t *queue_get_next_source_for_nick(const char *nick);
@@ -127,13 +127,10 @@ int queue_set_target_filename(queue_t *queue, const char *filename);
 void queue_set_source_filename(queue_t *queue, const char *filename);
 int queue_remove_directory(const char *target_directory);
 
-// int queue_add_source(long long int qt_id, const char *nick,
-        // const char *remote_filename);
-
 void queue_send_to_ui(void);
 
 int queue_remove_source(const char *local_filename, const char *nick);
-int queue_add(const char *nick, const char *remote_filename, unsigned long long int size,
+int queue_add(const char *nick, const char *remote_filename, uint64_t size,
         const char *local_filename, const char *tth);
 int queue_add_directory(const char *nick,
         const char *source_directory,

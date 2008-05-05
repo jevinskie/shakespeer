@@ -7,6 +7,7 @@ BEGIN {
     printf("#define _GNU_SOURCE\n");
     printf("#include <stdlib.h>\n");
     printf("#include <stdio.h>\n");
+    printf("#include <inttypes.h>\n");
     printf("#include \"io.h\"\n");
     printf("#include \"log.h\"\n");
 }
@@ -48,8 +49,8 @@ BEGIN {
         }
         else if(argtype == "uint64")
         {
-            argdef[i] = "unsigned long long int "
-            argfmt[i] = "%llu"
+            argdef[i] = "uint64_t "
+            argfmt[i] = "%\"PRIu64\""
         }
         else if(argtype == "string" || argtype == "path")
         {

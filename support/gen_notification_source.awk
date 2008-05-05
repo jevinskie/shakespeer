@@ -33,7 +33,7 @@ BEGIN {
         }
         else if(argtype == "uint64")
         {
-            argdef[i] = "unsigned long long int "
+            argdef[i] = "uint64_t "
         }
         else if(argtype == "string")
         {

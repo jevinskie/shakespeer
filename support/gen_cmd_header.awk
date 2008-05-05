@@ -34,7 +34,7 @@ BEGIN {
             if(argtype == "uint")
                 params=sprintf("%s, unsigned int %s", params, argname);
             if(argtype == "uint64")
-                params=sprintf("%s, unsigned long long %s", params, argname);
+                params=sprintf("%s, uint64_t %s", params, argname);
             else if(argtype == "string" || argtype == "path")
                 params=sprintf("%s, const char *%s", params, argname);
             else if(argtype == "bool")
@@ -49,7 +49,8 @@ BEGIN {
 END {
     printf("#ifndef _%s_cmd_h_\n", prefix);
     printf("#define _%s_cmd_h_\n", prefix);
-    printf("\n%s\n", includes);
+    printf("\n#include <inttypes.h>\n");
+    printf("%s\n", includes);
     printf("typedef struct %s %s;\n", prefix, struct)
     printf("struct %s\n{\n", prefix)
     printf("%s\n", members);

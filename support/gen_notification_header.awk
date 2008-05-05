@@ -4,6 +4,7 @@ BEGIN {
     printf("#ifndef _notifications_h_\n")
     printf("#define _notifications_h_\n")
     printf("\n#include <stdbool.h>\n");
+    printf("\n#include <stdint.h>\n");
     printf("#include \"notification_center.h\"\n");
 }
 
@@ -36,7 +37,7 @@ BEGIN {
         }
         else if(argtype == "uint64")
         {
-            argdef[i] = "unsigned long long int "
+            argdef[i] = "uint64_t "
         }
         else if(argtype == "string")
         {

@@ -57,7 +57,7 @@
     NSString *encoding;
     int numStaticNickMenuEntries;
     unsigned nops;
-    unsigned long long totsize;
+    uint64_t totsize;
 }
 
 - (IBAction)sendMessage:(id)sender;

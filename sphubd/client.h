@@ -85,10 +85,10 @@ struct cc
     int upload_buf_offset;
     int upload_buf_size;
     int local_fd;
-    unsigned long long filesize; /* total file size */ /* FIXME: also in current_queue->size */
-    unsigned long long offset; /* FIXME: also in current_queue->offset */
-    unsigned long long bytes_to_transfer;
-    unsigned long long bytes_done;
+    uint64_t filesize; /* total file size */ /* FIXME: also in current_queue->size */
+    uint64_t offset; /* FIXME: also in current_queue->offset */
+    uint64_t bytes_to_transfer;
+    uint64_t bytes_done;
     time_t last_activity;
     time_t transfer_start_time;
     time_t last_transfer_activity;
@@ -142,8 +142,7 @@ void cc_fl_match_queue(const char *filelist_path, const char *nick);
 /* client_upload.c
  */
 int cc_upload_prepare(cc_t *cc, const char *filename,
-        unsigned long long offset, unsigned long long bytes_to_transfer,
-        xerr_t **err);
+        uint64_t offset, uint64_t bytes_to_transfer, xerr_t **err);
 int cc_start_upload(cc_t *cc);
 void cc_finish_upload(cc_t *cc);
 ssize_t cc_upload_read(cc_t *cc, void *buf, size_t nbytes);

@@ -144,7 +144,7 @@ void hub_send_myinfo(hub_t *hub)
 
     char *tag = hub_make_tag(hub);
     char *myinfo_string = 0;
-    asprintf(&myinfo_string, "$MyINFO $ALL %s %s%s$ $%s\x01$%s$%llu$|",
+    asprintf(&myinfo_string, "$MyINFO $ALL %s %s%s$ $%s\x01$%s$%"PRIu64"$|",
             hub->me->nick,
             hub->me->description ? hub->me->description : "",
             tag,
@@ -450,7 +450,7 @@ void hub_search(hub_t *hub, search_request_t *request)
     }
 
     char *search_string = 0;
-    asprintf(&search_string, "%c?%c?%llu?%u?%s",
+    asprintf(&search_string, "%c?%c?%"PRIu64"?%u?%s",
             (request->size_restriction != SHARE_SIZE_NONE && request->type != SHARE_TYPE_TTH) ? 'T' : 'F',
             ((request->size_restriction == SHARE_SIZE_MIN ||
               (request->size_restriction == SHARE_SIZE_EQUAL && request->minsize)) &&

@@ -925,9 +925,9 @@
     SPQueueItem *qi = [self findItemWithTarget:targetFilename];
     if(qi)
     {
-        unsigned long long offset = [[[aNotification userInfo] objectForKey:@"offset"]
+        uint64_t offset = [[[aNotification userInfo] objectForKey:@"offset"]
             unsignedLongLongValue];
-        unsigned long long size = [[[aNotification userInfo] objectForKey:@"size"]
+        uint64_t size = [[[aNotification userInfo] objectForKey:@"size"]
             unsignedLongLongValue];
 
         [qi setStatus:[NSString stringWithFormat:@"%.1f%% ready", (float)offset / (size ? size : 1) * 100]];

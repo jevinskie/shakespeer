@@ -49,7 +49,7 @@ static void queue_match_filelist_schedule_event(
         queue_match_filelist_data_t *udata);
 
 static void queue_match_filelist_callback(const char *path, const char *tth,
-        unsigned long long size, void *user_data)
+        uint64_t size, void *user_data)
 {
     queue_match_filelist_data_t *udata = user_data;
 

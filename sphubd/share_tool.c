@@ -33,7 +33,7 @@ static void show_share_stats(void)
 
         share_get_stats(global_share, &stats);
         unsigned nunique = stats.ntotfiles - stats.nduplicates;
-        unsigned long long uniqsize = stats.totsize - stats.size;
+        uint64_t uniqsize = stats.totsize - stats.size;
         printf(CLRON
                 "Sharing %s, %u files total (%u duplicates),"
                 " %u of %u unique files hashed,"

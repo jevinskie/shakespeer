@@ -178,7 +178,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
     return [[self window] isKeyWindow];
 }
 
-- (void)setTotalShareSize:(unsigned long long)aNumber
+- (void)setTotalShareSize:(uint64_t)aNumber
 {
     totalShareSize = aNumber;
 }
@@ -189,7 +189,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 
     if([path isEqualToString:@""])
     {
-        unsigned long long size = [[[aNotification userInfo] objectForKey:@"size"] unsignedLongLongValue];
+        uint64_t size = [[[aNotification userInfo] objectForKey:@"size"] unsignedLongLongValue];
         [self setTotalShareSize:size];
         return;
     }
@@ -200,10 +200,10 @@ static float ToolbarHeightForWindow(NSWindow *window)
     {
         if([[dict objectForKey:@"path"] isEqualToString:path])
         {
-            unsigned long long size = [[[aNotification userInfo] objectForKey:@"size"] unsignedLongLongValue];
-            unsigned long long totsize = [[[aNotification userInfo] objectForKey:@"totsize"] unsignedLongLongValue];
-            unsigned long long dupsize = [[[aNotification userInfo] objectForKey:@"dupsize"] unsignedLongLongValue];
-            unsigned long long uniqsize = totsize - dupsize;
+            uint64_t size = [[[aNotification userInfo] objectForKey:@"size"] unsignedLongLongValue];
+            uint64_t totsize = [[[aNotification userInfo] objectForKey:@"totsize"] unsignedLongLongValue];
+            uint64_t dupsize = [[[aNotification userInfo] objectForKey:@"dupsize"] unsignedLongLongValue];
+            uint64_t uniqsize = totsize - dupsize;
             unsigned nfiles = [[[aNotification userInfo] objectForKey:@"nfiles"] intValue];
             unsigned ntotfiles = [[[aNotification userInfo] objectForKey:@"ntotfiles"] intValue];
             unsigned nduplicates = [[[aNotification userInfo] objectForKey:@"nduplicates"] intValue];

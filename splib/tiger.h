@@ -1,11 +1,11 @@
 #ifndef _tiger_h_
 #define _tiger_h_
 
-#include <sys/types.h>
+#include <stdint.h>
 
-typedef u_int64_t word64;
-typedef u_int32_t word32;
-typedef u_int8_t byte;
+typedef uint64_t word64;
+typedef uint32_t word32;
+typedef uint8_t byte;
 
 void tiger(word64 *str, word64 length, word64 res[3]);
 
@@ -18,7 +18,7 @@ void tiger(word64 *str, word64 length, word64 res[3]);
 #   define __BIG_ENDIAN__ 1
 #  endif
 # else
-#  include <sys/endian.h>
+#  include <machine/endian.h>
 #  if _BYTE_ORDER == _LITTLE_ENDIAN
 #   define __LITTLE_ENDIAN__ 1
 #  else

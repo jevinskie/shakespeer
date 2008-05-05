@@ -249,7 +249,7 @@ void ui_send_share_stats_for_root(ui_t *ui, const char *local_root)
 
 static int ui_cb_search_common(ui_t *ui, const char *hub_address,
         const char *search_string,
-        unsigned long long size, share_size_restriction_t size_restriction,
+        uint64_t size, share_size_restriction_t size_restriction,
         share_type_t file_type, int id)
 {
     search_request_t *sreq = search_listener_create_search_request(
@@ -286,7 +286,7 @@ static int ui_cb_search_common(ui_t *ui, const char *hub_address,
     return 0;
 }
 
-static int ui_cb_search_all(ui_t *ui, const char *search_string, unsigned long long size,
+static int ui_cb_search_all(ui_t *ui, const char *search_string, uint64_t size,
         int size_restriction, int file_type, int id)
 {
     return ui_cb_search_common(ui, NULL, search_string, size, size_restriction,
@@ -294,7 +294,7 @@ static int ui_cb_search_all(ui_t *ui, const char *search_string, unsigned long l
 }
 
 static int ui_cb_search(ui_t *ui, const char *hub_address, const char *search_string,
-        unsigned long long size, int size_restriction,
+        uint64_t size, int size_restriction,
         int file_type, int id)
 {
     return ui_cb_search_common(ui, hub_address, search_string, size, size_restriction,
@@ -380,7 +380,7 @@ static int ui_cb_private_message(ui_t *ui, const char *hub_address,
 }
 
 static int ui_cb_download_file(ui_t *ui, const char *hub_address,
-        const char *nick, const char *source_filename, unsigned long long size,
+        const char *nick, const char *source_filename, uint64_t size,
         const char *target_filename, const char *tth)
 {
     hub_t *hub = hub_find_by_address(hub_address);

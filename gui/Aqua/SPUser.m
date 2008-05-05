@@ -94,7 +94,7 @@
     return displayNick;
 }
 
-- (unsigned long long)size
+- (uint64_t)size
 {
     return size;
 }

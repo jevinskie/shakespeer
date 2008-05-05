@@ -53,13 +53,13 @@
     NSMutableArray *sharedPaths;
     NSMutableArray *predefinedDownloadLocations;
 
-    unsigned long long totalShareSize;
+    uint64_t totalShareSize;
     BOOL testInProgress;
     BOOL hashingPaused;
 }
 + (SPPreferenceController *)sharedPreferences;
 
-- (void)setTotalShareSize:(unsigned long long)aNumber;
+- (void)setTotalShareSize:(uint64_t)aNumber;
 
 - (IBAction)addSharedPath:(id)sender;
 - (IBAction)removeSharedPath:(id)sender;

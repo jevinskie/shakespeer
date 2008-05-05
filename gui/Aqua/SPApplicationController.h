@@ -86,11 +86,11 @@ void sendNotification(NSString *notificationName, NSString *key1, id arg1, ...);
 - (void)sendPublicMessage:(NSString *)aMessage toHub:(NSString *)hubAddress;
 - (int)searchHub:(NSString *)aHubAddress
        forString:(NSString *)aSearchString
-            size:(unsigned long long)aSize
+            size:(uint64_t)aSize
  sizeRestriction:(int)aSizeRestriction
         fileType:(int)aFileType;
 - (int)searchAllHubsForString:(NSString *)aSearchString
-                          size:(unsigned long long)aSize
+                          size:(uint64_t)aSize
                sizeRestriction:(int)aSizeRestriction
                       fileType:(int)aFileType;
 - (int)searchHub:(NSString *)aHubAddress forTTH:(NSString *)aTTH;

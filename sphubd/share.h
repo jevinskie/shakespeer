@@ -38,7 +38,7 @@ typedef struct share_search share_search_t;
 struct share_search
 {
     share_size_restriction_t size_restriction;
-    unsigned long long size;
+    uint64_t size;
     share_type_t type;
     arg_t *words;
     char *tth;
@@ -60,11 +60,11 @@ struct share_file
     char *path;
     char *name; /* points at path (after last slash) */
     share_type_t type;
-    unsigned long long size;
-    unsigned long long inode;
+    uint64_t size;
+    uint64_t inode;
     time_t mtime; /* FIXME: don't really need it here */
 
-    unsigned long long duplicate_inode; /* file is a duplicate of this inode */
+    uint64_t duplicate_inode; /* file is a duplicate of this inode */
 };
 
 typedef struct file_tree file_tree_t;
@@ -89,9 +89,9 @@ RB_PROTOTYPE(file_tree, share_file, entry, share_file_cmp);
 typedef struct share_stats share_stats_t;
 struct share_stats
 {
-    unsigned long long size; /* hashed size */
-    unsigned long long totsize;
-    unsigned long long dupsize;
+    uint64_t size; /* hashed size */
+    uint64_t totsize;
+    uint64_t dupsize;
     unsigned nfiles; /* number of hashed, unique files */
     unsigned ntotfiles;
     unsigned nduplicates;
@@ -126,8 +126,7 @@ char *share_translate_tth(share_t *share, const char *tth);
 
 void share_add_to_inode_table(share_t *share, share_file_t *file);
 void share_remove_from_inode_table(share_t *share, share_file_t *file);
-share_file_t *share_lookup_file_by_inode(share_t *share,
-        unsigned long long inode);
+share_file_t *share_lookup_file_by_inode(share_t *share, uint64_t inode);
 share_file_list_t *share_next_unhashed(share_t *share, unsigned int limit);
 void share_file_free(share_file_t *file);
 int share_remove(share_t *share, const char *local_root, bool is_rescan);

@@ -62,7 +62,7 @@ BEGIN {
             else if(a[1] == "uint")
                 printf("    unsigned int %s = strtoull(argv[%d], NULL, 0);\n", a[2], i)
             else if(a[1] == "uint64")
-                printf("    unsigned long long %s = strtoull(argv[%d], NULL, 0);\n", a[2], i)
+                printf("    uint64_t %s = strtoull(argv[%d], NULL, 0);\n", a[2], i)
             else if(a[1] == "string" || a[1] == "path")
                 printf("    char *%s = argv[%d];\n", a[2], i)
             else if(a[1] == "bool")

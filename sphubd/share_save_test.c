@@ -112,7 +112,7 @@ tdir_t directories_2[] = {
     {0, 0, 0, 0}
 };
 
-void build_share(long long mount_id, tdir_t *dirs)
+void build_share(int64_t mount_id, tdir_t *dirs)
 {
     int i;
     for(i = 0; dirs[i].name; i++)
@@ -122,7 +122,7 @@ void build_share(long long mount_id, tdir_t *dirs)
         fail_unless(rc == 0);
         if(dirs[i].files)
         {
-            long long dir_id = db_last_insert_id();
+            int64_t dir_id = db_last_insert_id();
             int j;
             for(j = 0; dirs[i].files[j].name; j++)
             {
@@ -160,7 +160,7 @@ void test_share(const char *dir, tdir_t *dirs)
 
     int rc = db_exec_sql(NULL, "INSERT INTO mount (path, virtual_root) VALUES ('%s', 'tmp')", dir);
     fail_unless(rc == 0);
-    long long mount_id = db_last_insert_id();
+    int64_t mount_id = db_last_insert_id();
 
     build_share(mount_id, dirs);
 

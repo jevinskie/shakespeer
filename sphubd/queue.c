@@ -82,7 +82,7 @@ queue_t *queue_get_next_source_for_nick(const char *nick)
 
     queue_source_t *qs_candidate = NULL;
     int qt_candidate_priority = 0;
-    unsigned long long qt_candidate_seq = 0;
+    uint64_t qt_candidate_seq = 0;
 
     u_int32_t flags = DB_SET;
     while(qsc->c_get(qsc, &key, &val, flags) == 0)
@@ -167,7 +167,7 @@ int queue_has_source_for_nick(const char *nick)
 /* Add a file to the download queue. Adds both a target and a source.
  */
 int queue_add_internal(const char *nick, const char *source_filename,
-        unsigned long long int size, const char *target_filename,
+        uint64_t size, const char *target_filename,
         const char *tth, int auto_matched_filelist,
         const char *target_directory)
 {
@@ -264,8 +264,7 @@ int queue_add_internal(const char *nick, const char *source_filename,
 }
 
 int queue_add(const char *nick, const char *source_filename,
-        unsigned long long size,
-        const char *target_filename, const char *tth)
+        uint64_t size, const char *target_filename, const char *tth)
 {
     return_val_if_fail(nick, -1);
     return_val_if_fail(target_filename, -1);
@@ -392,7 +391,7 @@ void queue_set_filelist_active(queue_t *queue, int flag)
     queue_update_filelist(queue->nick, qf);
 }
 
-void queue_set_size(queue_t *queue, unsigned long long size)
+void queue_set_size(queue_t *queue, uint64_t size)
 {
     return_if_fail(queue);
     return_if_fail(queue->target_filename);

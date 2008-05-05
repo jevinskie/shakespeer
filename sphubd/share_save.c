@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <inttypes.h>
 
 #include "he3.h"
 #include "bz2.h"
@@ -103,12 +104,12 @@ static void share_xml_print_file(FILE *fp, int level, share_file_t *file)
     const char *tth = tthdb_get_tth_by_inode(file->inode);
     if(tth && *tth)
     {
-        fprintf(fp, "<File Name=\"%s\" Size=\"%llu\" TTH=\"%s\"/>\r\n",
+        fprintf(fp, "<File Name=\"%s\" Size=\"%"PRIu64"\" TTH=\"%s\"/>\r\n",
                 escaped_utf8_filename, file->size, tth);
     }
     else
     {
-        fprintf(fp, "<File Name=\"%s\" Size=\"%llu\"/>\r\n",
+        fprintf(fp, "<File Name=\"%s\" Size=\"%"PRIu64"\"/>\r\n",
                 escaped_utf8_filename, file->size);
     }
     free(escaped_utf8_filename);

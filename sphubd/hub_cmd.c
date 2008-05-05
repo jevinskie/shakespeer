@@ -92,7 +92,7 @@ static int hub_search_match_callback(const share_search_t *search,
     }
     else
     {
-        asprintf(&response, "$SR %s %s\x05%llu %u/%u\x05%s%s (%s:%d)%s%s|",
+        asprintf(&response, "$SR %s %s\x05%"PRIu64" %u/%u\x05%s%s (%s:%d)%s%s|",
                 hub->me->nick,
                 virtual_path,
                 file->size,

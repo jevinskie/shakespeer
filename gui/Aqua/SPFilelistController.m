@@ -133,7 +133,7 @@
         }
         [items addObject:item];
 
-        unsigned long long fsize;
+        uint64_t fsize;
         if(file->type == SHARE_TYPE_DIRECTORY)
         {
             NSMutableArray *children = [self setFiles:file->dir];

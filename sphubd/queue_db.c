@@ -281,10 +281,10 @@ static int queue_add_target_overwrite(queue_target_t *qt, int overwrite_flag)
     return rc;
 }
 
-static unsigned long long queue_get_target_sequence(void)
+static uint64_t queue_get_target_sequence(void)
 {
-    unsigned long long *retp;
-    unsigned long long ret;
+    uint64_t *retp;
+    uint64_t ret;
 
     DBT key;
     memset(&key, 0, sizeof(DBT));
@@ -306,14 +306,14 @@ static unsigned long long queue_get_target_sequence(void)
     }
 
     /* FIXME: endian issue */
-    retp = (unsigned long long *)val.data;
+    retp = (uint64_t *)val.data;
     if(retp)
         ret = *retp + 1;
     else
         ret = 1;
 
     val.data = &ret;
-    val.size = sizeof(unsigned long long);
+    val.size = sizeof(uint64_t);
 
     rc = queue_sequence_db->put(queue_sequence_db, NULL, &key, &val, 0);
     if(rc != 0)

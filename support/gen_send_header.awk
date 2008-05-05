@@ -31,7 +31,7 @@ BEGIN {
             else if(argtype == "uint")
                 params=sprintf("%s, unsigned int %s", params, argname);
             else if(argtype == "uint64")
-                params=sprintf("%s, unsigned long long int %s", params, argname);
+                params=sprintf("%s, uint64_t %s", params, argname);
             else if(argtype == "string" || argtype == "path")
                 params=sprintf("%s, const char *%s", params, argname);
             else if(argtype == "bool")

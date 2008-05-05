@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with ShakesPeer; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */                                                                                      
+ */
 
 #ifndef _search_listener_h_
 #define _search_listener_h_
@@ -39,8 +39,8 @@ struct search_request
     TAILQ_ENTRY(search_request) link;
     
     share_size_restriction_t size_restriction;
-    unsigned long long search_size; /* the size we're searching for (sent to hub) */
-    unsigned long long real_size;   /* the real size we're looking for (to
+    uint64_t search_size; /* the size we're searching for (sent to hub) */
+    uint64_t real_size;   /* the real size we're looking for (to
                                        emulate exact search) */
     int minsize;
     share_type_t type;
@@ -57,7 +57,7 @@ struct search_response
     char *nick;
     char *filename;
     int type;
-    unsigned long long int size;
+    uint64_t size;
     int openslots;
     int totalslots;
     char *tth;
@@ -77,7 +77,7 @@ search_listener_t *search_listener_new(int port);
 void search_listener_close(search_listener_t *sl);
 void search_listener_add_request(search_listener_t *sl, search_request_t *request);
 search_request_t *search_listener_create_search_request(const char *words,
-        unsigned long long size,
+        uint64_t size,
         share_size_restriction_t size_restriction,
         share_type_t type,
         int id);

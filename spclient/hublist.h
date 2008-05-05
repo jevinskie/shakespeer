@@ -22,7 +22,7 @@
 #define _hublist_h_
 
 #include "sys_queue.h"
-
+#include <stdint.h>
 #include "xerr.h"
 
 typedef struct hublist_hub hublist_hub_t;
@@ -39,7 +39,7 @@ struct hublist_hub
     char *country;
     int min_slots;
     int max_hubs;
-    unsigned long long min_share;
+    uint64_t min_share;
 };
 
 typedef struct hublist hublist_t;

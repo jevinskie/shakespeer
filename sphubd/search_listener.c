@@ -153,7 +153,7 @@ search_listener_t *search_listener_new(int port)
     return sl;
 }
 
-int search_result_matches_request(const char *filename, unsigned long long int size, const char *tth,
+int search_result_matches_request(const char *filename, uint64_t size, const char *tth,
         search_request_t *sreq)
 {
     char *xfilename;
@@ -408,7 +408,7 @@ int search_listener_handle_response(search_listener_t *sl, const char *buf)
 
 /* <words> assumed to be in UTF-8 */
 search_request_t *search_listener_create_search_request(const char *words,
-        unsigned long long int size,
+        uint64_t size,
         share_size_restriction_t size_restriction,
         share_type_t type, int id)
 {

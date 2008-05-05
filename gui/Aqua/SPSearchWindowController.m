@@ -271,7 +271,7 @@
     if(theTag == tag)
     {
         NSString *filename = [[aNotification userInfo] objectForKey:@"filename"];
-        unsigned long long exactSize = [[[aNotification userInfo] objectForKey:@"size"] unsignedLongLongValue];
+        uint64_t exactSize = [[[aNotification userInfo] objectForKey:@"size"] unsignedLongLongValue];
         int openslots = [[[aNotification userInfo] objectForKey:@"openslots"] intValue];
         int totalslots = [[[aNotification userInfo] objectForKey:@"totalslots"] intValue];
         NSString *slots = [NSString stringWithFormat:@"%i/%i", openslots, totalslots];
@@ -397,11 +397,11 @@
     if([searchString length] == 0)
         return;
 
-    unsigned long long size = 0ULL;
+    uint64_t size = 0ULL;
     if([searchSize length] > 0)
     {
         NSScanner *scan = [NSScanner scannerWithString:searchSize];
-        [scan scanLongLong:(long long *)&size];
+        [scan scanLongLong:(int64_t *)&size];
         if([scan isAtEnd] == NO)
         {
             NSString *suffix = [[searchSize substringFromIndex:[scan scanLocation]] uppercaseString];

@@ -290,9 +290,9 @@
     SPTransferItem *tr = [self findTransferItemWithTargetFilename:targetFilename];
     if(tr)
     {
-        unsigned long long offset = [[[aNotification userInfo] objectForKey:@"offset"]
+        uint64_t offset = [[[aNotification userInfo] objectForKey:@"offset"]
             unsignedLongLongValue];
-        unsigned long long size = [[[aNotification userInfo] objectForKey:@"size"]
+        uint64_t size = [[[aNotification userInfo] objectForKey:@"size"]
             unsignedLongLongValue];
 
         [self willChangeValueForKey:@"transfers"];
@@ -488,7 +488,7 @@
 
 - (id)initWithNick:(NSString *)aNick
           filename:(NSString *)aFilename
-              size:(unsigned long long)aSize
+              size:(uint64_t)aSize
         hubAddress:(NSString *)aHubAddress
          direction:(int)aDirection
 {
@@ -569,7 +569,7 @@
     speed = aSpeed;
 }
 
-- (void)setOffset:(unsigned long long)anOffset
+- (void)setOffset:(uint64_t)anOffset
 {
     offset = anOffset;
 }
@@ -584,12 +584,12 @@
     return nick;
 }
 
-- (void)setSize:(unsigned long long)aSize
+- (void)setSize:(uint64_t)aSize
 {
     exactSize = aSize;
 }
 
-- (unsigned long long)size
+- (uint64_t)size
 {
     return exactSize;
 }

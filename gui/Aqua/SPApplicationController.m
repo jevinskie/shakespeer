@@ -470,7 +470,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 
 - (int)searchHub:(NSString *)aHubAddress
        forString:(NSString *)aSearchString
-            size:(unsigned long long)aSize
+            size:(uint64_t)aSize
  sizeRestriction:(int)aSizeRestriction
         fileType:(int)aFileType
 {
@@ -482,7 +482,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 }
 
 - (int)searchAllHubsForString:(NSString *)aSearchString
-                          size:(unsigned long long)aSize
+                          size:(uint64_t)aSize
                sizeRestriction:(int)aSizeRestriction
                       fileType:(int)aFileType
 {

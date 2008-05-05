@@ -16,8 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with ShakesPeer; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * $Id: filelist.h,v 1.13 2006/04/09 12:54:31 mhe Exp $
  */
 
 #ifndef _fl_h_
@@ -40,7 +38,7 @@ struct fl_dir
     LIST_HEAD(fl_file_list, fl_file) files;
     char *path;
     unsigned nfiles;
-    unsigned long long size;
+    uint64_t size;
 };
 
 typedef struct fl_file fl_file_t;
@@ -50,7 +48,7 @@ struct fl_file
     
     char *name;
     share_type_t type;
-    unsigned long long size;
+    uint64_t size;
     char *tth;
 
     fl_dir_t *dir;
@@ -59,7 +57,7 @@ struct fl_file
 fl_dir_t *fl_parse(const char *filename);
 
 typedef void (*fl_xml_file_callback_t)(const char *path, const char *tth,
-        unsigned long long size, void *user_data);
+        uint64_t size, void *user_data);
 
 typedef struct fl_xml_ctx fl_xml_ctx_t;
 struct fl_xml_ctx

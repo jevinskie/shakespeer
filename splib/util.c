@@ -58,7 +58,7 @@
 #define MAX_HUMAN_LEN 10
 #define HUMAN_SIZE_STR_TABLE_SIZE 5
 
-char *str_size_human(unsigned long long int size)
+char *str_size_human(uint64_t size)
 {
     static int str_table_index = 0;
     static char str_table[HUMAN_SIZE_STR_TABLE_SIZE][MAX_HUMAN_LEN];
@@ -68,9 +68,9 @@ char *str_size_human(unsigned long long int size)
 
     char *s = str_table[str_table_index];
 
-    if(size < 1024)
+    if(size < 1024ULL)
     {
-        snprintf(s, MAX_HUMAN_LEN, "%llu B", size);
+        snprintf(s, MAX_HUMAN_LEN, "%u B", (unsigned)size);
     }
     else if(size < 999.5*1024) /* kilobinary */
     {
@@ -87,7 +87,7 @@ char *str_size_human(unsigned long long int size)
     else /* terabinary */
     {
         snprintf(s, MAX_HUMAN_LEN, "%.1f TiB",
-                (double)size/((unsigned long long)1024*1024*1024*1024));
+                (double)size/((uint64_t)1024*1024*1024*1024));
     }
 
     return s;
@@ -564,7 +564,7 @@ int split_host_port(const char *hostport, char **host, int *port)
 
         char *e = 0;
         errno = 0;
-        unsigned long long p = strtoul(colon + 1, &e, 10);
+        uint64_t p = strtoul(colon + 1, &e, 10);
         if(colon[1] == 0 || *e != 0 || (p == ULONG_MAX && errno == ERANGE))
         {
             *port = -1;

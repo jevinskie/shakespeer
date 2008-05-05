@@ -12,7 +12,7 @@
 
 /* tiger hash result size, in bytes */
 #define TIGERSIZE 24
-#define XTIGERSIZE (24+sizeof(u_int32_t))
+#define XTIGERSIZE (24+sizeof(uint32_t))
 
 /* size of each block independently tiger-hashed, not counting leaf 0x00 prefix */
 #define BLOCKSIZE 1024
@@ -28,7 +28,7 @@
 
 typedef struct tt_context TT_CONTEXT;
 struct tt_context {
-  unsigned long long count;                   /* total blocks processed */
+  uint64_t count;                   /* total blocks processed */
   unsigned char leaf[1+BLOCKSIZE]; /* leaf in progress */
   unsigned char *block;            /* leaf data */
   unsigned char node[1+NODESIZE]; /* node scratch space */
@@ -48,7 +48,7 @@ char *tt_base32(TT_CONTEXT *ctx);
 char *tt_leafdata_base32(TT_CONTEXT *ctx);
 char *tt_leafdata_base64(TT_CONTEXT *ctx);
 void tt_destroy(TT_CONTEXT *ctx);
-u_int64_t tt_calc_block_size(u_int64_t filesize, unsigned max_levels);
+uint64_t tt_calc_block_size(uint64_t filesize, unsigned max_levels);
 
 #endif
 

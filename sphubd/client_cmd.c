@@ -109,7 +109,7 @@ static int cc_cmd_Get(void *data, int argc, char **argv)
     char *utf8_path = str_convert_to_unescaped_utf8(argv[0], cc->hub->encoding);
     return_val_if_fail(utf8_path, 0);
 
-    unsigned long long offset = strtoull(e + 1, 0, 10);
+    uint64_t offset = strtoull(e + 1, 0, 10);
     if(offset > 0)
     {
         offset--; /* offset is 1-based */
@@ -218,8 +218,8 @@ static int cc_cmd_ADCGET(void *data, int argc, char **argv)
         return -1;
     }
 
-    unsigned long long offset = strtoull(subs->subs[2], 0, 10);
-    long long bytes_to_transfer = strtoull(subs->subs[3], 0, 10);
+    uint64_t offset = strtoull(subs->subs[2], 0, 10);
+    int64_t bytes_to_transfer = strtoull(subs->subs[3], 0, 10);
     if(bytes_to_transfer == -1LL)
     {
         bytes_to_transfer = 0;
@@ -281,8 +281,8 @@ static int cc_cmd_UGetBlock(void *data, int argc, char **argv)
         return cc_send_command(cc, "$Error File Not Available|");
     }
 
-    unsigned long long offset = strtoull(subs->subs[0], 0, 10);
-    unsigned long long bytes_to_transfer = strtoull(subs->subs[1], 0, 10);
+    uint64_t offset = strtoull(subs->subs[0], 0, 10);
+    uint64_t bytes_to_transfer = strtoull(subs->subs[1], 0, 10);
 
     xerr_t *err = 0;
     int rc = cc_upload_prepare(cc, filename_utf8, offset, bytes_to_transfer, &err);

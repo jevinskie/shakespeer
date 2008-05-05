@@ -78,12 +78,12 @@
     return found;
 }
 
-- (unsigned long long)unsignedLongLongValue
+- (uint64_t)unsignedLongLongValue
 {
     NSScanner *scanner = [NSScanner scannerWithString:self];
-    long long ullValue;
+    int64_t ullValue;
     [scanner scanLongLong:&ullValue];
-    return (unsigned long long)ullValue;
+    return (uint64_t)ullValue;
 }
 
 - (NSAttributedString *)truncatedString:(NSLineBreakMode)mode

@@ -256,10 +256,10 @@
 
     if([path isEqualToString:@""])
     {
-        unsigned long long size = [[[aNotification userInfo] objectForKey:@"size"] unsignedLongLongValue];
-        unsigned long long totsize = [[[aNotification userInfo] objectForKey:@"totsize"] unsignedLongLongValue];
-        unsigned long long dupsize = [[[aNotification userInfo] objectForKey:@"dupsize"] unsignedLongLongValue];
-        unsigned long long uniqsize = totsize - dupsize;
+        uint64_t size = [[[aNotification userInfo] objectForKey:@"size"] unsignedLongLongValue];
+        uint64_t totsize = [[[aNotification userInfo] objectForKey:@"totsize"] unsignedLongLongValue];
+        uint64_t dupsize = [[[aNotification userInfo] objectForKey:@"dupsize"] unsignedLongLongValue];
+        uint64_t uniqsize = totsize - dupsize;
         unsigned percentComplete = (unsigned)(100 * ((double)size / (uniqsize ? uniqsize : 1)));
 
         NSString *msg = [NSString stringWithFormat:@"Sharing %s (%u%% hashed)",
@@ -863,7 +863,7 @@
     {
         /* convert the string to an integer and apply the suffix
         */
-        unsigned long long searchSize = [searchSizeString unsignedLongLongValue];
+        uint64_t searchSize = [searchSizeString unsignedLongLongValue];
         int suffix = [advSearchSizeSuffix indexOfSelectedItem];
         if(suffix < 0)
             suffix = 0;

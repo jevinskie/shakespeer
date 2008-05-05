@@ -34,7 +34,7 @@
  */
 user_t *user_new(const char *nick, const char *tag,
         const char *speed, const char *description,
-        const char *email, unsigned long long shared_size, hub_t *hub)
+        const char *email, uint64_t shared_size, hub_t *hub)
 {
     assert(nick);
 
@@ -82,7 +82,7 @@ user_t *user_new_from_myinfo(const char *myinfo, hub_t *hub)
     char *tag = NULL;
     char *desc = NULL;
     char *size_str = NULL;
-    unsigned long long size = 0ULL;
+    uint64_t size = 0ULL;
 
     size_t n = strcspn(myinfo, " ");
     if(n == 0 || myinfo[n] != ' ')

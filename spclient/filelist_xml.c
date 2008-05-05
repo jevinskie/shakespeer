@@ -79,7 +79,7 @@ static void fl_xml_parse_start_tag(void *user_data,
     else if(strcasecmp(el, "File") == 0)
     {
         const char *name = 0, *tth = 0;
-        unsigned long long size = 0;
+        uint64_t size = 0;
 
         int i;
         for(i = 0; attr && attr[i]; i += 2)

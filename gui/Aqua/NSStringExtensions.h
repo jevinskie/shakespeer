@@ -27,7 +27,7 @@
 - (NSString *)lastWindowsPathComponent;
 - (int)indexOfCharacter:(unichar)character fromIndex:(int)startIndex;
 - (int)occurencesOfString:(NSString *)aString;
-- (unsigned long long)unsignedLongLongValue;
+- (uint64_t)unsignedLongLongValue;
 - (NSAttributedString *)truncatedString:(NSLineBreakMode)mode;
 
 @end

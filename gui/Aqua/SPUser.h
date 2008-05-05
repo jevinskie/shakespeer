@@ -29,7 +29,7 @@
     NSAttributedString *description;
     NSAttributedString *tag;
     NSAttributedString *email;
-    unsigned long long size;
+    uint64_t size;
     BOOL isOperator;
     unsigned extraSlots;
 }
@@ -58,7 +58,7 @@
 - (NSAttributedString *)email;
 - (NSString *)nick;
 - (NSAttributedString *)displayNick;
-- (unsigned long long)size;
+- (uint64_t)size;
 - (unsigned)extraSlots;
 - (BOOL)isOperator;
 - (BOOL)compare:(SPUser *)aUser;

@@ -27,7 +27,6 @@
 
 #if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__)
 # include <sys/types.h>
-# include <sys/endian.h>
 # define U_INT64_TO_LE(x) htole64((x))
 #elif defined(__APPLE__)
 # include <machine/byte_order.h>

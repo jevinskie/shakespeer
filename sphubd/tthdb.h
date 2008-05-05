@@ -25,8 +25,8 @@
  * TTH is uptodate. */
 struct tthdb_data
 {
-    unsigned long long inode;
-    unsigned long long size;   /* filesize */ 
+    uint64_t inode;
+    uint64_t size;   /* filesize */ 
     time_t mtime;              /* modification time */
     unsigned leafdata_len;
     char leafdata[0];
@@ -35,7 +35,7 @@ struct tthdb_data
 typedef struct tth_inode tth_inode_t;
 struct tth_inode
 {
-    unsigned long long size;
+    uint64_t size;
     time_t mtime;
     char tth[41];
 };
@@ -48,11 +48,11 @@ int tthdb_update(const char *tth, struct tthdb_data *tthdata);
 struct tthdb_data *tthdb_lookup(const char *tth);
 int tthdb_remove(const char *tth);
 
-struct tthdb_data *tthdb_lookup_by_inode(unsigned long long inode);
-char *tthdb_get_tth_by_inode(unsigned long long inode);
+struct tthdb_data *tthdb_lookup_by_inode(uint64_t inode);
+char *tthdb_get_tth_by_inode(uint64_t inode);
 
-int tthdb_remove_inode(unsigned long long inode);
-tth_inode_t *tthdb_lookup_inode(unsigned long long inode);
+int tthdb_remove_inode(uint64_t inode);
+tth_inode_t *tthdb_lookup_inode(uint64_t inode);
 
 #endif
 

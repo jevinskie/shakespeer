@@ -103,14 +103,14 @@ int tthdb_remove(const char *tth)
     return 0;
 }
 
-int tthdb_remove_inode(unsigned long long inode)
+int tthdb_remove_inode(uint64_t inode)
 {
     return_val_if_fail(tth_db && tth_inode_db, -1);
 
     DBT key;
     memset(&key, 0, sizeof(DBT));
     key.data = &inode;
-    key.size = sizeof(unsigned long long);
+    key.size = sizeof(uint64_t);
 
     int rc = tth_inode_db->del(tth_inode_db, NULL, &key, 0);
     if(rc != 0)
@@ -154,7 +154,7 @@ static int tthdb_put(const char *tth, struct tthdb_data *tthdata, int flags)
         memset(&val, 0, sizeof(DBT));
 
         key.data = &tthdata->inode;
-        key.size = sizeof(unsigned long long);
+        key.size = sizeof(uint64_t);
 
         tth_inode_t ti;
         ti.size = tthdata->size;
@@ -233,7 +233,7 @@ struct tthdb_data *tthdb_lookup(const char *tth)
     return NULL;
 }
 
-tth_inode_t *tthdb_lookup_inode(unsigned long long inode)
+tth_inode_t *tthdb_lookup_inode(uint64_t inode)
 {
     return_val_if_fail(tth_db && tth_inode_db, NULL);
 
@@ -242,7 +242,7 @@ tth_inode_t *tthdb_lookup_inode(unsigned long long inode)
     memset(&val, 0, sizeof(DBT));
 
     key.data = &inode;
-    key.size = sizeof(unsigned long long);
+    key.size = sizeof(uint64_t);
 
     int rc = tth_inode_db->get(tth_inode_db, NULL, &key, &val, 0);
     if(rc == 0)
@@ -257,7 +257,7 @@ tth_inode_t *tthdb_lookup_inode(unsigned long long inode)
     return NULL;
 }
 
-struct tthdb_data *tthdb_lookup_by_inode(unsigned long long inode)
+struct tthdb_data *tthdb_lookup_by_inode(uint64_t inode)
 {
     tth_inode_t *ti = tthdb_lookup_inode(inode);
     if(ti)
@@ -268,7 +268,7 @@ struct tthdb_data *tthdb_lookup_by_inode(unsigned long long inode)
     return NULL;
 }
 
-char *tthdb_get_tth_by_inode(unsigned long long inode)
+char *tthdb_get_tth_by_inode(uint64_t inode)
 {
     tth_inode_t *ti = tthdb_lookup_inode(inode);
     if(ti)
@@ -281,8 +281,8 @@ char *tthdb_get_tth_by_inode(unsigned long long inode)
 
 #include "unit_test.h"
 
-int test_add(unsigned long long inode,
-        unsigned long long size, time_t mtime,
+int test_add(uint64_t inode,
+        uint64_t size, time_t mtime,
         char *tth,
         unsigned leafdata_len, void *leafdata)
 {
@@ -303,8 +303,8 @@ int test_add(unsigned long long inode,
 
 struct
 {
-    unsigned long long inode;
-    unsigned long long size;
+    uint64_t inode;
+    uint64_t size;
     time_t mtime;
     char *tth;
     unsigned leafdata_len;
