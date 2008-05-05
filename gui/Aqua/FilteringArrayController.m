@@ -1,6 +1,12 @@
 
-#import "FilteringArrayController.h"
 #import <Foundation/NSKeyValueObserving.h>
+#import "FilteringArrayController.h"
+#import "NSStringExtensions.h"
+
+@interface FilteringArrayController (Private)
+// check if the string matches all the terms in the array. (logical AND-search)
++ (BOOL)searchStrings:(NSArray *)searchStrings matchesTerms:(NSArray *)terms;
+@end
 
 
 @implementation FilteringArrayController
@@ -14,11 +20,8 @@
 
 - (NSArray *)arrangeObjects:(NSArray *)objects
 {
-    
-    if(searchString == nil ||
-            [searchString isEqualToString:@""] ||
-            searchKeys == nil ||
-            [searchKeys count] == 0)
+    if(!searchString || [[searchString stringWithoutWhitespace] length] == 0 ||
+       !searchKeys || [searchKeys count] == 0)
     {
         return [super arrangeObjects:objects];   
     }
@@ -31,52 +34,90 @@
      */
 
     NSMutableArray *matchedObjects = [NSMutableArray arrayWithCapacity:[objects count]];
+  
+    // split up the search string in terms, in order to do a OR-search.
+    NSArray *searchTerms = [searchString componentsSeparatedByString:@" "];
     
-    NSEnumerator *oEnum = [objects objectEnumerator];
-    id item;	
-    while((item = [oEnum nextObject]))
+    id currentItem;
+    NSEnumerator *unfilteredObjectsEnumerator = [objects objectEnumerator];
+    
+    while((currentItem = [unfilteredObjectsEnumerator nextObject]))
     {
-        // Use of local autorelease pool here is probably overkill,
-        // but may be useful in a larger-scale application.
+        // we're allocing and autoreleasing tons of objects in this scope,
+        // so having our own pool is good to avoid defragmenting memory.
         NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-        NSEnumerator *e = [searchKeys objectEnumerator];
+        // every key usually corresponds to a table column.
+        NSEnumerator *keysEnumerator = [searchKeys objectEnumerator];
         NSString *searchKey;
-        while((searchKey = [e nextObject]))
-        {
-            NSString *searchValue = [item valueForKeyPath:searchKey];
-            if([searchValue isKindOfClass:[NSAttributedString class]])
-            {
-                searchValue = [(NSAttributedString *)searchValue string];
-            }
-            if([searchValue rangeOfString:searchString options:NSCaseInsensitiveSearch].location != NSNotFound)
-            {
-                [matchedObjects addObject:item];
-                break;
-            }
+        
+        // let's start out by cleaning up the array. we might have a bunch of attributed (styled)
+        // strings, so get all raw strings before we do the search.
+        NSMutableArray *cleanSearchTerms = [NSMutableArray arrayWithCapacity:[searchKeys count]];
+        while((searchKey = [keysEnumerator nextObject])) {
+            NSString *cellValue = [currentItem valueForKeyPath:searchKey];
+            if([cellValue isKindOfClass:[NSAttributedString class]])
+                cellValue = [(NSAttributedString *)cellValue string];
+            
+            [cleanSearchTerms addObject:cellValue];
         }
+            
+        // now do the actual AND-search on these terms, with all the given keys as search space.
+        if ([FilteringArrayController searchStrings:cleanSearchTerms matchesTerms:searchTerms])
+            [matchedObjects addObject:currentItem];
+        
         [pool release];
     }
     return [super arrangeObjects:matchedObjects];
 }
 
++ (BOOL)searchStrings:(NSArray *)searchStrings matchesTerms:(NSArray *)terms
+{
+    NSEnumerator *termsEnumerator = [terms objectEnumerator];
+    NSString *curTerm = nil;
+    while ((curTerm = [termsEnumerator nextObject])) {
+        // ignore empty terms
+        if ([curTerm length] == 0)
+            continue;
+      
+        NSEnumerator *searchStringEnumerator = [searchStrings objectEnumerator];
+        NSString *currentSearchString = nil;
+        BOOL termFound = NO;
+        while ((currentSearchString = [searchStringEnumerator nextObject])) {
+            if ([currentSearchString rangeOfString:curTerm options:NSCaseInsensitiveSearch].location != NSNotFound) {
+                // found the current term in this string.
+                termFound = YES;
+                break;
+            }
+        }
+        
+        if (termFound)
+            // we had a match, so let's continue searching for the other terms.
+            continue;
+        
+        // we couldn't find the current search term in any of the keys, so no match.
+        return NO;
+    }
+  
+    // phew, passed all tests!
+    return YES;
+}
 
-//  - dealloc:
 - (void)dealloc
 {
-    [self setSearchString:nil];
-    [self setSearchKeys:nil];
+    [searchString release];
+    searchString = nil;
+    [searchKeys release];
+    searchKeys = nil;
+    
     [super dealloc];
 }
 
-
-// - searchString:
 - (NSString *)searchString
 {
     return searchString;
 }
 
-// - setSearchString:
 - (void)setSearchString:(NSString *)newSearchString
 {
     if (searchString != newSearchString)

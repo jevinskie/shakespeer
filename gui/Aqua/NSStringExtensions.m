@@ -102,6 +102,11 @@
     return truncatedString; /* not autoreleased */
 }
 
+- (NSString *)stringWithoutWhitespace
+{
+    return [self stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+}
+
 @end
 
 @implementation NSMutableAttributedString (ShakesPeerExtensions)

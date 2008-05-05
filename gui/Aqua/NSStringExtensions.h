@@ -30,6 +30,7 @@
 - (int)occurencesOfString:(NSString *)aString;
 - (uint64_t)unsignedLongLongValue;
 - (NSAttributedString *)truncatedString:(NSLineBreakMode)mode;
+- (NSString *)stringWithoutWhitespace;
 
 @end
 
