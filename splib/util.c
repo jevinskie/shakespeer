@@ -50,7 +50,7 @@
 #include "rx.h"
 
 #ifndef COREDUMPS_ENABLED
-# define COREDUMPS_ENABLED 1
+# define COREDUMPS_ENABLED 0
 #endif
 
 #define MAX_HUMAN_LEN 10
