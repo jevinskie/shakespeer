@@ -22,8 +22,8 @@ define unpack
 	mkdir ${1}-install
 	cd ${1}-build-${2} && \
 	{ \
-          tar zxvf ../${1}-${2}.tar.gz || \
-	  (gzcat ../${1}-${2}.tar.gz | tar xvf - ); \
+          tar zxf ../${1}-${2}.tar.gz || \
+	  (gzcat ../${1}-${2}.tar.gz | tar xf - ); \
 	}
 endef
 
@@ -88,9 +88,9 @@ bzip2-build-${BZ2_VER}/stamp: bzip2-${BZ2_VER}.tar.gz
 	    ${MAKE} install PREFIX=$$cwd/bzip2-install
 	touch bzip2-build-${BZ2_VER}/stamp
 
-DB_VER=4.4.20.NC
-DB_URL=http://downloads.sleepycat.com/db-${DB_VER}.tar.gz
-DB_MD5=afd9243ea353bbaa04421488d3b37900
+DB_VER=4.5.20.NC
+DB_URL=http://download-uk.oracle.com/berkeley-db/db-${DB_VER}.tar.gz
+DB_MD5=1bfa6256f8d546b97bef1f448ab09875
 db-${DB_VER}.tar.gz:
 	$(call download,db,${DB_VER},${DB_URL},${DB_MD5})
 db: db-build-${DB_VER}/stamp
@@ -101,6 +101,7 @@ db-build-${DB_VER}/stamp: db-${DB_VER}.tar.gz
 	    ../dist/configure --disable-shared \
 	                      --enable-static \
 			      --disable-queue \
+			      --disable-verify \
 			      --disable-statistics \
 			      --disable-replication \
 	                      --disable-cryptography \
@@ -112,7 +113,7 @@ ifneq (${HAS_BDB},yes)
 EXTERN_DEPENDS+=db
 BDB_CFLAGS=-I${TOP}/db-install/include
 BDB_LDFLAGS=-L${TOP}/db-install/lib
-BDB_LIBS=-ldb-4.4
+BDB_LIBS=-ldb-4.5
 endif
 
 ifneq (${HAS_BZ2},yes)
