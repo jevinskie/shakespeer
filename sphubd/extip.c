@@ -31,6 +31,7 @@
 
 #include <event.h>
 #include <evhttp.h>
+#include <evdns.h>
 
 #include "dstring_url.h"
 #include "io.h"
@@ -75,6 +76,8 @@ static bool use_static = false; /* true if manually set, disables automatic dete
 
 static void extip_update_cache(void);
 static void extip_response_handler(struct evhttp_request *req, void *data);
+static void extip_send_lookup_request(struct lookup_info *info);
+static void extip_schedule_update(struct lookup_info *info);
 
 /* Pass ip = NULL to disable static (manual) IP */
 void extip_set_static(const char *ip)
@@ -329,26 +332,79 @@ static char *extip_detect_from_buf(const char *buf)
     return ip;
 }
 
-static void extip_send_lookup_request(struct lookup_info *info)
+static void extip_try_next_host(struct lookup_info *info)
 {
+	INFO("failed to lookup external IP, trying another host");
+
+	/* Try the next host in the list. */
+	info->current_index++;
+	info->current_index %= num_lookup_hosts;
+
+	if(info->current_index == info->start_index)
+	{
+		/* We're back to the first host. All lookup hosts
+		 * have failed. Wait a while until we try again.
+		 */
+		WARNING("All lookup hosts failed, sleeping");
+		extip_schedule_update(info);
+	}
+	else
+	{
+		/* There is another host to try. Do it directly. */
+		extip_send_lookup_request(info);
+	}
+}
+
+static void extip_resolve_event(int result, char type, int count, int ttl,
+	void *addresses, void *user_data)
+{
+	struct lookup_info *info = user_data;
+	return_if_fail(info);
+
 	const char *host = lookup_hosts[info->current_index].host;
 	const char *uri = lookup_hosts[info->current_index].uri;
 
-	INFO("sending lookup request to %s", host);
+	if(result != DNS_ERR_NONE)
+	{
+		WARNING("Failed to lookup '%s': %s", host, evdns_err_to_string(result));
+		extip_try_next_host(info);
+		return;
+	}
+
+	INFO("sending lookup request to %s%s", host, uri);
 
 	struct evhttp_request *req =
 		evhttp_request_new(extip_response_handler, info);
 	return_if_fail(req);
 
+	DEBUG("setting headers for HTTP connection");
 	evhttp_add_header(req->output_headers, "Connection", "close");
 	evhttp_add_header(req->output_headers, "Host", host);
 	evhttp_add_header(req->output_headers,
 		"User-Agent", PACKAGE "/" VERSION);
 
-	struct evhttp_connection *evcon = evhttp_connection_new(host, 80);
+	char ip_address[16];
+	inet_ntop(AF_INET, &((char *)addresses)[0], ip_address, sizeof(ip_address));
+	DEBUG("creating new connection to [%s] port 80", ip_address);
+	struct evhttp_connection *evcon = evhttp_connection_new(ip_address, 80);
 	return_if_fail(evcon);
 
-	evhttp_make_request(evcon, req, EVHTTP_REQ_GET, uri);
+	DEBUG("sending HTTP request");
+	if(evhttp_make_request(evcon, req, EVHTTP_REQ_GET, uri) != 0)
+		extip_try_next_host(info);
+}
+
+static void extip_send_lookup_request(struct lookup_info *info)
+{
+	const char *host = lookup_hosts[info->current_index].host;
+
+	INFO("resolving [%s]", host);
+	int rc = evdns_resolve_ipv4(host, 0, extip_resolve_event, info);
+	if(rc != DNS_ERR_NONE)
+	{
+		WARNING("Failed to lookup '%s': %s", host, evdns_err_to_string(rc));
+		extip_try_next_host(info);
+	}
 }
 
 static void extip_run_update(int fd, short why, void *data)
@@ -393,24 +449,7 @@ static void extip_response_handler(struct evhttp_request *req, void *data)
 	{
 		/* Either the parsing failed, or we got an error response. */
 
-		INFO("failed to lookup external IP, trying another host");
-
-		/* Try the next host in the list. */
-		info->current_index++;
-		info->current_index %= num_lookup_hosts;
-
-		if(info->current_index == info->start_index)
-		{
-			/* We're back to the first host. All lookup hosts
-			 * have failed. Wait a while until we try again.
-			 */
-			extip_schedule_update(info);
-		}
-		else
-		{
-			/* There is another host to try. Do it directly. */
-			extip_send_lookup_request(info);
-		}
+		extip_try_next_host(info);
 	}
 	else
 	{
