@@ -41,6 +41,7 @@ NSString *SPPrefsHublistURL = @"hublistURL";
 NSString *SPPrefsKeepServerRunning = @"keepServerRunning";
 NSString *SPPrefsConnectionMode = @"connectionMode";
 NSString *SPPrefsLogLevel = @"logLevel";
+NSString *SPPrefsSessionRestore = @"sessionRestore";
 NSString *SPPrefsAutodetectIPAddress = @"autodetectIPAddress";
 NSString *SPPrefsExternalIPAddress = @"externalIPAddress";
 NSString *SPPrefsAutoCheckUpdates = @"autoCheckUpdates";

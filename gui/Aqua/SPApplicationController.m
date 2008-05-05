@@ -108,6 +108,7 @@ static SPApplicationController *mySharedApplicationController = nil;
             [NSNumber numberWithInt:100], SPPrefsDrawerHeight,
             [NSNumber numberWithBool:NO], SPPrefsRequireOpenSlots,
             [NSNumber numberWithBool:NO], SPPrefsRequireTTH,
+			[NSNumber numberWithBool:YES], SPPrefsSessionRestore,
             nil];
         [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
 
@@ -807,6 +808,12 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
         sp_send_shutdown(sp);
         /* 'kill -0 pid' until sphubd is dead, with timeout */
     }
+	
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsSessionRestore] == NO) {
+		// if the pref for autconnecting to last connected hubs is off, make sure 
+		// we clear any currently cached list on shutdown.
+		[[NSUserDefaults standardUserDefaults] setObject:[NSArray array] forKey:SPPrefsLastConnectedHubs];
+	}
 }
 
 #pragma mark -

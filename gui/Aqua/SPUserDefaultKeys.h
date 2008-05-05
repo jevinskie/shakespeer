@@ -41,6 +41,7 @@ extern NSString *SPPrefsHublistURL;
 extern NSString *SPPrefsKeepServerRunning;
 extern NSString *SPPrefsConnectionMode;
 extern NSString *SPPrefsLogLevel;
+extern NSString *SPPrefsSessionRestore;
 extern NSString *SPPrefsAutodetectIPAddress;
 extern NSString *SPPrefsExternalIPAddress;
 extern NSString *SPPrefsAutoCheckUpdates;

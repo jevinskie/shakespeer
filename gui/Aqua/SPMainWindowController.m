@@ -258,8 +258,10 @@
 
 - (void)syncHubsToDisk
 {
-    // saves the array of addresses to prefs, so we can easily reconnect to them at the next start.
-    [[NSUserDefaults standardUserDefaults] setObject:[hubs allKeys] forKey:SPPrefsLastConnectedHubs];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsSessionRestore]) {
+        // saves the array of addresses to prefs, so we can easily reconnect to them at the next start.
+        [[NSUserDefaults standardUserDefaults] setObject:[hubs allKeys] forKey:SPPrefsLastConnectedHubs];
+    }
 }
 
 - (void)restoreLastHubSession
