@@ -29,7 +29,7 @@ echo "Creating disk image $VOL"
 trap 'rm -f $TMPDMG; exit 1' 2 3 15
 
 # create a disk image
-hdiutil create -megabytes 20 $TMPDMG -layout NONE
+hdiutil create -megabytes 32 $TMPDMG -layout NONE
 # associate a device with this but don't mount it
 MYDEV=`hdid -nomount $TMPDMG`
 test -n "$MYDEV" || die "failed to attach disk image"
@@ -51,9 +51,6 @@ echo "+ copying ShakesPeer.app"
 /bin/cp -R $APP "$root"
 
 /bin/mkdir -p "$frameworks" || die "failed to create directory Frameworks"
-
-strip "$resources/sphubd" || die "failed to strip sphubd"
-strip "$resources/sphashd" || die "failed to strip sphashd"
 
 echo "+ copying License.txt"
 /bin/cp "$top_dir/License.txt" "$root" || die "failed to copy License.txt to disk image"

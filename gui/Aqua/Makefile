@@ -97,11 +97,13 @@ app_bundle.stamp: ShakesPeer
 	cp -f Resources/Images/shakespeer.icns $(RES)
 	cp -f ../../sphubd/sphubd $(RES)
 	cp -f ../../sphubd/sphashd $(RES)
+	strip $(RES)/sphubd
+	strip $(RES)/sphashd
 	cp -f ShakesPeer ShakesPeer.app/Contents/MacOS
 	test -d $(FWDIR)/Growl.framework || \
 		cp -RP Growl.framework $(FWDIR)
 	for a in checkpoint dump load recover upgrade verify stat; do \
-		cp -f ../../db-install/bin/db_$$a  $(RES) ; \
+		cp -f ../../db-install/bin/db_$$a $(RES) ; \
 	done
 
 install:
