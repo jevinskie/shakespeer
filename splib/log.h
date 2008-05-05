@@ -16,12 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with ShakesPeer; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */                                                                                      
+ */
 
 #ifndef _log_h_
 #define _log_h_
 
 #include <sys/types.h>
+#include <stdarg.h>
 #include <unistd.h>
 
 enum
@@ -38,6 +39,7 @@ int sp_log_init(const char *workdir, const char *prefix);
 void sp_log_set_level(const char *level);
 const char *sp_log_get_level(void);
 void sp_log_close(void);
+void sp_vlog(int level, const char *fmt, va_list ap);
 void sp_log(int level, const char *fmt, ...);
 
 #undef g_debug
@@ -51,6 +53,11 @@ void sp_log(int level, const char *fmt, ...);
 
 #undef g_warning
 #define g_warning(fmt, ...)  sp_log(LOG_LEVEL_WARNING, "[%d] (%s:%i) " fmt, getpid(), __func__, __LINE__, ## __VA_ARGS__)
+
+#define DEBUG g_debug
+#define INFO g_info
+#define WARNING g_warning
+#define ERROR g_error
 
 #define return_val_if_fail(cond, retval) do {           \
         if(!(cond)) { g_warning("assert failed: " #cond); \

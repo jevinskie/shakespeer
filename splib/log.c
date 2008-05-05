@@ -32,7 +32,7 @@
 #include <stdarg.h>
 
 #include <sys/time.h>
-/* #include <event.h> */
+#include <event.h>
 
 #include "log.h"
 #include "util.h"
@@ -82,9 +82,7 @@ const char *sp_log_get_level(void)
         return "none";
 }
 
-static void sp_glog_func(const char *log_domain, int log_level,
-        const char *message,
-        void *user_data)
+static void sp_glog_func(int log_level, const char *message)
 {
     if(log_level > max_log_level)
         return;
@@ -115,15 +113,21 @@ static void sp_glog_func(const char *log_domain, int log_level,
     }
 }
 
-void sp_log(int level, const char *fmt, ...)
+void sp_vlog(int level, const char *fmt, va_list ap)
 {
     char *msg;
+    vasprintf(&msg, fmt, ap);
+    sp_glog_func(level, msg);
+    free(msg);
+}
+
+void sp_log(int level, const char *fmt, ...)
+{
     va_list ap;
 
     va_start(ap, fmt);
-    vasprintf(&msg, fmt, ap);
-    sp_glog_func(NULL, level, msg, NULL);
-    free(msg);
+    sp_vlog(level, fmt, ap);
+    va_end(ap);
 }
 
 static void sp_log_rotate(const char *logfile)
@@ -181,7 +185,6 @@ static void sp_log_rotate(const char *logfile)
     }
 }
 
-#if 0
 static void event_log_callback(int severity, const char *msg)
 {
     int log_level;
@@ -201,9 +204,8 @@ static void event_log_callback(int severity, const char *msg)
             log_level = LOG_LEVEL_ERROR;
             break;
     }
-    sp_glog_func(NULL, log_level, msg, logfp);
+    sp_glog_func(log_level, msg);
 }
-#endif
 
 static int sp_log_reinit(void)
 {
@@ -215,7 +217,7 @@ static int sp_log_reinit(void)
     fprintf(logfp, "opened logfile '%s'\n", logfile);
     if(logfp)
     {
-        /* event_set_log_callback(event_log_callback); */
+        event_set_log_callback(event_log_callback);
         
         setvbuf(logfp, NULL, _IOLBF, 0);
     }
