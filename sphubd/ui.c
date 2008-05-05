@@ -628,6 +628,7 @@ static int ui_cb_set_port(ui_t *ui, int port)
     {
         if(start_client_listener(port) == 0 && start_search_listener(port) == 0)
         {
+	    hub_set_passive(false);
             global_port = port;
             ui_send_status_message(NULL, NULL, "Using port %i", port);
         }
