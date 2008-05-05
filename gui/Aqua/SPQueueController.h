@@ -124,6 +124,8 @@
     NSMutableArray *rootItems;
 }
 
++ (id)sharedQueueController;
+
 // called when the user removes a download 
 - (IBAction)removeFromQueue:(id)sender;
 

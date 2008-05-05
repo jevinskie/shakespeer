@@ -609,9 +609,8 @@
 
 - (IBAction)openDownloads:(id)sender
 {
-    if (!queueController) {
-        queueController = [[SPQueueController alloc] init];
-    }
+    if (!queueController)
+        queueController = [SPQueueController sharedQueueController];
     [sideBar addItem:queueController];
     [sideBar displayItem:queueController];
 }

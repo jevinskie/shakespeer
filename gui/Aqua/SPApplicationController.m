@@ -1,6 +1,5 @@
-/* vim: ft=objc
- *
- * Copyright 2005 Martin Hedenfalk <martin@bzero.se>
+/*
+ * Copyright 2005-2007 Martin Hedenfalk <martin@bzero.se>
  *
  * This file is part of ShakesPeer.
  *
@@ -35,6 +34,7 @@
 #import "SPMessagePanel.h"
 #import "SPLog.h"
 #import "SPMainWindowController.h"
+#import "SPQueueController.h"
 #import "SPClientBridge.h"
 #import "SPNotificationNames.h"
 #import "SPUserDefaultKeys.h"
@@ -316,6 +316,10 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
     else {
         mainWindowController = [SPMainWindowController sharedMainWindowController];
 
+        /* Must initialize the queue controller because it may get queue notifications
+         * during startup of the backend. */
+        [SPQueueController sharedQueueController];
+
 	[initMessage setStringValue:@"Initializing databases..."];
 
         /* add the stored recent hubs to the menu */
@@ -436,7 +440,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 
 - (void)addRecentHub:(NSString *)anAddress
 {
-    /* The list of recent hubs has a limit defined by MAC_RECENT_HUBS at
+    /* The list of recent hubs has a limit defined by MAX_RECENT_HUBS at
     the top of this file. The actual menu (in MainMenu.nib) also has
     a "Clear menu" item and a separator at the very bottom. New items
     are always inserted at the top (index 0), as in the recent items menu

@@ -1,6 +1,5 @@
-/* vim: ft=objc
- *
- * Copyright 2005 Martin Hedenfalk <martin@bzero.se>
+/*
+ * Copyright 2005-2007 Martin Hedenfalk <martin@bzero.se>
  *
  * This file is part of ShakesPeer.
  *
@@ -32,6 +31,15 @@
 #include "util.h"
 
 @implementation SPQueueController
+
++ (id)sharedQueueController
+{
+        static SPQueueController *qc = nil;
+        
+        if(qc == nil)
+                qc = [[SPQueueController alloc] init];
+        return qc;
+}
 
 - (id)init
 {
