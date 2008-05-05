@@ -23,6 +23,7 @@
 
 #include <ifaddrs.h>
 
+#include <stdbool.h>
 #include <string.h>
 #include <time.h>
 #include <errno.h>
@@ -40,7 +41,7 @@
 static char *external_ip = NULL;
 static char *static_ip = NULL;
 static time_t external_ip_lookup_time = 0;
-static int use_static = 0; /* 1 if manually set, disables automatic detection */
+static bool use_static = false; /* 1 if manually set, disables automatic detection */
 
 static void extip_update_cache(void);
 char *extip_detect(const char *address);
@@ -53,7 +54,7 @@ void extip_set_static(const char *ip)
 
     if(ip == NULL)
     {
-        use_static = 0;
+        use_static = false;
     }
     else
     {
@@ -61,12 +62,12 @@ void extip_set_static(const char *ip)
         if(inet_aton(ip, &tmp) == 0)
         {
             g_warning("invalid IP address [%s], ignored", ip);
-            use_static = 0;
+            use_static = false;
         }
         else
         {
             static_ip = strdup(ip);
-            use_static = 1;
+            use_static = true;
         }
     }
 }
@@ -184,24 +185,24 @@ static const char *extip_check_local_hub(struct in_addr *local,
     return NULL;
 }
 
-/* Returns 1 if the address is private according to RFC1918.
+/* Returns true if the address is private according to RFC1918.
  *
  *  10.0.0.0        -   10.255.255.255  (10/8 prefix)
  *  172.16.0.0      -   172.31.255.255  (172.16/12 prefix)
  *  192.168.0.0     -   192.168.255.255 (192.168/16 prefix)
  */
-static int addr_is_private(struct in_addr *ip)
+static bool addr_is_private(struct in_addr *ip)
 {
     unsigned long int addr = htonl(ip->s_addr);
 
     if((addr & 0xFFFF0000) == 0xc0A80000)
-        return 1;
+        return true;
     if((addr & 0xFFF00000) == 0xAC100000)
-        return 1;
+        return true;
     if((addr & 0xFF000000) == 0x0A000000)
-        return 1;
+        return true;
 
-    return 0;
+    return false;
 }
 
 /* returned string should NOT be free'd by caller */
@@ -336,14 +337,14 @@ char *extip_detect(const char *address)
 
 #include "unit_test.h"
 
-static int address_is_private(const char *address)
+static bool address_is_private(const char *address)
 {
     struct in_addr inp;
 
     if(inet_aton(address, &inp) == 0)
     {
         g_warning("invalid IPv4 address: [%s]", address);
-        return 1;
+        return true;
     }
 
     return addr_is_private(&inp);
@@ -356,18 +357,18 @@ int main(void)
     /*
      * address_is_private
      */
-    fail_unless( address_is_private("1.2.3.4") == 0 );
-    fail_unless( address_is_private("10.2.3.4") == 1 );
-    fail_unless( address_is_private("192.169.0.1") == 0 );
-    fail_unless( address_is_private("192.168.0.1") == 1 );
-    fail_unless( address_is_private("192.167.192.168") == 0 );
-    fail_unless( address_is_private("172.16.192.168") == 1 );
-    fail_unless( address_is_private("172.31.192.168") == 1 );
-    fail_unless( address_is_private("171.31.0.0") == 0 );
-    fail_unless( address_is_private("172.32.192.168") == 0 );
-    fail_unless( address_is_private("172.15.255.255") == 0 );
-    fail_unless( address_is_private("172.15.255.255") == 0 );
-    fail_unless( address_is_private("172.22.255.1") == 1 );
+    fail_unless( address_is_private("1.2.3.4") == false );
+    fail_unless( address_is_private("10.2.3.4") == true );
+    fail_unless( address_is_private("192.169.0.1") == false );
+    fail_unless( address_is_private("192.168.0.1") == true );
+    fail_unless( address_is_private("192.167.192.168") == false );
+    fail_unless( address_is_private("172.16.192.168") == true );
+    fail_unless( address_is_private("172.31.192.168") == true );
+    fail_unless( address_is_private("171.31.0.0") == false );
+    fail_unless( address_is_private("172.32.192.168") == false );
+    fail_unless( address_is_private("172.15.255.255") == false );
+    fail_unless( address_is_private("172.15.255.255") == false );
+    fail_unless( address_is_private("172.22.255.1") == true );
 
     char *ip = extip_detect_from_buf("192.0.34.166\n");
     fail_unless(ip);
