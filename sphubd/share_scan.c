@@ -84,7 +84,7 @@ static void share_scan_add_file(share_scan_state_t *ctx,
     /* g_debug("adding file [%s], inode %llu", f->path, f->inode); */
 
     /* is it already hashed? */
-    int already_hashed = 0;
+    bool already_hashed = false;
     tth_inode_t *ti = tthdb_lookup_inode(f->inode);
 
     if(ti == NULL)
@@ -133,7 +133,7 @@ static void share_scan_add_file(share_scan_state_t *ctx,
                         td->inode = f->inode;
                         td->mtime = f->mtime;
                         tthdb_update(ti->tth, td);
-                        already_hashed = 1;
+                        already_hashed = true;
                     }
                 }
             }
@@ -150,7 +150,7 @@ static void share_scan_add_file(share_scan_state_t *ctx,
                 else
                 {
                     /* hashed */
-                    already_hashed = 1;
+                    already_hashed = true;
                 }
             }
         }
