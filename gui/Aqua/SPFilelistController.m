@@ -107,7 +107,7 @@
     NSString *path = [[NSString alloc] initWithUTF8String:dir->path];
 
     fl_file_t *file;
-    LIST_FOREACH(file, &dir->files, link) {
+    TAILQ_FOREACH(file, &dir->files, link) {
         NSMutableDictionary *item = [NSMutableDictionary dictionary];
 
         [item setObject:path forKey:@"Path"];

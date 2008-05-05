@@ -39,7 +39,7 @@ static void queue_resolve_directory_recursively(const char *nick,
         unsigned *nfiles_p)
 {
     fl_file_t *file;
-    LIST_FOREACH(file, &root->files, link)
+    TAILQ_FOREACH(file, &root->files, link)
     {
         char *target;
         asprintf(&target, "%s/%s", directory, file->name);

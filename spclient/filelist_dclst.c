@@ -45,6 +45,7 @@ static fl_dir_t *fl_parse_dclst_recursive(FILE *fp, char **saved,
         int level, char *path)
 {
     fl_dir_t *dir = calloc(1, sizeof(fl_dir_t));
+    TAILQ_INIT(&dir->files);
     dir->path = strdup(path ? path : "");
 
     while(1)
@@ -108,7 +109,7 @@ static fl_dir_t *fl_parse_dclst_recursive(FILE *fp, char **saved,
         }
 
         dir->nfiles++;
-        LIST_INSERT_HEAD(&dir->files, file, link);
+        TAILQ_INSERT_TAIL(&dir->files, file, link);
 
         free(line);
     }

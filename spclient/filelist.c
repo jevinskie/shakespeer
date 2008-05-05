@@ -115,10 +115,10 @@ void fl_free_dir(fl_dir_t *dir)
     if(dir)
     {
         fl_file_t *f, *next;
-        for(f = LIST_FIRST(&dir->files); f; f = next)
+        for(f = TAILQ_FIRST(&dir->files); f; f = next)
         {
-            next = LIST_NEXT(f, link);
-            LIST_REMOVE(f, link);
+            next = TAILQ_NEXT(f, link);
+            TAILQ_REMOVE(&dir->files, f, link);
             fl_free_file(f);
         }
         free(dir->path);
@@ -135,7 +135,7 @@ fl_dir_t *fl_find_directory(fl_dir_t *root, const char *directory)
         return root;
 
     fl_file_t *file;
-    LIST_FOREACH(file, &root->files, link)
+    TAILQ_FOREACH(file, &root->files, link)
     {
         if(file->dir &&
            strncmp(file->dir->path, directory, strlen(file->dir->path)) == 0)

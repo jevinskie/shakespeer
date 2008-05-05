@@ -52,6 +52,7 @@ static void fl_xml_parse_start_tag(void *user_data,
         else
         {
             fl_dir_t *dir = calloc(1, sizeof(fl_dir_t));
+	    TAILQ_INIT(&dir->files);
             asprintf(&dir->path, "%s%s%s",
                     curdir->path, *curdir->path ? "\\" : "", dirname);
 
@@ -62,7 +63,7 @@ static void fl_xml_parse_start_tag(void *user_data,
                 f->type = SHARE_TYPE_DIRECTORY;
                 f->dir = dir;
 
-                LIST_INSERT_HEAD(&curdir->files, f, link);
+                TAILQ_INSERT_TAIL(&curdir->files, f, link);
                 curdir->nfiles++;
             }
 
@@ -113,7 +114,7 @@ static void fl_xml_parse_start_tag(void *user_data,
             f->size = size;
             f->tth = xstrdup(tth);
 
-            LIST_INSERT_HEAD(&curdir->files, f, link);
+            TAILQ_INSERT_TAIL(&curdir->files, f, link);
 
             curdir->nfiles++;
             curdir->size += f->size;
@@ -161,6 +162,7 @@ fl_xml_ctx_t *fl_xml_prepare_file(const char *filename,
     return_val_if_fail(fp, NULL);
 
     fl_dir_t *root = calloc(1, sizeof(fl_dir_t));
+    TAILQ_INIT(&root->files);
     root->path = strdup("");
 
     fl_xml_ctx_t *ctx = calloc(1, sizeof(fl_xml_ctx_t));

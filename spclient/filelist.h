@@ -32,7 +32,7 @@ struct fl_dir
 {
     LIST_ENTRY(fl_dir) link;
 
-    LIST_HEAD(fl_file_list, fl_file) files;
+    TAILQ_HEAD(fl_file_list, fl_file) files;
     char *path;
     unsigned nfiles;
     uint64_t size;
@@ -41,7 +41,7 @@ struct fl_dir
 typedef struct fl_file fl_file_t;
 struct fl_file
 {
-    LIST_ENTRY(fl_file) link;
+    TAILQ_ENTRY(fl_file) link;
     
     char *name;
     share_type_t type;
