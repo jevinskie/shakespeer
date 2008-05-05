@@ -73,11 +73,6 @@ void cc_free(cc_t *cc)
                 INFO("close(): %s", strerror(errno));
             }
         }
-        else if(cc->leafdata)
-        {
-            free(cc->leafdata);
-            cc->leafdata = NULL;
-        }
 
         if(cc->slot_state == SLOT_EXTRA)
         {

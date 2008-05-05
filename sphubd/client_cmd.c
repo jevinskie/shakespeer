@@ -198,7 +198,7 @@ static int cc_cmd_ADCGET(void *data, int argc, char **argv)
             return cc_send_command_as_is(cc, "$Error File Not Available|");
         }
 
-        cc_send_command_as_is(cc, "$ADCSND tthl %s 0 %lu|",
+        cc_send_command_as_is(cc, "$ADCSND tthl %s 0 %u|",
                 subs->subs[1], cc->leafdata_len);
         rx_free_subs(subs);
         cc->bytes_to_transfer = cc->leafdata_len;
