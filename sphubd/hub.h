@@ -90,6 +90,13 @@ struct hub
     struct event reconnect_event;
     int reconnect_attempt;
 
+    /* We define a kick as a disconnect where a reconnect succeeds
+     * on the first try. We give up reconnecting after 3 repeated
+     * kicks within 1 minute (ie, stop hammering).
+     */
+    int kick_counter;
+    time_t kick_time; /* time of first disconnect */
+
     user_t *me;
     char *password;
     char *hubname;

@@ -245,9 +245,34 @@ static void hub_connect_event(int fd, int error, void *user_data)
             if(hub->reconnect_attempt > 0)
             {
                 /* yes, remove the old one and create a new */
+
+		/* Reset kick counter after 1 minute. */
+		time_t now = time(0);
+		if(hub->kick_counter && hub->kick_time + 60 < now)
+		{
+		    hub->kick_counter = 0;
+		}
+
+		int kick_counter = 0;
+		if(hub->reconnect_attempt == 1)
+		{
+		    /* We got reconnected on the first attempt, this
+		     * might actually be a kick. */
+		    kick_counter = hub->kick_counter + 1;
+		}
+
                 DEBUG("replacing reconnection hub");
                 hub_close_connection(hub);
                 hub = hub_new_from_hcd(hcd);
+
+		/* Restore the saved kick_counter. If we got
+		 * disconnected because we we're being banned or kicked, we
+		 * shouldn't keep hammering on the door. Also set the time
+		 * of the first kick.
+		 */
+		hub->kick_counter = kick_counter;
+		if(hub->kick_counter == 1)
+		    hub->kick_time = time(0);
             }
             else
             {
@@ -550,9 +575,10 @@ void hub_close_connection(hub_t *hub)
 
         hub_set_need_myinfo_update(true);
 
-        if(hub->expected_disconnect == false)
+	/* should we attempt to reconnect to the hub? */
+        if(hub->expected_disconnect == false && hub->kick_counter < 3)
         {
-            hub_schedule_reconnect_event(hub);
+	    hub_schedule_reconnect_event(hub);
             return;
         }
     }
