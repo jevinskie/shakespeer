@@ -31,5 +31,9 @@ int open_database(DB **db, const char *dbfile, const char *dbname,
 int close_db(DB **db, const char *dbname);
 int db_transaction(DB_TXN **txn);
 
+void db_checkpoint(void);
+void db_prune_logfiles(void);
+void db_schedule_maintenance(void);
+
 #endif
 

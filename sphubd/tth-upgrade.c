@@ -52,6 +52,7 @@ int main(int argc, char **argv)
 
     db_checkpoint();
 
+    g_message("Upgrading TTH database...");
     bool modified;
 
     do

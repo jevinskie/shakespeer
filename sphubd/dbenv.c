@@ -25,11 +25,15 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <event.h>
 
 #include "globals.h"
 #include "log.h"
+#include "dbenv.h"
 
 static DB_ENV *default_db_env = NULL;
+static struct event db_checkpoint_event;
+static struct event db_prune_event;
 
 int db_transaction(DB_TXN **txn)
 {
@@ -125,6 +129,55 @@ static DB_ENV *get_default_db_environment(void)
     return default_db_env;
 }
 
+void db_checkpoint(void)
+{
+    return_if_fail(default_db_env);
+
+    g_message("checkpointing databases");
+    int rc = default_db_env->txn_checkpoint(default_db_env, 0, 0, 0);
+    if(rc != 0)
+    {
+	default_db_env->err(default_db_env, rc, "checkpoint event");
+	g_warning("PANIC! I DON'T KNOW WHAT TO DO!");
+	exit(1);
+    }
+}
+
+static void handle_checkpoint_event(int fd, short why, void *data)
+{
+    db_checkpoint();
+
+    /* re-install the timer */
+    struct timeval tv = {.tv_sec = 60, .tv_usec = 0};
+    evtimer_add(&db_checkpoint_event, &tv);
+}
+
+static void handle_prune_event(int fd, short why, void *data)
+{
+    db_prune_logfiles();
+
+    /* re-install the timer */
+    struct timeval tv = {.tv_sec = 10*60, .tv_usec = 0};
+    evtimer_add(&db_prune_event, &tv);
+}
+
+void db_schedule_maintenance(void)
+{
+    if(!event_initialized(&db_checkpoint_event))
+    {
+	evtimer_set(&db_checkpoint_event, handle_checkpoint_event, NULL);
+	struct timeval tv = {.tv_sec = 60, .tv_usec = 0};
+	evtimer_add(&db_checkpoint_event, &tv);
+    }
+
+    if(!event_initialized(&db_prune_event))
+    {
+	evtimer_set(&db_prune_event, handle_prune_event, NULL);
+	struct timeval tv = {.tv_sec = 10*60, .tv_usec = 0};
+	evtimer_add(&db_prune_event, &tv);
+    }
+}
+
 int open_database(DB **db, const char *dbfile, const char *dbname,
         int type, int flags)
 {
@@ -136,7 +189,8 @@ int open_database(DB **db, const char *dbfile, const char *dbname,
         (*db)->set_flags(*db, flags);
 
     g_info("opening [%s] in [%s]", dbname, dbfile);
-    int rc = (*db)->open(*db, NULL, dbfile, dbname, type, DB_CREATE | DB_AUTO_COMMIT, 0644);
+    int rc = (*db)->open(*db, NULL, dbfile, dbname, type,
+	DB_CREATE | DB_AUTO_COMMIT, 0644);
     if(rc != 0)
     {
         g_warning("Failed to open %s database in %s: %s", dbname,
@@ -166,5 +220,20 @@ int close_db(DB **db, const char *dbname)
     }
 
     return rc == 0 ? 0 : -1;
+}
+
+/* Explicitly remove old unused logfiles. Doesn't seem like DB_LOG_AUTOREMOVE
+ * flag actually removes any logfiles... */
+/* http://www.oracle.com/technology/documentation/berkeley-db/db/api_c/frame.html */
+void db_prune_logfiles(void)
+{
+    return_if_fail(default_db_env);
+
+    g_message("pruning old database logfiles");
+    int rc = default_db_env->log_archive(default_db_env, NULL, DB_ARCH_REMOVE);
+    if(rc != 0)
+    {
+	default_db_env->err(default_db_env, rc, "DB_ARCH_REMOVE");
+    }
 }
 

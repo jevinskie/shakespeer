@@ -522,6 +522,10 @@ int main(int argc, char **argv)
     queue_match_init();
     queue_auto_search_init();
 
+    /* start database checkpointing event */
+    db_schedule_maintenance();
+    db_prune_logfiles();
+
     asprintf(&socket_filename, "%s/sphubd", global_working_directory);
 
     /* start hashing daemon
