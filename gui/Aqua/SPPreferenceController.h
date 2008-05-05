@@ -81,7 +81,7 @@
 - (IBAction)setHashingPriority:(id)sender;
 
 - (void)switchToView:(NSView *)view;
-- (void)switchToItem:(NSToolbarItem *)item;
+- (void)switchToItem:(id)item;
 - (void)show;
 - (void)close;
 - (BOOL)isKeyWindow;

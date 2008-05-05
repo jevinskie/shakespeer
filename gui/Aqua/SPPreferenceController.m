@@ -79,9 +79,9 @@ static float ToolbarHeightForWindow(NSWindow *window)
         [prefsToolbar setAutosavesConfiguration:NO];
         [[self window] setToolbar:prefsToolbar];
         
-        // Default view is "Identity"
-        [prefsToolbar setSelectedItemIdentifier:@"IdentityItem"];
-        [self switchToView:identityView];
+        // Load last viewed pane
+        NSLog(@"lastPrefPane: %@", [[NSUserDefaults standardUserDefaults] objectForKey:@"lastPrefPane"]);
+        [self switchToItem:[[NSUserDefaults standardUserDefaults] objectForKey:@"lastPrefPane"]];
 
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(shareStatsNotification:)
@@ -192,23 +192,30 @@ static float ToolbarHeightForWindow(NSWindow *window)
     [[self window] setContentView:view];
 }
 
-- (void)switchToItem:(NSToolbarItem *)item
+- (void)switchToItem:(id)item
 {
     NSView *view = nil;
+    NSString *identifier;
     
-    if([[item itemIdentifier] isEqualToString:@"IdentityItem"])
+    // If the call is from a toolbar button, the sender will be an NSToolbarItem and we will need to fetch its itemIdentifier. If we want to call this method by hand, we can send it an NSString which will be used instead.
+    if([item respondsToSelector:@selector(itemIdentifier)])
+        identifier = [item itemIdentifier];
+    else
+        identifier = item;
+    
+    if([identifier isEqualToString:@"IdentityItem"])
     {
         view = identityView;
     }
-    else if([[item itemIdentifier] isEqualToString:@"ShareItem"])
+    else if([identifier isEqualToString:@"ShareItem"])
     {
         view = sharesView;
     }
-    else if([[item itemIdentifier] isEqualToString:@"NetworkItem"])
+    else if([identifier isEqualToString:@"NetworkItem"])
     {
         view = networkView;
     }
-    else if([[item itemIdentifier] isEqualToString:@"AdvancedItem"])
+    else if([identifier isEqualToString:@"AdvancedItem"])
     {
         view = advancedView;
     }
@@ -216,8 +223,8 @@ static float ToolbarHeightForWindow(NSWindow *window)
     if(view)
     {
         [self switchToView:view];
-        [prefsToolbar setSelectedItemIdentifier:[item itemIdentifier]];
-        [[NSUserDefaults standardUserDefaults] setObject:[item itemIdentifier] forKey:@"lastPrefPane"];
+        [prefsToolbar setSelectedItemIdentifier:identifier];
+        [[NSUserDefaults standardUserDefaults] setObject:identifier forKey:@"lastPrefPane"];
     }
 }
 

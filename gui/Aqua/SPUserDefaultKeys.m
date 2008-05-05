@@ -21,6 +21,7 @@
 
 #import "SPUserDefaultKeys.h"
 
+NSString *SPPrefsLastPrefPane = @"lastPrefPane";
 NSString *SPPrefsDownloadFolder = @"completeFolder";
 NSString *SPPrefsIncompleteFolder = @"incompleteFolder";
 NSString *SPPrefsNickname = @"nick";

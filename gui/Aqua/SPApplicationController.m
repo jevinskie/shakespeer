@@ -65,6 +65,7 @@ static SPApplicationController *mySharedApplicationController = nil;
         sp_register_callbacks(sp);
 
         NSDictionary *appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
+            @"IdentityItem", SPPrefsLastPrefPane,
             [@"~/Desktop/ShakesPeer Downloads" stringByExpandingTildeInPath], SPPrefsDownloadFolder,
             [@"~/Desktop/ShakesPeer Downloads/Incomplete" stringByExpandingTildeInPath], SPPrefsIncompleteFolder,
             @"unconfigured-shakespeer-user", SPPrefsNickname,
