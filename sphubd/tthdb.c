@@ -280,13 +280,15 @@ void tth_store_add_entry(struct tth_store *store,
 /* load the leafdata for the given TTH from the backend store */
 int tth_store_load_leafdata(struct tth_store *store, struct tth_entry *entry)
 {
+	char *lbuf = NULL;
 	return_val_if_fail(store, -1);
 	return_val_if_fail(entry, -1);
 
 	if(entry->leafdata)
 		return 0; /* already loaded */
 
-	INFO("loading leafdata for tth [%s]", entry->tth);
+	INFO("loading leafdata for tth [%s] at offset %llu",
+		entry->tth, entry->leafdata_offset);
 
 	/* seek to the entry->leafdata_offset position in the backend store */
 	int rc = fseek(store->fp, entry->leafdata_offset, SEEK_SET);
@@ -303,6 +305,18 @@ int tth_store_load_leafdata(struct tth_store *store, struct tth_entry *entry)
 		WARNING("failed to read line @offset %llu",
 			entry->leafdata_offset);
 		goto failed;
+	}
+
+	if(buf[len - 1] == '\n')
+		buf[len - 1] = 0;
+	else
+	{
+		/* EOF without EOL, copy and add the NUL */
+		lbuf = malloc(len + 1);
+		assert(lbuf);
+		memcpy(lbuf, buf, len);
+		lbuf[len] = 0;
+		buf = lbuf;
 	}
 
 	if(len < 3 || strncmp(buf, "+T:", 3) != 0)
@@ -333,9 +347,8 @@ int tth_store_load_leafdata(struct tth_store *store, struct tth_entry *entry)
 	entry->leafdata = malloc(base64_len);
 	assert(entry->leafdata);
 
-	entry->leafdata_len = base64_pton(buf,
-		(unsigned char *)entry->leafdata, base64_len);
-	if(entry->leafdata_len <= 0)
+	rc = base64_pton(buf, (unsigned char *)entry->leafdata, base64_len);
+	if(rc <= 0)
 	{
 		WARNING("invalid base64 encoded leafdata");
 		free(entry->leafdata);
@@ -343,11 +356,16 @@ int tth_store_load_leafdata(struct tth_store *store, struct tth_entry *entry)
 		goto failed;
 	}
 
+	entry->leafdata_len = rc;
+
+	free(lbuf);
 	return 0;
 
 failed:
 	WARNING("failed to load leafdata for tth [%s]: %s",
 		entry->tth, strerror(errno));
+
+	free(lbuf);
 
 	/* FIXME: should we re-load the tth store ? */
 	return -1;
@@ -438,8 +456,48 @@ void tth_store_set_active_inode(struct tth_store *store, const char *tth, uint64
 
 #ifdef TEST
 
+#include "unit_test.h"
+
 int main(void)
 {
+	sp_log_set_level("debug");
+	global_working_directory = "/tmp/sp-tthdb-test.d";
+	system("/bin/rm -rf /tmp/sp-tthdb-test.d");
+	system("mkdir /tmp/sp-tthdb-test.d");
+
+	const char *data = "+T:7LSZ6K2ZFQJBSEIRWM72N7VW2IULICCDW5ZUMJI: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\n"
+	"+I:61529D00001A7B:404E3394:7LSZ6K2ZFQJBSEIRWM72N7VW2IULICCDW5ZUMJI\n";
+	size_t len = strlen(data);
+
+	FILE *fp = fopen("/tmp/sp-tthdb-test.d/tth2.db", "w");
+	fail_unless(fp);
+	fail_unless(fwrite(data, 1, len, fp) == len);
+	fail_unless(fclose(fp) == 0);
+
+	tth_store_init();
+	fail_unless(global_tth_store);
+
+	struct tth_entry *te = tth_store_lookup(global_tth_store,
+		"7LSZ6K2ZFQJBSEIRWM72N7VW2IULICCDW5ZUMJI");
+	fail_unless(te);
+	fail_unless(te->active_inode = 0x61529D00001A7BULL);
+
+	struct tth_inode *ti = tth_store_lookup_inode(global_tth_store, 0x61529D00001A7BULL);
+	fail_unless(ti);
+	fail_unless(strcmp(ti->tth, "7LSZ6K2ZFQJBSEIRWM72N7VW2IULICCDW5ZUMJI") == 0);
+	fail_unless(ti->mtime = 0x404E3394);
+
+	fail_unless(te->leafdata_offset == 0);
+	fail_unless(te->leafdata == NULL);
+	int rc = tth_store_load_leafdata(global_tth_store, te);
+	fail_unless(rc == 0);
+	fail_unless(te->leafdata != NULL);
+	fail_unless(te->leafdata_len > 0);
+
+	tth_store_close();
+
+	system("/bin/rm -rf /tmp/sp-tthdb-test.d");
+
 	return 0;
 }
 
