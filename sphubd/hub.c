@@ -596,10 +596,10 @@ static void hub_count_GFunc(hub_t *hub, void *user_data)
 {
     hub_count_t *c = user_data;
 
-    if(hub->is_registered)
-        c->registered++;
-    else if(hub->me->is_operator)
+    if(hub->me->is_operator)
         c->operator++;
+    else if(hub->is_registered)
+        c->registered++;
     else
         c->normal++;
 }
