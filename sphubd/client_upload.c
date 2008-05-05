@@ -139,6 +139,9 @@ int cc_upload_prepare(cc_t *cc, const char *filename,
         {
             xerr_set(err, -1, "NMDC-style lists no longer supported,"
                     " please upgrade your client");
+            ui_send_status_message(NULL, cc->hub->address,
+                    "Peer '%s' uses obsolete client, filelist browsing denied",
+                    cc->nick);
             return -1;
         }
 

@@ -362,9 +362,6 @@ static int cc_cmd_GetListLen(void *data, int argc, char **argv)
 {
     cc_t *cc = data;
 
-    ui_send_status_message(NULL, cc->hub->address,
-            "Peer '%s' uses obsolete client, filelist browsing denied",
-            cc->nick);
     return cc_send_command(cc, "$ListLen 42|");
 }
 
