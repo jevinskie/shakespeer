@@ -40,6 +40,10 @@
     id currentSidebarItem;
     NSMutableDictionary *hubs;
     NSMutableDictionary *userCommands;
+    
+    // set when we're autoconnecting to the last connected hubs, so we won't try to
+    // sync it while we're in the middle of resetting the last session.
+    BOOL restoringLastConnectedHubs;
 
     IBOutlet SPSideBar *sideBar;
     IBOutlet NSTextField *statusBar;
@@ -128,6 +132,12 @@
 - (void)nextSidebarItem;
 
 - (id)hubWithAddress:(NSString *)aHubAddress;
+
+// persists all currently connected hubs to prefs, so we will reconnect to them
+// at the next start.
+- (void)syncHubsToDisk;
+
+- (void)restoreLastHubSession;
 
 - (NSArray *)userCommandsForHub:(NSString *)aHubAddress;
 

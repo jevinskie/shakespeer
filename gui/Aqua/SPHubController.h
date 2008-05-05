@@ -24,6 +24,7 @@
 @protocol SPSideBarItem;
 @class FilteringArrayController;
 
+/* There is one HubController created for each hub you're connected to. */
 @interface SPHubController : NSWindowController < SPSideBarItem >
 {
     IBOutlet NSTextView *chatView;

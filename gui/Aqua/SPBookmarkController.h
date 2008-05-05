@@ -52,8 +52,9 @@
 }
 
 + (SPBookmarkController *)sharedBookmarkController;
+
+- (void)connectToBookmark:(NSDictionary *)bm;
 - (IBAction)connectToSelectedBookmark:(id)sender;
-- (IBAction)setEncoding:(id)sender;
 
 - (void)setBookmarks:(NSArray *)anArray;
 - (BOOL)addBookmarkWithName:(NSString *)aName
@@ -65,7 +66,10 @@
                    encoding:(NSString *)anEncoding;
 - (void)autoConnectBookmarks;
 - (NSString *)passwordForHub:(NSString *)aHubAddress nick:(NSString *)aNick;
+- (NSDictionary *)bookmarkForHub:(NSString *)address;
+
 - (NSArray *)allowedEncodings;
+- (IBAction)setEncoding:(id)sender;
 
 - (void)newBookmarkSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (IBAction)newBookmarkShow:(id)sender;

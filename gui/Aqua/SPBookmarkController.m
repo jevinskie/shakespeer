@@ -258,6 +258,17 @@
     return thePassword;
 }
 
+- (NSDictionary *)bookmarkForHub:(NSString *)address
+{
+    NSDictionary *bm = nil;
+    NSEnumerator *bookmarksEnumerator = [bookmarks objectEnumerator];
+    while ((bm = [bookmarksEnumerator nextObject])) {
+      if ([[bm objectForKey:@"address"] isEqualToString:address])
+        return bm;
+    }
+    return nil;
+}
+
 - (NSArray *)allowedEncodings
 {
     return [NSArray arrayWithObjects:@"Default",

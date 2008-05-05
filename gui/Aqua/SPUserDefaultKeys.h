@@ -23,6 +23,7 @@
 
 extern NSString *SPPrefsLastSidebarItem;
 extern NSString *SPPrefsLastPrefPane;
+extern NSString *SPPrefsLastConnectedHubs;
 extern NSString *SPPrefsDownloadFolder;
 extern NSString *SPPrefsIncompleteFolder;
 extern NSString *SPPrefsNickname;

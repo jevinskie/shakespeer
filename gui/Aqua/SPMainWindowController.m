@@ -256,6 +256,43 @@
     return [userCommands objectForKey:aHubAddress];
 }
 
+- (void)syncHubsToDisk
+{
+    // saves the array of addresses to prefs, so we can easily reconnect to them at the next start.
+    [[NSUserDefaults standardUserDefaults] setObject:[hubs allKeys] forKey:SPPrefsLastConnectedHubs];
+}
+
+- (void)restoreLastHubSession
+{
+    // retrieve the list of all servers that were connected the last session.
+    NSArray *lastConnectedHubs = [[NSUserDefaults standardUserDefaults] arrayForKey:SPPrefsLastConnectedHubs];
+    if (lastConnectedHubs) {
+        // suppress hublist syncs while we're doing this.
+        restoringLastConnectedHubs = YES;
+    
+        NSEnumerator *addressEnumerator = [lastConnectedHubs objectEnumerator];
+        NSString *currentAddress = nil;
+        // reopen each connection. if any of the addresses are bookmarked, we can use password/nick, etc
+        // from that.
+        while ((currentAddress = [addressEnumerator nextObject])) {
+            NSDictionary *hubBookmark = [[SPBookmarkController sharedBookmarkController] bookmarkForHub:currentAddress];
+            if (hubBookmark) {
+                // we had this hub in our bookmarks, so let the bookmark controller deal with it, so it can
+                // reuse the correct nick, password, etc.
+                [[SPBookmarkController sharedBookmarkController] connectToBookmark:hubBookmark];
+            } else {
+                [[SPApplicationController sharedApplicationController] connectWithAddress:currentAddress
+                                                                                     nick:nil
+                                                                              description:nil
+                                                                                 password:nil
+                                                                                 encoding:nil];
+            }
+        } // while
+        
+        restoringLastConnectedHubs = NO;
+    }
+}
+
 #pragma mark -
 #pragma mark Sphubd notifications
 
@@ -450,6 +487,7 @@
     {
         [hubs removeObjectForKey:hubAddress];
         [hubs setObject:hubController forKey:newAddress];
+        [self syncHubsToDisk];
     }
 }
 
@@ -488,6 +526,11 @@
     {
         [hubController setConnected];
     }
+    
+    // if we're reconnecting to the last connected hubs, we don't want to sync our half-restored
+    // session to disk.
+    if (!restoringLastConnectedHubs)
+        [self syncHubsToDisk];
 }
 
 - (void)hubDisconnectedNotification:(NSNotification *)aNotification
@@ -497,6 +540,8 @@
     NSString *msg = [NSString stringWithFormat:@"Disconnected from hub %@", hubAddress];
     [[SPGrowlBridge sharedGrowlBridge] notifyWithName:SP_GROWL_HUB_CONNECTION_CLOSED
                                           description:msg];
+
+    [self syncHubsToDisk];
 }
 
 - (void)downloadFinishedNotification:(NSNotification *)aNotification

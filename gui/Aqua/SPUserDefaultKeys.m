@@ -23,6 +23,7 @@
 
 NSString *SPPrefsLastSidebarItem = @"lastSidebarItem";
 NSString *SPPrefsLastPrefPane = @"lastPrefPane";
+NSString *SPPrefsLastConnectedHubs = @"lastConnectedHubs";
 NSString *SPPrefsDownloadFolder = @"completeFolder";
 NSString *SPPrefsIncompleteFolder = @"incompleteFolder";
 NSString *SPPrefsNickname = @"nick";

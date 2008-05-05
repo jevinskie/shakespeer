@@ -34,6 +34,7 @@
 #import "SPBookmarkController.h"
 #import "SPNotificationNames.h"
 #import "SPUserDefaultKeys.h"
+#import "SPMainWindowController.h"
 
 static int spcb_port(sp_t *sp, int port)
 {
@@ -44,6 +45,7 @@ static int spcb_port(sp_t *sp, int port)
         else
             [[SPApplicationController sharedApplicationController] setPassiveMode];
         [[SPBookmarkController sharedBookmarkController] autoConnectBookmarks];
+        [[SPMainWindowController sharedMainWindowController] restoreLastHubSession];
     }
     return 0;
 }
