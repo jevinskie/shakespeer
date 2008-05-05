@@ -506,7 +506,11 @@ int main(int argc, char **argv)
     global_share = share_new();
     return_val_if_fail(global_share, 7);
     share_tth_init_notifications(global_share);
-    tthdb_open();
+    if(tthdb_open() != 0)
+    {
+	g_warning("failed to open TTH database, aborting startup");
+	shutdown_sphubd();
+    }
 
     extra_slots_init();
 

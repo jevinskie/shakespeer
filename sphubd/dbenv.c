@@ -67,8 +67,7 @@ int create_default_db_environment(void)
 {
     return_val_if_fail(default_db_env == NULL, -1);
 
-    g_message("creating default database environment, home = [%s]",
-            global_working_directory);
+    g_debug("home = [%s]", global_working_directory);
     int rc = db_env_create(&default_db_env, 0);
     if(rc != 0)
     {
@@ -118,6 +117,7 @@ static DB_ENV *get_default_db_environment(void)
 	    }
         }
 
+	return_val_if_fail(default_db_env, NULL);
         default_db_env->set_flags(default_db_env,
                 DB_TXN_WRITE_NOSYNC | DB_LOG_AUTOREMOVE, 1);
     }
