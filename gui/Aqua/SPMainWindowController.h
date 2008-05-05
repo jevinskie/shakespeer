@@ -32,7 +32,6 @@
     NSToolbar *toolbar;
 	
     SPPublicHubsController *publicHubsController;
-	SPFriendsController *friendsController;
     id bookmarkController;
     id queueController;
     SPTransferController *transferController;

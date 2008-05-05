@@ -611,9 +611,7 @@
 
 - (IBAction)openFriends:(id)sender
 {
-    if (!friendsController) {
-        friendsController = [[SPFriendsController alloc] init];
-    }
+    SPFriendsController *friendsController = [SPFriendsController sharedFriendsController];
     [sideBar addItem:friendsController];
     [sideBar displayItem:friendsController];
 }
