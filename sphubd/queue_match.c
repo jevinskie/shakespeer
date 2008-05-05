@@ -146,7 +146,7 @@ static void queue_handle_search_response_notification(nc_t *nc,
         return;
     }
 
-    DEBUG("matching on TTH '%s', size %llu", resp->tth, resp->size);
+    DEBUG("matching on TTH '%s', size %"PRIu64, resp->tth, resp->size);
 
     queue_target_t *qt = queue_lookup_target_by_tth(resp->tth);
     if(qt && qt->size == resp->size)

@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
 #include "globals.h"
 #include "tthdb.h"
@@ -46,7 +47,7 @@ int main(int argc, char **argv)
 		ntths++;
 	}
 
-	printf("\n%u tths, average leafdata size: %llu\n",
+	printf("\n%u tths, average leafdata size: %"PRIu64"\n",
 	ntths, leafdata_size / (ntths == 0 ? 1 : ntths));
 
 	tth_store_close();

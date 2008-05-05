@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "dstring.h"
 #include "xstr.h"
@@ -86,7 +87,7 @@ int share_search(share_t *share, const share_search_t *search,
             /* not found */
             return 0;
         }
-        DEBUG("found inode %llu", tthd->active_inode);
+        DEBUG("found inode %"PRIu64, tthd->active_inode);
 
         share_file_t *f = share_lookup_file_by_inode(share, tthd->active_inode);
         if(f)

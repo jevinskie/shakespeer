@@ -80,7 +80,7 @@ static int cc_send_download_request(cc_t *cc)
             else
 #endif
             {
-                return cc_send_command_as_is(cc, "$ADCGET file %s%s %llu %llu|",
+                return cc_send_command_as_is(cc, "$ADCGET file %s%s %"PRIu64" %"PRIu64"|",
                         base, request_filename,
                         queue->offset, queue->size - queue->offset);
             }
@@ -88,13 +88,13 @@ static int cc_send_download_request(cc_t *cc)
     }
     else if(cc->has_xmlbzlist && queue->size > 0 && !queue->is_filelist)
     {
-        return cc_send_command_as_is(cc, "$UGetBlock %llu %llu %s|",
+        return cc_send_command_as_is(cc, "$UGetBlock %"PRIu64" %"PRIu64" %s|",
                 queue->offset, queue->size - queue->offset,
                 queue->source_filename);
     }
     else
     {
-        return cc_send_command(cc, "$Get %s$%llu|",
+        return cc_send_command(cc, "$Get %s$%"PRIu64"|",
                 queue->source_filename, queue->offset + 1);
     }
 }
@@ -402,7 +402,7 @@ void cc_download_read(cc_t *cc)
     if((uint64_t)input_data_len > maxsize)
     {
 	WARNING("truncated input data length:"
-		"bytes_to_transfer=%llu, bytes_done=%llu, maxsize=%lu",
+		"bytes_to_transfer=%"PRIu64", bytes_done=%"PRIu64", maxsize=%lu",
 	    cc->bytes_to_transfer, cc->bytes_done, maxsize);
         input_data_len = (size_t)maxsize;
     }

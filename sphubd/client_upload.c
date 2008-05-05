@@ -199,8 +199,8 @@ int cc_upload_prepare(cc_t *cc, const char *filename,
     {
         if(stbuf.st_size < offset + bytes_to_transfer)
         {
-            INFO("%s: Request for too many bytes: st_size = %llu,"
-                    " offset = %llu, bytes_to_transfer = %llu",
+            INFO("%s: Request for too many bytes: st_size = %"PRIu64","
+                    " offset = %"PRIu64", bytes_to_transfer = %"PRIu64,
                     local_filename, (uint64_t)stbuf.st_size,
                     offset, bytes_to_transfer);
             free(local_filename);
@@ -213,7 +213,7 @@ int cc_upload_prepare(cc_t *cc, const char *filename,
     {
         cc->bytes_to_transfer = stbuf.st_size - offset;
     }
-    DEBUG("set cc->bytes_to_transfer = %llu", cc->bytes_to_transfer);
+    DEBUG("set cc->bytes_to_transfer = %"PRIu64, cc->bytes_to_transfer);
 
     cc->local_fd = open(local_filename, O_RDONLY);
     if(cc->local_fd == -1)

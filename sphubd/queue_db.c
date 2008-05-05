@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "xstr.h"
 #include "globals.h"
@@ -872,7 +873,7 @@ void queue_db_print_add_target(FILE *fp, struct queue_target *qt)
 	char *tmp2 = str_quote_backslash(qt->target_directory, ":");
 
 	fprintf(fp,
-		"+T:%s:%s:%llu:%s:%u:%lu:%i:%u\n",
+		"+T:%s:%s:%"PRIu64":%s:%u:%lu:%i:%u\n",
 		tmp1,
 		tmp2 ? tmp2 : "",
 		qt->size,

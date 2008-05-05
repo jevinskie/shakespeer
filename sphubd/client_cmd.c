@@ -138,7 +138,7 @@ static int cc_cmd_Get(void *data, int argc, char **argv)
     }
 
     cc->state = CC_STATE_REQUEST;
-    return cc_send_command(cc, "$FileLength %llu|", cc->filesize);
+    return cc_send_command(cc, "$FileLength %"PRIu64"|", cc->filesize);
 }
 
 /* $ADCGET <type> <filename> <startpos> <bytes> <flag0>...<flagN> */
@@ -247,7 +247,7 @@ static int cc_cmd_ADCGET(void *data, int argc, char **argv)
         return -1;
     }
 
-    cc_send_command_as_is(cc, "$ADCSND file %s %llu %llu|",
+    cc_send_command_as_is(cc, "$ADCSND file %s %"PRIu64" %"PRIu64"|",
             filename_utf8, cc->offset, cc->bytes_to_transfer);
     rx_free_subs(subs);
 
@@ -301,7 +301,7 @@ static int cc_cmd_UGetBlock(void *data, int argc, char **argv)
         return cc_send_command(cc, "$MaxedOut|");
     }
 
-    return_val_if_fail(cc_send_command(cc, "$Sending %llu|",
+    return_val_if_fail(cc_send_command(cc, "$Sending %"PRIu64"|",
                 cc->bytes_to_transfer) == 0, -1);
 
     cc->state = CC_STATE_REQUEST;
@@ -384,7 +384,7 @@ static int cc_cmd_FileLength(void *data, int argc, char **argv)
     {
         if(cc->current_queue->size != cc->filesize)
         {
-            WARNING("requested size differs from reported (%llu != %llu)",
+            WARNING("requested size differs from reported (%"PRIu64" != %"PRIu64")",
                     cc->filesize, cc->current_queue->size);
             queue_set_size(cc->current_queue, cc->filesize);
         }
