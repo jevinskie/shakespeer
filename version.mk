@@ -1,3 +1,0 @@
-PACKAGE=shakespeer
-VERSION=20060725
-
