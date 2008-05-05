@@ -44,37 +44,33 @@ extern NSString* SPPublicHubDataType;
 {
     if ((self = [super init])) {
         [NSBundle loadNibNamed:@"Bookmarks" owner:self];
-        NSArray *defaultBookmarks = [[NSUserDefaults standardUserDefaults] arrayForKey:@"bookmarks"];
-        if (defaultBookmarks == nil) {
-            [self setBookmarks:[NSArray array]];
-        }
-        else {
-            [self setBookmarks:defaultBookmarks];
+        
+        NSArray *defaultBookmarks = [[NSUserDefaults standardUserDefaults] arrayForKey:SPBookmarks];
+        [self setBookmarks:defaultBookmarks];
+        
+        // below is bookmark migration stuff
+        NSEnumerator *e = [bookmarks objectEnumerator];
+        NSMutableDictionary *bm;
+        while ((bm = [e nextObject]) != nil) {
+            // add the key "name" for all bookmarks if it doesn't exist
+            if ([bm objectForKey:@"name"] == nil)
+                [bm setObject:[bm objectForKey:@"address"] forKey:@"name"];
             
-            // below is bookmark migration stuff
-            NSEnumerator *e = [bookmarks objectEnumerator];
-            NSMutableDictionary *bm;
-            while ((bm = [e nextObject]) != nil) {
-                // add the key "name" for all bookmarks if it doesn't exist
-                if ([bm objectForKey:@"name"] == nil)
-                    [bm setObject:[bm objectForKey:@"address"] forKey:@"name"];
+            // migrate any passwords to the keychain
+            if ([bm objectForKey:@"password"]) {
+                NSError *error = nil;
+                [SPKeychain setPassword:[bm objectForKey:@"password"]
+                              forServer:[bm objectForKey:@"address"]
+                                account:[bm objectForKey:@"nick"]
+                                  error:&error];
                 
-                // migrate any passwords to the keychain
-                if ([bm objectForKey:@"password"]) {
-                    NSError *error = nil;
-                    [SPKeychain setPassword:[bm objectForKey:@"password"]
-                                  forServer:[bm objectForKey:@"address"]
-                                    account:[bm objectForKey:@"nick"]
-                                      error:&error];
-                    
-                    [bm removeObjectForKey:@"password"];
-                }
+                [bm removeObjectForKey:@"password"];
             }
-            
-            // save bookmarks and explicitly synchronize with .plist
-            [[NSUserDefaults standardUserDefaults] setObject:bookmarks forKey:@"bookmarks"];
-            [[NSUserDefaults standardUserDefaults] synchronize];
         }
+        
+        // save bookmarks and explicitly synchronize with .plist
+        [[NSUserDefaults standardUserDefaults] setObject:bookmarks forKey:SPBookmarks];
+        [[NSUserDefaults standardUserDefaults] synchronize];
     }
     
     return self;
@@ -201,7 +197,7 @@ extern NSString* SPPublicHubDataType;
     }
     
     // save bookmarks and explicitly synchronize with .plist
-    [[NSUserDefaults standardUserDefaults] setObject:bookmarks forKey:@"bookmarks"];
+    [[NSUserDefaults standardUserDefaults] setObject:bookmarks forKey:SPBookmarks];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
     return YES;
@@ -238,7 +234,7 @@ extern NSString* SPPublicHubDataType;
         }
     }
 
-    [[NSUserDefaults standardUserDefaults] setObject:bookmarks forKey:@"bookmarks"];
+    [[NSUserDefaults standardUserDefaults] setObject:bookmarks forKey:SPBookmarks];
 }
 
 - (NSString *)passwordForHub:(NSString *)aHubAddress nick:(NSString *)aNick
@@ -483,7 +479,7 @@ extern NSString* SPPublicHubDataType;
                           error:&error];
     
         // save bookmarks and explicitly synchronize with .plist
-        [[NSUserDefaults standardUserDefaults] setObject:bookmarks forKey:@"bookmarks"];
+        [[NSUserDefaults standardUserDefaults] setObject:bookmarks forKey:SPBookmarks];
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
 }
@@ -550,7 +546,7 @@ extern NSString* SPPublicHubDataType;
                                           error:&error];
             
             // save bookmarks and explicitly synchronize with .plist
-            [[NSUserDefaults standardUserDefaults] setObject:bookmarks forKey:@"bookmarks"];
+            [[NSUserDefaults standardUserDefaults] setObject:bookmarks forKey:SPBookmarks];
             [[NSUserDefaults standardUserDefaults] synchronize];
         }
     }
@@ -559,4 +555,3 @@ extern NSString* SPPublicHubDataType;
 }
 
 @end
-

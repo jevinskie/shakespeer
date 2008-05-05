@@ -38,7 +38,16 @@
     }
 }
 
-- (void)tabView:(NSTabView *)tabView didSelectTabViewItem:(NSTabViewItem *)tabViewItem
+// inform the current item that it is being replaced
+- (BOOL)tabView:(NSTabView *)theTabView shouldSelectTabViewItem:(NSTabViewItem *)tabViewItem
+{
+    if (delegate && [delegate respondsToSelector:@selector(sideBar:didDeselectItem:)])
+        [delegate sideBar:self didDeselectItem:[[theTabView selectedTabViewItem] identifier]];
+    
+    return YES;
+}
+
+- (void)tabView:(NSTabView *)theTabView didSelectTabViewItem:(NSTabViewItem *)tabViewItem
 {
     if (delegate && [delegate respondsToSelector:@selector(sideBar:didSelectItem:)])
         [delegate sideBar:self didSelectItem:[tabViewItem identifier]];

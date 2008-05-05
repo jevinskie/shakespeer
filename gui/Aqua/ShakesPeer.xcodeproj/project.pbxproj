@@ -32,6 +32,8 @@
 		28C74ED60ADBECDF00BACE5C /* Uploads.nib in Resources */ = {isa = PBXBuildFile; fileRef = 28C74EC90ADBECDF00BACE5C /* Uploads.nib */; };
 		28C7E8280B1DF40400C8DD15 /* np.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 28C7E8270B1DF40300C8DD15 /* np.scpt */; };
 		28D1DFA50A2A023000F9F9EE /* SPKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D1DFA30A2A023000F9F9EE /* SPKeychain.m */; };
+		28E0863F0D841873006CF70A /* Friends.nib in Resources */ = {isa = PBXBuildFile; fileRef = 28E0863D0D841873006CF70A /* Friends.nib */; };
+		28E086420D8418E0006CF70A /* SPFriendsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28E086400D8418E0006CF70A /* SPFriendsController.m */; };
 		28F0ACFA0A29E7E100FFEC99 /* MHSysTree.m in Sources */ = {isa = PBXBuildFile; fileRef = 28F0ACF80A29E7E100FFEC99 /* MHSysTree.m */; };
 		9A0DC08F0BBC475200229BA0 /* debug-sphubd.sh in Resources */ = {isa = PBXBuildFile; fileRef = 9A0DC08E0BBC475200229BA0 /* debug-sphubd.sh */; };
 		FC7E1A89097E6ADC0087431A /* action.png in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A55097E6ADC0087431A /* action.png */; };
@@ -192,6 +194,9 @@
 		28C7E8270B1DF40300C8DD15 /* np.scpt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.scpt; name = np.scpt; path = Resources/np.scpt; sourceTree = "<group>"; };
 		28D1DFA20A2A023000F9F9EE /* SPKeychain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPKeychain.h; sourceTree = "<group>"; };
 		28D1DFA30A2A023000F9F9EE /* SPKeychain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPKeychain.m; sourceTree = "<group>"; usesTabs = 0; };
+		28E0863E0D841873006CF70A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/Friends.nib; sourceTree = "<group>"; };
+		28E086400D8418E0006CF70A /* SPFriendsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPFriendsController.m; sourceTree = "<group>"; };
+		28E086410D8418E0006CF70A /* SPFriendsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPFriendsController.h; sourceTree = "<group>"; };
 		28F0ACF70A29E7E100FFEC99 /* MHSysTree.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MHSysTree.h; sourceTree = "<group>"; };
 		28F0ACF80A29E7E100FFEC99 /* MHSysTree.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = MHSysTree.m; sourceTree = "<group>"; usesTabs = 0; };
 		9A0DC08E0BBC475200229BA0 /* debug-sphubd.sh */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.script.sh; name = "debug-sphubd.sh"; path = "Resources/debug-sphubd.sh"; sourceTree = "<group>"; };
@@ -346,6 +351,8 @@
 				FC7E1AD1097E6B3E0087431A /* SPChatWindowController.m */,
 				FC7E1AD2097E6B3E0087431A /* SPFilelistController.h */,
 				FC7E1AD3097E6B3E0087431A /* SPFilelistController.m */,
+				28E086410D8418E0006CF70A /* SPFriendsController.h */,
+				28E086400D8418E0006CF70A /* SPFriendsController.m */,
 				FC7E1AD8097E6B3E0087431A /* SPHubController.h */,
 				FC7E1AD9097E6B3E0087431A /* SPHubController.m */,
 				FC7E1ADC097E6B3E0087431A /* SPMainWindowController-Toolbar.h */,
@@ -515,6 +522,7 @@
 		FC7E1A2D097E6A6D0087431A /* Nibs */ = {
 			isa = PBXGroup;
 			children = (
+				28E0863D0D841873006CF70A /* Friends.nib */,
 				28C74EB30ADBECDF00BACE5C /* Bookmarks.nib */,
 				28C74EB50ADBECDF00BACE5C /* ChatWindow.nib */,
 				28C74EB70ADBECDF00BACE5C /* DirectoryListing.nib */,
@@ -729,6 +737,7 @@
 				28C74ED50ADBECDF00BACE5C /* SearchWindow.nib in Resources */,
 				28C74ED60ADBECDF00BACE5C /* Uploads.nib in Resources */,
 				9A0DC08F0BBC475200229BA0 /* debug-sphubd.sh in Resources */,
+				28E0863F0D841873006CF70A /* Friends.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -791,6 +800,7 @@
 				28F0ACFA0A29E7E100FFEC99 /* MHSysTree.m in Sources */,
 				28D1DFA50A2A023000F9F9EE /* SPKeychain.m in Sources */,
 				2894F7410D6308D100D8B355 /* UKCrashReporter.m in Sources */,
+				28E086420D8418E0006CF70A /* SPFriendsController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -909,6 +919,14 @@
 				28C74ECA0ADBECDF00BACE5C /* English */,
 			);
 			name = Uploads.nib;
+			sourceTree = "<group>";
+		};
+		28E0863D0D841873006CF70A /* Friends.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				28E0863E0D841873006CF70A /* English */,
+			);
+			name = Friends.nib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

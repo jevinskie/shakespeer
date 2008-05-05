@@ -36,6 +36,8 @@ void registerSPTransformers(void)
     [NSValueTransformer setValueTransformer:[[[FilenameImageTransformer alloc] init] autorelease] forName:@"FilenameImageTransformer"];
     [NSValueTransformer setValueTransformer:[[[TransferImageTransformer alloc] init] autorelease] forName:@"TransferImageTransformer"];
     [NSValueTransformer setValueTransformer:[[[TruncateTailTransformer alloc] init] autorelease] forName:@"TruncateTailTransformer"];
+    [NSValueTransformer setValueTransformer:[[[FriendStatusTransformer alloc] init] autorelease] forName:@"FriendStatusTransformer"];
+    [NSValueTransformer setValueTransformer:[[[FriendLastSeenTransformer alloc] init] autorelease] forName:@"FriendLastSeenTransformer"];
 }
 
 @implementation HumanSizeTransformer
@@ -367,3 +369,81 @@ void registerSPTransformers(void)
 
 @end
 
+@implementation FriendStatusTransformer
+
++ (Class)transformedValueClass
+{
+    return [NSAttributedString class];
+}
+
++ (BOOL)supportsReverseTransformation
+{
+    return NO;
+}
+
+- (id)transformedValue:(id)value
+{
+    BOOL isOnline = [value boolValue];
+    NSString *statusString;
+    
+    if (isOnline)
+        statusString = @"Online";
+    else
+        statusString = @"Offline";
+    
+    return statusString;
+}
+
+@end
+
+@implementation FriendLastSeenTransformer
+
++ (Class)transformedValueClass
+{
+    return [NSAttributedString class];
+}
+
++ (BOOL)supportsReverseTransformation
+{
+    return NO;
+}
+
+- (id)transformedValue:(id)value
+{
+    NSDate *now = [NSDate date];
+    int seconds = [now timeIntervalSinceDate:value];
+    
+    // If the date is in the future, the user has never been seen. We'll add
+    // ten seconds to that threshold to account for the running time of this
+    // method. Actually, we could as well add several years to that threshold
+    // since new friends are initialized at [NSDate distantFuture] which currently
+    // defaults to the year 4000 or similar.
+    if (seconds < -10)
+        return @"Never";
+    
+    // we'll display this as a fuzzy date string
+    int years = seconds / (60 * 60 * 24 * 365);
+    if (years > 0)
+        return @"More than a year ago";
+    
+    seconds -= years * (60 * 60 * 24 * 365);
+    int months = seconds / (60 * 60 * 24 * 30);
+    if (months > 6)
+        return @"More than half a year ago";
+    if (months >= 1)
+        return @"More than a month ago";
+    
+    seconds -= months * (60 * 60 * 24 * 30);
+    int weeks = seconds / (60 * 60 * 24 * 7);
+    if (weeks > 0)
+        return @"A few weeks ago";
+    
+    seconds -= weeks * (60 * 60 * 24 * 30);
+    int days = seconds / (60 * 60 * 24);
+    if (days > 0)
+        return @"A few days ago";
+    
+    return @"Today";
+}
+
+@end

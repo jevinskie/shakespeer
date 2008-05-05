@@ -45,7 +45,8 @@ SOURCES = \
 	URLMutableAttributedString.m \
 	URLTextView.m \
 	main.m \
-	UKCrashReporter.m
+	UKCrashReporter.m \
+	SPFriendsController.m
 
 SPApplicationController.o SPClientBridge.o: $(TOP)/version.mk
 

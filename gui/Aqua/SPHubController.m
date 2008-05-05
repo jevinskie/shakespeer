@@ -23,6 +23,7 @@
 #import "SPMainWindowController.h"
 #import "SPApplicationController.h"
 #import "SPBookmarkController.h"
+#import "SPFriendsController.h"
 #import "SPUser.h"
 #import "SPUserCommand.h"
 #import "SPTransformers.h"
@@ -904,6 +905,13 @@
     }
 }
 
+- (IBAction)addFriend:(id)sender
+{
+    // TODO: we should probably switch to the friends sidebar and launch an edit sheet instead
+    NSString *newFriendNick = [[sender representedObject] nick];
+    [[SPFriendsController sharedFriendsController] addFriendWithName:newFriendNick comments:@""];
+}
+
 - (IBAction)toggleColumn:(id)sender
 {
     NSTableColumn *tc = nil;
@@ -934,6 +942,24 @@
     NSString *filterString = [sender stringValue];
     [self filterUsersWithString:filterString];
     [userTable reloadData];
+}
+
+#pragma mark -
+#pragma mark Menu validation
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem
+{
+    int clickedRow = [userTable selectedRow];
+    if (clickedRow == -1)
+        return NO;
+    
+    SPUser *clickedUser = [filteredUsers objectAtIndex:clickedRow];
+    if (clickedUser) {
+        [menuItem setRepresentedObject:clickedUser];
+        return YES;
+    }
+    
+    return NO;
 }
 
 #pragma mark -

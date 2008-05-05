@@ -32,6 +32,15 @@
 
 @interface NSObject (SPSideBarItemInformalProtocol)
 
+// These methods can be implemented if a sidebar item wants to be
+// notified when it is selected and deselected. For example, this can
+// be useful if you want to invalidate a timer when the item is
+// deselected, and restart the timer when it is selected again; this
+// was first implemented in SPFriendsController, which you can check
+// out for further enlightenment.
+- (void)viewBecameSelected;
+- (void)viewBecameDeselected;
+
 - (void)unbindControllers;
 - (NSString *)sectionTitle;
 - (BOOL)canClose;
@@ -94,6 +103,7 @@
 @end
 
 @protocol SPSideBarDelegate
+- (void)sideBar:(SPSideBar *)sideBar didDeselectItem:(id)anItem;
 - (void)sideBar:(SPSideBar *)sideBar didSelectItem:(id)anItem;
 - (void)sideBar:(SPSideBar *)sideBar willCloseItem:(id)sideBarItem;
 - (void)sideBar:(SPSideBar *)sideBar didCloseItem:(id)sideBarItem;

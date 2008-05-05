@@ -58,3 +58,5 @@ extern NSString *SPPrefsDrawerIsVisible;
 extern NSString *SPPrefsDrawerHeight;
 extern NSString *SPPrefsRequireOpenSlots;
 extern NSString *SPPrefsRequireTTH;
+extern NSString *SPBookmarks;
+extern NSString *SPFriends;

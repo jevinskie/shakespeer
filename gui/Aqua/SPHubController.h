@@ -23,6 +23,7 @@
 #import "SPSideBar.h"
 
 @class FilteringArrayController;
+@class SPUser;
 
 /* There is one HubController created for each hub you're connected to. */
 @interface SPHubController : NSWindowController < SPSideBarItem >
@@ -67,6 +68,7 @@
 
 - (IBAction)sendMessage:(id)sender;
 - (IBAction)startPrivateChat:(id)sender;
+- (IBAction)addFriend:(id)sender;
 - (IBAction)browseUser:(id)sender;
 - (IBAction)autoMatchFilelist:(id)sender;
 - (IBAction)toggleColumn:(id)sender;
@@ -74,6 +76,7 @@
 - (IBAction)grantExtraSlot:(id)sender;
 - (IBAction)filter:(id)sender;
 
+- (SPUser *)findUserWithNick:(NSString *)aNick;
 - (void)updateUserTable:(NSTimer *)aTimer;
 - (id)initWithAddress:(NSString *)anAddress nick:(NSString *)aNick;
 - (NSImage *)image;

@@ -78,4 +78,14 @@
 }
 @end
 
+@interface FriendStatusTransformer : NSValueTransformer
+{
+}
+@end
+
+@interface FriendLastSeenTransformer : NSValueTransformer
+{
+}
+@end
+
 void registerSPTransformers(void);

@@ -32,6 +32,7 @@
 #import "SPGrowlBridge.h"
 #import "SPSideBar.h"
 #import "SPPublicHubsController.h"
+#import "SPFriendsController.h"
 #import "SPTransferController.h"
 #import "SPUserDefaultKeys.h"
 #import "SPNotificationNames.h"
@@ -75,12 +76,15 @@
     NSString *lastItem = [[NSUserDefaults standardUserDefaults] objectForKey:@"lastSidebarItem"];
     
     [self openHublist:self];
+    [self openFriends:self];
     [self openBookmarks:self];
     [self openDownloads:self];
     [self openUploads:self];
     
     if ([lastItem isEqualToString:@"Public Hubs"])
         [self openHublist:self];
+    else if ([lastItem isEqualToString:@"Friends"])
+        [self openFriends:self];
     else if ([lastItem isEqualToString:@"Bookmarks"])
         [self openBookmarks:self];
     else if ([lastItem isEqualToString:@"Downloads"])
@@ -239,6 +243,11 @@
             [sideBar setNeedsDisplay];
         }
     }
+}
+
+- (NSDictionary *)connectedHubs
+{
+    return [[hubs copy] autorelease];
 }
 
 - (id)hubWithAddress:(NSString *)aHubAddress
@@ -600,6 +609,15 @@
     [sideBar displayItem:publicHubsController];
 }
 
+- (IBAction)openFriends:(id)sender
+{
+    if (!friendsController) {
+        friendsController = [[SPFriendsController alloc] init];
+    }
+    [sideBar addItem:friendsController];
+    [sideBar displayItem:friendsController];
+}
+
 - (IBAction)openBookmarks:(id)sender
 {
     bookmarkController = [SPBookmarkController sharedBookmarkController];
@@ -788,11 +806,24 @@
 #pragma mark -
 #pragma mark SPSideBar delegates
 
+- (void)sideBar:(SPSideBar *)sideBar didDeselectItem:(id)sideBarItem
+{
+    // notify the previously selected item that it is
+    // being deselected, this is useful for invalidating timers etc.
+    if ([sideBarItem respondsToSelector:@selector(viewBecameDeselected)])
+        [sideBarItem performSelector:@selector(viewBecameDeselected)];
+}
+
 - (void)sideBar:(SPSideBar *)sideBar didSelectItem:(id)sideBarItem
 {
     currentSidebarItem = sideBarItem;
     [[self window] setTitle:[NSString stringWithFormat:@"ShakesPeer - %@", [sideBarItem title]]];
     [contextMenuButton setMenu:[sideBarItem menu]];
+    
+    // TODO: The following should be the canonical method, and each sidebar item
+    // should be responsible for the proper actions (like focusChatInput etc.)
+    if ([sideBarItem respondsToSelector:@selector(viewBecameSelected)])
+        [sideBarItem performSelector:@selector(viewBecameSelected)];
     
     if ([sideBarItem respondsToSelector:@selector(focusChatInput)])
         [sideBarItem focusChatInput];

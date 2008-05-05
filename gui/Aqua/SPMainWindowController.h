@@ -23,16 +23,20 @@
 
 @class SPSideBar;
 @class SPPublicHubsController;
+@class SPFriendsController;
 @class SPTransferController;
 @class MenuButton;
 
 @interface SPMainWindowController : NSWindowController
 {
     NSToolbar *toolbar;
+	
     SPPublicHubsController *publicHubsController;
+	SPFriendsController *friendsController;
     id bookmarkController;
     id queueController;
     SPTransferController *transferController;
+	
     NSString *passwordHub, *passwordNick;
     NSTimer *statusMessageTimer;
     NSMutableDictionary *privateChats;
@@ -98,6 +102,7 @@
 + (id)sharedMainWindowController;
 
 - (IBAction)openHublist:(id)sender;
+- (IBAction)openFriends:(id)sender;
 - (IBAction)openBookmarks:(id)sender;
 - (IBAction)openDownloads:(id)sender;
 - (IBAction)openUploads:(id)sender;
@@ -131,6 +136,7 @@
 - (void)prevSidebarItem;
 - (void)nextSidebarItem;
 
+- (NSDictionary *)connectedHubs;
 - (id)hubWithAddress:(NSString *)aHubAddress;
 
 // persists all currently connected hubs to prefs, so we will reconnect to them

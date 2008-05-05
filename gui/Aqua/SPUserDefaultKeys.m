@@ -58,3 +58,5 @@ NSString *SPPrefsDrawerIsVisible = @"drawerIsVisible";
 NSString *SPPrefsDrawerHeight = @"drawerHeight";
 NSString *SPPrefsRequireOpenSlots = @"requireOpenSlots";
 NSString *SPPrefsRequireTTH = @"requireTTH";
+NSString *SPBookmarks = @"bookmarks";
+NSString *SPFriends = @"friends";

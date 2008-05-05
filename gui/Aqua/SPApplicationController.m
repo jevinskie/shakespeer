@@ -116,6 +116,8 @@ static SPApplicationController *mySharedApplicationController = nil;
             [NSNumber numberWithBool:NO], SPPrefsRequireOpenSlots,
             [NSNumber numberWithBool:NO], SPPrefsRequireTTH,
 			[NSNumber numberWithBool:YES], SPPrefsSessionRestore,
+            [NSArray array], SPBookmarks,
+            [NSArray array], SPFriends,
             nil];
         [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
 
@@ -830,6 +832,11 @@ else {
 - (IBAction)showPublicHubsView:(id)sender
 {
     [mainWindowController openHublist:self];
+}
+
+- (IBAction)showFriendsView:(id)sender
+{
+    [mainWindowController openFriends:self];
 }
 
 - (IBAction)showBookmarksView:(id)sender

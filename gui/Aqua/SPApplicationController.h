@@ -65,6 +65,7 @@ void sendNotification(NSString *notificationName, NSString *key1, id arg1, ...);
 - (IBAction)showLogfiles:(id)sender;
 - (IBAction)showConnectView:(id)sender;
 - (IBAction)showPublicHubsView:(id)sender;
+- (IBAction)showFriendsView:(id)sender;
 - (IBAction)showBookmarksView:(id)sender;
 - (IBAction)showDownloadsView:(id)sender;
 - (IBAction)showUploadsView:(id)sender;
