@@ -127,6 +127,7 @@ void sendNotification(NSString *notificationName, NSString *key1, id arg1, ...);
 
 - (void)setPort:(int)aPort;
 - (void)setIPAddress:(NSString *)anIPAddress;
+- (void)setAllowHubIPOverride:(BOOL)allowOverride;
 - (void)setPassword:(NSString *)aPassword forHub:(NSString *)aHubAddress;
 - (void)updateUserEmail:(NSString *)email description:(NSString *)description speed:(NSString *)speed;
 - (void)sendPrivateMessage:(NSString *)theMessage toNick:(NSString *)theNick hub:(NSString *)hubAddress;

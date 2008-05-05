@@ -472,6 +472,12 @@ static float ToolbarHeightForWindow(NSWindow *window)
         [[SPApplicationController sharedApplicationController] setIPAddress:@""];
 }
 
+- (IBAction)setAllowHubIPOverride:(id)sender
+{
+    BOOL allowOverride = [[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsAllowHubIPOverride];
+    [[SPApplicationController sharedApplicationController] setAllowHubIPOverride:allowOverride];
+}
+
 - (IBAction)updateUserInfo:(id)sender
 {
     NSString *email = [emailField stringValue];

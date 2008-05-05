@@ -648,6 +648,12 @@ static int ui_cb_set_ip_address(ui_t *ui, const char *ip_address)
     return 0;
 }
 
+static int ui_cb_set_allow_hub_ip_override(ui_t *ui, int allow_hub_override)
+{
+	extip_set_override(allow_hub_override);
+	return 0;
+}
+
 static int ui_cb_add_shared_path(ui_t *ui, const char *path)
 {
     char *expanded_path = tilde_expand_path(path);
@@ -889,6 +895,7 @@ void ui_accept_connection(int fd, short condition, void *data)
     ui->cb_rescan_share_interval = ui_cb_rescan_share_interval;
     ui->cb_set_port = ui_cb_set_port;
     ui->cb_set_ip_address = ui_cb_set_ip_address;
+	ui->cb_set_allow_hub_ip_override = ui_cb_set_allow_hub_ip_override;
     ui->cb_add_shared_path = ui_cb_add_shared_path;
     ui->cb_remove_shared_path = ui_cb_remove_shared_path;
     ui->cb_shutdown = ui_cb_shutdown;

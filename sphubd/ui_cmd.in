@@ -40,6 +40,7 @@ c cancel-transfer path:target_filename
 c transfer-stats-interval uint:seconds
 c set-port int:port
 c set-ip-address string:ip_address
+c set-allow-hub-ip-override bool:allow_hub_override
 c add-shared-path path:path
 c remove-shared-path path:path
 c shutdown

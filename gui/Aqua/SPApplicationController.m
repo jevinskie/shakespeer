@@ -104,6 +104,7 @@ static SPApplicationController *mySharedApplicationController = nil;
             [NSNumber numberWithBool:NO], SPPrefsKeepServerRunning,
             @"Message", SPPrefsLogLevel,
             [NSNumber numberWithBool:YES], SPPrefsAutodetectIPAddress,
+            [NSNumber numberWithBool:YES], SPPrefsAllowHubIPOverride,
             [NSNumber numberWithBool:YES], SPPrefsAutoCheckUpdates,
             [NSNumber numberWithBool:YES], SPPrefsShowSmileyIcons,
             [NSNumber numberWithFloat:1.0], SPPrefsRescanShareInterval,
@@ -684,6 +685,11 @@ else {
         sp_send_set_ip_address(sp, "auto-detect");
 }
 
+- (void)setAllowHubIPOverride:(BOOL)allowOverride
+{
+    sp_send_set_allow_hub_ip_override(sp, allowOverride);
+}
+
 - (void)setPassword:(NSString *)aPassword forHub:(NSString *)aHubAddress
 {
     sp_send_set_password(sp, [aHubAddress UTF8String], [aPassword UTF8String]);
@@ -1054,6 +1060,7 @@ else {
 	    sp_send_set_ip_address(sp,
 		[[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsExternalIPAddress] UTF8String]);
 	}
+    sp_send_set_allow_hub_ip_override(sp, [[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsAllowHubIPOverride]);
 
         [self setSlots:[[NSUserDefaults standardUserDefaults] integerForKey:SPPrefsUploadSlots]
                 perHub:[[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsUploadSlotsPerHub]];

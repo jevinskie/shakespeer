@@ -71,6 +71,7 @@
 - (IBAction)selectIncompleteFolder:(id)sender;
 - (IBAction)setPort:(id)sender;
 - (IBAction)setIPAddress:(id)sender;
+- (IBAction)setAllowHubIPOverride:(id)sender;
 - (IBAction)updateUserInfo:(id)sender;
 - (IBAction)testConnection:(id)sender;
 - (IBAction)setSlots:(id)sender;

@@ -20,6 +20,8 @@
 void extip_init(void);
 const char *extip_get(int fd, const char *hub_ip);
 void extip_set_static(const char *ip);
+void extip_set_override(bool allow_hub_override);
+bool extip_get_override();
 
 #endif
 

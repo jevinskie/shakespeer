@@ -41,6 +41,7 @@
 #include "nmdc.h"
 #include "rx.h"
 #include "xstr.h"
+#include "extip.h"
 
 typedef struct hub_search_data hub_search_data_t;
 struct hub_search_data
@@ -611,7 +612,11 @@ static int hub_cmd_UserIP(void *data, int argc, char **argv)
                  */
 
                 INFO("Hub reported my active IP as %s", b->argv[1]);
-                user_set_ip(hub->me, b->argv[1]);
+				if (extip_get_override()) {
+					user_set_ip(hub->me, b->argv[1]);
+				} else {
+					INFO("Ignoring reported IP");
+				}
             }
         }
 

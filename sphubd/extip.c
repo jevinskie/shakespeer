@@ -71,6 +71,7 @@ static const int num_lookup_hosts =
 
 static char *external_ip = NULL;
 static char *static_ip = NULL;
+static bool allow_hub_override = true;
 static time_t external_ip_lookup_time = 0;
 static bool use_static = false; /* true if manually set, disables automatic detection */
 
@@ -106,6 +107,16 @@ void extip_set_static(const char *ip)
 	    nc_send_external_ip_detected_notification(nc_default(), static_ip);
         }
     }
+}
+
+void extip_set_override(bool allow_override)
+{
+	allow_hub_override = allow_override;
+}
+
+bool extip_get_override()
+{
+	return allow_hub_override;
 }
 
 int get_netmask(struct in_addr *ip, struct in_addr *mask)
