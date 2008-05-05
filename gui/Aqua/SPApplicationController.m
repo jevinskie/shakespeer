@@ -465,7 +465,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
     
     NSEnumerator *e = [[menuOpenRecent itemArray] objectEnumerator];
     NSMenuItem *currentItem;
-    while (currentItem = [e nextObject]) {
+    while ((currentItem = [e nextObject]) != nil) {
         if ([[currentItem title] isNotEqualTo:@"Clear menu"] && ![currentItem isSeparatorItem])
             [recentHubs addObject:[currentItem title]];
     }
@@ -478,7 +478,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
     // clear the list of recent hubs
     NSEnumerator *e = [[menuOpenRecent itemArray] objectEnumerator];
     NSMenuItem *currentItem;
-    while (currentItem = [e nextObject]) {
+    while ((currentItem = [e nextObject]) != nil) {
         if ([[currentItem title] isNotEqualTo:@"Clear menu"] && ![currentItem isSeparatorItem])
             [menuOpenRecent removeItem:currentItem];
     }
