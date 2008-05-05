@@ -1,0 +1,57 @@
+{
+    IBClasses = (
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            ACTIONS = {
+                addSharedPath = id; 
+                removeSharedPath = id; 
+                selectCompleteFolder = id; 
+                selectDownloadFolder = id; 
+                setAutoSearchNewSources = id; 
+                setConnectionMode = id; 
+                setFollowRedirects = id; 
+                setHashingPriority = id; 
+                setIPAddress = id; 
+                setLogLevel = id; 
+                setPort = id; 
+                setRescanShareInterval = id; 
+                setSlots = id; 
+                testConnection = id; 
+                togglePauseHashing = id; 
+                updateSharedPaths = id; 
+                updateUserInfo = id; 
+            }; 
+            CLASS = SPPreferenceController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                IPAddressField = NSTextField; 
+                advancedView = NSView; 
+                completeFolder = NSTextField; 
+                descriptionField = NSTextField; 
+                downloadFolder = NSTextField; 
+                emailField = NSTextField; 
+                identityView = NSView; 
+                networkView = NSView; 
+                portField = NSTextField; 
+                rescanShareField = NSTextField; 
+                sharedPathsController = NSArrayController; 
+                sharesView = NSView; 
+                slotsField = NSTextField; 
+                slotsPerHubButton = NSButton; 
+                speedField = NSComboBox; 
+                testConnectionProgress = NSProgressIndicator; 
+                testPortButton = NSButton; 
+                testResults = NSTextField; 
+                updateSharedPathsIndicator = NSProgressIndicator; 
+            }; 
+            SUPERCLASS = NSWindowController; 
+        }, 
+        {
+            CLASS = WBIPv4Control; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {delegate = id; }; 
+            SUPERCLASS = NSControl; 
+        }
+    ); 
+    IBVersion = 1; 
+}

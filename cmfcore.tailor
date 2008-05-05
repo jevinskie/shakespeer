@@ -1,0 +1,18 @@
+[DEFAULT]
+verbose = True
+
+[project]
+target = svn:target
+start-revision = INITIAL
+root-directory = /Users/hakan/shakespeer
+state-file = tailor.state
+source = darcs:source
+subdir = .
+
+[darcs:source]
+repository = /Users/hakan/shakespeer_pristine/
+
+[svn:target]
+module = trunk/
+repository = https://shakespeer.googlecode.com/svn/
+

@@ -1,0 +1,28 @@
+ci "hub_cmd.h"
+
+cp hub
+cs hub_t
+
+a 0
+
+c $Lock string:lock string:pk
+c $Hello string:nick
+c $Quit string:nick
+c $MyINFO string:nick string:description string:speed string:email uint64:size regexp:\\$ALL ([^ ]+) ([^$]*)\\$[AP \x05]*\\$([^$\x01]*)[ \x01]*\\$([^$]*)\\$([^$]*)\\$?\\|?
+c $HubName string:hubname *
+c $Supports
+c $Search string:host int:port string:size_restricted string:is_minimum_size uint64:size string:search_string regexp:([^:]+):([^ ]+) ([FT])\\?([FT])\\?([0-9]+)\\?([0-9]+)\\?(.*)$
+c $MultiSearch
+c $SR
+c $ConnectToMe string:remote_nick string:sender
+c $RevConnectToMe string:nick string:remote_nick
+c $To: string:nick string:message regexp:[^ ]+ From: ([^ ]+) \\$(.*)|$
+c $NickList string:nicklist
+c $OpList string:oplist
+c $GetPass
+c $ForceMove string:new_address
+c $UserIP string:nick string:ip
+c $UserIP2 string:iplist *
+c $LogedIn
+c $BadPass
+c $ValidateDenide
