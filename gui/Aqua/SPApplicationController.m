@@ -66,6 +66,7 @@ static SPApplicationController *mySharedApplicationController = nil;
 
         NSDictionary *appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
             [@"~/Desktop/ShakesPeer Downloads" stringByExpandingTildeInPath], SPPrefsDownloadFolder,
+            [@"~/Desktop/ShakesPeer Downloads/Incomplete" stringByExpandingTildeInPath], SPPrefsIncompleteFolder,
             @"unconfigured-shakespeer-user", SPPrefsNickname,
             @"", SPPrefsEmail,
             @"DSL", SPPrefsSpeed,
@@ -224,6 +225,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
     [self setAutoSearchNewSources:[[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsAutoSearchNewSources]];
     [self setHashingPriority:[[NSUserDefaults standardUserDefaults] integerForKey:SPPrefsHashingPriority]];
     [self setDownloadFolder:[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsDownloadFolder]];
+    [self setIncompleteFolder:[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsIncompleteFolder]];
 
     return YES;
 }
@@ -668,6 +670,11 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 - (void)setDownloadFolder:(NSString *)downloadFolder
 {
     sp_send_set_download_directory(sp, [downloadFolder UTF8String]);
+}
+
+- (void)setIncompleteFolder:(NSString *)incompleteFolder
+{
+    sp_send_set_incomplete_directory(sp, [incompleteFolder UTF8String]);
 }
 
 #pragma mark -

@@ -134,6 +134,7 @@ void sendNotification(NSString *notificationName, NSString *key1, id arg1, ...);
 - (void)resumeHashing;
 - (void)setHashingPriority:(unsigned int)prio;
 - (void)setDownloadFolder:(NSString *)downloadFolder;
+- (void)setIncompleteFolder:(NSString *)incompleteFolder;
 - (void)registerUrlHandler;
 - (BOOL)setupSphubdConnection;
 - (void)removeSphubdConnection;

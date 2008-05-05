@@ -22,6 +22,7 @@
 #import <Foundation/Foundation.h>
 
 extern NSString *SPPrefsDownloadFolder;
+extern NSString *SPPrefsIncompleteFolder;
 extern NSString *SPPrefsNickname;
 extern NSString *SPPrefsSpeed;
 extern NSString *SPPrefsEmail;

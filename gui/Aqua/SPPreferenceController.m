@@ -54,8 +54,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
     self = [super initWithWindowNibName:@"Preferences"];
     if(self)
     {
-        /* Setup toolbar
-         */
+        /* Setup toolbar */
         blankView = [[NSView alloc] init];
         prefsToolbar = [[NSToolbar alloc] initWithIdentifier:@"prefsToolbar"];
         [prefsToolbar autorelease];
@@ -112,7 +111,39 @@ static float ToolbarHeightForWindow(NSWindow *window)
 
         [self setWindowFrameAutosaveName:@"PreferenceWindow"];
     }
+    
     return self;
+}
+
+- (void)awakeFromNib
+{
+    predefinedDownloadLocations = [[NSMutableArray alloc] initWithObjects:
+        @"~/Desktop",
+        @"~/Documents",
+        @"~/Movies",
+        @"~/Music",
+        @"~/Pictures",
+        nil];
+    
+    // Localize predefined download location names and add icons
+    NSEnumerator *e = [predefinedDownloadLocations objectEnumerator];
+    NSString *path;
+    while((path = [e nextObject]) != nil)
+    {
+        NSString *name = [path lastPathComponent];
+        
+        // Set the icon
+        [[downloadFolderButton itemWithTitle:name] setImage:[self smallIconForPath:path]];
+        
+        // Set the name
+        [[downloadFolderButton itemWithTitle:name] setTitle:[[NSFileManager defaultManager] displayNameAtPath:path]];
+    }
+    
+    // Set name and icon for current download folder
+    [self updateNameAndIconForDownloadFolder];
+    
+    // Set name and icon for current incomplete folder
+    [self updateNameAndIconForIncompleteFolder];
 }
 
 + (SPPreferenceController *)sharedPreferences
@@ -128,6 +159,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 - (void)dealloc
 {
     [sharedPaths release];
+    [predefinedDownloadLocations release];
     [super dealloc];
 }
 
@@ -424,26 +456,65 @@ static float ToolbarHeightForWindow(NSWindow *window)
     {
         return [[op filenames] objectAtIndex:0];
     }
+    
     return nil;
-}
-
-- (IBAction)setDownloadFolder:(id)sender
-{
-    NSString *path = [[sender stringValue] stringByAbbreviatingWithTildeInPath];
-    NSLog(@"setDownloadFolder: path = %@", path);
-    [[NSUserDefaults standardUserDefaults] setObject:path forKey:SPPrefsDownloadFolder];
-    [[SPApplicationController sharedApplicationController] setDownloadFolder:path];
 }
 
 - (IBAction)selectDownloadFolder:(id)sender
 {
-    NSString *path = [[self selectFolder] stringByAbbreviatingWithTildeInPath];
-    NSLog(@"selectDownloadFolder: path = %@", path);
+    NSString *path = nil;
+    
+    switch([sender tag])
+    {
+        case 0: // Current folder
+            path = [sender title]; break;
+        case 1:
+            path = @"~/Desktop"; break;
+        case 2:
+            path = @"~/Documents"; break;
+        case 3:
+            path = @"~/Movies"; break;
+        case 4:
+            path = @"~/Music"; break;
+        case 5:
+            path = @"~/Pictures"; break;
+        case 6: // Other…
+        {
+            path = [[self selectFolder] stringByAbbreviatingWithTildeInPath];
+            [downloadFolderButton selectItemAtIndex:0];
+            break;
+        }
+    }
     if(path)
     {
-        [downloadFolder setStringValue:path];
+        NSLog(@"Changed download folder to: %@", path);
         [[NSUserDefaults standardUserDefaults] setObject:path forKey:SPPrefsDownloadFolder];
         [[SPApplicationController sharedApplicationController] setDownloadFolder:path];
+        [self updateNameAndIconForDownloadFolder];
+    }
+}
+
+- (IBAction)selectIncompleteFolder:(id)sender
+{
+    NSString *path = nil;
+    
+    switch([sender tag])
+    {
+        case 0: // Current folder
+            path = [sender title]; break;
+        case 1: // Other…
+        {
+            path = [[self selectFolder] stringByAbbreviatingWithTildeInPath];
+            [incompleteFolderButton selectItemAtIndex:0];
+            break;
+        }
+    }
+    if(path)
+    {
+        NSLog(@"Changed incomplete folder to: %@", path);
+        [[NSUserDefaults standardUserDefaults] setObject:path forKey:SPPrefsIncompleteFolder];
+        [[SPApplicationController sharedApplicationController] setIncompleteFolder:path];
+        [self updateNameAndIconForIncompleteFolder];
     }
 }
 
@@ -589,6 +660,28 @@ static float ToolbarHeightForWindow(NSWindow *window)
 - (IBAction)setHashingPriority:(id)sender
 {
     [[SPApplicationController sharedApplicationController] setHashingPriority:[[sender selectedItem] tag]];
+}
+
+- (NSImage *)smallIconForPath:(NSString *)path
+{
+    NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFile:[path stringByExpandingTildeInPath]];
+    [icon setSize:NSMakeSize(16, 16)];
+    
+    return icon;
+}
+
+- (void)updateNameAndIconForDownloadFolder
+{
+    NSString *downloadFolder = [[NSUserDefaults standardUserDefaults] objectForKey:SPPrefsDownloadFolder];
+    [[downloadFolderButton itemAtIndex:0] setTitle:downloadFolder];
+    [[downloadFolderButton itemAtIndex:0] setImage:[self smallIconForPath:downloadFolder]];
+}
+
+- (void)updateNameAndIconForIncompleteFolder
+{
+    NSString *incompleteFolder = [[NSUserDefaults standardUserDefaults] objectForKey:SPPrefsIncompleteFolder];
+    [[incompleteFolderButton itemAtIndex:0] setTitle:incompleteFolder];
+    [[incompleteFolderButton itemAtIndex:0] setImage:[self smallIconForPath:incompleteFolder]];
 }
 
 @end

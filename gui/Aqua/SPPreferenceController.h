@@ -27,8 +27,10 @@
     IBOutlet NSView *networkView;
     IBOutlet NSView *sharesView;
     IBOutlet NSView *advancedView;
-
-    IBOutlet NSTextField *downloadFolder;
+    
+    IBOutlet NSPopUpButton *downloadFolderButton;
+    IBOutlet NSPopUpButton *incompleteFolderButton;
+    
     IBOutlet NSTextField *emailField;
     IBOutlet NSTextField *descriptionField;
     IBOutlet NSComboBox *speedField;
@@ -47,8 +49,9 @@
 
     NSView *blankView;
     NSToolbar *prefsToolbar;
-
+    
     NSMutableArray *sharedPaths;
+    NSMutableArray *predefinedDownloadLocations;
 
     unsigned long long totalShareSize;
     BOOL testInProgress;
@@ -61,8 +64,8 @@
 - (IBAction)addSharedPath:(id)sender;
 - (IBAction)removeSharedPath:(id)sender;
 - (IBAction)updateSharedPaths:(id)sender;
-- (IBAction)setDownloadFolder:(id)sender;
 - (IBAction)selectDownloadFolder:(id)sender;
+- (IBAction)selectIncompleteFolder:(id)sender;
 - (IBAction)setPort:(id)sender;
 - (IBAction)setIPAddress:(id)sender;
 - (IBAction)updateUserInfo:(id)sender;
@@ -81,6 +84,9 @@
 - (BOOL)isKeyWindow;
 - (void)addSharedPathsPath:(NSString *)aPath;
 - (void)updateAllSharedPaths;
+- (NSImage *)smallIconForPath:(NSString *)path;
+- (void)updateNameAndIconForDownloadFolder;
+- (void)updateNameAndIconForIncompleteFolder;
 
 @end
 

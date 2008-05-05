@@ -59,4 +59,5 @@ c resume-hashing
 c set-auto-search int:enabled
 c set-hash-prio uint:prio
 c set-download-directory string:download_directory
+c set-incomplete-directory string:incomplete_directory
 
