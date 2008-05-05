@@ -690,7 +690,7 @@ static int hub_cmd_BadPass(void *data, int argc, char **argv)
     INFO("Wrong password");
     hub->expected_disconnect = true;
     hub_close_connection(hub);
-    return 0;
+    return -1;
 }
 
 static int hub_cmd_ValidateDenide(void *data, int argc, char **argv)

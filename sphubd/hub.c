@@ -445,6 +445,7 @@ void hub_search(hub_t *hub, search_request_t *request)
 {
     return_if_fail(hub);
     return_if_fail(request);
+    return_if_fail(hub->logged_in);
 
     char *words_joined = 0;
     if(request->tth)
