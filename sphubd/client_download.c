@@ -128,9 +128,15 @@ cc_request_download(cc_t *cc)
                 /* When the directory is added to the queue, it is directly
                  * resolved if the filelist is directly available. Otherwise
                  * the filelist is queued and should be downloaded before the
-                 * directory */
+                 * directory. */
                 WARNING("unresolvable directory [%s] ???",
                         queue->source_filename);
+
+		/* Apparently there is an inconsistency in the queue data.
+		 * Instead of risk looping forever trying to resolve the
+		 * directory, just remove it.
+		 */
+                queue_remove_directory(queue->target_filename);
             }
         }
         else if(queue->is_filelist)
