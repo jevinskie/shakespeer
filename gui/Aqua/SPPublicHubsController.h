@@ -18,10 +18,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
-
+#import "SPSideBar.h"
 #include "hublist.h"
 
-@protocol SPSideBarItem;
 @class FilteringArrayController;
 
 /*!

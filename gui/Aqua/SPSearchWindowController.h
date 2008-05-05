@@ -21,8 +21,8 @@
 
 #import <Cocoa/Cocoa.h>
 #import "NSStringExtensions.h"
+#import "SPSideBar.h"
 
-@protocol SPSideBarItem;
 @class SPOutlineView;
 
 @interface SPSearchWindowController : NSWindowController < SPSideBarItem >

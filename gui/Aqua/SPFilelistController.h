@@ -20,10 +20,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
-
+#import "SPSideBar.h"
 #include "spclient.h"
 
-@protocol SPSideBarItem;
 @class SPOutlineView;
 
 @interface SPFilelistController : NSObject < SPSideBarItem >

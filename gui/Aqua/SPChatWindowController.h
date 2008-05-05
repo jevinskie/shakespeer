@@ -20,8 +20,7 @@
  */                                                                                      
 
 #import <Cocoa/Cocoa.h>
-
-@protocol SPSideBarItem;
+#import "SPSideBar.h"
 
 @interface SPChatWindowController : NSObject < SPSideBarItem >
 {

@@ -20,8 +20,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-
-@protocol SPSideBarItem;
+#import "SPSideBar.h"
 
 #define SPTransferState_Downloading 0
 #define SPTransferState_Uploading 1

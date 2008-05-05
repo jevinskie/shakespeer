@@ -20,8 +20,8 @@
 
 #import <Cocoa/Cocoa.h>
 #import "MHSysTree.h"
+#import "SPSideBar.h"
 
-@protocol SPSideBarItem;
 @class FilteringArrayController;
 
 /* There is one HubController created for each hub you're connected to. */
