@@ -53,6 +53,7 @@
 - (NSString *)nick;
 - (void)setStatus:(NSString *)aStatusString;
 - (NSString *)targetFilename;
+- (NSString *)filename;
 - (void)setFilename:(NSString *)aFilename;
 - (uint64_t)size;
 - (void)setSize:(uint64_t)aSize;

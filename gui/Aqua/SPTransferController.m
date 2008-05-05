@@ -207,6 +207,18 @@
     return nil;
 }
 
+- (SPTransferItem *)findFilelistTransferItemWithNick:(NSString *)aNick
+{
+    NSEnumerator *e = [transfers objectEnumerator];
+    SPTransferItem *tr;
+    while ((tr = [e nextObject]) != nil) {
+        if ([aNick isEqualToString:[tr nick]] && [[tr filename] hasPrefix:@"files.xml."] && [[tr filename] hasSuffix:@".bz2"]) {
+            return tr;
+        }
+    }
+    return nil;
+}
+
 - (SPTransferItem *)findTransferItemWithNick:(NSString *)aNick directions:(int)aDirectionMask
 {
     NSEnumerator *e = [transfers objectEnumerator];
@@ -249,8 +261,8 @@
 
 - (void)filelistFinishedNotification:(NSNotification *)aNotification
 {
-    NSString *targetFilename = [[aNotification userInfo] objectForKey:@"targetFilename"];
-    SPTransferItem *tr = [self findTransferItemWithTargetFilename:targetFilename];
+    NSString *nick = [[aNotification userInfo] objectForKey:@"nick"];
+    SPTransferItem *tr = [self findFilelistTransferItemWithNick:nick];
     if (!tr)
         // this is normal. we got a notification when the user loaded a cached filelist, 
         // so no file list was in the transfers.
@@ -546,6 +558,11 @@
 - (NSString *)targetFilename
 {
     return targetFilename;
+}
+
+- (NSString *)filename
+{
+    return [filename string];
 }
 
 - (NSString *)nick
