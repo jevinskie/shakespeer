@@ -45,7 +45,6 @@
 #include "ui.h"
 #include "log.h"
 #include "extra_slots.h"
-#include "dbenv.h"
 #include "extip.h"
 
 static char *socket_filename = NULL;
@@ -256,40 +255,14 @@ int start_search_listener(int port)
     return -1;
 }
 
-static void shutdown_sphubd_event(int fd, short condition, void *data) __attribute (( noreturn ));
-
 static void shutdown_sphubd_event(int fd, short condition, void *data)
 {
-    /* close all client connections and exit */
-    g_message("shutting down");
-    if(socket_filename && unlink(socket_filename) != 0)
-    {
-        g_warning("failed to unlink socket file '%s': %s",
-                socket_filename, strerror(errno));
-    }
-
-    sp_remove_pid(global_working_directory, "sphubd");
-
-    ui_close_all_connections();
-    cc_close_all_connections();
-    hub_close_all_connections();
-    hs_shutdown();
-    tthdb_close();
-    queue_close();
-    extra_slots_close();
-    close_default_db_environment();
-
-    /* be nice to valgrind */
-    free(global_working_directory);
-    free(argv0_path);
-    sp_log_close();
-
-    exit(6);
+    event_loopexit(NULL);
 }
 
 void shutdown_sphubd(void)
 {
-    shutdown_sphubd_event(0, EV_SIGNAL, NULL);
+    event_loopexit(NULL);
 }
 
 static void handle_download_finished_notification(nc_t *nc, const char *channel,
@@ -364,6 +337,9 @@ static void handle_download_finished_notification(nc_t *nc, const char *channel,
 
     DEBUG("moving [%s] to download directory [%s]", source, target);
 
+    /* FIXME: using rename() to move the file assumes the incomplete and
+     * download directory reside on the same device.
+     */
     if(rename(source, target) != 0)
     {
         ui_send_status_message(NULL, NULL, "Unable to move file %s: %s",
@@ -395,19 +371,8 @@ int main(int argc, char **argv)
 {
     /* if non-positive, don't listen for UI connections on a TCP socket */
     int ui_tcp_port = -1;
-    char *p, *e;
 
-    p = strdup(argv[0]);
-    e = strrchr(p, '/');
-    if(e)
-        *e = 0;
-    else
-    {
-        free(p);
-        p = strdup(".");
-    }
-    argv0_path = absolute_path(p);
-    free(p);
+    argv0_path = get_exec_path(argv[0]);
 
     int foreground = 0;
 
@@ -494,32 +459,16 @@ int main(int argc, char **argv)
     signal_set(&sigint_event, SIGINT, shutdown_sphubd_event, NULL);
     signal_add(&sigint_event, NULL);
 
-    /* initialize the database
-     */
-    xerr_t *err = 0;
-
-    g_debug("initializing share");
     global_share = share_new();
     return_val_if_fail(global_share, 7);
     share_tth_init_notifications(global_share);
-    if(tthdb_open() != 0)
-    {
-	g_warning("failed to open TTH database, aborting startup");
-	shutdown_sphubd();
-    }
 
+    tth_store_init();
     extra_slots_init();
 
-    g_debug("initializing queue");
     queue_init();
     queue_match_init();
     queue_auto_search_init();
-
-    /* start database checkpointing event */
-    db_schedule_maintenance();
-    db_prune_logfiles();
-
-    asprintf(&socket_filename, "%s/sphubd", global_working_directory);
 
     /* start hashing daemon
      */
@@ -534,6 +483,7 @@ int main(int argc, char **argv)
 
     /* create a socket for user interface connections
      */
+    asprintf(&socket_filename, "%s/sphubd", global_working_directory);
     int ui_fd = io_bind_unix_socket(socket_filename);
     if(ui_fd == -1)
         return 1;
@@ -545,6 +495,7 @@ int main(int argc, char **argv)
 
     if(ui_tcp_port > 0)
     {
+	xerr_t *err = 0;
         int ui_tcp_fd = io_bind_tcp_socket(ui_tcp_port, &err);
         if(ui_tcp_fd != -1)
         {
@@ -581,8 +532,30 @@ int main(int argc, char **argv)
 
     DEBUG("starting main loop");
     event_dispatch();
-    g_warning("main loop returned");
-    
+
+    /* close all client connections and exit */
+    INFO("shutting down");
+    if(socket_filename && unlink(socket_filename) != 0)
+    {
+        WARNING("failed to unlink socket file '%s': %s",
+                socket_filename, strerror(errno));
+    }
+
+    sp_remove_pid(global_working_directory, "sphubd");
+
+    ui_close_all_connections();
+    cc_close_all_connections();
+    hub_close_all_connections();
+    hs_shutdown();
+    tth_store_close();
+    queue_close();
+    extra_slots_close();
+
+    /* be nice to valgrind */
+    free(global_working_directory);
+    free(argv0_path);
+    sp_log_close();
+
     return 0;
 }
 

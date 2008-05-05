@@ -24,8 +24,7 @@
 void set_share_rescan_interval(int interval);
 int start_client_listener(int port);
 int start_search_listener(int port);
-void shutdown_sphubd(void)
-    __attribute (( noreturn ));
+void shutdown_sphubd(void);
 
 #endif
 
