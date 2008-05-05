@@ -24,7 +24,7 @@ RELEASE_DIR=release-build-$(TAG)
 else
 TAG_OPTION=
 RELEASE_DIR=release-build-HEAD
-VERSION=
+VERSION:=snapshot-$(shell date +"%Y%m%d")
 endif
 
 tag-release:
