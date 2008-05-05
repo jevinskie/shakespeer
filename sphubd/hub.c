@@ -331,7 +331,7 @@ static void hub_connect_async(hub_connect_data_t *hcd, struct in_addr *addr)
     hcd->resolved_ip = strdup( inet_ntoa(saddr.sin_addr) );
 
     xerr_t *err = 0;
-    int rc = io_connect_async(&saddr, hub_connect_event, hcd, &err);
+    int rc = io_connect_async(&saddr, global_port + 2, hub_connect_event, hcd, &err);
     if(rc != 0)
     {
         WARNING("Failed to connect to hub '%s': %s",

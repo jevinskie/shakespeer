@@ -31,6 +31,7 @@
 
 struct sockaddr_in *io_lookup(const char *hostport, xerr_t **err);
 int io_connect_async(struct sockaddr_in *remote_addr,
+	int local_port,
         void (*event_func)(int fd, int error, void *user_data),
         void *user_data,
         xerr_t **err);
