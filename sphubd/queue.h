@@ -28,6 +28,7 @@
 #define QUEUE_TARGET_MAXPATH 256
 #define QUEUE_SOURCE_MAXNICK 32
 
+#include <stdint.h>
 #include <time.h>
 #include <stdbool.h>
 
