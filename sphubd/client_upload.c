@@ -37,16 +37,17 @@
 
 void cc_finish_upload(cc_t *cc)
 {
-    INFO("finished uploading file");
     if(cc->local_fd != -1)
     {
+	INFO("finished uploading file [%s]", cc->local_filename);
         close(cc->local_fd);
         cc->local_fd = -1;
         ui_send_upload_finished(NULL, cc->local_filename);
     }
     else
     {
-        free(cc->leafdata);
+	INFO("finished uploading leafdata for [%s]", cc->local_filename);
+	/* don't free the leafdata, it belongs to the tth_store */
         cc->leafdata = NULL;
         cc->leafdata_index = 0;
         cc->leafdata_len = 0;
@@ -59,14 +60,15 @@ void cc_finish_upload(cc_t *cc)
     {
         /* extra slots last the whole connection */
         hub_free_upload_slot(cc->hub, cc->nick, cc->slot_state);
+	cc->slot_state = SLOT_NONE;
     }
 
     free(cc->local_filename);
     cc->local_filename = NULL;
 }
 
-/* reads at most nbytes bytes of data to be uploaded to client cc
- * places read bytes in *buf and returns number of bytes actually read
+/* Reads at most nbytes bytes of data to be uploaded to client cc.
+ * Places read bytes in *buf and returns number of bytes actually read.
  *
  * Data can be read either from a file (normal file upload) or from the
  * cc->leafdata buffer when uploading TTH leaf data.

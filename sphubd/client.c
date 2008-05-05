@@ -218,9 +218,8 @@ void cc_close_connection(cc_t *cc)
     DEBUG("closing down cc on fd %i", cc->fd);
 
     if(cc->bufev)
-    {
         bufferevent_free(cc->bufev);
-    }
+
     if(cc->fd != -1)
     {
         close(cc->fd);
@@ -228,14 +227,11 @@ void cc_close_connection(cc_t *cc)
     }
 
     if(event_initialized(&cc->handshake_timer_event))
-    {
         event_del(&cc->handshake_timer_event);
-    }
 
     if(cc->local_fd != -1)
-    {
         close(cc->local_fd);
-    }
+
     /* FIXME: must clean up any allocated slots if transfer broken */
 
     INFO("removing client connection with nick [%s]",
@@ -328,6 +324,9 @@ void cc_in_event(struct bufferevent *bufev, void *data)
     }
 }
 
+/* The out event is called when the output buffer is drained. This means
+ * we need to read more data from the file.
+ */
 void cc_out_event(struct bufferevent *bufev, void *data)
 {
     cc_t *cc = data;
@@ -347,6 +346,7 @@ void cc_out_event(struct bufferevent *bufev, void *data)
             size_t nbytes = sizeof(buf);
             if(cc->bytes_done + nbytes > cc->bytes_to_transfer)
             {
+		/* this is the last chunk */
                 nbytes = cc->bytes_to_transfer - cc->bytes_done;
             }
 
@@ -369,7 +369,11 @@ static void cc_err_event(struct bufferevent *bufev, short why, void *data)
 {
     cc_t *cc = data;
 
-    WARNING("why = 0x%02X", why);
+    if((why & EVBUFFER_EOF) == EVBUFFER_EOF)
+	INFO("end-of-file on connection %i", cc->fd);
+    else
+	INFO("error condition 0x%02X on connection %i", why, cc->fd);
+
     cc_close_connection(cc);
 }
 
@@ -384,8 +388,9 @@ static void cc_expire_handshake_timer_event_func(int fd, short condition, void *
 
 /* Add a socket for a client connection to the main event loop.
  *
- * INCOMING_CONNECTION is 1 if the client connection was initiated by
- * another peer (ie, as a response to a $ConnectToMe).
+ * INCOMING_CONNECTION is true if the client connection was initiated by
+ * another peer (ie, as a response to a $ConnectToMe). It is the connecting
+ * peer that sends the first requests.
  */
 static void cc_add_channel(int fd, bool incoming_connection, hub_t *hub,
         struct sockaddr_in *peer_addr)
@@ -398,7 +403,7 @@ static void cc_add_channel(int fd, bool incoming_connection, hub_t *hub,
 
     DEBUG("adding file descriptor %d to client connections", fd);
     cc->bufev = bufferevent_new(fd, cc_in_event, cc_out_event, cc_err_event, cc);
-    bufferevent_enable(cc->bufev, EV_READ | EV_WRITE);
+    bufferevent_enable(cc->bufev, EV_READ);
 
     LIST_INSERT_HEAD(&cc_list_head, cc, next);
 
@@ -523,46 +528,53 @@ static void cc_send_transfer_stats(int fd, short condition, void *data)
 {
     time_t now = time(0);
 
-    cc_t *cc;
-    for(cc = LIST_FIRST(&cc_list_head); cc != NULL;)
+    cc_t *cc, *next;
+    for(cc = LIST_FIRST(&cc_list_head); cc != NULL; cc = next)
     {
-        cc_t *next = LIST_NEXT(cc, next);
+        next = LIST_NEXT(cc, next);
 
-        if(cc->state == CC_STATE_BUSY)
-        {
-            unsigned idle_time = now - cc->last_transfer_activity;
-            if(idle_time > CC_IDLE_TIMEOUT)
-            {
-                ui_send_status_message(NULL, cc->hub->address,
-                        "Aborting transfer with nick '%s'"
-                        " after %u seconds idle time",
-                        cc->nick, CC_IDLE_TIMEOUT);
-                cc_close_connection(cc);
-            }
-            else
-            {
-                unsigned duration = now - cc->transfer_start_time;
-                unsigned bytes_per_sec = cc->bytes_done / (duration ? duration : 1);
+	/* skip idle connections */
+        if(cc->state != CC_STATE_BUSY)
+	    continue;
 
-                const char *target = NULL;
-                if(cc->direction == CC_DIR_DOWNLOAD && cc->current_queue)
-                {
-                    target = cc->current_queue->target_filename;
-                }
-                else if(cc->direction == CC_DIR_UPLOAD)
-                {
-                    target = cc->local_filename;
-                }
+	/* close stalled transfers */
+	unsigned idle_time = now - cc->last_transfer_activity;
+	if(idle_time > CC_IDLE_TIMEOUT)
+	{
+	    ui_send_status_message(NULL, cc->hub->address,
+		    "Aborting transfer with nick '%s'"
+		    " after %u seconds idle time",
+		    cc->nick, CC_IDLE_TIMEOUT);
+	    cc_close_connection(cc);
+	    continue;
+	}
 
-                if(target)
-                {
-                    ui_send_transfer_stats(NULL, target, cc->bytes_done + cc->offset,
-                            cc->filesize, bytes_per_sec);
-                }
-            }
-        }
-        
-        cc = next;
+	unsigned duration = now - cc->transfer_start_time;
+	unsigned bytes_per_sec = cc->bytes_done / (duration ? duration : 1);
+
+	const char *target = NULL;
+	if(cc->direction == CC_DIR_DOWNLOAD && cc->current_queue)
+	{
+	    target = cc->current_queue->target_filename;
+	}
+	else if(cc->direction == CC_DIR_UPLOAD)
+	{
+	    target = cc->local_filename;
+	}
+
+	if(target)
+	{
+	    ui_send_transfer_stats(NULL, target, cc->bytes_done + cc->offset,
+		    cc->filesize, bytes_per_sec);
+	}
+
+#if 0
+	/* send stats for directories */
+	if(cc->direction == CC_DIR_DOWNLOAD && cc->current_queue && cc->current_queue->is_directory)
+	{
+	    /* Not implemented yet. */
+	}
+#endif
     }
 
     /* re-schedule event */
