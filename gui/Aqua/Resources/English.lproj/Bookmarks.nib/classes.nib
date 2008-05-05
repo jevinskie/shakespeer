@@ -4,6 +4,7 @@
         {
             ACTIONS = {
                 connectToSelectedBookmark = id; 
+                duplicateBookmark = id; 
                 editBookmarkCancel = id; 
                 editBookmarkExecute = id; 
                 editBookmarkShow = id; 
@@ -17,6 +18,7 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 arrayController = NSArrayController; 
+                bookmarkMenu = NSMenu; 
                 bookmarkTable = NSTableView; 
                 bookmarkView = NSView; 
                 editBookmark = NSWindow; 

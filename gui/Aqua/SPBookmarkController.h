@@ -28,6 +28,7 @@
     IBOutlet NSView *bookmarkView;
     IBOutlet NSArrayController *arrayController;
     IBOutlet NSTableView *bookmarkTable;
+    IBOutlet NSMenu *bookmarkMenu;
     
     IBOutlet NSWindow *newBookmark;
     IBOutlet NSTextField *newBookmarkName;
@@ -75,6 +76,8 @@
 - (IBAction)editBookmarkShow:(id)sender;
 - (IBAction)editBookmarkExecute:(id)sender;
 - (IBAction)editBookmarkCancel:(id)sender;
+
+- (IBAction)duplicateBookmark:(id)sender;
 
 - (void)removeBookmarkShow:(id)sender;
 - (void)removeBookmarkSheetDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;

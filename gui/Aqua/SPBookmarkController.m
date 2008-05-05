@@ -89,6 +89,7 @@
 {
     [bookmarkTable setTarget:self];
     [bookmarkTable setDoubleAction:@selector(connectToSelectedBookmark:)];
+    [bookmarkTable setMenu:bookmarkMenu];
 }
 
 - (void)dealloc
@@ -446,6 +447,27 @@
 - (IBAction)editBookmarkCancel:(id)sender
 {
     [NSApp endSheet:editBookmark];
+}
+
+#pragma mark -
+#pragma mark Duplicate bookmark
+
+- (IBAction)duplicateBookmark:(id)sender
+{
+    NSArray *selectedObjects = [arrayController selectedObjects];
+    if([selectedObjects count])
+    {
+        NSDictionary *bm = [selectedObjects objectAtIndex:0];
+        
+        // Duplicate the selected bookmark
+        [self addBookmarkWithName:[[bm objectForKey:@"name"] stringByAppendingString:@" copy"]
+                          address:[bm objectForKey:@"address"]
+                             nick:@""
+                         password:@""
+                      description:[bm objectForKey:@"descriptionString"]
+                      autoconnect:[[bm objectForKey:@"autoConnect"] boolValue]
+                         encoding:[[self allowedEncodings] objectAtIndex:[[bm objectForKey:@"encodingIndex"] intValue]]];
+    }
 }
 
 #pragma mark -
