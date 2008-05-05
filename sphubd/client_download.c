@@ -43,7 +43,8 @@
  *
  * returns 0 on success, any other value on error
  */
-static int cc_send_download_request(cc_t *cc)
+static int
+cc_send_download_request(cc_t *cc)
 {
     return_val_if_fail(cc, -1);
     return_val_if_fail(cc->current_queue, -1);
@@ -80,7 +81,8 @@ static int cc_send_download_request(cc_t *cc)
             else
 #endif
             {
-                return cc_send_command_as_is(cc, "$ADCGET file %s%s %"PRIu64" %"PRIu64"|",
+                return cc_send_command_as_is(cc,
+			"$ADCGET file %s%s %"PRIu64" %"PRIu64"|",
                         base, request_filename,
                         queue->offset, queue->size - queue->offset);
             }
@@ -99,7 +101,8 @@ static int cc_send_download_request(cc_t *cc)
     }
 }
 
-int cc_request_download(cc_t *cc)
+int
+cc_request_download(cc_t *cc)
 {
     return_val_if_fail(cc, -1);
     return_val_if_fail(cc->current_queue == NULL || cc->fetch_leaves == 2, -1);

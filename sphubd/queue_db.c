@@ -38,7 +38,8 @@ struct queue_store *q_store = NULL;
 
 static void queue_db_normalize(void);
 
-static void queue_parse_add_target(char *buf, size_t len)
+static void
+queue_parse_add_target(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "+T:" */
 	len -= 3;
@@ -79,7 +80,8 @@ static void queue_parse_add_target(char *buf, size_t len)
 	queue_target_add(filename, tth, target_directory, s, f, p, seq);
 }
 
-static void queue_parse_add_source(char *buf, size_t len)
+static void
+queue_parse_add_source(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "+S:" */
 	len -= 3;
@@ -97,7 +99,8 @@ static void queue_parse_add_source(char *buf, size_t len)
 	queue_add_source(nick, target_filename, source_filename);
 }
 
-static void queue_parse_add_filelist(char *buf, size_t len)
+static void
+queue_parse_add_filelist(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "+F:" */
 	len -= 3;
@@ -114,7 +117,8 @@ static void queue_parse_add_filelist(char *buf, size_t len)
 	queue_add_filelist(nick, auto_matched);
 }
 
-static void queue_parse_add_directory(char *buf, size_t len)
+static void
+queue_parse_add_directory(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "+D:" */
 	len -= 3;
@@ -132,7 +136,8 @@ static void queue_parse_add_directory(char *buf, size_t len)
 	queue_db_add_directory(target_directory, nick, source_directory);
 }
 
-static void queue_parse_remove_directory(char *buf, size_t len)
+static void
+queue_parse_remove_directory(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "-D:" */
 	len -= 3;
@@ -141,7 +146,8 @@ static void queue_parse_remove_directory(char *buf, size_t len)
 	queue_remove_directory(buf);
 }
 
-static void queue_parse_set_directory_resolved(char *buf, size_t len)
+static void
+queue_parse_set_directory_resolved(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "=R:" */
 	len -= 3;
@@ -157,7 +163,8 @@ static void queue_parse_set_directory_resolved(char *buf, size_t len)
 	queue_db_set_resolved(target_directory, nfiles);
 }
 
-static void queue_parse_set_priority(char *buf, size_t len)
+static void
+queue_parse_set_priority(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "=P:" */
 	len -= 3;
@@ -171,7 +178,8 @@ static void queue_parse_set_priority(char *buf, size_t len)
 	queue_set_priority(target_filename, priority);
 }
 
-static void queue_parse_remove_target(char *buf, size_t len)
+static void
+queue_parse_remove_target(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "-T:" */
 	len -= 3;
@@ -180,7 +188,8 @@ static void queue_parse_remove_target(char *buf, size_t len)
 	queue_remove_target(buf);
 }
 
-static void queue_parse_remove_filelist(char *buf, size_t len)
+static void
+queue_parse_remove_filelist(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "-F:" */
 	len -= 3;
@@ -189,7 +198,8 @@ static void queue_parse_remove_filelist(char *buf, size_t len)
 	queue_remove_filelist(buf);
 }
 
-static void queue_parse_remove_source(char *buf, size_t len)
+static void
+queue_parse_remove_source(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "-S:" */
 	len -= 3;
@@ -203,7 +213,8 @@ static void queue_parse_remove_source(char *buf, size_t len)
 	queue_remove_source(target_filename, nick);
 }
 
-static void queue_load(void)
+static void
+queue_load(void)
 {
 	return_if_fail(q_store);
 	return_if_fail(q_store->fp);
@@ -297,7 +308,8 @@ static void queue_load(void)
 	q_store->loading = false;
 }
 
-static void queue_db_open_logfile(void)
+static void
+queue_db_open_logfile(void)
 {
 	return_if_fail(q_store);
 
@@ -314,7 +326,8 @@ static void queue_db_open_logfile(void)
 	free(qlog_filename);
 }
 
-void queue_init(void)
+void
+queue_init(void)
 {
 	INFO("initializing queue");
 
@@ -335,7 +348,8 @@ void queue_init(void)
 	setvbuf(q_store->fp, NULL, _IOLBF, 0);
 }
 
-void queue_target_free(struct queue_target *qt)
+void
+queue_target_free(struct queue_target *qt)
 {
 	if(qt)
 	{
@@ -346,7 +360,8 @@ void queue_target_free(struct queue_target *qt)
 	}
 }
 
-void queue_source_free(struct queue_source *qs)
+void
+queue_source_free(struct queue_source *qs)
 {
 	if(qs)
 	{
@@ -358,7 +373,8 @@ void queue_source_free(struct queue_source *qs)
 	}
 }
 
-static void queue_filelist_free(struct queue_filelist *qf)
+static void
+queue_filelist_free(struct queue_filelist *qf)
 {
 	if(qf)
 	{
@@ -368,7 +384,8 @@ static void queue_filelist_free(struct queue_filelist *qf)
 	}
 }
 
-static void queue_directory_free(struct queue_directory *qd)
+static void
+queue_directory_free(struct queue_directory *qd)
 {
 	if(qd)
 	{
@@ -380,7 +397,8 @@ static void queue_directory_free(struct queue_directory *qd)
 	}
 }
 
-void queue_close(void)
+void
+queue_close(void)
 {
 	return_if_fail(q_store);
 
@@ -413,7 +431,8 @@ void queue_close(void)
 	INFO("queue closed");
 }
 
-queue_target_t *queue_lookup_target(const char *target_filename)
+queue_target_t *
+queue_lookup_target(const char *target_filename)
 {
 	return_val_if_fail(q_store, NULL);
 	return_val_if_fail(target_filename, NULL);
@@ -428,7 +447,8 @@ queue_target_t *queue_lookup_target(const char *target_filename)
 	return NULL;
 }
 
-queue_target_t *queue_lookup_target_by_tth(const char *tth)
+queue_target_t *
+queue_lookup_target_by_tth(const char *tth)
 {
 	return_val_if_fail(q_store, NULL);
 	return_val_if_fail(tth, NULL);
@@ -443,7 +463,8 @@ queue_target_t *queue_lookup_target_by_tth(const char *tth)
 	return NULL;
 }
 
-queue_filelist_t *queue_lookup_filelist(const char *nick)
+queue_filelist_t *
+queue_lookup_filelist(const char *nick)
 {
 	return_val_if_fail(q_store, NULL);
 	return_val_if_fail(nick, NULL);
@@ -458,7 +479,8 @@ queue_filelist_t *queue_lookup_filelist(const char *nick)
 	return NULL;
 }
 
-queue_directory_t *queue_db_lookup_directory(const char *target_directory)
+queue_directory_t *
+queue_db_lookup_directory(const char *target_directory)
 {
 	return_val_if_fail(q_store, NULL);
 	return_val_if_fail(target_directory, NULL);
@@ -473,7 +495,8 @@ queue_directory_t *queue_db_lookup_directory(const char *target_directory)
 	return NULL;
 }
 
-struct queue_target *queue_target_add(const char *target_filename,
+struct queue_target *
+queue_target_add(const char *target_filename,
 	const char *tth,
 	const char *target_directory,
 	uint64_t size,
@@ -511,14 +534,16 @@ struct queue_target *queue_target_add(const char *target_filename,
 			}
 			else
 			{
-				base_filename = xstrndup(target_filename, last_dot - target_filename);
+				base_filename = xstrndup(target_filename,
+					last_dot - target_filename);
 				extension = strdup(last_dot + 1);
 			}
 		}
 
 		/* ok, missing or differing TTHs, make target filename unique */
 		free(unique_target_filename);
-		asprintf(&unique_target_filename, "%s-%i.%s", base_filename, index++, extension);
+		asprintf(&unique_target_filename, "%s-%i.%s",
+			base_filename, index++, extension);
 	}
 
 	free(base_filename);
@@ -560,7 +585,8 @@ struct queue_target *queue_target_add(const char *target_filename,
 }
 
 /* returns 0 if the source was added, else non-zero */
-int queue_add_source(const char *nick, const char *target_filename,
+int
+queue_add_source(const char *nick, const char *target_filename,
 	const char *source_filename)
 {
 	return_val_if_fail(nick, -1);
@@ -606,7 +632,8 @@ int queue_add_source(const char *nick, const char *target_filename,
 	return 0; /* queue source was added */
 }
 
-int queue_remove_filelist(const char *nick)
+int
+queue_remove_filelist(const char *nick)
 {
 	return_val_if_fail(q_store, -1);
 	return_val_if_fail(nick, -1);
@@ -632,7 +659,8 @@ int queue_remove_filelist(const char *nick)
 	return 0;
 }
 
-int queue_db_remove_target(const char *target_filename)
+int
+queue_db_remove_target(const char *target_filename)
 {
 	return_val_if_fail(q_store, -1);
 	return_val_if_fail(target_filename, -1);
@@ -659,7 +687,8 @@ int queue_db_remove_target(const char *target_filename)
 	return 0;
 }
 
-int queue_remove_target(const char *target_filename)
+int
+queue_remove_target(const char *target_filename)
 {
 	return_val_if_fail(target_filename, -1);
 
@@ -707,7 +736,8 @@ int queue_remove_target(const char *target_filename)
 }
 
 /* removes all sources for the target filename */
-int queue_remove_sources(const char *target_filename)
+int
+queue_remove_sources(const char *target_filename)
 {
 	return_val_if_fail(target_filename, -1);
 
@@ -731,7 +761,8 @@ int queue_remove_sources(const char *target_filename)
 	return 0;
 }
 
-int queue_remove_sources_by_nick(const char *nick)
+int
+queue_remove_sources_by_nick(const char *nick)
 {
 	return_val_if_fail(nick, -1);
 
@@ -760,7 +791,8 @@ int queue_remove_sources_by_nick(const char *nick)
 	return 0;
 }
 
-void queue_db_add_directory(const char *target_directory,
+void
+queue_db_add_directory(const char *target_directory,
 	const char *nick, const char *source_directory)
 {
 	return_if_fail(target_directory);
@@ -788,7 +820,8 @@ void queue_db_add_directory(const char *target_directory,
 		queue_db_print_add_directory(q_store->fp, qd);
 }
 
-int queue_db_remove_directory(const char *target_directory)
+int
+queue_db_remove_directory(const char *target_directory)
 {
 	DEBUG("removing directory [%s]", target_directory);
 
@@ -814,7 +847,8 @@ int queue_db_remove_directory(const char *target_directory)
 	return 0;
 }
 
-queue_directory_t *queue_db_lookup_unresolved_directory_by_nick(const char *nick)
+queue_directory_t *
+queue_db_lookup_unresolved_directory_by_nick(const char *nick)
 {
 	return_val_if_fail(nick, NULL);
 
@@ -834,7 +868,8 @@ queue_directory_t *queue_db_lookup_unresolved_directory_by_nick(const char *nick
 	return NULL;
 }
 
-void queue_db_set_resolved(const char *target_directory, unsigned nfiles)
+void
+queue_db_set_resolved(const char *target_directory, unsigned nfiles)
 {
 	DEBUG("setting [%s] as resolved, [%u] files", target_directory, nfiles);
 
@@ -861,7 +896,8 @@ void queue_db_set_resolved(const char *target_directory, unsigned nfiles)
 	}
 }
 
-struct queue_target *queue_target_duplicate(struct queue_target *qt)
+struct queue_target *
+queue_target_duplicate(struct queue_target *qt)
 {
 	return_val_if_fail(qt, NULL);
 
@@ -916,7 +952,8 @@ queue_db_print_add_source(FILE *fp, struct queue_source *qs)
 	return rc;
 }
 
-int queue_db_print_remove_source(FILE *fp, struct queue_source *qs)
+int
+queue_db_print_remove_source(FILE *fp, struct queue_source *qs)
 {
 	return_val_if_fail(fp, -1);
 	return_val_if_fail(qs, -1);
@@ -1022,7 +1059,8 @@ queue_db_save(FILE *fp)
 	return 0;
 }
 
-static void queue_db_normalize(void)
+static void
+queue_db_normalize(void)
 {
 	INFO("normalizing queue database");
 
@@ -1051,7 +1089,7 @@ static void queue_db_normalize(void)
 		asprintf(&qlog_filename, "%s/%s",
 			global_working_directory, QUEUE_DB_FILENAME);
 
-		INFO("atomically replaces queue database");
+		INFO("atomically replacing queue database");
 
 		if(rename(tmpfile, qlog_filename) != 0) 
 		{
