@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <string.h>
 
+#include <sys/types.h>
 #include <event.h>
 
 #include "share.h"
