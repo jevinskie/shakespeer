@@ -166,7 +166,7 @@ static int hub_search_from_self(hub_t *hub, share_search_t *s)
     if(s->passive)
         rc = (g_utf8_collate(s->nick, hub->me->nick) == 0);
     else
-        rc = (strcmp(s->host, hub->me->ip) == 0 && global_port == s->port);
+        rc = (hub->me->ip != NULL && strcmp(s->host, hub->me->ip) == 0 && global_port == s->port);
 
     return rc;
 }

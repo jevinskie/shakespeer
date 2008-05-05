@@ -266,6 +266,7 @@ static void hub_connect_event(int fd, int error, void *user_data)
         if(hub)
         {
             hub_attach_io_channel(hub, fd);
+	    user_set_ip(hub->me, extip_get(hub->fd, hub->hubip));
         }
     }
     else

@@ -313,6 +313,7 @@ static void extip_response_handler(struct evhttp_request *req, void *data)
 		nc_send_external_ip_detected_notification(nc_default(), ip);
 		free(external_ip);
 		external_ip = ip;
+		external_ip_lookup_time = time(0);
 	}
 
 	/* evhttp_request_free(req); */

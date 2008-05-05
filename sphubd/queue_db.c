@@ -848,17 +848,15 @@ queue_directory_t *queue_db_lookup_unresolved_directory_by_nick(const char *nick
 {
 	return_val_if_fail(nick, NULL);
 
-	DEBUG("looking for unresolved directories for [%s]", nick);
-
 	struct queue_directory *qd;
 	TAILQ_FOREACH(qd, &q_store->directories, link)
 	{
-		DEBUG("nick [%s], target [%s], source [%s], flags %i",
-			qd->nick, qd->target_directory,
-			qd->source_directory, qd->flags);
 		if(strcmp(nick, qd->nick) == 0 &&
 			(qd->flags & QUEUE_DIRECTORY_RESOLVED) == 0)
 		{
+			DEBUG("nick [%s], target [%s], source [%s], flags %i",
+				qd->nick, qd->target_directory,
+				qd->source_directory, qd->flags);
 			return qd;
 		}
 	}

@@ -459,6 +459,8 @@ int main(int argc, char **argv)
     signal_set(&sigint_event, SIGINT, shutdown_sphubd_event, NULL);
     signal_add(&sigint_event, NULL);
 
+    extip_init();
+
     global_share = share_new();
     return_val_if_fail(global_share, 7);
     share_tth_init_notifications(global_share);
@@ -527,8 +529,6 @@ int main(int argc, char **argv)
     evtimer_add(&download_trigger_event, &tv);
 
     queue_connect_schedule_trigger(connect_trigger_callback);
-
-    extip_init();
 
     DEBUG("starting main loop");
     event_dispatch();
