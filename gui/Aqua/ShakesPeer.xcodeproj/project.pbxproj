@@ -17,9 +17,7 @@
 		287851BA0A179F5D00A2992F /* minus.png in Resources */ = {isa = PBXBuildFile; fileRef = 287851B90A179F5D00A2992F /* minus.png */; };
 		287851BC0A179F6500A2992F /* plus.png in Resources */ = {isa = PBXBuildFile; fileRef = 287851BB0A179F6500A2992F /* plus.png */; };
 		28A36F4D0A10B21600B6EE86 /* shakespeer.icns in Resources */ = {isa = PBXBuildFile; fileRef = 28A36F490A10B1BD00B6EE86 /* shakespeer.icns */; };
-		28D1DFA40A2A023000F9F9EE /* SPKeychain.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 28D1DFA20A2A023000F9F9EE /* SPKeychain.h */; };
 		28D1DFA50A2A023000F9F9EE /* SPKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D1DFA30A2A023000F9F9EE /* SPKeychain.m */; };
-		28F0ACF90A29E7E100FFEC99 /* MHSysTree.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 28F0ACF70A29E7E100FFEC99 /* MHSysTree.h */; };
 		28F0ACFA0A29E7E100FFEC99 /* MHSysTree.m in Sources */ = {isa = PBXBuildFile; fileRef = 28F0ACF80A29E7E100FFEC99 /* MHSysTree.m */; };
 		FC7E1A48097E6AA30087431A /* Bookmarks.nib in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A2E097E6AA30087431A /* Bookmarks.nib */; };
 		FC7E1A49097E6AA30087431A /* ChatWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A30097E6AA30087431A /* ChatWindow.nib */; };
@@ -160,8 +158,6 @@
 			dstSubfolderSpec = 10;
 			files = (
 				FC9FE9400982BA1500264848 /* Growl.framework in Copy Frameworks */,
-				28F0ACF90A29E7E100FFEC99 /* MHSysTree.h in Copy Frameworks */,
-				28D1DFA40A2A023000F9F9EE /* SPKeychain.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
