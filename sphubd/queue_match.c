@@ -29,7 +29,10 @@
 #include "queue.h"
 #include "xstr.h"
 
-static int queue_match_search_response_flag = 1;
+#include "ui.h"
+
+static bool queue_match_search_response = true;
+static bool queue_auto_download_filelists = true;
 
 typedef struct queue_match_filelist_data queue_match_filelist_data_t;
 struct queue_match_filelist_data
@@ -136,7 +139,7 @@ static void queue_handle_search_response_notification(nc_t *nc,
         nc_search_response_t *notification,
         void *user_data)
 {
-    if(queue_match_search_response_flag == 0)
+    if(!queue_match_search_response)
     {
         return;
     }
@@ -178,12 +181,13 @@ static void queue_handle_search_response_notification(nc_t *nc,
                 queue_match_filelist(existing_filelist, resp->nick);
                 free(existing_filelist);
             }
-            else
+            else if(queue_auto_download_filelists)
             {
                 /* we have to download it first (matching is done
                  * automagically) */
 
-                g_info("queueing filelist from [%s] for auto-matching",
+                ui_send_status_message(NULL, NULL, 
+                        "queueing filelist from [%s] for auto-matching",
                         resp->nick);
                 queue_add_filelist(resp->nick, 1 /* auto-matched */);
             }

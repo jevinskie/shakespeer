@@ -9,9 +9,7 @@ sphubd:
 Low(er) priority:
 
 * fix transfer-stats when uploading the same file to two or more users
-* detect and handle hub redirection loops
 * make extip_detect asynchronous
-* check TTH on downloaded files
 * configurable number of download slots (now unlimited)
 * report (total) up/download statistics continuously
 * parse $HubTopic commands
@@ -37,14 +35,6 @@ gui:
 * Remove 'Keep backend running in background' option
 * Add Filemenu item "Quit but keep backend running"
 * kill -TERM/-KILL sphubd + sphashd if not gone after shutdown
-
-* rework download queue / transfer lists
-  - rename to Downloads
-  - remove finished transfers (keep them greyed out in the dl queue instead)
-  - add command to remove completed transfers from the download (as in soulseeX)
-  ? finished transfers: persistent transfer history
-  - replace Transfers view with Uploads
-  - show stats for complete directory tree in downloads
 
 * Tab completion on nicknames in main chat
 ? Menu option to download to separate location

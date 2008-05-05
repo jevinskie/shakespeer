@@ -291,6 +291,12 @@ void share_search_free(share_search_t *s)
 #include "globals.h"
 #include "unit_test.h"
 
+#include "ui.h"
+int ui_send_status_message(ui_t *ui, const char *hub_address, const char *message, ...)
+{
+    return 0;
+}
+
 int main(void)
 {
     global_working_directory = "/tmp";

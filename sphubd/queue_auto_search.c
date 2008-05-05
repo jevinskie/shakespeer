@@ -50,18 +50,18 @@ static void queue_auto_search_sources_event_func(int fd, short why,
         void *data);
 #endif
 
-static int is_recently_searched(const char *tth)
+static bool is_recently_searched(const char *tth)
 {
     struct recent_search_entry *e;
     TAILQ_FOREACH(e, &recent_searches_head, link)
     {
         if(strcmp(e->tth, tth) == 0)
         {
-            return 1;
+            return true;
         }
     }
 
-    return 0;
+    return false;
 }
 
 static char *queue_auto_search_get_tth(void)
@@ -159,7 +159,7 @@ void queue_schedule_auto_search_sources(int enable)
 
     if(enable)
     {
-        struct timeval tv = {.tv_sec = 90, .tv_usec = 0};
+        struct timeval tv = {.tv_sec = 123, .tv_usec = 0};
         evtimer_add(&ev, &tv);
     }
 }

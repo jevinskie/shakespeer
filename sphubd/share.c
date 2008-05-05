@@ -34,9 +34,9 @@
 #include "log.h"
 #include "base32.h"
 #include "nfkc.h"
-
 #include "notifications.h"
 #include "share.h"
+#include "ui.h"
 
 RB_GENERATE(file_tree, share_file, entry, share_file_cmp);
 
@@ -95,11 +95,8 @@ int share_add(share_t *share, const char *path)
         share->bloom = bloom_create(32768);
     }
 
-    g_debug("scanning directory %s...", path);
-#ifdef HAVE_UI
-    /* FIXME: send notification about scanning start */
     ui_send_status_message(NULL, NULL, "Scanning %s...", path);
-#endif
+
     return share_scan(share, mp);
 }
 
@@ -121,7 +118,7 @@ void share_rescan(share_t *share)
     }
 }
 
-/* is_rescan should be true is the share is being removed due to a rescan.
+/* is_rescan should be true if the share is being removed due to a rescan.
  * Otherwise the notification handler will send an updated MyINFO command to
  * the hub, possibly causing a low share kick.
  */
@@ -307,16 +304,6 @@ share_mountpoint_t *share_lookup_mountpoint(share_t *share,
     return NULL;
 }
 
-#if 0
-int share_file_cmp(share_file_t *a, share_file_t *b)
-{
-    if(a == NULL)
-        return b == NULL ? 0 : -1;
-    else
-        return b == NULL ? 1 : strcmp(a->path, b->path);
-}
-#endif
-
 /*
  * /folder
  * /folder/prout
@@ -354,14 +341,10 @@ static int share_path_cmp(const char *a, const char *b)
         slash_a = strchr(pa, '/');
         slash_b = strchr(pb, '/');
 
-        /* g_debug("slash_a = [%s], pa = [%s]", slash_a, pa); */
-        /* g_debug("slash_b = [%s], pb = [%s]", slash_b, pb); */
-
         if(slash_a == NULL)
         {
             if(slash_b)
             {
-                /* g_debug("a < b"); */
                 return -1;
             }
             /* slash_a = a + a_total_len; */
@@ -371,7 +354,6 @@ static int share_path_cmp(const char *a, const char *b)
         {
             if(slash_a)
             {
-                /* g_debug("a > b"); */
                 return 1;
             }
             /* slash_b = b + b_total_len; */
@@ -380,7 +362,6 @@ static int share_path_cmp(const char *a, const char *b)
         if(slash_a == NULL)
         {
             rc = strcmp(a, b);
-            /* g_debug("no more slashes, strcmp([%s], [%s]) == %i", a, b, rc); */
             break;
         }
 
@@ -392,13 +373,11 @@ static int share_path_cmp(const char *a, const char *b)
             minlen = blen;
 
         rc = strncmp(a, b, minlen);
-        /* g_debug("got slashes, strncmp([%s], [%s], %i) == %i", a, b, minlen, rc); */
 
         if(rc == 0 && alen != blen)
         {
             rc = alen - blen;
         }
-        /* g_debug("rc == %i", rc); */
     } while(rc == 0);
 
     return rc < 0 ? -1 : 1;
@@ -624,6 +603,11 @@ void share_get_stats(share_t *share, share_stats_t *stats)
 
 #ifdef TEST
 #include "unit_test.h"
+
+int ui_send_status_message(ui_t *ui, const char *hub_address, const char *message, ...)
+{
+    return 0;
+}
 
 int main(void)
 {
