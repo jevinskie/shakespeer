@@ -5,6 +5,7 @@
             ACTIONS = {
                 cancelUpdate = id; 
                 checkForUpdates = id; 
+                clearRecentHubs = id; 
                 closeCurrentSidebarItem = id; 
                 connectToBackendServer = id; 
                 donate = id; 

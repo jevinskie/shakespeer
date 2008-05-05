@@ -113,7 +113,16 @@ void sendNotification(NSString *notificationName, NSString *key1, id arg1, ...);
 - (void)addSharedPath:(NSString *)aPath;
 - (void)removeSharedPath:(NSString *)aPath;
 - (void)cancelTransfer:(NSString *)targetFilename;
+
+#pragma mark Recent hubs
+
 - (void)recentOpenHub:(id)sender;
+- (void)addRecentHub:(NSString *)anAddress;
+- (NSArray *)recentHubs;
+- (IBAction)clearRecentHubs:(id)sender;
+
+#pragma mark -
+
 - (void)setPort:(int)aPort;
 - (void)setIPAddress:(NSString *)anIPAddress;
 - (void)setPassword:(NSString *)aPassword forHub:(NSString *)aHubAddress;

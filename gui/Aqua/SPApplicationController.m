@@ -45,6 +45,8 @@
 # include "../../version.h"
 #endif
 
+#define MAX_RECENT_HUBS 10
+
 static SPApplicationController *mySharedApplicationController = nil;
 
 #pragma mark -
@@ -284,14 +286,6 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
                         contextInfo:nil];
 }
 
-- (void)addRecentHub:(NSString *)anAddress
-{
-    NSMenuItem *hubMenuItem = [menuOpenRecent addItemWithTitle:anAddress
-                                                        action:@selector(recentOpenHub:)
-                                                 keyEquivalent:@""];
-    [hubMenuItem setTarget:self];
-}
-
 - (IBAction)connectToBackendServer:(id)sender
 {
     if ([self setupSphubdConnection] == NO) {
@@ -325,7 +319,8 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 
         /* add the stored recent hubs to the menu */
         NSArray *recentHubs = [[NSUserDefaults standardUserDefaults] stringArrayForKey:SPPrefsRecentHubs];
-        e = [recentHubs objectEnumerator];
+        // use the reverse enumerator so that the most recent hub is at the top
+        e = [recentHubs reverseObjectEnumerator];
         NSString *recentHub;
         while ((recentHub = [e nextObject]) != nil) {
             [self addRecentHub:recentHub];
@@ -413,6 +408,86 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
     [self registerUrlHandler];
 }
 
+#pragma mark Recent hubs
+
+- (void)recentOpenHub:(id)sender
+{
+    [self connectWithAddress:[sender title] nick:nil description:nil password:nil encoding:nil];
+}
+
+- (void)addRecentHub:(NSString *)anAddress
+{
+    /* The list of recent hubs has a limit defined by MAC_RECENT_HUBS at
+    the top of this file. The actual menu (in MainMenu.nib) also has
+    a "Clear menu" item and a separator at the very bottom. New items
+    are always inserted at the top (index 0), as in the recent items menu
+    in Finder. Items are deleted from the bottom of the list. Only unique
+    addresses will be added to the list. */
+    
+    // check if the given address is already in the list
+    if ([[self recentHubs] indexOfObject:anAddress] == NSNotFound) {
+        int numberOfItems = [[self recentHubs] count];
+        
+        // only keep ten recent hubs
+        if (numberOfItems >= MAX_RECENT_HUBS) {
+            /* remove all items from the 11th to the last if there are
+            more than 10 (this will only be run once for each user,
+            because we didn't have any limit until now) */
+            if (numberOfItems > MAX_RECENT_HUBS) {
+                int i;
+                int numberOfExcessItems = numberOfItems - MAX_RECENT_HUBS;
+                for (i = 0; i < numberOfExcessItems; i++) {
+                    [menuOpenRecent removeItemAtIndex:numberOfItems - 1];
+                }
+            }
+            
+            // otherwise, just remove the first one
+            [menuOpenRecent removeItemAtIndex:numberOfItems - 1];
+        }
+        
+        // insert the item at the top of the list
+        NSMenuItem *hubMenuItem = [menuOpenRecent insertItemWithTitle:anAddress
+                                                               action:@selector(recentOpenHub:)
+                                                        keyEquivalent:@""
+                                                              atIndex:0];
+        [hubMenuItem setTarget:self];
+        
+        // write the list of recent hubs to preferences
+        [[NSUserDefaults standardUserDefaults] setObject:[self recentHubs]
+                                                  forKey:SPPrefsRecentHubs];
+    }
+}
+
+// returns the list of recent hubs as an array of strings
+- (NSArray *)recentHubs
+{
+    NSMutableArray *recentHubs = [NSMutableArray array];
+    
+    NSEnumerator *e = [[menuOpenRecent itemArray] objectEnumerator];
+    NSMenuItem *currentItem;
+    while (currentItem = [e nextObject]) {
+        if ([[currentItem title] isNotEqualTo:@"Clear menu"] && ![currentItem isSeparatorItem])
+            [recentHubs addObject:[currentItem title]];
+    }
+    
+    return recentHubs;
+}
+
+- (IBAction)clearRecentHubs:(id)sender
+{
+    // clear the list of recent hubs
+    NSEnumerator *e = [[menuOpenRecent itemArray] objectEnumerator];
+    NSMenuItem *currentItem;
+    while (currentItem = [e nextObject]) {
+        if ([[currentItem title] isNotEqualTo:@"Clear menu"] && ![currentItem isSeparatorItem])
+            [menuOpenRecent removeItem:currentItem];
+    }
+    
+    // write our now empty list to preferences
+    [[NSUserDefaults standardUserDefaults] setObject:[self recentHubs]
+                                              forKey:SPPrefsRecentHubs];
+}
+
 #pragma mark -
 #pragma mark sphubd command functions
 
@@ -442,12 +517,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
             [description UTF8String], [speed UTF8String], passive, [aPassword UTF8String], [anEncoding UTF8String]);
 
     /* add the hub to the recent hubs menu */
-    NSArray *recentHubs = [[NSUserDefaults standardUserDefaults] stringArrayForKey:SPPrefsRecentHubs];
-    if ([recentHubs indexOfObject:anAddress] == NSNotFound) {
-        [self addRecentHub:anAddress];
-        [[NSUserDefaults standardUserDefaults] setObject:[recentHubs arrayByAddingObject:anAddress]
-                                                  forKey:SPPrefsRecentHubs];
-    }
+    [self addRecentHub:anAddress];
 }
 
 - (void)disconnectFromAddress:(NSString *)anAddress
@@ -679,11 +749,6 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 - (IBAction)showPreferences:(id)sender
 {
     [[SPPreferenceController sharedPreferences] show];
-}
-
-- (void)recentOpenHub:(id)sender
-{
-    [self connectWithAddress:[sender title] nick:nil description:nil password:nil encoding:nil];
 }
 
 - (IBAction)openSPWebpage:(id)sender
