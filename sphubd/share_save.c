@@ -325,7 +325,7 @@ int share_save(share_t *share, unsigned type)
     {
         char *xml_filename;
         asprintf(&xml_filename, "%s/files.xml", global_working_directory);
-        if(share->uptodate == 0 || access(xml_filename, F_OK) == -1)
+        if(!share->uptodate || access(xml_filename, F_OK) == -1)
         {
             rc = share_save_xml(share, xml_filename, NULL);
         }
@@ -338,7 +338,7 @@ int share_save(share_t *share, unsigned type)
     }
 
 
-    share->uptodate = (rc == 0 ? 1 : 0);
+    share->uptodate = (rc == 0 ? true : false);
 
     return rc;
 }

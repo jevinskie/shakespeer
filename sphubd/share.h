@@ -21,6 +21,8 @@
 #ifndef _share_h_
 #define _share_h_
 
+#include <stdbool.h>
+
 #include "sys_queue.h"
 #include "sys_tree.h"
 
@@ -42,7 +44,7 @@ struct share_search
     char *tth;
     unsigned matches;
 
-    int passive;
+    bool passive;
     int port;
     char *host;
     char *nick;
@@ -72,7 +74,7 @@ typedef struct share share_t;
 struct share
 {
     LIST_HEAD(, share_mountpoint) mountpoints;
-    int uptodate;     /* if 0, filelist must be re-saved */
+    bool uptodate;     /* if false, filelist must be re-saved */
     bloom_t *bloom;
     char *cid;
     unsigned listlen; /* length of the uncompressed MyList file */
@@ -128,7 +130,7 @@ share_file_t *share_lookup_file_by_inode(share_t *share,
         unsigned long long inode);
 share_file_list_t *share_next_unhashed(share_t *share, unsigned int limit);
 void share_file_free(share_file_t *file);
-int share_remove(share_t *share, const char *local_root);
+int share_remove(share_t *share, const char *local_root, bool is_rescan);
 share_mountpoint_t *share_add_mountpoint(share_t *share,
         const char *local_root);
 void share_remove_mountpoint(share_t *share, share_mountpoint_t *mp);

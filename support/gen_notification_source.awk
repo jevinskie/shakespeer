@@ -41,7 +41,7 @@ BEGIN {
         }
         else if(argtype == "bool")
         {
-            argdef[i] = "int "
+            argdef[i] = "bool "
         }
         else if(argtype == "double")
         {

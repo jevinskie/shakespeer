@@ -42,7 +42,7 @@ void hub_free_upload_slot(hub_t *hub, const char *nick, slot_state_t slot_state)
                     slots_left = ++hub_global_slots;
                 g_info("freeing one upload slot for nick %s, %d slots left",
                         nick, slots_left);
-                hub_set_need_myinfo_update(1);
+                hub_set_need_myinfo_update(true);
             }
             break;
         case SLOT_FREE:
@@ -81,7 +81,7 @@ slot_state_t hub_request_upload_slot(hub_t *hub, const char *nick,
 
         g_info("allocating one upload slot for file %s, %d slots left",
                 filename, slots_left);
-        hub_set_need_myinfo_update(1);
+        hub_set_need_myinfo_update(true);
 
         return SLOT_NORMAL;
     }
@@ -94,7 +94,7 @@ void hub_set_slots(hub_t *hub, int slots)
     if(slots >= 0)
     {
         hub->slots = slots;
-        hub_set_need_myinfo_update(1);
+        hub_set_need_myinfo_update(true);
     }
     else
     {
@@ -124,7 +124,7 @@ void hub_all_set_slots(int slots)
 void hub_set_slots_global(int slots)
 {
     hub_global_slots = slots;
-    hub_set_need_myinfo_update(1);
+    hub_set_need_myinfo_update(true);
 }
 
 static void hub_count_slots_GFunc(hub_t *hub, void *user_data)

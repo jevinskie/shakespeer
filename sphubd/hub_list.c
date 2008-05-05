@@ -26,7 +26,7 @@
 #include "log.h"
 #include "xstr.h"
 
-static int myinfo_need_update = 0;
+static int myinfo_need_update = false;
 static LIST_HEAD(, hub) hub_list_head;
 
 void hub_list_init(void)
@@ -218,12 +218,12 @@ void hub_foreach(void (*func)(hub_t *hub, void *user_data), void *user_data)
     }
 }
 
-void hub_set_need_myinfo_update(int flag)
+void hub_set_need_myinfo_update(bool flag)
 {
     myinfo_need_update = flag;
 }
 
-int hub_need_myinfo_update(void)
+bool hub_need_myinfo_update(void)
 {
     return myinfo_need_update;
 }

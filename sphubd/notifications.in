@@ -11,7 +11,7 @@ notification share_scan_finished string:path
 notification tth_available pointer:file string:tth uint:leafdata_len pointer:leafdata double:mibs_per_sec
 notification hashing_complete
 notification will_remove_share string:local_root
-notification did_remove_share string:local_root
+notification did_remove_share string:local_root bool:is_rescan
 
 ########## download queue notifications
 notification filelist_added string:nick int:priority

@@ -680,7 +680,7 @@ static int hub_cmd_GetPass(void *data, int argc, char **argv)
 
 static int hub_cmd_LogedIn(void *data, int argc, char **argv)
 {
-    hub_set_need_myinfo_update(1);
+    hub_set_need_myinfo_update(true);
     g_debug("Ok, seems we're logged in...");
     return 0;
 }

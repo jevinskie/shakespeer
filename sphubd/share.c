@@ -77,7 +77,7 @@ int share_add(share_t *share, const char *path)
         }
 
         g_message("path already shared, will re-scan: %s", path);
-        share_remove(share, path);
+        share_remove(share, path, true);
     }
 
     struct stat stbuf;
@@ -121,7 +121,11 @@ void share_rescan(share_t *share)
     }
 }
 
-int share_remove(share_t *share, const char *local_root)
+/* is_rescan should be true is the share is being removed due to a rescan.
+ * Otherwise the notification handler will send an updated MyINFO command to
+ * the hub, possibly causing a low share kick.
+ */
+int share_remove(share_t *share, const char *local_root, bool is_rescan)
 {
     share_mountpoint_t *mp;
 
@@ -166,11 +170,11 @@ int share_remove(share_t *share, const char *local_root)
         }
     }
 
-    share->uptodate = 0;
+    share->uptodate = false;
 
     share_remove_mountpoint(share, mp);
 
-    nc_send_did_remove_share_notification(nc_default(), local_root);
+    nc_send_did_remove_share_notification(nc_default(), local_root, is_rescan);
 
     return 0;
 }

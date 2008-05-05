@@ -3,7 +3,8 @@ BEGIN {
 
     printf("#ifndef _notifications_h_\n")
     printf("#define _notifications_h_\n")
-    printf("\n#include \"notification_center.h\"\n");
+    printf("\n#include <stdbool.h>\n");
+    printf("#include \"notification_center.h\"\n");
 }
 
 /^notification / {
@@ -43,7 +44,7 @@ BEGIN {
         }
         else if(argtype == "bool")
         {
-            argdef[i] = "int "
+            argdef[i] = "bool "
         }
         else if(argtype == "double")
         {

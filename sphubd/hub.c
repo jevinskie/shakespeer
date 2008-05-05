@@ -203,7 +203,7 @@ static hub_t *hub_new_from_hcd(hub_connect_data_t *hcd)
     }
 
     hub_list_add(hub);
-    hub_set_need_myinfo_update(1);
+    hub_set_need_myinfo_update(true);
 
     ui_send_hub_add(NULL, hub->address, hub->hubname, hub->me->nick, hub->me->description, hub->encoding);
 
@@ -559,7 +559,7 @@ void hub_close_connection(hub_t *hub)
 
         cc_close_all_on_hub(hub);
 
-        hub_set_need_myinfo_update(1);
+        hub_set_need_myinfo_update(true);
 
         if(hub->expected_disconnect == false)
         {
@@ -694,7 +694,7 @@ static void myinfo_updater(int fd, short condition, void *data)
 
     if(hub_need_myinfo_update() && now - last_myinfo_update > 30)
     {
-        hub_set_need_myinfo_update(0);
+        hub_set_need_myinfo_update(false);
         hub_all_send_myinfo();
         last_myinfo_update = time(0);
     }
@@ -725,7 +725,7 @@ static void hub_set_passive_GFunc(hub_t *hub, void *user_data)
 void hub_set_passive(int on)
 {
     hub_foreach(hub_set_passive_GFunc, &on);
-    hub_set_need_myinfo_update(1);
+    hub_set_need_myinfo_update(true);
 }
 
 void hub_send_nmdc_default_user_commands(hub_t *hub)

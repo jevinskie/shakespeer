@@ -624,11 +624,9 @@ static int ui_cb_remove_shared_path(ui_t *ui, const char *path)
     char *expanded_path = tilde_expand_path(path);
     char *xpath = str_trim_end_inplace(expanded_path, "/");
 
-    if(share_remove(global_share, xpath) == 0)
+    if(share_remove(global_share, xpath, false) == 0)
     {
         ui_send_status_message(NULL, NULL, "Removed shared path %s...", path);
-        ui_send_share_stats_for_root(NULL, path);
-        hub_set_need_myinfo_update(1);
     }
     free(expanded_path);
     return 0;
@@ -656,7 +654,7 @@ static int ui_cb_set_password(ui_t *ui, const char *hub_address, const char *pas
 static int ui_cb_update_user_info(ui_t *ui, const char *speed, const char *description, const char *email)
 {
     hub_update_user_info(speed, description, email);
-    hub_set_need_myinfo_update(1);
+    hub_set_need_myinfo_update(true);
     return 0;
 }
 

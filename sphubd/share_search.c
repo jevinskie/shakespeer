@@ -174,7 +174,7 @@ share_search_t *share_search_parse_nmdc(const char *command,
     char *port_or_user = xstrndup(command, n);
     command += n + 1;
 
-    s->passive = (strcasecmp(s->host, "Hub") == 0 ? 1 : 0);
+    s->passive = (strcasecmp(s->host, "Hub") == 0 ? true : false);
     if(s->passive)
     {
         s->nick = port_or_user;
@@ -310,7 +310,7 @@ int main(void)
     fail_unless(strcmp(s->tth, "QSYBVKR6IAIEF6R4RG7DGBXWEP3PQBTBEBV2IPY") == 0);
     fail_unless(s->words == NULL);
     fail_unless(s->type == SHARE_TYPE_TTH);
-    fail_unless(s->passive == 0);
+    fail_unless(s->passive == false);
     share_search_free(s);
 
     s = share_search_parse_nmdc("1.2.3.4:5922 F?T?0?1?", "WINDOWS-1252");

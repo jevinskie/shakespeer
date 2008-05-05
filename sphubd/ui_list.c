@@ -78,7 +78,7 @@ static void handle_tth_available_notification(nc_t *nc,
     ui_send_status_message(NULL, NULL, "finished hashing %s (%.2lf MiB/s)",
             slash, data->mibs_per_sec);
 
-    hub_set_need_myinfo_update(1);
+    hub_set_need_myinfo_update(true);
     ui_schedule_share_stats_update();
 }
 
@@ -177,8 +177,11 @@ static void handle_did_remove_share_notification( nc_t *nc,
         const char *channel,
         nc_did_remove_share_t *notification, void *user_data)
 {
-    ui_send_share_stats_for_root(NULL, notification->local_root);
-    hub_set_need_myinfo_update(1);
+    if(!notification->is_rescan)
+    {
+        ui_send_share_stats_for_root(NULL, notification->local_root);
+        hub_set_need_myinfo_update(true);
+    }
 }
 
 void ui_list_init(void)
