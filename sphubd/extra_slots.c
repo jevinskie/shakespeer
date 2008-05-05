@@ -1,21 +1,17 @@
 /*
- * Copyright 2006 Martin Hedenfalk <martin@bzero.se>
+ * Copyright (c) 2006-2007 Martin Hedenfalk <martin@bzero.se>
  *
- * This file is part of ShakesPeer.
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
  *
- * ShakesPeer is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * ShakesPeer is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with ShakesPeer; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
 #define _GNU_SOURCE
@@ -30,7 +26,7 @@
 #include "log.h"
 #include "hub.h"
 #include "ui.h"
-
+#include "xstr.h"
 #include "extra_slots.h"
 #include "notifications.h"
 
@@ -139,32 +135,16 @@ static void extra_slots_parse(void)
 			buf = lbuf;
 		}
 
-		char *nick = strdup(buf);
-		char *np = nick;
+		DEBUG("parsing [%s]", buf);
 
-		char *p;
-		for(p = buf; *p; p++)
-		{
-			if(*p == '\\')
-			{
-				if(++p == 0)
-					break;
-			}
-			else if(*p == ':')
-				break;
-			*np++ = *p;
-		}
-		*np = 0;
+		char *nick = q_strsep(&buf, ":");
+		DEBUG("nick = [%s]", nick);
 
-		DEBUG("p = [%s]", p);
-
-		if(*p != ':')
+		if(*buf == '\0')
 			goto failed;
-		*p = 0; /* nul-terminate nick */
 
-		size_t nick_len = p - buf;
-
-		buf += nick_len + 1;
+		DEBUG("nick = [%s]", nick);
+		DEBUG("buf = [%s]", buf);
 
 		char *endptr;
 		int extra_slots = strtol(buf, &endptr, 10);
@@ -173,10 +153,8 @@ static void extra_slots_parse(void)
 
 		xs_set(nick, extra_slots);
 
-		free(nick);
 		continue;
 failed:
-		free(nick);
 		WARNING("failed to parse line %u\n", line_number);
 
 	}
