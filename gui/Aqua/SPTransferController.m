@@ -267,7 +267,7 @@
     if (!tr)
         // this is normal. we got a notification when the user loaded a cached filelist, 
         // so no file list wasn't in the transfers.
-		return;
+        return;
     
     [self willChangeValueForKey:@"transfers"];
     [tr setStatus:@"Finished, idle"];
