@@ -4,7 +4,6 @@ BEGIN {
 
     printf("/* This is a generated file. Don't edit. Edit the source instead.\n */\n\n");
 
-    printf("#define _GNU_SOURCE\n");
     printf("#include <stdlib.h>\n");
     printf("#include <stdio.h>\n");
     printf("#include <inttypes.h>\n");

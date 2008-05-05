@@ -14,8 +14,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define _GNU_SOURCE /* needed for asprintf */
-
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>

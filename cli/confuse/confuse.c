@@ -24,7 +24,6 @@
 #endif
 
 #ifdef HAVE_STRING_H
-# define _GNU_SOURCE    /* FIXME! */
 # include <string.h>
 #endif
 #ifdef HAVE_STDLIB_H

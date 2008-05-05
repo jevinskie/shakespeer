@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#define _GNU_SOURCE /* needed for asprintf on linux */
-
 #include "sys_queue.h"
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -30,7 +28,6 @@
 #include <fcntl.h>
 #include <string.h>
 #include <stdlib.h>
-#define _GNU_SOURCE /* needed for asprintf */
 #include <stdio.h>
 #include <stdarg.h>
 

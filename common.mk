@@ -19,6 +19,8 @@ CFLAGS+=-I$(TOP)/splib -I${TOP}/spclient
 os := $(shell uname)
 
 ifeq ($(os),Linux)
+# Required for asprintf on Linux
+CFLAGS+=-D_GNU_SOURCE
 # Required for large file support on Linux
 CFLAGS+=-D_FILE_OFFSET_BITS=64
 endif

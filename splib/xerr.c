@@ -23,10 +23,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* $Id: xerr.c,v 1.3 2006/04/09 12:54:31 mhe Exp $ */
-
-#define _GNU_SOURCE /* needed for asprintf */
-
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
