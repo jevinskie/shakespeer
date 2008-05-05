@@ -229,19 +229,6 @@ static void hcd_free(hub_connect_data_t *hcd)
     }
 }
 
-void hub_set_external_ip(hub_t *hub, void *user_data)
-{
-    const char *ext_ip = extip_get(hub->fd, hub->hubip);
-    user_set_ip(hub->me, ext_ip);
-
-    g_info("External IP for hub [%s] is %s", hub->address, hub->me->ip);
-}
-
-void hub_set_all_external_ip(void)
-{
-    hub_foreach(hub_set_external_ip, NULL);
-}
-
 static void hub_connect_event(int fd, int error, void *user_data)
 {
     hub_connect_data_t *hcd = user_data;
@@ -279,9 +266,6 @@ static void hub_connect_event(int fd, int error, void *user_data)
         if(hub)
         {
             hub_attach_io_channel(hub, fd);
-
-            /* we're connected, now find out our IP */
-	    hub_set_external_ip(hub, NULL);
         }
     }
     else

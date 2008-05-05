@@ -28,23 +28,25 @@
 #include <time.h>
 #include <errno.h>
 
+#include <event.h>
+#include <evhttp.h>
+
 #include "dstring_url.h"
 #include "io.h"
 #include "log.h"
 #include "util.h"
 #include "rx.h"
+#include "notifications.h"
 
-#define EXTERNAL_IP_URL "http://83.168.236.117/ip.shtml"
-
+#define EXTERNAL_IP_HOST "shakespeer.bzero.se"
 #define EXTERNAL_IP_TIMEOUT 10*60 /* looked up IP is valid this many seconds */
 
 static char *external_ip = NULL;
 static char *static_ip = NULL;
 static time_t external_ip_lookup_time = 0;
-static bool use_static = false; /* 1 if manually set, disables automatic detection */
+static bool use_static = false; /* true if manually set, disables automatic detection */
 
 static void extip_update_cache(void);
-char *extip_detect(const char *address);
 
 /* Pass ip = NULL to disable static (manual) IP */
 void extip_set_static(const char *ip)
@@ -55,19 +57,22 @@ void extip_set_static(const char *ip)
     if(ip == NULL)
     {
         use_static = false;
+	if(external_ip)
+	    nc_send_external_ip_detected_notification(nc_default(), external_ip);
     }
     else
     {
         struct in_addr tmp;
         if(inet_aton(ip, &tmp) == 0)
         {
-            g_warning("invalid IP address [%s], ignored", ip);
+            WARNING("invalid IP address [%s], ignored", ip);
             use_static = false;
         }
         else
         {
             static_ip = strdup(ip);
             use_static = true;
+	    nc_send_external_ip_detected_notification(nc_default(), static_ip);
         }
     }
 }
@@ -102,7 +107,7 @@ int get_netmask(struct in_addr *ip, struct in_addr *mask)
     int fd;
     if((fd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
     {
-        g_warning("socket: %s", strerror(errno));
+        WARNING("socket: %s", strerror(errno));
         return -1;
     }
 
@@ -113,7 +118,7 @@ int get_netmask(struct in_addr *ip, struct in_addr *mask)
     ifc.ifc_buf = buf;
     if(ioctl(fd, SIOCGIFCONF, (char *)&ifc) < 0)
     {
-        g_warning("ioctl(SIOCGIFCONF): %s", strerror(errno));
+        WARNING("ioctl(SIOCGIFCONF): %s", strerror(errno));
         close(fd);
         return -1;
     }
@@ -132,25 +137,25 @@ int get_netmask(struct in_addr *ip, struct in_addr *mask)
         {
             struct sockaddr_in *addrp = (struct sockaddr_in *)sockaddrp;
 
-            g_debug("found IP %s", inet_ntoa(addrp->sin_addr));
+            DEBUG("found IP %s", inet_ntoa(addrp->sin_addr));
 
             /* does the IP address match? */
             if(memcmp(ip, &addrp->sin_addr, sizeof(struct in_addr)) == 0)
             {
-                g_debug("interface name: %s", ifr->ifr_name);
+                DEBUG("interface name: %s", ifr->ifr_name);
 
                 if(ioctl(fd, SIOCGIFNETMASK, ifr) < 0)
-                    g_warning("ioctl(SIOCGIFNETMASK): %s", strerror(errno));
+                    WARNING("ioctl(SIOCGIFNETMASK): %s", strerror(errno));
 
                 memcpy(mask,
                         &((struct sockaddr_in *)&ifr->ifr_addr)->sin_addr,
                         sizeof(struct in_addr));
-                g_debug("network mask: %s", inet_ntoa(*mask));
+                DEBUG("network mask: %s", inet_ntoa(*mask));
                 break;
             }
         }
         else
-            g_debug("non-INET interface %s, family = %i",
+            DEBUG("non-INET interface %s, family = %i",
                     ifr->ifr_name, sockaddrp->sa_family);
     }
 
@@ -165,7 +170,7 @@ static const char *extip_check_local_hub(struct in_addr *local,
     /* look up the local netmask */
     struct in_addr mask;
     return_val_if_fail(get_netmask(local, &mask) == 0, NULL);
-    g_info("detected my local netmask as %s", inet_ntoa(mask));
+    INFO("detected my local netmask as %s", inet_ntoa(mask));
 
     /* Check if we're in the same subnet as the hub. */
     struct in_addr subnet;
@@ -173,13 +178,13 @@ static const char *extip_check_local_hub(struct in_addr *local,
 
     if((remote->s_addr & mask.s_addr) == subnet.s_addr)
     {
-        g_info("common subnet [%s], using local IP", inet_ntoa(subnet));
+        INFO("common subnet [%s], using local IP", inet_ntoa(subnet));
 
         return inet_ntoa(*local);
     }
     else
     {
-        g_debug("hub ip [%s] not in local subnet", inet_ntoa(*remote));
+        DEBUG("hub ip [%s] not in local subnet", inet_ntoa(*remote));
     }
 
     return NULL;
@@ -211,7 +216,7 @@ const char *extip_get(int fd, const char *hub_ip)
     struct in_addr hub_addr;
     if(!inet_aton(hub_ip, &hub_addr))
     {
-        g_warning("invalid hub IP [%s]", hub_ip);
+        WARNING("invalid hub IP [%s]", hub_ip);
         return NULL;
     }
 
@@ -222,7 +227,7 @@ const char *extip_get(int fd, const char *hub_ip)
     struct sockaddr_in sin;
     unsigned int namelen = sizeof(sin);
     getsockname(fd, (struct sockaddr *)&sin, &namelen);
-    g_info("detected my local IP as %s", inet_ntoa(sin.sin_addr));
+    INFO("detected my local IP as %s", inet_ntoa(sin.sin_addr));
 
     /* Check if the hub is local. If so, return the local address. */
     const char *ip = extip_check_local_hub(&sin.sin_addr, &hub_addr);
@@ -241,7 +246,7 @@ const char *extip_get(int fd, const char *hub_ip)
         /* Both we and the hub has a private (RFC1918) address. However, we're
          * not on the same subnet. There's no use trying to use the external
          * public IP, it won't work. */
-        g_info("using private local IP for private hub %s", inet_ntoa(hub_addr));
+        INFO("using private local IP for private hub %s", inet_ntoa(hub_addr));
         return inet_ntoa(sin.sin_addr);
     }
 
@@ -262,7 +267,7 @@ const char *extip_get(int fd, const char *hub_ip)
 
     if(external_ip == NULL)
     {
-        g_warning("external IP unavailable, using local IP");
+        WARNING("external IP unavailable, using local IP");
         return inet_ntoa(sin.sin_addr);
     }
 
@@ -272,25 +277,6 @@ const char *extip_get(int fd, const char *hub_ip)
 void extip_init(void)
 {
     extip_update_cache();
-}
-
-static void extip_update_cache(void)
-{
-    time_t now = time(0);
-
-    if(external_ip && external_ip_lookup_time + EXTERNAL_IP_TIMEOUT < now)
-    {
-        g_debug("external IP [%s] has timed out after %i seconds",
-                external_ip, EXTERNAL_IP_TIMEOUT);
-        free(external_ip);
-        external_ip = NULL;
-    }
-
-    if(external_ip == NULL)
-    {
-        external_ip = extip_detect(EXTERNAL_IP_URL);
-        external_ip_lookup_time = now;
-    }
 }
 
 static char *extip_detect_from_buf(const char *buf)
@@ -303,7 +289,7 @@ static char *extip_detect_from_buf(const char *buf)
     if(subs && subs->nsubs == 2)
     {
         ip = strdup(subs->subs[0]);
-        g_debug("detected external IP %s", ip);
+        DEBUG("detected external IP %s", ip);
     }
 
     rx_free_subs(subs);
@@ -311,26 +297,43 @@ static char *extip_detect_from_buf(const char *buf)
     return ip;
 }
 
-/* Fetches the webpage at {address} and scans it for an IP address. Returns the
- * IP address found (as a malloced string, caller should free), or NULL on
- * error.
- */
-char *extip_detect(const char *address)
+static void extip_response_handler(struct evhttp_request *req, void *data)
 {
-    return_val_if_fail(address, NULL);
+	DEBUG("got external IP lookup response");
 
-    g_info("detecting external IP address");
+	/* FIXME: is evbuffer data nul-terminated? */
+	char *ip = extip_detect_from_buf((const char *)EVBUFFER_DATA(req->input_buffer));
 
-    dstring_t *buf = dstring_new_from_url(address);
-    if(buf == NULL)
+	if(ip)
+	{
+		nc_send_external_ip_detected_notification(nc_default(), ip);
+		free(external_ip);
+		external_ip = ip;
+	}
+
+	/* evhttp_request_free(req); */
+}
+
+static void extip_update_cache(void)
+{
+    time_t now = time(0);
+
+    if(external_ip == NULL || external_ip_lookup_time + EXTERNAL_IP_TIMEOUT < now)
     {
-        g_warning("failed to lookup external IP");
-        return NULL;
-    }
+	if(external_ip)
+		DEBUG("external IP [%s] has timed out after %i seconds",
+			external_ip, EXTERNAL_IP_TIMEOUT);
 
-    char *ip = extip_detect_from_buf(buf->string);
-    dstring_free(buf, 1);
-    return ip;
+	DEBUG("scheduling external IP lookup request");
+	struct evhttp_request *req = evhttp_request_new(extip_response_handler, NULL);
+	return_if_fail(req);
+	evhttp_add_header(req->output_headers, "Connection", "close");
+	evhttp_add_header(req->output_headers, "User-Agent", PACKAGE "/" VERSION);
+	evhttp_add_header(req->output_headers, "Host", EXTERNAL_IP_HOST);
+	struct evhttp_connection *evcon = evhttp_connection_new(EXTERNAL_IP_HOST, 80);
+	return_if_fail(evcon);
+	evhttp_make_request(evcon, req, EVHTTP_REQ_GET, "/ip.shtml");
+    }
 }
 
 #ifdef TEST
@@ -343,7 +346,7 @@ static bool address_is_private(const char *address)
 
     if(inet_aton(address, &inp) == 0)
     {
-        g_warning("invalid IPv4 address: [%s]", address);
+        WARNING("invalid IPv4 address: [%s]", address);
         return true;
     }
 

@@ -25,13 +25,29 @@
 #include "encoding.h"
 #include "log.h"
 #include "xstr.h"
+#include "notifications.h"
 
 static int myinfo_need_update = false;
 static LIST_HEAD(, hub) hub_list_head;
 
+static void hub_handle_external_ip_notification(nc_t *nc, const char *channel,
+	nc_external_ip_detected_t *info,
+	void *user_data)
+{
+	hub_t *hub;
+	LIST_FOREACH(hub, &hub_list_head, next)
+	{
+		user_set_ip(hub->me, info->external_ip);
+		INFO("External IP for hub [%s] is %s", hub->address, hub->me->ip);
+	}
+}
+
 void hub_list_init(void)
 {
-    LIST_INIT(&hub_list_head);
+	LIST_INIT(&hub_list_head);
+
+	nc_add_external_ip_detected_observer(nc_default(),
+		hub_handle_external_ip_notification, NULL);
 }
 
 unsigned hub_user_hash(const char *nick)

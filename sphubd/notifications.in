@@ -6,6 +6,8 @@ notification download_finished string:filename
 
 notification extra_slot_granted string:nick int:extra_slots
 
+notification external_ip_detected string:external_ip
+
 ########## share notifications
 
 notification share_file_added pointer:share pointer:file pointer:mp

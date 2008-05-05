@@ -600,7 +600,7 @@ static int ui_cb_set_ip_address(ui_t *ui, const char *ip_address)
         extip_set_static(NULL);
     else
         extip_set_static(ip_address);
-    hub_set_all_external_ip();
+
     return 0;
 }
 

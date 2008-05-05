@@ -146,9 +146,6 @@ int hub_send_command(hub_t *hub, const char *fmt, ...);
 int hub_is_connected(void);
 void hub_close_all_connections(void);
 
-void hub_set_external_ip(hub_t *hub, void *user_data);
-void hub_set_all_external_ip(void);
-
 void hub_message_free_all(hub_t *hub);
 void hub_message_pop(hub_t *hub);
 void hub_message_push(hub_t *hub, const char *nick, const char *message_escaped);
