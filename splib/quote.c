@@ -23,8 +23,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* $Id: quote.c,v 1.1 2006/03/14 17:41:56 mhe Exp $ */
-
 #include <string.h>
 
 #include "dstring.h"

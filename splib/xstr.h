@@ -33,5 +33,7 @@ size_t strlcat(char *dst, const char *src, size_t size);
 char *strcasestr(const char *big, const char *little);
 #endif
 
+char *q_strsep(char **p, const char *set);
+
 #endif
 

@@ -497,8 +497,8 @@ char *str_shorten_path(const char *path, int maxlen)
  */
 char *find_filelist(const char *working_directory, const char *nick)
 {
-    if(working_directory == NULL || nick == NULL)
-        return NULL;
+    return_val_if_fail(working_directory, NULL);
+    return_val_if_fail(nick, NULL);
 
     char *xnick = strdup(nick);
     str_replace_set(xnick, "/", '_');

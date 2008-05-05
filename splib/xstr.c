@@ -225,6 +225,37 @@ char *str_replace_set(char *string, const char *set, char replacement)
     return string;
 }
 
+char *q_strsep(char **pp, const char *set)
+{
+	if(pp == NULL || *pp == NULL || set == NULL)
+		return 0;
+
+	char *p = *pp;
+	char *op = p;
+	char *np = p;
+
+	for(; *p; p++)
+	{
+		if(*p == '\\')
+		{
+			if(++p == 0)
+				break;
+		}
+		else if(strchr(set, *p) != NULL)
+		{
+			++p;
+			break;
+		}
+
+		*np++ = *p;
+	}
+
+	*np = '\0';
+	*pp = p;
+
+	return op;
+}
+
 #ifdef TEST
 
 #include <stdio.h>
@@ -333,7 +364,55 @@ int main(void)
     fail_unless(strcmp(repl, "r-plac-m-nt-string") == 0);
     free(repl);
 
-    return 0;
+	/* q_strcspn
+	 */
+	char qbuf[] = "one:two\\:two=three";
+	char *p;
+
+	p = qbuf;
+	char *one = q_strsep(&p, ":");
+	fail_unless(one == qbuf);
+	fail_unless(strcmp(one, "one") == 0);
+	fail_unless(p == qbuf + 4);
+	fail_unless(strcmp(p, "two\\:two=three") == 0);
+
+	char *twotwo = q_strsep(&p, ":=");
+	fail_unless(twotwo);
+	printf("twotwo == [%s]\n", twotwo);
+	fail_unless(twotwo == qbuf + 4);
+	fail_unless(strcmp(twotwo, "two:two") == 0);
+
+	char *three = q_strsep(&p, ":=");
+	fail_unless(three == qbuf + 13);
+	fail_unless(strcmp(three, "three") == 0);
+
+	fail_unless(p);
+	fail_unless(*p == 0);
+
+	char *four = q_strsep(&p, ":");
+	fail_unless(four == p);
+	fail_unless(q_strsep(&p, ":") == p);
+
+	/* check multiple separators */
+	char qbuf2[] = "five:::six";
+	p = qbuf2;
+	char *five = q_strsep(&p, ":");
+	fail_unless(five == qbuf2);
+	fail_unless(strcmp(five, "five") == 0);
+	fail_unless(p == qbuf2 + 5);
+
+	char *empty = q_strsep(&p, ":");
+	fail_unless(empty == qbuf2 + 5);
+	fail_unless(empty[0] == '\0');
+	empty = q_strsep(&p, ":");
+	fail_unless(empty == qbuf2 + 6);
+	fail_unless(empty[0] == '\0');
+
+	char *six = q_strsep(&p, ":");
+	fail_unless(six);
+	fail_unless(strcmp(six, "six") == 0);
+
+	return 0;
 }
 
 #endif
