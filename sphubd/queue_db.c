@@ -121,88 +121,48 @@ static int queue_reset_db(void)
 
 static int queue_open_db(void)
 {
-    /* open target database */
-    if(open_database(&queue_target_db, QUEUE_DB_FILENAME, "target",
-                DB_BTREE, 0) != 0)
-        return -1;
-    return_val_if_fail(queue_target_db, -1);
-
-    /* open sequence database */
-    if(open_database(&queue_sequence_db, QUEUE_DB_FILENAME, "sequence",
-                DB_BTREE, 0) != 0)
+    struct
     {
-        queue_target_db->close(queue_target_db, 0);
-        queue_target_db = NULL;
-        return -1;
-    }
+	DB **db;
+	const char *name;
+	int flags;
+    } dbs[] = {
+	{&queue_target_db,	"target",	0},
+	{&queue_sequence_db,	"sequence",	0},
+	{&queue_source_db,	"source",	DB_DUPSORT},
+	{&queue_filelist_db,	"filelist",	0},
+	{&queue_directory_db,	"directory",	0},
+	{&queue_tth_db,		"tth_target",	DB_DUPSORT},
+	{&queue_directory_nick_db, "directory_nick", DB_DUPSORT},
+	{NULL, NULL, 0}
+    };
 
-    /* open source database */
-    if(open_database(&queue_source_db, QUEUE_DB_FILENAME, "source",
-               DB_BTREE, DB_DUPSORT) != 0)
+    int i;
+    for(i = 0; dbs[i].db; i++)
     {
-        queue_sequence_db->close(queue_sequence_db, 0);
-        queue_sequence_db = NULL;
-        queue_target_db->close(queue_target_db, 0);
-        queue_target_db = NULL;
-        return -1;
-    }
-
-    /* open filelist database */
-    if(open_database(&queue_filelist_db, QUEUE_DB_FILENAME, "filelist",
-                DB_BTREE, 0) != 0)
-    {
-        queue_source_db->close(queue_source_db, 0);
-        queue_source_db = NULL;
-        queue_sequence_db->close(queue_sequence_db, 0);
-        queue_sequence_db = NULL;
-        queue_target_db->close(queue_target_db, 0);
-        queue_target_db = NULL;
-        return -1;
-    }
-
-    /* open directory database */
-    if(open_database(&queue_directory_db, QUEUE_DB_FILENAME, "directory",
-                DB_BTREE, 0) != 0)
-    {
-        queue_filelist_db->close(queue_filelist_db, 0);
-        queue_filelist_db = NULL;
-        queue_source_db->close(queue_source_db, 0);
-        queue_source_db = NULL;
-        queue_sequence_db->close(queue_sequence_db, 0);
-        queue_sequence_db = NULL;
-        queue_target_db->close(queue_target_db, 0);
-        queue_target_db = NULL;
-        return -1;
+	if(open_database(dbs[i].db, QUEUE_DB_FILENAME, dbs[i].name,
+		    DB_BTREE, dbs[i].flags) != 0)
+	    return -1;
+	return_val_if_fail(*dbs[i].db, -1);
     }
 
     /* open secondary database to queue_target_db, adds index by TTH */
-    if(open_database(&queue_tth_db, QUEUE_DB_FILENAME, "tth_target",
-                DB_BTREE, DB_DUPSORT) == 0)
+    int rc = queue_target_db->associate(queue_target_db,
+	    NULL, queue_tth_db, queue_target_get_tth, DB_AUTO_COMMIT);
+    if(rc != 0)
     {
-        int rc = queue_target_db->associate(queue_target_db,
-                NULL, queue_tth_db, queue_target_get_tth, DB_AUTO_COMMIT);
-        if(rc != 0)
-            g_warning("tth<->target associate failed: %s", db_strerror(rc));
-    }
-    else
-    {
-        return -1;
+	g_warning("tth<->target associate failed: %s", db_strerror(rc));
+	return -1;
     }
 
     /* open secondary database to queue_directory_db, adds index by nick */
-    if(open_database(&queue_directory_nick_db, QUEUE_DB_FILENAME,
-                "directory_nick",
-                DB_BTREE, DB_DUPSORT) == 0)
+    rc = queue_directory_db->associate(queue_directory_db,
+	    NULL, queue_directory_nick_db, queue_directory_get_nick,
+	    DB_AUTO_COMMIT);
+    if(rc != 0)
     {
-        int rc = queue_directory_db->associate(queue_directory_db,
-                NULL, queue_directory_nick_db, queue_directory_get_nick,
-                DB_AUTO_COMMIT);
-        if(rc != 0)
-            g_warning("directory<->nick associate failed: %s", db_strerror(rc));
-    }
-    else
-    {
-        return -1;
+	g_warning("directory<->nick associate failed: %s", db_strerror(rc));
+    	return -1;
     }
 
     return 0;
@@ -212,29 +172,8 @@ int queue_init(void)
 {
     g_message("Initializing queue, using: " DB_VERSION_STRING);
 
-    const char *db_list[] = {
-        "target",
-        "sequence",
-        "source",
-        "filelist",
-        "directory",
-        "tth_target",
-        "directory_nick",
-        NULL};
-    if(verify_db(QUEUE_DB_FILENAME, db_list) != 0)
-    {
-        g_warning("Corrupt queue database!");
-        backup_db(QUEUE_DB_FILENAME);
-    }
-
     g_debug("opening databases in file %s", QUEUE_DB_FILENAME);
     int rc = queue_open_db();
-    if(rc != 0)
-    {
-        backup_db(QUEUE_DB_FILENAME);
-        rc = queue_open_db();
-    }
-
     if(rc == 0)
     {
         queue_reset_db();
@@ -374,6 +313,7 @@ int queue_add_source(const char *nick, queue_source_t *qs)
 {
     return_val_if_fail(nick, -1);
     return_val_if_fail(qs, -1);
+    return_val_if_fail(queue_source_db, -1);
 
     DBT val;
     memset(&val, 0, sizeof(DBT));
@@ -482,6 +422,7 @@ queue_target_t *queue_lookup_target(const char *target_filename)
 queue_target_t *queue_lookup_target_by_tth(const char *tth)
 {
     return_val_if_fail(tth, NULL);
+    return_val_if_fail(queue_tth_db, NULL);
 
     DBT key;
     memset(&key, 0, sizeof(DBT));

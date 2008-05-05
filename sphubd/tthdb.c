@@ -56,15 +56,6 @@ int tthdb_close(void)
 
 int tthdb_open(void)
 {
-    const char *db_list[] = {"tth", "tth_inode", "tth_dups", NULL};
-    if(verify_db(TTH_DB_FILENAME, db_list) != 0)
-    {
-        g_warning("Corrupt TTH database!");
-        backup_db(TTH_DB_FILENAME);
-    }
-    else
-        g_message("TTH database verified OK");
-
     g_debug("opening database %s", TTH_DB_FILENAME);
 
     /* open tth database */

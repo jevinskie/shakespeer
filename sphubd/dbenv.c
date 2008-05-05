@@ -108,100 +108,21 @@ static DB_ENV *get_default_db_environment(void)
 
         if(open_default_db_environment(flags) == DB_RUNRECOVERY)
         {
-            flags |= DB_RECOVER;
-            if(open_default_db_environment(flags) == DB_RUNRECOVERY)
-            {
-                flags &= ~DB_RECOVER;
-                flags |= DB_RECOVER_FATAL;
-                g_warning("running fatal recovery");
-                if(open_default_db_environment(flags) != 0)
-                {
-                    g_warning("giving up opening database environment");
-                    exit(2);
-                }
-            }
+	    flags &= ~DB_RECOVER;
+	    flags |= DB_RECOVER_FATAL;
+	    g_warning("running fatal recovery");
+	    if(open_default_db_environment(flags) != 0)
+	    {
+		g_warning("giving up opening database environment");
+		exit(2);
+	    }
         }
 
         default_db_env->set_flags(default_db_env,
-                DB_AUTO_COMMIT | DB_TXN_WRITE_NOSYNC | DB_LOG_AUTOREMOVE, 1);
+                DB_TXN_WRITE_NOSYNC | DB_LOG_AUTOREMOVE, 1);
     }
 
     return default_db_env;
-}
-
-static int verify_db_ordercheck(const char *dbfile, const char *dbname)
-{
-    DB *db;
-
-    g_debug("checking database %s", dbname);
-
-    db_create(&db, get_default_db_environment(), 0);
-    return_val_if_fail(db, -1);
-    int rc = db->verify(db, dbfile, dbname, NULL, DB_ORDERCHKONLY);
-    if(rc != 0 && rc != DB_NOTFOUND)
-    {
-        g_warning("%s[%s]: %s", dbfile, dbname, db_strerror(rc));
-        return -1;
-    }
-
-    return 0;
-}
-
-int verify_db(const char *dbfile, const char *db_list[])
-{
-    return_val_if_fail(dbfile, -1);
-    return_val_if_fail(db_list, -1);
-
-    g_debug("checking databases in file %s", dbfile);
-
-    int fd = open(".", O_RDONLY);
-    chdir(global_working_directory);
-
-    DB *db;
-    db_create(&db, get_default_db_environment(), 0);
-    return_val_if_fail(db, -1);
-    int rc = db->verify(db, dbfile, NULL, NULL, DB_NOORDERCHK);
-
-    if(rc == ENOENT)
-    {
-        fchdir(fd);
-        return 0;
-    }
-
-    if(rc != 0)
-    {
-        g_warning("%s: %s", dbfile, db_strerror(rc));
-        fchdir(fd);
-        return -1;
-    }
-
-    int i;
-    for(i = 0; db_list[i]; i++)
-    {
-        if(verify_db_ordercheck(dbfile, db_list[i]) != 0)
-        {
-            fchdir(fd);
-            return -1;
-        }
-    }
-
-    g_debug("Database verified OK");
-    fchdir(fd);
-
-    return 0;
-}
-
-void backup_db(const char *dbfile)
-{
-    int fd = open(".", O_RDONLY);
-    chdir(global_working_directory);
-    char *backup_file;
-    asprintf(&backup_file, "%s.corrupted", dbfile);
-    unlink(backup_file);
-    rename(dbfile, backup_file);
-    free(backup_file);
-    fchdir(fd);
-    close(fd);
 }
 
 int open_database(DB **db, const char *dbfile, const char *dbname,
@@ -214,7 +135,8 @@ int open_database(DB **db, const char *dbfile, const char *dbname,
     if(flags)
         (*db)->set_flags(*db, flags);
 
-    int rc = (*db)->open(*db, NULL, dbfile, dbname, type, DB_CREATE, 0644);
+    g_info("opening [%s] in [%s]", dbname, dbfile);
+    int rc = (*db)->open(*db, NULL, dbfile, dbname, type, DB_CREATE | DB_AUTO_COMMIT, 0644);
     if(rc != 0)
     {
         g_warning("Failed to open %s database in %s: %s", dbname,

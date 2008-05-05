@@ -42,15 +42,6 @@ int extra_slots_init(void)
 {
     g_debug("opening database %s", SLOTS_DB_FILENAME);
 
-    const char *db_list[] = {"slots", NULL};
-    if(verify_db(SLOTS_DB_FILENAME, db_list) != 0)
-    {
-        g_warning("Corrupt slots database!");
-        backup_db(SLOTS_DB_FILENAME);
-    }
-    else
-        g_message("Slots database verified OK");
-
     /* open slots database */
     if(open_database(&slots_db, SLOTS_DB_FILENAME, "slots",
                 DB_HASH, 0) != 0)
