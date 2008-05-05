@@ -987,8 +987,11 @@ static int queue_db_save(FILE *fp)
 	struct queue_directory *qd;
 	TAILQ_FOREACH(qd, &q_store->directories, link)
 	{
-		queue_db_print_add_directory(fp, qd);
-		queue_db_print_set_resolved(fp, qd);
+		if(qd->nleft > 0)
+		{
+			queue_db_print_add_directory(fp, qd);
+			queue_db_print_set_resolved(fp, qd);
+		}
 	}
 
 	return 0;
