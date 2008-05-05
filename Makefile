@@ -10,7 +10,7 @@ check-local:
 clean-local:
 
 config.mk: configure ${TOP}/support/configure.sub
-	CFLAGS="$(UB_CFLAGS)" sh ./configure
+	CFLAGS="$(EXTERN_CFLAGS)" sh ./configure
 
 config-osx:
 	cp -f config-osx.mk config.mk

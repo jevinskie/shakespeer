@@ -20,6 +20,9 @@ TESTS ?= user_test tthdb_test extra_slots_test \
 TOP=..
 include ${TOP}/common.mk
 
+CFLAGS += $(HEADLESS_CFLAGS)
+LDFLAGS += $(HEADLESS_LDFLAGS)
+
 bin_PROGRAMS=sphubd sphashd
 noinst_PROGRAMS=share_tool queue_tool
 all-local: ${BUILT_SOURCES} ${bin_PROGRAMS} ${noinst_PROGRAMS}

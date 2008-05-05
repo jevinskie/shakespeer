@@ -42,6 +42,14 @@ UB_LDFLAGS=-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386
 endif
 endif
 
+# add -m64 here to compile external libraries with -m64
+EXTERN_CFLAGS=-m64 $(UB_CFLAGS)
+EXTERN_LDFLAGS=-m64
+
+# add -m64 here to compile non-GUI files with 64 bit support
+HEADLESS_CFLAGS=-m64
+HEADLESS_LDFLAGS=-m64
+
 # Need -lresolv on Linux
 ifeq ($(os),Linux)
 LIBS+=-lresolv
@@ -88,7 +96,7 @@ COMPILE.test = \
 
 define LINK
 	@echo "linking $@"
-	@CMD="${CC} -o $@ $^ ${UB_CFLAGS} ${LDFLAGS} ${LIBS}"; $$CMD || \
+	@CMD="$(CC) -o $@ $^ $(LDFLAGS) $(LIBS)"; $$CMD || \
 	  { echo "command was: $$CMD"; false; }
 endef
 

@@ -8,6 +8,9 @@ check_PROGRAMS=$(TESTS)
 TOP=..
 include ${TOP}/common.mk
 
+CFLAGS += $(HEADLESS_CFLAGS)
+LDFLAGS += $(HEADLESS_LDFLAGS)
+
 all-local: libspclient.a
 
 noinst_LIBRARIES = libspclient.a

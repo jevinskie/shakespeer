@@ -13,6 +13,9 @@ check_PROGRAMS = rx_test bloom_test args_test util_test tiger_test \
 TOP=..
 include ${TOP}/common.mk
 
+CFLAGS += $(HEADLESS_CFLAGS)
+LDFLAGS += $(HEADLESS_LDFLAGS)
+
 all-local: libsplib.a
 
 noinst_LIBRARIES = libsplib.a
