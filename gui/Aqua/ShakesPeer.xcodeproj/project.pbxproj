@@ -109,7 +109,6 @@
 		FC7E1B1B097E6B3F0087431A /* SPUserCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = FC7E1AF7097E6B3F0087431A /* SPUserCommand.m */; };
 		FC7E1B1C097E6B3F0087431A /* URLMutableAttributedString.m in Sources */ = {isa = PBXBuildFile; fileRef = FC7E1AF9097E6B3F0087431A /* URLMutableAttributedString.m */; };
 		FC7E1B1D097E6B3F0087431A /* URLTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = FC7E1AFB097E6B3F0087431A /* URLTextView.m */; };
-		FC7E1B1E097E6B3F0087431A /* XBorderedView.m in Sources */ = {isa = PBXBuildFile; fileRef = FC7E1AFD097E6B3F0087431A /* XBorderedView.m */; };
 		FC834CEA09A867EE006F1549 /* SPNotificationNames.m in Sources */ = {isa = PBXBuildFile; fileRef = FC834CE609A867EE006F1549 /* SPNotificationNames.m */; };
 		FC834CEC09A867EE006F1549 /* SPUserDefaultKeys.m in Sources */ = {isa = PBXBuildFile; fileRef = FC834CE809A867EE006F1549 /* SPUserDefaultKeys.m */; };
 		FC9FE9310982B9E300264848 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC9FE9300982B9E300264848 /* Growl.framework */; };
@@ -303,8 +302,6 @@
 		FC7E1AF9097E6B3F0087431A /* URLMutableAttributedString.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = URLMutableAttributedString.m; sourceTree = "<group>"; };
 		FC7E1AFA097E6B3F0087431A /* URLTextView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = URLTextView.h; sourceTree = "<group>"; };
 		FC7E1AFB097E6B3F0087431A /* URLTextView.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = URLTextView.m; sourceTree = "<group>"; };
-		FC7E1AFC097E6B3F0087431A /* XBorderedView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = XBorderedView.h; sourceTree = "<group>"; };
-		FC7E1AFD097E6B3F0087431A /* XBorderedView.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = XBorderedView.m; sourceTree = "<group>"; };
 		FC834CE509A867EE006F1549 /* SPNotificationNames.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPNotificationNames.h; sourceTree = "<group>"; };
 		FC834CE609A867EE006F1549 /* SPNotificationNames.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPNotificationNames.m; sourceTree = "<group>"; };
 		FC834CE709A867EE006F1549 /* SPUserDefaultKeys.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPUserDefaultKeys.h; sourceTree = "<group>"; };
@@ -527,8 +524,6 @@
 				FC7E1AF9097E6B3F0087431A /* URLMutableAttributedString.m */,
 				FC7E1AFA097E6B3F0087431A /* URLTextView.h */,
 				FC7E1AFB097E6B3F0087431A /* URLTextView.m */,
-				FC7E1AFC097E6B3F0087431A /* XBorderedView.h */,
-				FC7E1AFD097E6B3F0087431A /* XBorderedView.m */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -749,7 +744,6 @@
 				FC7E1B1B097E6B3F0087431A /* SPUserCommand.m in Sources */,
 				FC7E1B1C097E6B3F0087431A /* URLMutableAttributedString.m in Sources */,
 				FC7E1B1D097E6B3F0087431A /* URLTextView.m in Sources */,
-				FC7E1B1E097E6B3F0087431A /* XBorderedView.m in Sources */,
 				FC834CEA09A867EE006F1549 /* SPNotificationNames.m in Sources */,
 				FC834CEC09A867EE006F1549 /* SPUserDefaultKeys.m in Sources */,
 				FF05422F09CCB9070032DE2D /* SPClientBridge.m in Sources */,

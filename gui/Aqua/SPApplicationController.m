@@ -41,6 +41,7 @@
 
 #include "nmdc.h"
 #include "log.h"
+#include "../../version.h"
 
 static SPApplicationController *mySharedApplicationController = nil;
 
