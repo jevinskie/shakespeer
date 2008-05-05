@@ -353,6 +353,28 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
     return YES;
 }
 
+- (void)checkDownloadFolder
+{
+    NSUserDefaults *standardUserDefaults = [NSUserDefaults standardUserDefaults];
+    NSString *downloadFolder = [[standardUserDefaults stringForKey:SPPrefsDownloadFolder] stringByExpandingTildeInPath];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    BOOL isDir = NO;
+    if(![fileManager fileExistsAtPath:downloadFolder isDirectory:&isDir] || !isDir) {
+	NSLog(@"download folder not found or not a directory: %@", downloadFolder);
+	NSAlert *alert = [NSAlert alertWithMessageText:@"Download folder not found."
+                                         defaultButton:@"Go to preferences"
+				       alternateButton:@"Ignore"
+				       otherButton:nil
+				       informativeTextWithFormat:@"The folder %@ was not found, or is not a folder. If this folder is on an external disk, verify that the disk is correctly attached. If you choose to ignore this, downloads will not work.", [downloadFolder stringByAbbreviatingWithTildeInPath]];
+
+	int rc = [alert runModal];
+	if(rc == NSAlertDefaultReturn) {
+	    [[SPPreferenceController sharedPreferences] switchToItem:@"ShareItem"];
+	    [self showPreferences:self];
+	}
+    }
+}
+
 - (void)loadGUInibs
 {
     /* create the server messages panel, but don't show it
@@ -1023,6 +1045,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
         [initWindow orderOut:self];
 
         [mainWindowController showWindow:self];
+        [self checkDownloadFolder];
 
         [[SPBookmarkController sharedBookmarkController] autoConnectBookmarks];
         [mainWindowController restoreLastHubSession];
