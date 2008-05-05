@@ -26,6 +26,7 @@
 #include "log.h"
 #include "xstr.h"
 #include "notifications.h"
+#include "extip.h"
 
 static int myinfo_need_update = false;
 static LIST_HEAD(, hub) hub_list_head;
@@ -37,7 +38,7 @@ static void hub_handle_external_ip_notification(nc_t *nc, const char *channel,
 	hub_t *hub;
 	LIST_FOREACH(hub, &hub_list_head, next)
 	{
-		user_set_ip(hub->me, info->external_ip);
+		user_set_ip(hub->me, extip_get(hub->fd, hub->hubip));
 		INFO("External IP for hub [%s] is %s", hub->address, hub->me->ip);
 	}
 }

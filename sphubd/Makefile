@@ -142,7 +142,7 @@ share_search_test: share_search_test.o \
 	${LINK}
 
 search_listener_test: search_listener_test.o \
-	search_listener.o hub_list.o user.o notifications.o
+	search_listener.o hub_list.o user.o notifications.o extip.o
 	${LINK}
 
 queue_directory_test: queue_directory_test.o queue_db.o queue.o \
@@ -164,7 +164,7 @@ user_test: user_test.o user.o
 	${LINK}
 
 hub_slots_test: hub_slots_test.o hub_list.o user.o extra_slots.o \
-		globals.o notifications.o
+		globals.o notifications.o extip.o
 	${LINK}
 
 #share_save_test_SOURCES=share_save_test.c share.c share_save.c globals.c
