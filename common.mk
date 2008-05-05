@@ -64,6 +64,14 @@ COMPILE = \
 	sed -e 's/\#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e '/^$$/ d' -e 's/$$/ :/' < $(df).d >> $(df).P && \
 	rm -f $(df).d
 
+COMPILE.test = \
+	mkdir -p $(DEPDIR); \
+	CMD="${CC} -Wp,-MD,$(df).d -c -o $@ $< -DTEST ${CFLAGS} ${UB_CFLAGS}"; $$CMD || \
+		{ echo "command was: $$CMD"; false; } && \
+	cp $(df).d $(df).P && \
+	sed -e 's/\#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e '/^$$/ d' -e 's/$$/ :/' < $(df).d >> $(df).P && \
+	rm -f $(df).d
+
 %.o: %.c
 	@echo "compiling $<"
 	@$(COMPILE)
@@ -74,7 +82,7 @@ COMPILE = \
 
 %_test.o: %.c
 	@echo "compiling tests in $<"
-	@$(COMPILE)
+	@$(COMPILE.test)
 
 define LINK
 	@echo "linking $@"
