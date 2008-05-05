@@ -548,11 +548,13 @@ struct queue_target *queue_target_add(const char *target_filename,
 	TAILQ_INSERT_TAIL(&q_store->targets, qt, link);
 
 	if(!q_store->loading)
+	{
 		queue_db_print_add_target(q_store->fp, qt);
 
-        /* notify UI:s */
-        nc_send_queue_target_added_notification(nc_default(),
-                qt->filename, qt->size, qt->tth, qt->priority);
+		/* notify UI:s */
+		nc_send_queue_target_added_notification(nc_default(),
+			qt->filename, qt->size, qt->tth, qt->priority);
+	}
 
 	return qt;
 }
