@@ -50,7 +50,7 @@ queue_t *queue_get_next_source_for_nick(const char *nick)
         /* fill in a queue_t from the qf */
         queue = calloc(1, sizeof(queue_t));
         queue->nick = xstrdup(nick);
-        queue->is_filelist = 1;
+        queue->is_filelist = true;
         queue->auto_matched = ((qf->flags & QUEUE_TARGET_AUTO_MATCHED)
                 == QUEUE_TARGET_AUTO_MATCHED);
         return queue;
@@ -63,7 +63,7 @@ queue_t *queue_get_next_source_for_nick(const char *nick)
         /* fill in a queue_t from the qf */
         queue = calloc(1, sizeof(queue_t));
         queue->nick = xstrdup(nick);
-        queue->is_directory = 1;
+        queue->is_directory = true;
         queue->target_filename = xstrdup(qd->target_directory);
         queue->source_filename = xstrdup(qd->source_directory);
         return queue;
@@ -131,7 +131,7 @@ queue_t *queue_get_next_source_for_nick(const char *nick)
         queue->target_filename = xstrdup(qs_candidate->target_filename);
         queue->tth = xstrdup(qt->tth);
         queue->size = qt->size;
-        queue->is_filelist = 0;
+        queue->is_filelist = false;
         queue->auto_matched = ((qt->flags & QUEUE_TARGET_AUTO_MATCHED)
                 == QUEUE_TARGET_AUTO_MATCHED);
 

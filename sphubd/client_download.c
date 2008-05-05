@@ -333,10 +333,10 @@ int cc_start_download(cc_t *cc)
 
     g_debug("global_incomplete_directory = [%s]", global_incomplete_directory);
 
-    int dl_dir_exists;
+    bool dl_dir_exists;
     if(cc->current_queue->is_filelist)
     {
-        dl_dir_exists = 1;
+        dl_dir_exists = true;
     }
     else
     {

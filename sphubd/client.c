@@ -135,16 +135,23 @@ void cc_cancel_transfer(const char *local_filename)
 
 void cc_cancel_directory_transfers(const char *target_directory)
 {
+    while(*target_directory == '/')
+        ++target_directory;
+
+    g_debug("cancelling transfers for directory [%s]", target_directory);
+
     cc_t *cc = NULL;
     do
     {
         cc = cc_find_by_target_directory(target_directory);
         if(cc)
         {
+            g_debug("cancelling directory transfer with nick [%s]", cc->nick);
             if(cc->direction == CC_DIR_DOWNLOAD)
             {
                 return_if_fail(cc->current_queue);
-                queue_set_priority(cc->current_queue->target_filename, 0); /* pause the download */
+                /* FIXME: why do we pause the download? */
+                queue_set_priority(cc->current_queue->target_filename, 0);
             }
             cc_close_connection(cc);
         }
@@ -462,6 +469,8 @@ cc_t *cc_find_by_target_directory(const char *target_directory)
         x = strdup(target_directory);
     else
         asprintf(&x, "%s/", target_directory);
+
+    g_debug("looking for transfers with prefix [%s]", x);
 
     cc_t *cc = NULL;
     LIST_FOREACH(cc, &cc_list_head, next)

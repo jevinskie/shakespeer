@@ -29,7 +29,7 @@
 #define QUEUE_SOURCE_MAXNICK 32
 
 #include <time.h>
-#include <db.h> /* for db_seq_t */
+#include <stdbool.h>
 
 #define txn_return_val_if_fail(cond, retval) do {           \
         if(!(cond)) { g_warning("assert failed: " #cond); \
@@ -84,11 +84,9 @@ struct queue
     char *tth;
     uint64_t size;
     uint64_t offset;
-    int is_filelist;
-    int is_directory;
-    int auto_matched;
-    int64_t target_id;
-    int64_t source_id;
+    bool is_filelist;
+    bool is_directory;
+    bool auto_matched;
 };
 
 int queue_init(void);
