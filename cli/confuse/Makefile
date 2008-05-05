@@ -1,9 +1,12 @@
-all: libconfuse.a
+TOP=../..
+include ${TOP}/common.mk
 
-CFLAGS+=-DPACKAGE_VERSION="\"2.5\"" -DPACKAGE_STRING="\"libConfuse 2.5\""
+all-local: libconfuse.a
+
+CFLAGS+=-DPACKAGE_VERSION="\"2.5\"" -DPACKAGE_STRING="\"libConfuse_2.5\""
 CFLAGS+=-DHAVE_STRING_H -DHAVE_STDLIB_H -DHAVE_UNISTD_H -DHAVE_STRDUP -DHAVE_STRCASECMP
 
-OBJS=confuse.o lexer.o
+SOURCES=confuse.c lexer.c
 
 libconfuse.a: ${OBJS}
 	rm -f $@
@@ -13,7 +16,6 @@ libconfuse.a: ${OBJS}
 lexer.c: lexer.l
 	lex -Pcfg_yy -o$@ $<
 
-clean:
+clean-local:
 	rm -f ${OBJS} libconfuse.a lexer.c *~
 
-celan: clean
