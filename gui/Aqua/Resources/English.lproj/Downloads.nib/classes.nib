@@ -16,6 +16,7 @@
         {
             ACTIONS = {
                 browseUsersFiles = id; 
+                clearAllFinishedDownloads = id; 
                 openSelected = id; 
                 removeFromQueue = id; 
                 removeSource = id; 

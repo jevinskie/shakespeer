@@ -115,6 +115,8 @@
 - (IBAction)removeFromQueue:(id)sender;
 - (IBAction)removeSource:(id)sender;
 - (IBAction)removeUserFromQueue:(id)sender;
+- (IBAction)clearAllFinishedDownloads:(id)sender;
+- (void)clearAllFinishedDownloadsRecursivelyInArray:(NSMutableArray *)anArray;
 - (IBAction)setPriority:(id)sender;
 - (IBAction)searchByTTH:(id)sender;
 - (IBAction)searchForAlternates:(id)sender;
@@ -124,4 +126,3 @@
 - (IBAction)revealInFinder:(id)sender;
 
 @end
-

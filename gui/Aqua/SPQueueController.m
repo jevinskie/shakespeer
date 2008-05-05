@@ -456,6 +456,29 @@
     }
 }
 
+- (IBAction)clearAllFinishedDownloads:(id)sender
+{
+    [self clearAllFinishedDownloadsRecursivelyInArray:rootItems];
+    [tableView reloadData];
+}
+
+- (void)clearAllFinishedDownloadsRecursivelyInArray:(NSMutableArray *)anArray
+{
+    NSEnumerator *e = [anArray objectEnumerator];
+    SPQueueItem *qi;
+    while((qi = [e nextObject]) != nil)
+    {
+        if([qi isFinished])
+        {
+            [anArray removeObject:qi];
+        }
+        else if([qi isDirectory])
+        {
+            [self clearAllFinishedDownloadsRecursivelyInArray:[qi children]];
+        }
+    }
+}
+
 - (void)setPriority:(unsigned int)priority recursivelyInArray:(NSArray *)anArray
 {
     NSEnumerator *e = [anArray objectEnumerator];
