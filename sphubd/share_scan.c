@@ -85,7 +85,7 @@ static void share_scan_add_file(share_scan_state_t *ctx,
 
     /* is it already hashed? */
     bool already_hashed = false;
-    tth_inode_t *ti = tthdb_lookup_inode(f->inode);
+    struct tth_inode *ti = tth_store_lookup_inode(global_tth_store, f->inode);
 
     if(ti == NULL)
     {
@@ -95,96 +95,86 @@ static void share_scan_add_file(share_scan_state_t *ctx,
     {
         /* hashed or duplicate */
 
-        /* g_debug("Found inode %llu: tth = [%s]", f->inode, ti->tth); */
+	struct tth_entry *td = tth_store_lookup(global_tth_store, ti->tth);
 
-        struct tthdb_data *td = tthdb_lookup(ti->tth);
-        if(td)
+	if(td == NULL || ti->mtime != stbuf->st_mtime)
+	{
+	    /* This is either an inode without a TTH, which is useless,
+	     * or an obsolete inode (modified file). */
+	    DEBUG("removing obsolete inode %llu", f->inode);
+	    tth_store_remove_inode(global_tth_store, f->inode);
+#if 0 /* FIXME: should we remove the TTH too? */
+	    if(td)
+		tth_store_remove(global_tth_store, ti->tth);
+#endif
+	}
+	else
         {
-            /* g_debug("Found TTH, inode = %llu", td->inode); */
-            if(td->inode != f->inode)
-            {
-                /* g_debug("wrong inode, duplicate"); */
-                if(ti->size != f->size || ti->mtime != f->mtime)
-                {
-                    /* obsolete, unhashed */
-                    /* g_debug("obsolete duplicate"); */
-                    tthdb_remove_inode(f->inode);
-                }
-                else
-                {
-                    /* duplicate, check if the original is shared */
-                    share_file_t *original_file =
-                        share_lookup_file_by_inode(ctx->share, td->inode);
-                    if(original_file)
-                    {
-                        /* ok, keep as duplicate */
-                        g_debug("Setting [%s] as duplicate of inode %llu",
-                                f->path, td->inode);
-                        f->duplicate_inode = td->inode;
+	    already_hashed = true;
 
-                        /* update the mount statistics */
-                        ctx->mp->stats.nduplicates++;
-                        ctx->mp->stats.dupsize += f->size;
-                    }
-                    else
-                    {
-                        /* original not shared, switch with duplicate */
-                        /* g_debug("original not shared, switching"); */
-                        td->inode = f->inode;
-                        td->mtime = f->mtime;
-                        tthdb_update(ti->tth, td);
-                        already_hashed = true;
-                    }
-                }
-            }
-            else
+            /* DEBUG("Found TTH, inode = %llu", td->inode); */
+	    if(td->active_inode == 0)
+	    {
+		/* TTH is not active, claim this TTH for this inode */
+		tth_store_set_active_inode(global_tth_store,
+		    ti->tth, f->inode);
+	    }
+            else if(td->active_inode != f->inode)
             {
-                /* g_debug("correct inode, match"); */
-                if(td->size != f->size || td->mtime != f->mtime)
-                {
-                    /* obsolete, unhashed */
-                    /* g_debug("obsolete"); */
-                    tthdb_remove(ti->tth);
-                    tthdb_remove_inode(f->inode);
-                }
-                else
-                {
-                    /* hashed */
-                    already_hashed = true;
-                }
+                /* DEBUG("inode collision, duplicate"); */
+		/* check if the original is shared */
+		share_file_t *original_file =
+		    share_lookup_file_by_inode(ctx->share, td->active_inode);
+		if(original_file)
+		{
+		    /* ok, keep as duplicate */
+		    DEBUG("Setting inode %llu [%s] as duplicate of inode %llu",
+			    f->inode, f->path, td->active_inode);
+		    f->duplicate_inode = td->active_inode;
+
+		    /* update the mount statistics */
+		    ctx->mp->stats.nduplicates++;
+		    ctx->mp->stats.dupsize += f->size;
+		}
+		else
+		{
+		    /* original not shared, switch with duplicate */
+		    /* (this can only happen if shares has been removed live) */
+		    tth_store_set_active_inode(global_tth_store,
+			    ti->tth, f->inode);
+		}
             }
-        }
-        else
-        {
-            /* unhashed */
-            tthdb_remove_inode(f->inode);
+            /* else we found the same file again: rehash (or circular link?) */
         }
     }
 
-    if(already_hashed)
+    if(f->duplicate_inode == 0)
     {
-        /* Insert it in the tree. */
-        RB_INSERT(file_tree, &ctx->share->files, f);
+	if(already_hashed)
+	{
+	    /* Insert it in the tree. */
+	    RB_INSERT(file_tree, &ctx->share->files, f);
 
-        /* update the mount statistics */
-        ctx->mp->stats.nfiles++;
-        ctx->mp->stats.size += f->size;
+	    /* update the mount statistics */
+	    ctx->mp->stats.nfiles++;
+	    ctx->mp->stats.size += f->size;
 
-        /* add it to the bloom filter */
-        bloom_add_filename(ctx->share->bloom, f->name);
-    }
-    else
-    {
-        /* Insert it in the unhashed tree. */
-        RB_INSERT(file_tree, &ctx->share->unhashed_files, f);
+	    /* add it to the bloom filter */
+	    bloom_add_filename(ctx->share->bloom, f->name);
+	}
+	else
+	{
+	    /* Insert it in the unhashed tree. */
+	    RB_INSERT(file_tree, &ctx->share->unhashed_files, f);
+	}
+
+	/* add it to the inode hash */
+	share_add_to_inode_table(ctx->share, f);
     }
 
     /* update the mount statistics */
     ctx->mp->stats.ntotfiles++;
     ctx->mp->stats.totsize += f->size;
-
-    /* add it to the inode hash */
-    share_add_to_inode_table(ctx->share, f);
 
     nc_send_share_file_added_notification(nc_default(),
         ctx->share, f, ctx->mp);

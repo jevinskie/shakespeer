@@ -28,7 +28,7 @@
 #include "rx.h"
 #include "nfkc.h"
 #include "encoding.h"
-
+#include "globals.h"
 #include "share.h"
 
 static int file_matches_search(share_file_t *f, const share_search_t *search)
@@ -76,15 +76,15 @@ int share_search(share_t *share, const share_search_t *search,
     {
         /* If we're searching for a TTH, just look it up in the database. */
 
-        struct tthdb_data *tthd = tthdb_lookup(search->tth);
+        struct tth_entry *tthd = tth_store_lookup(global_tth_store, search->tth);
         if(tthd == NULL)
         {
             /* not found */
             return 0;
         }
-        g_debug("found inode %llu", tthd->inode);
+        DEBUG("found inode %llu", tthd->active_inode);
 
-        share_file_t *f = share_lookup_file_by_inode(share, tthd->inode);
+        share_file_t *f = share_lookup_file_by_inode(share, tthd->active_inode);
         if(f)
         {
             func(search, f, search->tth, user_data);
@@ -122,8 +122,8 @@ int share_search(share_t *share, const share_search_t *search,
             {
                 if(f->duplicate_inode == 0ULL && file_matches_search(f, search))
                 {
-                    char *tth = tthdb_get_tth_by_inode(f->inode);
-                    int rc = func(search, f, tth, user_data);
+		    struct tth_inode *ti = tth_store_lookup_inode(global_tth_store, f->inode);
+                    int rc = func(search, f, ti ? ti->tth : NULL, user_data);
                     if(--limit == 0)
                         break;
 

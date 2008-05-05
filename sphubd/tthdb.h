@@ -1,58 +1,81 @@
 /*
- * Copyright 2004-2006 Martin Hedenfalk <martin@bzero.se>
+ * Copyright (c) 2007 Martin Hedenfalk <martin@bzero.se>
  *
- * This file is part of ShakesPeer.
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
  *
- * ShakesPeer is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * ShakesPeer is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with ShakesPeer; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
 #ifndef _tthdb_h_
 #define _tthdb_h_
 
-/* The filesize and modification time are saved here so we can check if the
- * TTH is uptodate. */
-struct tthdb_data
+#include "sys_tree.h"
+
+#include <stdio.h>
+#include <stdbool.h>
+
+typedef struct tth_entry tth_entry_t;
+struct tth_entry
 {
-    uint64_t inode;
-    uint64_t size;   /* filesize */ 
-    time_t mtime;              /* modification time */
-    unsigned leafdata_len;
-    char leafdata[0];
+	RB_ENTRY(tth_entry) link;
+
+	uint64_t active_inode;
+	char tth[40];
+
+	off_t leafdata_offset;
+	unsigned leafdata_len;
+	char *leafdata;
 };
 
-typedef struct tth_inode tth_inode_t;
 struct tth_inode
 {
-    uint64_t size;
-    time_t mtime;
-    char tth[41];
+	RB_ENTRY(tth_inode) link;
+
+	uint64_t inode;
+	time_t mtime;
+	char tth[40];
 };
 
-int tthdb_open(void);
-int tthdb_close(void);
+struct tth_store
+{
+	char *filename;
+	FILE *fp;
+	bool loading;
+	bool need_normalize;
+	unsigned line_number;
+	RB_HEAD(tth_entries_head, tth_entry) entries;
+	RB_HEAD(tth_inodes_head, tth_inode) inodes;
+};
 
-int tthdb_add(const char *tth, struct tthdb_data *tthdata);
-int tthdb_update(const char *tth, struct tthdb_data *tthdata);
-struct tthdb_data *tthdb_lookup(const char *tth);
-int tthdb_remove(const char *tth);
+RB_PROTOTYPE(tth_entries_head, tth_entry, link, tth_entry_cmp);
+RB_PROTOTYPE(tth_inodes_head, tth_inode, link, tth_inode_cmp);
 
-struct tthdb_data *tthdb_lookup_by_inode(uint64_t inode);
-char *tthdb_get_tth_by_inode(uint64_t inode);
+void tth_store_init(void);
+void tth_store_close(void);
+int tth_store_load_leafdata(struct tth_store *store, struct tth_entry *entry);
 
-int tthdb_remove_inode(uint64_t inode);
-tth_inode_t *tthdb_lookup_inode(uint64_t inode);
+void tth_store_add_entry(struct tth_store *store,
+	const char *tth, const char *leafdata_base64,
+	off_t leafdata_offset);
+void tth_store_add_inode(struct tth_store *store,
+	uint64_t inode, time_t mtime, const char *tth);
+
+struct tth_entry *tth_store_lookup(struct tth_store *store, const char *tth);
+void tth_store_remove(struct tth_store *store, const char *tth);
+
+struct tth_entry *tth_store_lookup_by_inode(struct tth_store *store, uint64_t inode);
+void tth_store_remove_inode(struct tth_store *store, uint64_t inode);
+struct tth_inode *tth_store_lookup_inode(struct tth_store *store, uint64_t inode);
+
+void tth_store_set_active_inode(struct tth_store *store, const char *tth, uint64_t inode);
 
 #endif
 

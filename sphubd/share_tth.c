@@ -71,19 +71,18 @@ void handle_tth_available_notification(nc_t *nc,
     share_t *share = user_data;
     share_file_t *file = notification->file;
 
-    struct tthdb_data *td = malloc(sizeof(struct tthdb_data) +
-            notification->leafdata_len);
-    td->inode = file->inode;
-    td->size = file->size;
-    td->mtime = file->mtime;
-    td->leafdata_len = notification->leafdata_len;
-    memcpy(td->leafdata, notification->leafdata,
-            notification->leafdata_len);
+    struct tth_entry *te = tth_store_lookup(global_tth_store, notification->tth);
 
-    /*g_debug("adding tth for file [%s], inode %llu",
-            file->path, file->inode);*/
-    int rc = tthdb_add(notification->tth, td);
-    free(td);
+    if(te == NULL)
+    {
+	tth_store_add_entry(global_tth_store,
+	    notification->tth,
+	    notification->leafdata_base64,
+	    0);
+    }
+
+    tth_store_add_inode(global_tth_store,
+	file->inode, file->mtime, notification->tth);
 
     share_mountpoint_t *mp = share_lookup_local_root(share, file->path);
     if(mp == NULL)
@@ -92,48 +91,39 @@ void handle_tth_available_notification(nc_t *nc,
         return;
     }
 
-    share->uptodate = 0;
+    share->uptodate = false;
 
-    if(rc == 0)
+    if(te == NULL)
     {
+	/* there was no previous conflicting TTH */
         share_insert_file(share, mp, file);
     }
-    else if(rc == 1)
+    else
     {
         /* constraint violation; TTH not unique */
         /* update this offending file to be a duplicate of the original */
 
-        struct tthdb_data *original_tth = tthdb_lookup(notification->tth);
-        if(original_tth)
-        {
-            /* duplicate, check if original is shared */
-            share_file_t *original_file =
-                share_lookup_file_by_inode(share, original_tth->inode);
-            if(original_file)
-            {
-                /* original shared, keep as duplicate */
-                file->duplicate_inode = original_tth->inode;
-                mp->stats.nduplicates++;
-                mp->stats.dupsize += file->size;
-            }
-            else
-            {
-                /* original not shared, switch duplicates */
-                original_tth->inode = file->inode;
-                original_tth->mtime = file->mtime;
-                tthdb_update(notification->tth, original_tth);
+	/* duplicate, check if original is shared */
+	share_file_t *original_file =
+	    share_lookup_file_by_inode(share, te->active_inode);
+	if(original_file)
+	{
+	    /* original shared, keep as duplicate */
+	    file->duplicate_inode = te->active_inode;
+	    mp->stats.nduplicates++;
+	    mp->stats.dupsize += file->size;
+	}
+	else
+	{
+	    /* original not shared, switch duplicates */
 
-                share_insert_file(share, mp, file);
-            }
-        }
-        else
-        {
-            g_warning("THIS SHOULD NOT HAPPEN! INCONSISTENT TTH DATABASE?");
-        }
-    }
-    else if(rc == -1)
-    {
-        g_warning("share_add_tth failed");
+	    tth_store_add_entry(global_tth_store,
+		notification->tth,
+		notification->leafdata_base64,
+		0);
+
+	    share_insert_file(share, mp, file);
+	}
     }
 }
 

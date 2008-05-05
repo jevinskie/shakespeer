@@ -161,6 +161,8 @@ int cc_request_download(cc_t *cc)
             asprintf(&target, "%s/%s",
                     global_download_directory, queue->target_filename);
 
+	    /* Check if the file is already donwloaded
+	     */
             if(stat(target, &stbuf) == 0)
             {
                 INFO("local file in download dir already exists: [%s]",

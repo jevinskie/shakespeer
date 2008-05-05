@@ -161,15 +161,15 @@ static int cc_cmd_ADCGET(void *data, int argc, char **argv)
     /* special handling for leaf data upload */
     if(strcmp(subs->subs[0], "tthl") == 0)
     {
-        struct tthdb_data *tthd = NULL;
+        struct tth_entry *te = NULL;
         if(str_has_prefix(subs->subs[1], "TTH/"))
         {
-            tthd = tthdb_lookup(subs->subs[1] + 4);
-            if(tthd)
+            te = tth_store_lookup(global_tth_store, subs->subs[1] + 4);
+            if(te)
             {
                 /* Found the TTH, check if the file is shared. */
-                if(share_lookup_file_by_inode(global_share, tthd->inode) == NULL)
-                    tthd = NULL;
+                if(share_lookup_file_by_inode(global_share, te->active_inode) == NULL)
+                    te = NULL;
             }
         }
         else
@@ -183,14 +183,14 @@ static int cc_cmd_ADCGET(void *data, int argc, char **argv)
                 share_file_t *f = share_lookup_file(global_share, local_path);
                 free(local_path);
                 if(f)
-                    tthd = tthdb_lookup_by_inode(f->inode);
+                    te = tth_store_lookup_by_inode(global_tth_store, f->inode);
             }
         }
 
-        if(tthd)
+        if(te && tth_store_load_leafdata(global_tth_store, te) == 0)
         {
-            cc->leafdata = tthd->leafdata;
-            cc->leafdata_len = tthd->leafdata_len;
+            cc->leafdata = te->leafdata;
+            cc->leafdata_len = te->leafdata_len;
         }
         else
         {

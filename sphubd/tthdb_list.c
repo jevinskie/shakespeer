@@ -32,9 +32,6 @@
 #include "tthdb.h"
 #include "log.h"
 #include "xstr.h"
-#include "dbenv.h"
-
-extern DB *tth_db;
 
 int main(int argc, char **argv)
 {
@@ -45,59 +42,42 @@ int main(int argc, char **argv)
 
     sp_log_set_level("debug");
 
-    tthdb_open();
+    tth_store_init();
 
-    if(tth_db == NULL)
-        return 2;
+    uint64_t leafdata_size = 0;
+    unsigned ntths = 0;
 
-    g_debug("creating cursor");
-
-    /* create a cursor */
-    DBC *cursor;
-    tth_db->cursor(tth_db, NULL, &cursor, 0);
-
-    int rc = -1;
-    while(cursor)
+    struct tth_entry *te;
+    RB_FOREACH(te, tth_entries_head,
+	&((struct tth_store *)global_tth_store)->entries)
     {
-        DBT key;
-        DBT val;
+	printf("%s:", te->tth);
 
-        memset(&key, 0, sizeof(DBT));
-        memset(&val, 0, sizeof(DBT));
+        printf(" inode=%016llX", te->active_inode);
 
-        rc = cursor->c_get(cursor, &key, &val, DB_NEXT);
+	struct tth_inode *ti = tth_store_lookup_inode(global_tth_store,
+	    te->active_inode);
 
-        if(rc != 0)
-            break;
 
-        struct tthdb_data *d = val.data;
-        printf("got inode %llu: ", d->inode);
+        printf(" mtime=%08lX", (unsigned long)ti->mtime);
 
-        char *tth = tthdb_get_tth_by_inode(d->inode);
+	unsigned prev_leafdata_len = te->leafdata_len;
+	int rc = tth_store_load_leafdata(global_tth_store, te);
+	if(rc == 0)
+	{
+		if(te->leafdata_len != prev_leafdata_len)
+			printf(" LEAFDATA CHANGED");
+		printf(" leafdata size=%u\n", te->leafdata_len);
+	}
 
-        if(tth)
-        {
-            printf("%s", tth);
-            assert(strncmp(tth, key.data, strlen(tth)) == 0);
-        }
-        else
-        {
-            printf("NO TTH FOUND!");
-        }
-        printf(" size: %llu mtime: %lu\n", d->size, (unsigned long)d->mtime);
-
+	leafdata_size += te->leafdata_len;
+	ntths++;
     }
 
-    if(rc == -1)
-    {
-        printf("Failed: %s\n", strerror(errno));
-    }
+    printf("\n%u tths, average leafdata size: %llu\n",
+	ntths, leafdata_size / ntths);
 
-    if(cursor)
-        cursor->c_close(cursor);
-
-    tthdb_close();
-    close_default_db_environment();
+    tth_store_close();
 
     return 0;
 }

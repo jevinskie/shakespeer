@@ -37,11 +37,14 @@
 #include "notifications.h"
 #include "share.h"
 #include "ui.h"
+#include "globals.h"
 
 RB_GENERATE(file_tree, share_file, entry, share_file_cmp);
 
 share_t *share_new(void)
 {
+    DEBUG("initializing share");
+
     share_t *share = calloc(1, sizeof(share_t));
 
     RB_INIT(&share->files);
@@ -559,12 +562,12 @@ share_file_list_t *share_next_unhashed(share_t *share, unsigned limit)
 /* returned string should be freed by caller */
 char *share_translate_tth(share_t *share, const char *tth)
 {
-    struct tthdb_data *tthd = tthdb_lookup(tth);
+    struct tth_entry *te = tth_store_lookup(global_tth_store, tth);
     
-    if(tthd == NULL)
+    if(te == NULL)
         return NULL;
 
-    share_file_t *f = share_lookup_file_by_inode(share, tthd->inode);
+    share_file_t *f = share_lookup_file_by_inode(share, te->active_inode);
     if(f == NULL)
         return NULL;
 

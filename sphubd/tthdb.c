@@ -1,426 +1,447 @@
 /*
- * Copyright 2006 Martin Hedenfalk <martin@bzero.se>
+ * Copyright (c) 2007 Martin Hedenfalk <martin@bzero.se>
  *
- * This file is part of ShakesPeer.
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
  *
- * ShakesPeer is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * ShakesPeer is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with ShakesPeer; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define _GNU_SOURCE
-
 #include <sys/types.h>
-#include <fcntl.h>
-#include <limits.h>
-#include <db.h>
+
+#include <assert.h>
 #include <errno.h>
-#include <stdio.h>
 #include <string.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
+#include "tthdb.h"
+#include "base64.h"
 #include "log.h"
 #include "globals.h"
-#include "xstr.h"
-#include "dbenv.h"
-#include "tthdb.h"
 
-#define TTH_DB_FILENAME "tth.db"
-
-DB *tth_db = NULL;
-DB *tth_inode_db = NULL;
-
-#if DB_VERSION_MAJOR < 4
-# error "Wrong version of Berkeley DB"
-#endif
-
-int tthdb_close(void)
+int tth_entry_cmp(struct tth_entry *a, struct tth_entry *b)
 {
-    int rc = 0;
-
-    rc += close_db(&tth_db, "tth");
-    rc += close_db(&tth_inode_db, "tth_inode");
-
-    return rc;
+	return strcmp(a->tth, b->tth);
 }
 
-int tthdb_open(void)
+int tth_inode_cmp(struct tth_inode *a, struct tth_inode *b)
 {
-    g_debug("opening database %s", TTH_DB_FILENAME);
-
-    /* open tth database */
-    if(open_database(&tth_db, TTH_DB_FILENAME, "tth", DB_HASH, 0) != 0)
-    {
-        return -1;
-    }
-
-    /* open tth_inode database */
-    if(open_database(&tth_inode_db, TTH_DB_FILENAME, "tth_inode",
-                DB_HASH, 0) != 0)
-    {
-        return -1;
-    }
-
-    return 0;
+	return b->inode - a->inode;
 }
 
-int tthdb_remove(const char *tth)
+RB_GENERATE(tth_entries_head, tth_entry, link, tth_entry_cmp);
+RB_GENERATE(tth_inodes_head, tth_inode, link, tth_inode_cmp);
+
+static void tth_parse_add_tth(struct tth_store *store,
+	char *buf, size_t len, off_t offset)
 {
-    return_val_if_fail(tth_db && tth_inode_db, -1);
-    return_val_if_fail(tth, -1);
+	buf += 3; /* skip past "+T:" */
+	len -= 3;
 
-    DBT key;
-    memset(&key, 0, sizeof(DBT));
-    key.data = (void *)tth;
-    key.size = strlen(tth) + 1;
+	/* syntax of buf is 'tth:leafdata_base64' */
 
-    int rc = tth_db->del(tth_db, NULL, &key, 0);
-    if(rc != 0)
-    {
-        g_warning("failed to delete TTH [%s]: %s", tth, db_strerror(rc));
-        return -1;
-    }
+	if(len <= 40 || buf[39] != ':')
+	{
+		WARNING("failed to load tth on line %u", store->line_number);
+	}
+	else
+	{
+		/* Don't read the leafdata into memory. Instead we
+		 * store the offset for this entry in the file, so
+		 * we easily can retrieve it when needed.
+		 */
 
-    return 0;
+		buf[39] = 0;
+		tth_store_add_entry(store, buf, NULL, offset);
+	}
 }
 
-int tthdb_remove_inode(uint64_t inode)
+static void tth_parse_add_inode(struct tth_store *store, char *buf, size_t len)
 {
-    return_val_if_fail(tth_db && tth_inode_db, -1);
+	buf += 3; /* skip past "+I:" */
+	len -= 3;
 
-    DBT key;
-    memset(&key, 0, sizeof(DBT));
-    key.data = &inode;
-    key.size = sizeof(uint64_t);
+	/* syntax of buf is 'inode:mtime:tth' */
+	/* numeric values are stored in hex */
 
-    int rc = tth_inode_db->del(tth_inode_db, NULL, &key, 0);
-    if(rc != 0)
-    {
-        g_warning("failed to delete inode %llu: %s",
-                inode, db_strerror(rc));
-        return -1;
-    }
+	uint64_t inode;
+	unsigned long mtime;
+	char tth[40];
 
-    return 0;
+	int rc = sscanf(buf, "%llX:%lX:%s", &inode, &mtime, tth);
+	if(rc != 3 || inode == 0 || mtime == 0 || tth[39] != 0)
+		WARNING("failed to load inode on line %u", store->line_number);
+	else
+		tth_store_add_inode(store, inode, mtime, tth);
 }
 
-static int tthdb_put(const char *tth, struct tthdb_data *tthdata, int flags)
+static void tth_parse_remove_tth(struct tth_store *store, char *buf, size_t len)
 {
-    return_val_if_fail(tth_db && tth_inode_db, -1);
-    return_val_if_fail(tth, -1);
-    return_val_if_fail(tthdata, -1);
-    return_val_if_fail(tthdata->leafdata_len > 0, -1);
-    return_val_if_fail(tthdata->inode > 0ULL, -1);
-    return_val_if_fail(tthdata->size > 0ULL, -1);
+	buf += 3; /* skip past "-T:" */
+	len -= 3;
 
-    DBT key, val;
-    memset(&key, 0, sizeof(DBT));
-    memset(&val, 0, sizeof(DBT));
-
-    key.data = (void *)tth;
-    key.size = strlen(tth) + 1; /* store terminating nul */
-
-    val.data = tthdata;
-    val.size = sizeof(struct tthdb_data) + tthdata->leafdata_len;
-
-    DB_TXN *txn;
-    return_val_if_fail(db_transaction(&txn) == 0, -1);
-
-    int rc = tth_db->put(tth_db, txn, &key, &val, flags);
-
-    if(rc == 0 || rc == DB_KEYEXIST)
-    {
-        DBT key, val;
-        memset(&key, 0, sizeof(DBT));
-        memset(&val, 0, sizeof(DBT));
-
-        key.data = &tthdata->inode;
-        key.size = sizeof(uint64_t);
-
-        tth_inode_t ti;
-        ti.size = tthdata->size;
-        ti.mtime = tthdata->mtime;
-        strlcpy(ti.tth, tth, sizeof(ti.tth));
-
-        val.data = &ti;
-        val.size = sizeof(tth_inode_t);
-
-        int rc2 = tth_inode_db->put(tth_inode_db, txn, &key, &val, 0);
-        if(rc2 != 0)
-        {
-            g_warning("Failed to add inode: %s", db_strerror(rc2));
-        }
-        else if(rc == DB_KEYEXIST)
-            rc2 = DB_KEYEXIST;
-
-        rc = rc2;
-    }
-
-    if(rc == 0 || rc == DB_KEYEXIST)
-    {
-        txn->commit(txn, 0);
-    }
-    else
-    {
-        g_warning("aborting transaction");
-        txn->abort(txn);
-    }
-
-    return rc;
+	tth_store_remove(store, buf);
 }
 
-int tthdb_update(const char *tth, struct tthdb_data *tthdata)
+static void tth_parse_remove_inode(struct tth_store *store, char *buf, size_t len)
 {
-    /* g_debug("updating tth [%s] with inode %llu", tth, tthdata->inode); */
+	buf += 3; /* skip past "-I:" */
+	len -= 3;
 
-    int rc = tthdb_put(tth, tthdata, 0);
-
-    if(rc != 0)
-    {
-        g_warning("failed to update tth: %s", db_strerror(rc));
-        return -1;
-    }
-
-    return 0;
+	char *endptr = NULL;
+	uint64_t inode = strtoull(buf, &endptr, 16);
+	if(endptr == NULL || *endptr != 0 || inode == 0)
+	{
+		WARNING("failed to load TTH remove on line %u",
+			store->line_number);
+	}
+	else
+		tth_store_remove_inode(store, inode);
 }
 
-int tthdb_add(const char *tth, struct tthdb_data *tthdata)
+static void tth_parse(struct tth_store *store)
 {
-    /* g_debug("adding tth [%s] with inode %llu", tth, tthdata->inode); */
+	int ntth = 0;
+	int ninode = 0;
 
-    int rc = tthdb_put(tth, tthdata, DB_NOOVERWRITE);
+	store->loading = true;
+	store->need_normalize = false;
 
-    if(rc != 0 && rc != DB_KEYEXIST)
-    {
-        g_warning("failed to add tth: %s", db_strerror(rc));
-        return -1;
-    }
+	char *buf, *lbuf = NULL;
+	size_t len;
+	off_t offset = 0;
+	while((buf = fgetln(store->fp, &len)) != NULL)
+	{
+		store->line_number++;
 
-    return rc == DB_KEYEXIST ? 1 : 0;
+		if(buf[len - 1] == '\n')
+			buf[len - 1] = 0;
+		else
+		{
+			/* EOF without EOL, copy and add the NUL */
+			lbuf = malloc(len + 1);
+			assert(lbuf);
+			memcpy(lbuf, buf, len);
+			lbuf[len] = 0;
+			buf = lbuf;
+		}
+
+		if(len < 3 || buf[2] != ':')
+			continue;
+
+		if(strncmp(buf, "+T:", 3) == 0)
+		{
+			tth_parse_add_tth(store, buf, len, offset);
+			ntth++;
+		}
+		else if(strncmp(buf, "+I:", 3) == 0)
+		{
+			tth_parse_add_inode(store, buf, len);
+			ninode++;
+		}
+		else if(strncmp(buf, "-T:", 3) == 0)
+		{
+			tth_parse_remove_tth(store, buf, len);
+			ntth--;
+			store->need_normalize = true;
+		}
+		else if(strncmp(buf, "-I:", 3) == 0)
+		{
+			tth_parse_remove_inode(store, buf, len);
+			ninode--;
+			store->need_normalize = true;
+		}
+		else
+		{
+			INFO("unknown type %02X%02X, skipping line %u",
+				(unsigned char)buf[0], (unsigned char)buf[1],
+				store->line_number);
+			store->need_normalize = true;
+		}
+
+		offset = ftell(store->fp);
+	}
+	free(lbuf);
+
+	INFO("done loading TTH store (%i TTHs, %i inodes)", ntth, ninode);
+
+	store->loading = false;
 }
 
-struct tthdb_data *tthdb_lookup(const char *tth)
+static struct tth_store *tth_load(const char *filename)
 {
-    return_val_if_fail(tth_db && tth_inode_db, NULL);
+	struct tth_store *store = calloc(1, sizeof(struct tth_store));
 
-    DBT key;
-    memset(&key, 0, sizeof(DBT));
-    key.data = (void *)tth;
-    key.size = strlen(tth) + 1;
+	store->filename = strdup(filename);
+	RB_INIT(&store->entries);
+	RB_INIT(&store->inodes);
 
-    DBT val;
-    memset(&val, 0, sizeof(DBT));
+	store->fp = fopen(filename, "a+");
+	rewind(store->fp);
+	INFO("loading TTH store from [%s]", filename);
+	tth_parse(store);
 
-    int rc = tth_db->get(tth_db, NULL, &key, &val, 0);
-    if(rc == 0)
-    {
-        return val.data;
-    }
-    else if(rc != DB_NOTFOUND)
-    {
-        g_warning("failed to get tth data: %s", db_strerror(rc));
-    }
-
-    return NULL;
+	return store;
 }
 
-tth_inode_t *tthdb_lookup_inode(uint64_t inode)
+void tth_store_init(void)
 {
-    return_val_if_fail(tth_db && tth_inode_db, NULL);
+	return_if_fail(global_working_directory);
 
-    DBT key, val;
-    memset(&key, 0, sizeof(DBT));
-    memset(&val, 0, sizeof(DBT));
-
-    key.data = &inode;
-    key.size = sizeof(uint64_t);
-
-    int rc = tth_inode_db->get(tth_inode_db, NULL, &key, &val, 0);
-    if(rc == 0)
-    {
-        return val.data;
-    }
-    else if(rc != DB_NOTFOUND)
-    {
-        g_warning("failed to get tth inode data: %s", db_strerror(rc));
-    }
-
-    return NULL;
+	char *tth_store_filename;
+	asprintf(&tth_store_filename, "%s/tth2.db", global_working_directory);
+	global_tth_store = tth_load(tth_store_filename);
+	free(tth_store_filename);
 }
 
-struct tthdb_data *tthdb_lookup_by_inode(uint64_t inode)
+static void tth_close_database(struct tth_store *store)
 {
-    tth_inode_t *ti = tthdb_lookup_inode(inode);
-    if(ti)
-    {
-        return tthdb_lookup(ti->tth);
-    }
+	INFO("closing TTH database");
 
-    return NULL;
+	fclose(store->fp);
+	free(store->filename);
+	free(store);
 }
 
-char *tthdb_get_tth_by_inode(uint64_t inode)
+void tth_store_close(void)
 {
-    tth_inode_t *ti = tthdb_lookup_inode(inode);
-    if(ti)
-        return ti->tth;
+	tth_close_database(global_tth_store);
+}
 
-    return NULL;
+void tth_store_add_inode(struct tth_store *store,
+	 uint64_t inode, time_t mtime, const char *tth)
+{
+	struct tth_inode *ti;
+
+	ti = tth_store_lookup_inode(store, inode);
+	if(ti == NULL)
+	{
+		ti = calloc(1, sizeof(struct tth_inode));
+		ti->inode = inode;
+		RB_INSERT(tth_inodes_head, &store->inodes, ti);
+	}
+
+	if(ti->mtime != mtime || strcmp(ti->tth, tth) != 0)
+	{
+		ti->mtime = mtime;
+		strlcpy(ti->tth, tth, sizeof(ti->tth));
+
+		if(!store->loading)
+		{
+			fprintf(store->fp, "+I:%llX:%lX:%s\n",
+				inode, (unsigned long)mtime, tth);
+		}
+	}
+}
+
+void tth_store_add_entry(struct tth_store *store,
+	const char *tth, const char *leafdata_base64,
+	off_t leafdata_offset)
+{
+	struct tth_entry *te;
+
+	te = tth_store_lookup(store, tth);
+
+	if(te == NULL)
+	{
+		te = calloc(1, sizeof(struct tth_entry));
+		strlcpy(te->tth, tth, sizeof(te->tth));
+		te->leafdata_offset = leafdata_offset;
+
+		RB_INSERT(tth_entries_head, &store->entries, te);
+	}
+
+	if(!store->loading)
+	{
+		return_if_fail(leafdata_base64);
+
+		int len = fprintf(store->fp, "+T:%s:%s\n",
+			tth, leafdata_base64);
+
+		/* Call ftell() _after_ we have written the +T line, because
+		 * the file is opened in append mode and we might have
+		 * seek'd earlier to read leafdata. This way we are certain
+		 * we get the correct offset.
+		 */
+		if(len > 0)
+			te->leafdata_offset = ftell(store->fp) - len;
+	}
+}
+
+/* load the leafdata for the given TTH from the backend store */
+int tth_store_load_leafdata(struct tth_store *store, struct tth_entry *entry)
+{
+	return_val_if_fail(store, -1);
+	return_val_if_fail(entry, -1);
+
+	if(entry->leafdata)
+		return 0; /* already loaded */
+
+	INFO("loading leafdata for tth [%s]", entry->tth);
+
+	/* seek to the entry->leafdata_offset position in the backend store */
+	int rc = fseek(store->fp, entry->leafdata_offset, SEEK_SET);
+	if(rc == -1)
+	{
+		WARNING("seek to %llu failed", entry->leafdata_offset);
+		goto failed;
+	}
+
+	size_t len;
+	char *buf = fgetln(store->fp, &len);
+	if(buf == NULL)
+	{
+		WARNING("failed to read line @offset %llu",
+			entry->leafdata_offset);
+		goto failed;
+	}
+
+	if(len < 3 || strncmp(buf, "+T:", 3) != 0)
+	{
+		WARNING("invalid start tag: [%s]", buf);
+		goto failed;
+	}
+
+	buf += 3;
+	len -= 3;
+
+	if(len <= 40 || buf[39] != ':' || strncmp(buf, entry->tth, 39) != 0)
+	{
+		WARNING("offset points to wrong tth: [%s]", buf);
+		goto failed;
+	}
+
+	buf += 40;
+	len -= 40;
+
+	unsigned leafdata_len = strcspn(buf, ":");
+	if(buf[leafdata_len] != ':')
+	{
+		WARNING("missing delimiter at end of leafdata: [%s]", buf);
+		goto failed;
+	}
+
+	buf[leafdata_len] = 0; /* nul-terminate base64 encoded leafdata */
+
+	entry->leafdata = malloc(leafdata_len);
+	assert(entry->leafdata);
+	int outlen = base64_pton(buf,
+		(unsigned char *)entry->leafdata, leafdata_len);
+	if(outlen <= 0)
+	{
+		WARNING("invalid base64 encoded leafdata");
+		free(entry->leafdata);
+		entry->leafdata = NULL;
+		goto failed;
+	}
+
+	return 0;
+
+failed:
+	WARNING("failed to load leafdata for tth [%s]: %s",
+		entry->tth, strerror(errno));
+
+	/* FIXME: should we re-load the tth store ? */
+	return -1;
+}
+
+struct tth_entry *tth_store_lookup(struct tth_store *store, const char *tth)
+{
+	struct tth_entry find;
+	strlcpy(find.tth, tth, sizeof(find.tth));
+	return RB_FIND(tth_entries_head, &store->entries, &find);
+}
+
+static void tth_entry_free(struct tth_entry *entry)
+{
+	if(entry)
+	{
+		free(entry->leafdata);
+		free(entry);
+	}
+}
+
+void tth_store_remove(struct tth_store *store, const char *tth)
+{
+	struct tth_entry *entry = tth_store_lookup(store, tth);
+	if(entry)
+	{
+		RB_REMOVE(tth_entries_head, &store->entries, entry);
+
+		if(!store->loading)
+		{
+			fprintf(store->fp, "-T:%s\n", tth);
+		}
+
+		tth_entry_free(entry);
+	}
+}
+
+struct tth_entry *tth_store_lookup_by_inode(struct tth_store *store, uint64_t inode)
+{
+	struct tth_inode *ti = tth_store_lookup_inode(store, inode);
+	if(ti)
+		return tth_store_lookup(store, ti->tth);
+	return NULL;
+}
+
+static void tth_inode_free(struct tth_inode *ti)
+{
+	if(ti)
+	{
+		free(ti);
+	}
+}
+
+void tth_store_remove_inode(struct tth_store *store, uint64_t inode)
+{
+	struct tth_inode *ti = tth_store_lookup_inode(store, inode);
+	if(ti)
+	{
+		RB_REMOVE(tth_inodes_head, &store->inodes, ti);
+
+		if(!store->loading)
+		{
+			fprintf(store->fp, "-I:%llX\n", inode);
+		}
+
+		tth_inode_free(ti);
+	}
+}
+
+struct tth_inode *tth_store_lookup_inode(struct tth_store *store, uint64_t inode)
+{
+	struct tth_inode find;
+	find.inode = inode;
+	return RB_FIND(tth_inodes_head, &store->inodes, &find);
+}
+
+void tth_store_set_active_inode(struct tth_store *store, const char *tth, uint64_t inode)
+{
+	return_if_fail(store);
+	return_if_fail(tth);
+
+	struct tth_entry *te = tth_store_lookup(store, tth);
+	return_if_fail(te);
+
+	/* switch active inode for this TTH */
+	te->active_inode = inode;
 }
 
 #ifdef TEST
 
-#include "unit_test.h"
-
-int test_add(uint64_t inode,
-        uint64_t size, time_t mtime,
-        char *tth,
-        unsigned leafdata_len, void *leafdata)
-{
-    struct tthdb_data *td = calloc(1,
-            sizeof(struct tthdb_data) + leafdata_len);
-
-    td->inode = inode;
-    td->size = size;
-    td->mtime = mtime;
-    td->leafdata_len = leafdata_len;
-    memcpy(td->leafdata, leafdata, leafdata_len);
-
-    int rc = tthdb_add(tth, td);
-    free(td);
-
-    return rc;
-}
-
-struct
-{
-    uint64_t inode;
-    uint64_t size;
-    time_t mtime;
-    char *tth;
-    unsigned leafdata_len;
-    char *leafdata;
-} test_data[] =
-{
-    {25770216759ULL, 23ULL, 1147701096,
-        "X7ZSCHG6JHDTCITHAL6COZYVA2OEQF65GIJCEZA",
-        24, "123456789012345678901234"},
-    {25770216120ULL, 123456789ULL, 1147701097,
-        "52RTKFZCHGND7DNQJAL5F24U3BSVT5MGI332D3I",
-        48, "123456789012345678901234567890123456789012345678"},
-    {25770216121ULL, 12345ULL, 1147701098,
-        "52RTKFZCHGND7DNQJAL5F24U3BSVT5MGI332D3J",
-        48, "123456789012345678901234567890123456789012345679"},
-    {12334516121ULL, 23445ULL, 1147704564,
-        "ADFGSDFGSDFG7DNQJAL5F24U3BSVT5MGI332D3J",
-        48, "ADSADSFASDF2345678901234567890123456789012345679"},
-    {0, 0, 0, NULL, 0, NULL}
-};
-
 int main(void)
 {
-    global_working_directory = "/tmp/sp-tthdb-test.d";
-    sp_log_set_level("debug");
-    system("/bin/rm -rf /tmp/sp-tthdb-test.d");
-    system("mkdir /tmp/sp-tthdb-test.d");
-
-    fail_unless(tthdb_open() == 0);
-
-    int i;
-    for(i = 0; test_data[i].tth; i++)
-    {
-        int rc = test_add(test_data[i].inode,
-                test_data[i].size, test_data[i].mtime,
-                test_data[i].tth,
-                test_data[i].leafdata_len, test_data[i].leafdata);
-        fail_unless(rc == 0);
-    }
-
-    fail_unless(tth_db);
-    fail_unless(tth_inode_db);
-    fail_unless(tthdb_close() == 0);
-
-    fail_unless(tthdb_open() == 0);
-
-    for(i = 0; test_data[i].tth; i++)
-    {
-        g_debug("inode %lli, tth [%s]",
-                test_data[i].inode, test_data[i].tth);
-
-        char *tth = tthdb_get_tth_by_inode(test_data[i].inode);
-        fail_unless(tth);
-        fail_unless(strcmp(tth, test_data[i].tth) == 0);
-
-        struct tthdb_data *d = tthdb_lookup(test_data[i].tth);
-        fail_unless(d);
-
-        struct tthdb_data *d2 = tthdb_lookup_by_inode(test_data[i].inode);
-        fail_unless(d2);
-
-        fail_unless(d->leafdata_len == d2->leafdata_len);
-        fail_unless(memcmp(d, d2,
-                    sizeof(struct tthdb_data) + d->leafdata_len) == 0);
-
-        fail_unless(d->inode == test_data[i].inode);
-        fail_unless(d->mtime == test_data[i].mtime);
-        fail_unless(d->size == test_data[i].size);
-        fail_unless(d->leafdata_len == test_data[i].leafdata_len);
-    }
-
-    /* Add a different TTH to a pre-existing inode. */
-    int rc = test_add(test_data[0].inode,
-            test_data[0].size, test_data[0].mtime,
-            "BBBBBBBBBBBBBDNQJAL5F24U3BSVT5MGI332D3J",
-            48, "BBBBBBBBB012345678901234567890123456789012345679");
-    fail_unless(rc == 0);
-
-    /* Make sure the new TTH has replaced the old one. */
-    const char *tth = tthdb_get_tth_by_inode(test_data[0].inode);
-    fail_unless(tth);
-    fail_unless(strcmp(tth,
-                "BBBBBBBBBBBBBDNQJAL5F24U3BSVT5MGI332D3J") == 0);
-    /* However, the old TTH is still available. */
-    struct tthdb_data *td = tthdb_lookup(test_data[0].tth);
-    fail_unless(td);
-    fail_unless(td->inode == test_data[0].inode);
-
-    /* Test removing entries. */
-    fail_unless(tthdb_lookup(test_data[1].tth) != NULL);
-    fail_unless(tthdb_remove(test_data[1].tth) == 0);
-    fail_unless(tthdb_lookup(test_data[1].tth) == NULL);
-
-    fail_unless(tthdb_lookup_inode(test_data[1].inode) != NULL);
-    fail_unless(tthdb_remove_inode(test_data[1].inode) == 0);
-    fail_unless(tthdb_lookup_inode(test_data[1].inode) == NULL);
-
-    /* Add a duplicate inode */
-    time_t dup_mtime = test_data[2].mtime + 17;
-    rc = test_add(1008806325121417935ULL,
-            test_data[2].size, dup_mtime,
-            test_data[2].tth,
-            test_data[2].leafdata_len, test_data[2].leafdata);
-    fail_unless(rc == 1); /* TTH already exists */
-
-    /* We should be able to lookup the duplicate inode. */
-    tth_inode_t *ti = tthdb_lookup_inode(1008806325121417935ULL);
-    fail_unless(ti);
-    fail_unless(ti->size == test_data[2].size);
-    fail_unless(ti->mtime == dup_mtime);
-
-    fail_unless(tthdb_close() == 0);
-    system("/bin/rm -rf /tmp/sp-tthdb-test.d");
-
-    return 0;
+	return 0;
 }
 
 #endif

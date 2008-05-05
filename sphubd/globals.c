@@ -24,3 +24,4 @@ char *global_id_lock = 0;
  */
 bool global_move_partial_directories = false;
 
+void *global_tth_store = 0;

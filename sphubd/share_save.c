@@ -101,11 +101,11 @@ static void share_xml_print_file(FILE *fp, int level, share_file_t *file)
 
     share_scan_indent(fp, level);
 
-    const char *tth = tthdb_get_tth_by_inode(file->inode);
-    if(tth && *tth)
+    struct tth_inode *ti = tth_store_lookup_inode(global_tth_store, file->inode);
+    if(ti)
     {
         fprintf(fp, "<File Name=\"%s\" Size=\"%"PRIu64"\" TTH=\"%s\"/>\r\n",
-                escaped_utf8_filename, file->size, tth);
+                escaped_utf8_filename, file->size, ti->tth);
     }
     else
     {

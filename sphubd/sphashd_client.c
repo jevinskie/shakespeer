@@ -85,15 +85,8 @@ static void hs_finish_file(hs_t *hs, const char *filename,
     {
         if(hash_base32 && leaves_base64)
         {
-            size_t targsize = strlen(leaves_base64);
-            unsigned char *target = malloc(targsize);
-            int outlen = base64_pton(leaves_base64, target, targsize);
-
-            return_if_fail(outlen % 24 == 0);
-
             nc_send_tth_available_notification(nc_default(),
-                    file, hash_base32, outlen, target, mibs_per_sec);
-            free(target);
+                    file, hash_base32, leaves_base64, mibs_per_sec);
         }
 
         LIST_REMOVE(file, link);

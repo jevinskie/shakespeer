@@ -12,7 +12,7 @@ notification external_ip_detected string:external_ip
 
 notification share_file_added pointer:share pointer:file pointer:mp
 notification share_scan_finished string:path
-notification tth_available pointer:file string:tth uint:leafdata_len pointer:leafdata double:mibs_per_sec
+notification tth_available pointer:file string:tth string:leafdata_base64 double:mibs_per_sec
 notification hashing_complete
 notification will_remove_share string:local_root
 notification did_remove_share string:local_root bool:is_rescan
