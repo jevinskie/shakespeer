@@ -767,8 +767,8 @@ static int ui_cb_set_download_directory(ui_t *ui, const char *download_directory
 {
     if(download_directory)
     {
-        free(global_storage_directory);
-        global_storage_directory = tilde_expand_path(download_directory);
+        free(global_download_directory);
+        global_download_directory = tilde_expand_path(download_directory);
     }
 
     return 0;
@@ -778,8 +778,8 @@ static int ui_cb_set_incomplete_directory(ui_t *ui, const char *incomplete_direc
 {
     if(incomplete_directory)
     {
-        free(global_download_directory);
-        global_download_directory = tilde_expand_path(incomplete_directory);
+        free(global_incomplete_directory);
+        global_incomplete_directory = tilde_expand_path(incomplete_directory);
     }
     
     return 0;

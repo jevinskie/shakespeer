@@ -296,19 +296,19 @@ static void handle_download_finished_notification(nc_t *nc, const char *channel,
     return_if_fail(notification);
     return_if_fail(notification->filename);
 
-    if(global_download_directory == 0 || global_storage_directory == 0)
+    if(global_incomplete_directory == 0 || global_download_directory == 0)
     {
         /* strange? */
         return;
     }
 
-    if(strcmp(global_download_directory, global_storage_directory) == 0)
+    if(strcmp(global_incomplete_directory, global_download_directory) == 0)
     {
         /* same directory */
         return;
     }
 
-    if(access(global_storage_directory, F_OK) != 0)
+    if(access(global_download_directory, F_OK) != 0)
     {
         g_warning("Download directory doesn't exist, won't move complete file");
         return;
@@ -339,9 +339,9 @@ static void handle_download_finished_notification(nc_t *nc, const char *channel,
     if(global_move_partial_directories || qd == NULL)
     {
         asprintf(&source, "%s/%s",
-                global_download_directory, notification->filename);
+                global_incomplete_directory, notification->filename);
         asprintf(&target, "%s/%s",
-                global_storage_directory, notification->filename);
+                global_download_directory, notification->filename);
 
         /* make sure the target directory exists */
         char *dir = strdup(target);
@@ -355,9 +355,9 @@ static void handle_download_finished_notification(nc_t *nc, const char *channel,
     {
         return_if_fail(qd->nleft == 1);
         asprintf(&source, "%s/%s",
-                global_download_directory, qd->target_directory);
+                global_incomplete_directory, qd->target_directory);
         asprintf(&target, "%s/%s",
-                global_storage_directory, qd->target_directory);
+                global_download_directory, qd->target_directory);
     }
 
     g_debug("moving [%s] to download directory [%s]", source, target);
@@ -374,7 +374,7 @@ static void handle_download_finished_notification(nc_t *nc, const char *channel,
             /* the directory is complete, remove the (filesystem) directory */
             char *target_directory;
             asprintf(&target_directory, "%s/%s",
-                    global_download_directory, qd->target_directory);
+                    global_incomplete_directory, qd->target_directory);
             if(rmdir(target_directory) != 0)
             {
                 ui_send_status_message(NULL, NULL,
@@ -444,8 +444,8 @@ int main(int argc, char **argv)
 
     if(global_working_directory == NULL)
         global_working_directory = get_working_directory();
+    global_incomplete_directory = tilde_expand_path("~");
     global_download_directory = tilde_expand_path("~");
-    global_storage_directory = tilde_expand_path("~");
 
 #if 0
     global_id_generator = strdup("ShakesPeer");

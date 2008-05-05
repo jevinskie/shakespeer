@@ -159,7 +159,7 @@ int cc_request_download(cc_t *cc)
 
             char *target = 0;
             asprintf(&target, "%s/%s",
-                    global_storage_directory, queue->target_filename);
+                    global_download_directory, queue->target_filename);
 
             if(stat(target, &stbuf) == 0)
             {
@@ -173,7 +173,7 @@ int cc_request_download(cc_t *cc)
             {
                 free(target);
                 asprintf(&target, "%s/%s",
-                        global_download_directory, queue->target_filename);
+                        global_incomplete_directory, queue->target_filename);
 
                 int rc = stat(target, &stbuf);
                 free(target);
@@ -331,7 +331,7 @@ int cc_start_download(cc_t *cc)
     return_val_if_fail(cc, -1);
     return_val_if_fail(cc->current_queue, -1);
 
-    g_debug("global_download_directory = [%s]", global_download_directory);
+    g_debug("global_incomplete_directory = [%s]", global_incomplete_directory);
 
     int dl_dir_exists;
     if(cc->current_queue->is_filelist)
@@ -340,17 +340,17 @@ int cc_start_download(cc_t *cc)
     }
     else
     {
-        dl_dir_exists = global_download_directory &&
-            access(global_download_directory, F_OK) == 0;
+        dl_dir_exists = global_incomplete_directory &&
+            access(global_incomplete_directory, F_OK) == 0;
     }
 
     if(!dl_dir_exists)
     {
         g_warning("download directory [%s] doesn't exist, refuses to download",
-                global_download_directory);
+                global_incomplete_directory);
         ui_send_status_message(NULL, cc->hub->address,
                 "Download directory '%s' doesn't exist"
-                " (unattached external harddrive?)", global_download_directory);
+                " (unattached external harddrive?)", global_incomplete_directory);
         return -1;
     }
 
@@ -361,7 +361,7 @@ int cc_start_download(cc_t *cc)
     if(cc->fetch_leaves == 1)
     {
         asprintf(&target, "%s/%s.tthl",
-                global_download_directory, cc->current_queue->target_filename);
+                global_incomplete_directory, cc->current_queue->target_filename);
     }
     else if(cc->current_queue->is_filelist)
     {
@@ -370,7 +370,7 @@ int cc_start_download(cc_t *cc)
     else
     {
         asprintf(&target, "%s/%s",
-               global_download_directory, cc->current_queue->target_filename);
+               global_incomplete_directory, cc->current_queue->target_filename);
     }
 
     g_debug("target: [%s]", target);

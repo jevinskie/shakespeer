@@ -12,8 +12,8 @@ extern bool global_follow_redirects;
 extern bool global_auto_match_filelists;
 extern bool global_auto_search_sources;
 extern unsigned global_hash_prio;
+extern char *global_incomplete_directory;
 extern char *global_download_directory;
-extern char *global_storage_directory;
 
 extern char *global_id_version;
 extern char *global_id_tag;
