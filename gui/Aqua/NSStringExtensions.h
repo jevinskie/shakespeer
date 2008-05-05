@@ -23,6 +23,7 @@
 
 @interface NSString (ShakesPeerExtensions)
 
+- (NSComparisonResult)numericalCompare:(NSString *)aString;
 - (NSString *)stringByDeletingLastWindowsPathComponent;
 - (NSString *)lastWindowsPathComponent;
 - (int)indexOfCharacter:(unichar)character fromIndex:(int)startIndex;

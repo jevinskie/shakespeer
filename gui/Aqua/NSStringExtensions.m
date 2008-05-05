@@ -23,6 +23,11 @@
 
 @implementation NSString (ShakesPeerExtensions)
 
+- (NSComparisonResult)numericalCompare:(NSString *)aString
+{
+    return [self compare:aString options:NSNumericSearch];
+}
+
 - (NSString *)stringByDeletingLastWindowsPathComponent
 {
     NSCharacterSet *backslashSet = [NSCharacterSet characterSetWithCharactersInString:@"\\"];
