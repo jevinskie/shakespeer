@@ -50,3 +50,5 @@ extern NSString *SPPrefsDateOfPreviousVersionCheck;
 extern NSString *SPPrefsHashingPriority;
 extern NSString *SPPrefsDrawerIsVisible;
 extern NSString *SPPrefsDrawerHeight;
+extern NSString *SPPrefsRequireOpenSlots;
+extern NSString *SPPrefsRequireTTH;

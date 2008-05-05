@@ -70,6 +70,7 @@
                              type:aSearchType
                        hubAddress:aHubAddress];
     }
+    
     return self;
 }
 
@@ -174,6 +175,15 @@
     }
         
     [[searchResultTable headerView] setMenu:columnsMenu];
+    
+    int flags = 0;
+    if([[NSUserDefaults standardUserDefaults] boolForKey:@"requireOpenSlots"])
+        flags |= 1;
+    if([[NSUserDefaults standardUserDefaults] boolForKey:@"requireTTH"])
+        flags |= 2;
+    
+    lastFlags = flags;
+    [self filterSearchResults:lastFilterString flags:lastFlags];
 }
 
 - (void)dealloc

@@ -22,7 +22,6 @@
 #import <Cocoa/Cocoa.h>
 #import "NSStringExtensions.h"
 
-
 @protocol SPSideBarItem;
 @class SPOutlineView;
 
@@ -90,4 +89,3 @@
 - (int)searchID;
 
 @end
-

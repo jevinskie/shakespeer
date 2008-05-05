@@ -90,6 +90,8 @@ static SPApplicationController *mySharedApplicationController = nil;
             [NSNumber numberWithUnsignedInt:2], SPPrefsHashingPriority,
             [NSNumber numberWithBool:NO], SPPrefsDrawerIsVisible,
             [NSNumber numberWithInt:100], SPPrefsDrawerHeight,
+            [NSNumber numberWithBool:NO], SPPrefsRequireOpenSlots,
+            [NSNumber numberWithBool:NO], SPPrefsRequireTTH,
             nil];
         [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
 

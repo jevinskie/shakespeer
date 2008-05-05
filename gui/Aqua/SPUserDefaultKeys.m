@@ -50,3 +50,5 @@ NSString *SPPrefsDateOfPreviousVersionCheck = @"SPPrefsDateOfPreviousVersionChec
 NSString *SPPrefsHashingPriority = @"hashingPriority";
 NSString *SPPrefsDrawerIsVisible = @"drawerIsVisible";
 NSString *SPPrefsDrawerHeight = @"drawerHeight";
+NSString *SPPrefsRequireOpenSlots = @"requireOpenSlots";
+NSString *SPPrefsRequireTTH = @"requireTTH";
