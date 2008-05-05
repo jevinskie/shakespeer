@@ -57,7 +57,7 @@
     {
         [item setLabel:@"Advanced Search"];
         [item setToolTip:@"Advanced Search"];
-        [item setImage:[NSImage imageNamed:@"search"]];
+        [item setImage:[NSImage imageNamed:@"ToolbarAdvancedSearch"]];
         [item setAction:@selector(advSearchShow:)];
     }
     else if([itemIdentifier isEqualToString:@"toggleDrawer"])
@@ -65,7 +65,7 @@
         [item setLabel:@"Toggle transfer drawer"];
         [item setToolTip:@"Toggle transfer drawer"];
         [item setTarget:transferDrawer];
-        [item setImage:[NSImage imageNamed:@"transfer-drawer"]];
+        [item setImage:[NSImage imageNamed:@"ToolbarDrawer"]];
         [item setAction:@selector(toggle:)];
     }
     else if([itemIdentifier isEqualToString:@"contextMenu"])
@@ -83,7 +83,7 @@
     {
         [item setLabel:@"Connect"];
         [item setToolTip:@"Connect to server"];
-        [item setImage:[NSImage imageNamed:@"connectButton"]];
+        [item setImage:[NSImage imageNamed:@"ToolbarConnect"]];
         [item setAction:@selector(connectShow:)];
     }
 

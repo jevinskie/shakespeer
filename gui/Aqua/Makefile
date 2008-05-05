@@ -68,10 +68,11 @@ app_bundle.stamp: ShakesPeer
 	cp -f Resources/Info.plist ShakesPeer.app/Contents
 	cp -fR Resources/English.lproj/*[^~].nib ShakesPeer.app/Contents/Resources/English.lproj
 	cp -f Resources/English.lproj/InfoPlist.strings ShakesPeer.app/Contents/Resources/English.lproj
-	cp -f Resources/*.png ShakesPeer.app/Contents/Resources 
-	cp -f Resources/*.tiff ShakesPeer.app/Contents/Resources 
-	cp -f Resources/Smileys/*.png ShakesPeer.app/Contents/Resources 
-	cp -f Resources/shakespeer.icns ShakesPeer.app/Contents/Resources 
+	cp -f Resources/Images/*.png ShakesPeer.app/Contents/Resources 
+	cp -f Resources/Images/*.tiff ShakesPeer.app/Contents/Resources 
+	cp -f Resources/Images/*.tif ShakesPeer.app/Contents/Resources 
+	cp -f Resources/Images/Smileys/*.png ShakesPeer.app/Contents/Resources 
+	cp -f Resources/Images/shakespeer.icns ShakesPeer.app/Contents/Resources 
 	cp -f ../../sphubd/sphubd ShakesPeer.app/Contents/Resources
 	cp -f ../../sphubd/sphashd ShakesPeer.app/Contents/Resources
 	cp -f ShakesPeer ShakesPeer.app/Contents/MacOS
