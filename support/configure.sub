@@ -1,4 +1,4 @@
-# Copyright (c) 2006 Martin Hedenfalk <martin@hedenfalk.se>
+# Copyright (c) 2006-2007 Martin Hedenfalk <martin@bzero.se>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -61,6 +61,21 @@ EOF
 
 	LIBS=$old_LIBS
 	return $rc
+}
+
+check_function()
+{
+	func=$1
+	checking for function $func...
+	check_lib $func
+	rc=$?
+	if test $rc -eq 0; then
+		msg yes
+		out HAS_${func}=yes
+	else
+		msg no
+		out HAS_${func}=no
+	fi
 }
 
 check_header()
