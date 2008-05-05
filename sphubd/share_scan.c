@@ -331,6 +331,10 @@ static void share_scan_event(int fd, short why, void *user_data)
             ctx->share->uptodate = 0;
             ctx->mp->scan_in_progress = 0;
             free(ctx);
+
+	    ctx->share->scanning--;
+	    return_if_fail(ctx->share->scanning >= 0);
+
             return;
         }
 
@@ -365,6 +369,12 @@ int share_scan(share_t *share, share_mountpoint_t *mp)
     return_val_if_fail(share, -1);
     return_val_if_fail(mp, -1);
     return_val_if_fail(mp->scan_in_progress == 0, -1);
+
+    /* Keep a counter to indicate for the myinfo update event that
+     * we should wait until rescanning is done. Otherwise we risk
+     * sending out a too low share size that gets us kicked.
+     */
+    share->scanning++;
 
     share_scan_state_t *ctx = calloc(1, sizeof(share_scan_state_t));
 

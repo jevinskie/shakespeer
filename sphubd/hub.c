@@ -642,8 +642,13 @@ static void myinfo_updater(int fd, short condition, void *data)
 
     if(hub_need_myinfo_update() && now - last_myinfo_update > 30)
     {
-        hub_set_need_myinfo_update(false);
-        hub_all_send_myinfo();
+	if(((share_t *)global_share)->scanning == 0)
+	{
+	    hub_set_need_myinfo_update(false);
+	    hub_all_send_myinfo();
+	}
+	else
+	    WARNING("skipping update, %i scans in progress", ((share_t *)global_share)->scanning);
         last_myinfo_update = time(0);
     }
 

@@ -75,6 +75,7 @@ struct share
 {
     LIST_HEAD(, share_mountpoint) mountpoints;
     bool uptodate;     /* if false, filelist must be re-saved */
+    int scanning;      /* increased for each each share currently scanning */
     bloom_t *bloom;
     char *cid;
     unsigned listlen; /* length of the uncompressed MyList file */
