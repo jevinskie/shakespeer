@@ -1,14 +1,16 @@
 
 # 1 = name, 2 = version, 3 = url, 4 = md5
 define download
-	cp ../${1}-${2}.tar.gz . || \
+	@echo "downloading $(3)..."
+	@cp ../${1}-${2}.tar.gz . || \
 	cp ../../${1}-${2}.tar.gz . || \
 	cp ../../../${1}-${2}.tar.gz . || \
 	curl ${3} -o ${1}-${2}.tar.gz || \
 	wget ${3} || \
 	fetch ${3} || \
 	ftp ${3}
-	md5=`(md5 ${1}-${2}.tar.gz || \
+	@echo "verifying checksum..."
+	@md5=`(md5 ${1}-${2}.tar.gz || \
 	    md5sum ${1}-${2}.tar.gz) 2>/dev/null | \
 	    sed 's/.*\([0-9a-z]\{32\}\).*/\1/'` && \
 	test "$$md5" = "${4}" || \

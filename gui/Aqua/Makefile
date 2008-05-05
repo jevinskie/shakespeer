@@ -10,25 +10,41 @@ else
 all-local:
 endif
 
-SOURCES=FilteringArrayController.m \
-	   MenuButton.m NSMenu-UserCommandAdditions.m \
-	   NSMutableAttributedString-SmileyAdditions.m \
-	   NSStringExtensions.m \
-	   SPApplicationController.m SPBookmarkController.m \
-	   SPChatWindowController.m \
-	   SPFilelistController.m \
-	   SPHubController.m SPLog.m \
-	   SPMainWindowController-Toolbar.m SPMainWindowController.m \
-	   SPPreferenceController.m SPPublicHubsController.m \
-	   SPQueueController.m \
-	   SPSearchWindowController.m SPSideBar.m SPTableView.m \
-	   SPTransferController.m \
-	   SPTransformers.m SPUser.m SPUserCommand.m SidebarCell.m \
-	   URLMutableAttributedString.m URLTextView.m main.m \
-	   SPOutlineView.m \
-	   SPMessagePanel.m SPGrowlBridge.m \
-	   SPNotificationNames.m SPUserDefaultKeys.m SPClientBridge.m \
-	   MHSysTree.m SPKeychain.m
+SOURCES = \
+	FilteringArrayController.m \
+	MHSysTree.m \
+	MenuButton.m \
+	NSMenu-UserCommandAdditions.m \
+	NSMutableAttributedString-SmileyAdditions.m \
+	NSStringExtensions.m \
+	SPApplicationController.m \
+	SPBookmarkController.m \
+	SPChatWindowController.m \
+	SPClientBridge.m \
+	SPFilelistController.m \
+	SPGrowlBridge.m \
+	SPHubController.m SPLog.m \
+	SPKeychain.m \
+	SPMainWindowController-Toolbar.m \
+	SPMainWindowController.m \
+	SPMessagePanel.m \
+	SPNotificationNames.m \
+	SPOutlineView.m \
+	SPPreferenceController.m \
+	SPPublicHubsController.m \
+	SPQueueController.m \
+	SPSearchWindowController.m \
+	SPSideBar.m \
+	SPTableView.m \
+	SPTransferController.m \
+	SPTransformers.m \
+	SPUser.m \
+	SPUserCommand.m \
+	SPUserDefaultKeys.m \
+	SidebarCell.m \
+	URLMutableAttributedString.m \
+	URLTextView.m \
+	main.m
 
 SPApplicationController.o SPClientBridge.o: ${TOP}/version.mk
 

@@ -20,12 +20,11 @@ release:
 	cd release-build && \
 	if test -d shakespeer/_darcs; then \
 	  cd shakespeer && \
-	  darcs pull -a -v http://darcs.bzero.se/shakespeer && \
-	  make depend ; \
+	  darcs pull -a -v http://darcs.bzero.se/shakespeer ; \
 	else \
 	  darcs get --partial -v http://darcs.bzero.se/shakespeer && \
 	  cd shakespeer ; \
-	fi && pwd && $(MAKE) all BUILD_PROFILE=release
+	fi && $(MAKE) all BUILD_PROFILE=release
 
 dmg: release
 	cd release-build/shakespeer && /bin/sh support/mkdmg "$(VERSION)" . ../..
