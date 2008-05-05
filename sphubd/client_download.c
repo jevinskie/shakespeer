@@ -398,10 +398,13 @@ void cc_download_read(cc_t *cc)
         return;
     }
 
-    size_t maxsize = cc->bytes_to_transfer - cc->bytes_done;
-    if(input_data_len > maxsize)
+    uint64_t maxsize = cc->bytes_to_transfer - cc->bytes_done;
+    if((uint64_t)input_data_len > maxsize)
     {
-        input_data_len = maxsize;
+	WARNING("truncated input data length:"
+		"bytes_to_transfer=%llu, bytes_done=%llu, maxsize=%lu",
+	    cc->bytes_to_transfer, cc->bytes_done, maxsize);
+        input_data_len = (size_t)maxsize;
     }
 
     char *input_data = (char *)EVBUFFER_DATA(input_buffer);

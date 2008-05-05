@@ -177,6 +177,9 @@ int extra_slots_init(void)
 		xs_loading = false;
 	}
 
+	/* set the log file line buffered */
+	setvbuf(xs_fp, NULL, _IOLBF, 0);
+
 	return 0;
 }
 

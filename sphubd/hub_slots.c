@@ -88,11 +88,12 @@ void hub_set_slots(int slots, bool per_hub)
 {
     return_if_fail(slots > 0);
 
-    DEBUG("setting slots = %d %s", slots, per_hub ? "per hub" : "");
     if(per_hub)
     	total_slots = slots * (hub_count_normal() + hub_count_registered());
     else
     	total_slots = slots;
+    INFO("setting slots = %d%s (%i totally)",
+	slots, per_hub ? " per hub" : "", total_slots);
     configured_slots = slots;
     per_hub_flag = per_hub;
     hub_set_need_myinfo_update(true);
