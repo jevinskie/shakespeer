@@ -104,7 +104,7 @@ db-build-${DB_VER}/stamp: db-${DB_VER}.tar.gz
 	                      --enable-static \
 			      --disable-queue \
 			      --disable-verify \
-			      --disable-statistics \
+			      --enable-statistics \
 			      --disable-replication \
 	                      --disable-cryptography \
 	                      --prefix=$$cwd/db-install && \

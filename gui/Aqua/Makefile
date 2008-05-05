@@ -1,9 +1,9 @@
 SUBDIRS = Resources
 
 TOP=../..
-include ${TOP}/common.mk
+include $(TOP)/common.mk
 
-ifneq (${XCODE},)
+ifneq ($(XCODE),)
 all-local: app_bundle.stamp
 bin_PROGRAMS=ShakesPeer
 else
@@ -46,9 +46,9 @@ SOURCES = \
 	URLTextView.m \
 	main.m
 
-SPApplicationController.o SPClientBridge.o: ${TOP}/version.mk
+SPApplicationController.o SPClientBridge.o: $(TOP)/version.mk
 
-OBJS=${SOURCES:.m=.o}
+OBJS=$(SOURCES:.m=.o)
 
 CFLAGS+=-pipe -fobjc-exceptions -fpascal-strings -fobjc-direct-dispatch -F.
 
@@ -57,11 +57,11 @@ FRAMEWORKS = -framework Cocoa \
 	     -framework Growl \
 	     -framework Security
 
-ShakesPeer: Growl.framework ${OBJS} \
-	    ${TOP}/spclient/libspclient.a \
-	    ${TOP}/splib/libsplib.a
-	${CC} ${OBJS} -o $@ ${CFLAGS} ${UB_CFLAGS} ${LDFLAGS} ${LIBS} \
-	${FRAMEWORKS} -bind_at_load
+ShakesPeer: Growl.framework $(OBJS) \
+	    $(TOP)/spclient/libspclient.a \
+	    $(TOP)/splib/libsplib.a
+	$(CC) $(OBJS) -o $@ $(CFLAGS) $(UB_CFLAGS) $(LDFLAGS) $(LIBS) \
+	$(FRAMEWORKS) -bind_at_load
 
 GROWL_VERSION=0.7.4
 
@@ -69,14 +69,15 @@ Growl-$(GROWL_VERSION)-SDK.dmg:
 	ftp http://growl.info/files/Growl-$(GROWL_VERSION)-SDK.dmg
 
 Growl.framework: Growl-$(GROWL_VERSION)-SDK.dmg
-	p=`hdiutil attach Growl-$(GROWL_VERSION)-SDK.dmg -private | awk '$$1 ~ /^\/dev/ && $$2 == "Apple_HFS" {print $$3}'` && \
+	p=`hdiutil attach Growl-$(GROWL_VERSION)-SDK.dmg -private | \
+		awk '$$1 ~ /^\/dev/ && $$2 == "Apple_HFS" (print $$3)'` && \
 	cp -RP $$p/Frameworks/Growl.framework . && \
 	hdiutil detach $$p
 
 APP=ShakesPeer.app
 CONTENTS=$(APP)/Contents
 RES=$(CONTENTS)/Resources
-FRAMEWORKS=$(CONTENTS)/Frameworks
+FWDIR=$(CONTENTS)/Frameworks
 
 app_bundle.stamp: ShakesPeer
 	$(MAKE) -C Resources all
@@ -84,7 +85,7 @@ app_bundle.stamp: ShakesPeer
 	@echo "Creating application bundle..."
 	@echo "------------------------------"
 	mkdir -p ShakesPeer.app/Contents/MacOS
-	mkdir -p $(FRAMEWORKS)
+	mkdir -p $(FWDIR)
 	mkdir -p $(RES)/English.lproj
 	cp -f Resources/Info.plist ShakesPeer.app/Contents
 	cp -fR Resources/English.lproj/*[^~].nib $(RES)/English.lproj
@@ -97,15 +98,15 @@ app_bundle.stamp: ShakesPeer
 	cp -f ../../sphubd/sphubd $(RES)
 	cp -f ../../sphubd/sphashd $(RES)
 	cp -f ShakesPeer ShakesPeer.app/Contents/MacOS
-	test -d $(FRAMEWORKS)/Growl.framework || \
-		cp -RP Growl.framework $(FRAMEWORKS)
-	for a in recover upgrade; do \
+	test -d $(FWDIR)/Growl.framework || \
+		cp -RP Growl.framework $(FWDIR)
+	for a in checkpoint dump load recover upgrade verify stat; do \
 		cp -f ../../db-install/bin/db_$$a  $(RES) ; \
 	done
 
 install:
 
 clean-local:
-	rm -f ${bin_PROGRAMS} ${OBJS}
-	${MAKE} -C Resources clean
+	rm -f $(bin_PROGRAMS) $(OBJS)
+	$(MAKE) -C Resources clean
 
