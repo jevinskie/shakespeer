@@ -446,42 +446,5 @@ void cc_download_read(cc_t *cc)
             cc_finish_download(cc);
         }
     }
-
-#if 0
-    static char buf[8192];
-    size_t nbytes = sizeof(buf);
-    size_t maxsize = cc->bytes_to_transfer - cc->bytes_done;
-    if(nbytes > maxsize)
-    {
-        nbytes = maxsize;
-    }
-
-    ssize_t rc = read(fd, buf, nbytes);
-
-    if(rc < 0)
-    {
-        g_warning("error: %s", strerror(errno));
-        cc_close_connection(cc);
-        return;
-    }
-    else if(rc == 0)
-    {
-        g_warning("end-of-file on fd %d", fd);
-        cc_close_connection(cc);
-        return;
-    }
-    else
-    {
-        if(cc_download_write(cc, buf, rc) != 0)
-        {
-            return;
-        }
-    }
-
-    if(cc->bytes_done >= cc->bytes_to_transfer)
-    {
-        cc_finish_download(cc);
-    }
-#endif
 }
 

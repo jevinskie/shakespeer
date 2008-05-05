@@ -430,7 +430,7 @@
             if(newOperatorFlag)
                 nops++;
 
-            needUpdating = TRUE;
+            needUpdating = YES;
         }
         else
         {

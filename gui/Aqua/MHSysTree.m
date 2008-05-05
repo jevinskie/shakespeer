@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Martin Hedenfalk <martin.hedenfalk@gmail.com>
+ * Copyright 2006 Martin Hedenfalk <martin@bzero.se>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@ RB_GENERATE(id_tree, rb_entry, entry, id_cmp);
 
 int id_cmp(struct rb_entry *a, struct rb_entry *b)
 {
-    /* return (int)[a->obj performSelector:a->comparator withObject:b->obj]; */
     return (int)[a->obj performSelector:@selector(compare:) withObject:b->obj];
 }
 
@@ -42,7 +41,6 @@ int id_cmp(struct rb_entry *a, struct rb_entry *b)
     {
         RB_INIT(&root);
         nitems = 0;
-        comparator = @selector(compare:);
     }
     return self;
 }
@@ -57,7 +55,6 @@ int id_cmp(struct rb_entry *a, struct rb_entry *b)
 {
     struct rb_entry *e = malloc(sizeof(struct rb_entry));
     e->obj = [anObject retain];
-    e->comparator = comparator;
     RB_INSERT(id_tree, &root, e);
     nitems++;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Martin Hedenfalk <martin.hedenfalk@gmail.com>
+ * Copyright 2006 Martin Hedenfalk <martin@bzero.se>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,6 @@ struct rb_entry
 {
     RB_ENTRY(rb_entry) entry;
     id obj;
-    SEL comparator;
 };
 
 @interface MHSysTree : NSObject

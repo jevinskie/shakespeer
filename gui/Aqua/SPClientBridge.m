@@ -521,7 +521,7 @@ static void sp_queue_write(sp_t *sp)
     {
         if(EVBUFFER_LENGTH(sp->output) == 0)
         {
-            /* all queued data is writte, disable output callback */
+            /* all queued data is written, disable output callback */
             CFSocketDisableCallBacks((CFSocketRef)sp->user_data, kCFSocketWriteCallBack);
         }
     }
@@ -530,7 +530,7 @@ static void sp_queue_write(sp_t *sp)
 void sp_callback(CFSocketRef s, CFSocketCallBackType callbackType,
         CFDataRef address, const void *data, void *info)
 {
-    sp_t *sp = (sp_t *)info;
+    sp_t *sp = info;
     assert(sp);
 
     if(callbackType == kCFSocketWriteCallBack)
@@ -549,7 +549,7 @@ void sp_callback(CFSocketRef s, CFSocketCallBackType callbackType,
 
 int sp_queue_data(sp_t *sp, const char *string, size_t len)
 {
-    NSLog(@"Queing %i bytes", len);
+    NSLog(@"Queueing %i bytes", len);
     evbuffer_add(sp->output, (void *)string, len);
 
     /* re-enable output callback */
@@ -563,6 +563,11 @@ int sp_send_string(sp_t *sp, const char *string)
     int should_queue = 0;
     int rc = 0;
     size_t nbytes = strlen(string);
+
+    return_val_if_fail(sp, -1);
+    return_val_if_fail(sp->output, -1);
+    return_val_if_fail(sp->fd != -1, -1);
+    return_val_if_fail(string, -1);
 
     if(EVBUFFER_LENGTH(sp->output) > 0)
     {

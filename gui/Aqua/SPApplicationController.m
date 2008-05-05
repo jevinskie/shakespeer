@@ -184,6 +184,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
         }
     }
 
+    /* FIXME: this is just silly! We should not use any libevent stuff here! */
     sp->output = evbuffer_new();
 
     /* Attach the socket to the run loop
