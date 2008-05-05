@@ -181,6 +181,8 @@ int he3_encode(const char *ifilename, const char *ofilename, xerr_t **err)
     unsigned int len = 0;
     bitfile_t bitfile;
 
+    memset(&bitfile, 0, sizeof(bitfile_t));
+
     if(ifilename)
         fpIn = fopen(ifilename, "r");
     else
