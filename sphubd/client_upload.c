@@ -33,6 +33,7 @@
 #include "log.h"
 #include "globals.h"
 #include "xstr.h"
+#include "xerr.h"
 
 void cc_finish_upload(cc_t *cc)
 {
@@ -122,7 +123,8 @@ int cc_start_upload(cc_t *cc)
  * returns 0 on success, or -1 on error
  */
 int cc_upload_prepare(cc_t *cc, const char *filename,
-        unsigned long long offset, unsigned long long bytes_to_transfer)
+        unsigned long long offset, unsigned long long bytes_to_transfer,
+        xerr_t **err)
 {
     char *local_filename = 0;
     int fl_type = 0;
@@ -133,11 +135,19 @@ int cc_upload_prepare(cc_t *cc, const char *filename,
     }
     else if((fl_type = is_filelist(filename)) != FILELIST_NONE)
     {
+        if(fl_type == FILELIST_DCLST)
+        {
+            xerr_set(err, -1, "NMDC-style lists no longer supported,"
+                    " please upgrade your client");
+            return -1;
+        }
+
         asprintf(&local_filename, "%s/%s", global_working_directory, filename);
         if(share_save(global_share, fl_type) != 0)
         {
             g_warning("failed to save share");
             free(local_filename);
+            xerr_set(err, -1, "File Not Available");
             return -1;
         }
     }
@@ -149,6 +159,7 @@ int cc_upload_prepare(cc_t *cc, const char *filename,
     if(local_filename == NULL)
     {
         g_message("%s: couldn't translate path, outside share?", filename);
+        xerr_set(err, -1, "File Not Available");
         return -1;
     }
 
@@ -156,6 +167,7 @@ int cc_upload_prepare(cc_t *cc, const char *filename,
     {
         g_warning("attempt to spoof my own nick");
         free(local_filename);
+        xerr_set(err, -1, "File Not Available");
         return -1;
     }
 
@@ -164,6 +176,7 @@ int cc_upload_prepare(cc_t *cc, const char *filename,
     {
         g_message("%s: %s", local_filename, strerror(errno));
         free(local_filename);
+        xerr_set(err, -1, "File Not Available");
         return -1;
     }
 
@@ -171,6 +184,7 @@ int cc_upload_prepare(cc_t *cc, const char *filename,
     {
         g_message("%s: not a regular file", local_filename);
         free(local_filename);
+        xerr_set(err, -1, "File Not Available");
         return -1;
     }
 
@@ -178,9 +192,12 @@ int cc_upload_prepare(cc_t *cc, const char *filename,
     {
         if(stbuf.st_size < offset + bytes_to_transfer)
         {
-            g_message("%s: Request for too many bytes: st_size = %llu, offset = %llu, bytes_to_transfer = %llu",
-                    local_filename, (unsigned long long)stbuf.st_size, offset, bytes_to_transfer);
+            g_message("%s: Request for too many bytes: st_size = %llu,"
+                    " offset = %llu, bytes_to_transfer = %llu",
+                    local_filename, (unsigned long long)stbuf.st_size,
+                    offset, bytes_to_transfer);
             free(local_filename);
+            xerr_set(err, -1, "File Not Available");
             return -1;
         }
         cc->bytes_to_transfer = bytes_to_transfer;
@@ -196,6 +213,7 @@ int cc_upload_prepare(cc_t *cc, const char *filename,
     {
         g_message("failed to open %s: %s", local_filename, strerror(errno));
         free(local_filename);
+        xerr_set(err, -1, "File Not Available");
         return -1;
     }
     g_info("opened local file [%s] on fd %d", local_filename, cc->local_fd);
@@ -204,6 +222,7 @@ int cc_upload_prepare(cc_t *cc, const char *filename,
     {
         g_warning("lseek failed: %s", strerror(errno));
         free(local_filename);
+        xerr_set(err, -1, "File Not Available");
         return -1;
     }
 

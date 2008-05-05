@@ -54,44 +54,6 @@ static void share_scan_indent(FILE *fp, int level)
         fputc('\t', fp);
 }
 
-/* The DCLst filelist only support WINDOWS-1252 encoding. Obsolete clients
- * won't understand other encodings anyway...
- */
-static void share_dclst_print_file(FILE *fp, int level, share_file_t *file)
-{
-    char *win1252_filename = str_utf8_to_escaped_legacy(file->name,
-            "WINDOWS-1252");
-    if(win1252_filename == NULL)
-    {
-        g_message("failed to convert [%s] to windows-1252: (file skipped)",
-                file->name);
-    }
-    else
-    {
-        share_scan_indent(fp, level);
-        fprintf(fp, "%s|%llu\r\n", win1252_filename, file->size);
-        free(win1252_filename);
-    }
-}
-
-static void share_dclst_print_directory(FILE *fp, int level,
-        const char *filename)
-{
-    char *win1252_filename = str_utf8_to_escaped_legacy(filename,
-            "WINDOWS-1252");
-    if(win1252_filename == NULL)
-    {
-        g_message("failed to convert [%s] to windows-1252: (file skipped)",
-                filename);
-    }
-    else
-    {
-        share_scan_indent(fp, level);
-        fprintf(fp, "%s\r\n", win1252_filename);
-        free(win1252_filename);
-    }
-}
-
 /* escapes xml data, returned string should be freed by caller */
 static char *share_xml_escape(const char *string)
 {
@@ -310,39 +272,6 @@ static void share_save_file(share_t *share, share_save_context_t *ctx)
     }
 }
 
-static int share_save_dclst(share_t *share, const char *filename, xerr_t **err)
-{
-    int rc = 0;
-
-    g_debug("saving filelist to %s...", filename);
-    FILE *fp = fopen(filename, "w");
-    if(fp == 0)
-    {
-        xerr_set(err, -1, "%s: %s", filename, strerror(errno));
-        rc = -1;
-    }
-    else
-    {
-        share_save_context_t ctx;
-        memset(&ctx, 0, sizeof(share_save_context_t));
-
-        ctx.fp = fp;
-        ctx.file_pfunc = share_dclst_print_file;
-        ctx.directory_start_pfunc = share_dclst_print_directory;
-
-        share_save_file(share, &ctx);
-        share->listlen = ftell(fp);
-        fclose(fp);
-
-        char *dest;
-        asprintf(&dest, "%s.DcLst", filename);
-        rc = he3_encode(filename, dest, err);
-        free(dest);
-    }
-
-    return rc;
-}
-
 static int share_save_xml(share_t *share, const char *filename, xerr_t **err)
 {
     int rc = 0;
@@ -381,29 +310,12 @@ static int share_save_xml(share_t *share, const char *filename, xerr_t **err)
     return rc;
 }
 
-int share_save(share_t *share, unsigned int type)
+int share_save(share_t *share, unsigned type)
 {
     int rc = 0;
 
     return_val_if_fail(share, -1);
-
-    if((type & FILELIST_DCLST) == FILELIST_DCLST)
-    {
-        char *dclst_filename;
-        asprintf(&dclst_filename, "%s/MyList", global_working_directory);
-        if(share->uptodate == 0 || access(dclst_filename, F_OK) == -1)
-        {
-            rc = share_save_dclst(share, dclst_filename, NULL);
-        }
-        else
-        {
-            g_debug("share up to date and file exists,"
-                    " skipping saving DcLst file");
-        }
-        free(dclst_filename);
-        if(rc != 0)
-            return rc;
-    }
+    return_val_if_fail(type == FILELIST_XML, -1);
 
     if((type & FILELIST_XML) == FILELIST_XML)
     {
@@ -415,7 +327,8 @@ int share_save(share_t *share, unsigned int type)
         }
         else
         {
-            g_debug("share up to date and file exists, skipping saving xml file");
+            g_debug("share up to date and file exists,"
+                    " skipping saving xml file");
         }
         free(xml_filename);
     }

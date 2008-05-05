@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with ShakesPeer; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */                                                                                      
+ */
 
 #ifndef _client_h_
 #define _client_h_
@@ -29,6 +29,7 @@
 #include "queue.h"
 #include "io.h"
 #include "ui.h"
+#include "xerr.h"
 
 /* idle timeout in seconds before a transfer is aborted due to inactivity */
 #define CC_IDLE_TIMEOUT 5*60
@@ -139,7 +140,8 @@ void cc_fl_match_queue(const char *filelist_path, const char *nick);
 /* client_upload.c
  */
 int cc_upload_prepare(cc_t *cc, const char *filename,
-        unsigned long long offset, unsigned long long bytes_to_transfer);
+        unsigned long long offset, unsigned long long bytes_to_transfer,
+        xerr_t **err);
 int cc_start_upload(cc_t *cc);
 void cc_finish_upload(cc_t *cc);
 ssize_t cc_upload_read(cc_t *cc, void *buf, size_t nbytes);

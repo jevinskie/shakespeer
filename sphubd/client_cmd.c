@@ -119,14 +119,18 @@ static int cc_cmd_Get(void *data, int argc, char **argv)
         g_warning("Zero offset in $Get command");
     }
 
-    int rc = cc_upload_prepare(cc, utf8_path, offset, 0);
+    xerr_t *err = 0;
+    int rc = cc_upload_prepare(cc, utf8_path, offset, 0, &err);
     free(utf8_path);
     if(rc != 0)
     {
-        return cc_send_command(cc, "$Error File Not Available|");
+        rc = cc_send_command(cc, "$Error %s|", xerr_msg(err));
+        xerr_free(err);
+        return rc;
     }
 
-    cc->slot_state = hub_request_upload_slot(cc->hub, cc->nick, cc->local_filename, cc->filesize);
+    cc->slot_state = hub_request_upload_slot(cc->hub, cc->nick,
+            cc->local_filename, cc->filesize);
     if(cc->slot_state == SLOT_NONE)
     {
         cc_send_command(cc, "$MaxedOut|");
@@ -224,11 +228,14 @@ static int cc_cmd_ADCGET(void *data, int argc, char **argv)
     /* ADCGET send filenames in UTF-8 */
     char *filename_utf8 = subs->subs[1];
 
-    int rc = cc_upload_prepare(cc, filename_utf8, offset, bytes_to_transfer);
+    xerr_t *err = 0;
+    int rc = cc_upload_prepare(cc, filename_utf8, offset, bytes_to_transfer, &err);
     if(rc != 0)
     {
         rx_free_subs(subs);
-        return cc_send_command_as_is(cc, "$Error File Not Available|");
+        rc = cc_send_command(cc, "$Error %s|", xerr_msg(err));
+        xerr_free(err);
+        return rc;
     }
 
     cc->slot_state = hub_request_upload_slot(cc->hub, cc->nick,
@@ -277,11 +284,14 @@ static int cc_cmd_UGetBlock(void *data, int argc, char **argv)
     unsigned long long offset = strtoull(subs->subs[0], 0, 10);
     unsigned long long bytes_to_transfer = strtoull(subs->subs[1], 0, 10);
 
-    int rc = cc_upload_prepare(cc, filename_utf8, offset, bytes_to_transfer);
+    xerr_t *err = 0;
+    int rc = cc_upload_prepare(cc, filename_utf8, offset, bytes_to_transfer, &err);
     rx_free_subs(subs);
     if(rc != 0)
     {
-        return cc_send_command(cc, "$Error File Not Available|");
+        rc = cc_send_command(cc, "$Error %s|", xerr_msg(err));
+        xerr_free(err);
+        return rc;
     }
 
     cc->slot_state = hub_request_upload_slot(cc->hub, cc->nick,
@@ -351,15 +361,11 @@ static int cc_cmd_ADCSND(void *data, int argc, char **argv)
 static int cc_cmd_GetListLen(void *data, int argc, char **argv)
 {
     cc_t *cc = data;
-    
-    if(share_save(global_share, FILELIST_DCLST) != 0)
-    {
-        g_warning("failed to save share");
-        return -1;
-    }
 
-    return cc_send_command(cc, "$ListLen %u|",
-            ((share_t *)global_share)->listlen);
+    ui_send_status_message(NULL, cc->hub->address,
+            "Peer '%s' uses obsolete client, filelist browsing denied",
+            cc->nick);
+    return cc_send_command(cc, "$ListLen 42|");
 }
 
 static int cc_cmd_FileLength(void *data, int argc, char **argv)
