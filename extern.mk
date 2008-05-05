@@ -69,32 +69,32 @@ expat-build-${EXPAT_VER}/stamp: expat-${EXPAT_VER}.tar.gz
 	    ${MAKE} install
 	touch expat-build-${EXPAT_VER}/stamp
 
-ICONV_VER=1.9.1
-ICONV_URL=http://ftp.gnu.org/pub/gnu/libiconv/libiconv-${ICONV_VER}.tar.gz
+ICONV_VER=1.11
+ICONV_URL=http://ftp.gnu.org/pub/gnu/libiconv/libiconv-$(ICONV_VER).tar.gz
 ICONV_MD5=0c99a05e0c3c153bac1c960f78711155
-libiconv-${ICONV_VER}.tar.gz:
-	$(call download,libiconv,${ICONV_VER},${ICONV_URL},${ICONV_MD5})
-libiconv: libiconv-build-${ICONV_VER}/stamp
-libiconv-build-${ICONV_VER}/stamp: libiconv-${ICONV_VER}.tar.gz
-	$(call unpack,libiconv,${ICONV_VER})
-	cwd=`pwd` && cd libiconv-build-${ICONV_VER}/libiconv-${ICONV_VER} && \
+libiconv-$(ICONV_VER).tar.gz:
+	$(call download,libiconv,$(ICONV_VER),$(ICONV_URL),$(ICONV_MD5))
+libiconv: libiconv-build-$(ICONV_VER)/stamp
+libiconv-build-$(ICONV_VER)/stamp: libiconv-$(ICONV_VER).tar.gz
+	$(call unpack,libiconv,$(ICONV_VER))
+	cwd=`pwd` && cd libiconv-build-$(ICONV_VER)/libiconv-$(ICONV_VER) && \
 	    CFLAGS="$(EXTERN_CFLAGS)" \
 	    LDFLAGS="$(EXTERN_CFLAGS)" \
 	    ./configure --disable-shared \
 	                --enable-static \
 	                --prefix=$$cwd/libiconv-install && \
-	    ${MAKE} install
-	touch libiconv-build-${ICONV_VER}/stamp
+	    $(MAKE) install
+	touch libiconv-build-$(ICONV_VER)/stamp
 
-BZ2_VER=1.0.1
-BZ2_URL=http://www.digistar.com/bzip2/v100/bzip2-${BZ2_VER}.tar.gz
-BZ2_MD5=770135dc94369cb3eb6013ed505c8dc5
-bzip2-${BZ2_VER}.tar.gz:
-	$(call download,bzip2,${BZ2_VER},${BZ2_URL},${BZ2_MD5})
-bzip2: bzip2-build-${BZ2_VER}/stamp
-bzip2-build-${BZ2_VER}/stamp: bzip2-${BZ2_VER}.tar.gz
-	$(call unpack,bzip2,${BZ2_VER})
-	cwd=`pwd` && cd bzip2-build-${BZ2_VER}/bzip2-${BZ2_VER} && \
+BZ2_VER=1.0.4
+BZ2_URL=http://www.bzip.org/$(BZ2_VER)/bzip2-$(BZ2_VER).tar.gz
+BZ2_MD5=fc310b254f6ba5fbb5da018f04533688
+bzip2-$(BZ2_VER).tar.gz:
+	$(call download,bzip2,$(BZ2_VER),$(BZ2_URL),$(BZ2_MD5))
+bzip2: bzip2-build-$(BZ2_VER)/stamp
+bzip2-build-$(BZ2_VER)/stamp: bzip2-$(BZ2_VER).tar.gz
+	$(call unpack,bzip2,$(BZ2_VER))
+	cwd=`pwd` && cd bzip2-build-$(BZ2_VER)/bzip2-$(BZ2_VER) && \
 	    sed 's/^CFLAGS/&+/' Makefile > makefile.tmp && \
 	    CFLAGS="$(EXTERN_CFLAGS)" \
 	    LDFLAGS="$(EXTERN_CFLAGS)" \
@@ -103,7 +103,7 @@ bzip2-build-${BZ2_VER}/stamp: bzip2-${BZ2_VER}.tar.gz
 	    mkdir -p $$cwd/bzip2-install/include && \
 	    cp -f bzlib.h $$cwd/bzip2-install/include && \
 	    cp -f libbz2.a $$cwd/bzip2-install/lib/libbz2.a
-	touch bzip2-build-${BZ2_VER}/stamp
+	touch bzip2-build-$(BZ2_VER)/stamp
 
 ifneq (${HAS_BZ2},yes)
 EXTERN_DEPENDS+=bzip2
