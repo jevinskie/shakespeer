@@ -70,7 +70,7 @@ Growl-$(GROWL_VERSION)-SDK.dmg:
 
 Growl.framework: Growl-$(GROWL_VERSION)-SDK.dmg
 	p=`hdiutil attach Growl-$(GROWL_VERSION)-SDK.dmg -private | \
-		awk '$$1 ~ /^\/dev/ && $$2 == "Apple_HFS" (print $$3)'` && \
+		awk '$$1 ~ /^\/dev/ && $$2 == "Apple_HFS" {print $$3}'` && \
 	cp -RP $$p/Frameworks/Growl.framework . && \
 	hdiutil detach $$p
 
