@@ -43,7 +43,7 @@ libevent-build-${EVENT_VER}/stamp: libevent-$(EVENT_VER).tar.gz
 	    ./configure --disable-shared \
 	                --enable-static \
 	                --prefix=$$cwd/libevent-install && \
-	    sed "s/^CFLAGS.*/& $(EXTERN_CFLAGS)/" sample/Makefile > sample/makefile.tmp && \
+	    sed 's/^CFLAGS.*/& $$\(EXTERN_CFLAGS)/' sample/Makefile > sample/makefile.tmp && \
 	    mv sample/makefile.tmp sample/Makefile && \
 	    $(MAKE) libevent.la && \
 	    mkdir -p $$cwd/libevent-install/include && \
