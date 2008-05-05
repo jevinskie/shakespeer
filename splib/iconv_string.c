@@ -31,6 +31,12 @@
 
 #include "log.h"
 
+#ifdef _LIBICONV_VERSION
+# define ICONV_CONST const
+#else
+# define ICONV_CONST
+#endif
+
 char *iconv_string_full(const char *string, ssize_t length,
                         const char *src_encoding,
                         const char *dst_encoding,
@@ -64,7 +70,7 @@ char *iconv_string_full(const char *string, ssize_t length,
     if(replacement_char > 0)
         wstring = strdup(string);
 
-    char *inp = wstring;
+    ICONV_CONST char *inp = (ICONV_CONST char *)wstring;
     char *outp = dst;
 
     size_t inbytesleft = length;
@@ -73,8 +79,7 @@ char *iconv_string_full(const char *string, ssize_t length,
     while(1)
     {
         errno = 0;
-        size_t rc = iconv(cd, (const char **)&inp, &inbytesleft,
-                &outp, &outbytesleft);
+        size_t rc = iconv(cd, &inp, &inbytesleft, &outp, &outbytesleft);
 
         if(rc == (size_t)-1)
         {
@@ -84,7 +89,7 @@ char *iconv_string_full(const char *string, ssize_t length,
                     /* inp points to the beginning of an invalid sequence */
                     if(replacement_char > 0)
                     {
-                        *inp = (char)replacement_char;
+                        *(char *)inp = (char)replacement_char;
                         /* try again */
                         break;
                     }

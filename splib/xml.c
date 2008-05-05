@@ -39,6 +39,12 @@
 #include "log.h"
 #include "xstr.h"
 
+#ifdef _LIBICONV_VERSION
+# define ICONV_CONST const
+#else
+# define ICONV_CONST
+#endif
+
 /* So far unused */
 int xml_iconv_convert(void *data, const char *s)
 {
@@ -46,7 +52,7 @@ int xml_iconv_convert(void *data, const char *s)
 
     int uc;
 
-    const char *inp = s;
+    ICONV_CONST char *inp = (ICONV_CONST char *)s;
     char *outp = (char *)&uc;
 
     size_t insize = 1;
@@ -88,7 +94,7 @@ int xml_unknown_encoding_handler(void *encodingHandlerData,
         size_t insize = 1, outsize = 2;
 
         inbuf[0] = i;
-        const char *inp = inbuf;
+        ICONV_CONST char *inp = (ICONV_CONST char *)inbuf;
         char *outp = outbuf;
 
         size_t rc = iconv(cd, &inp, &insize, &outp, &outsize);
