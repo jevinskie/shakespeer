@@ -16,8 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with ShakesPeer; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * $Id: filelist_xml.c,v 1.4 2006/04/21 09:30:40 mhe Exp $
  */
 
 #define _GNU_SOURCE /* needed for asprintf */
@@ -216,6 +214,8 @@ fl_dir_t *fl_parse_xml(const char *filename)
 
 int main(void)
 {
+    sp_log_set_level("debug");
+
     fl_dir_t *fl = fl_parse_xml("fl_test1.xml");
     fail_unless(fl);
     fail_unless(fl->nfiles == 40);

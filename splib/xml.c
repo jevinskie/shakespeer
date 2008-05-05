@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 Martin Hedenfalk <martin.hedenfalk@gmail.com>
+ * Copyright (c) 2006 Martin Hedenfalk <martin@bzero.se>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,15 +27,17 @@
 # include "config.h"
 #endif
 
-#include "xml.h"
-#include "nfkc.h"
-
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-
 #include <iconv.h>
+#include <stdbool.h>
+
+#include "xml.h"
+#include "nfkc.h"
+#include "log.h"
+#include "xstr.h"
 
 /* So far unused */
 int xml_iconv_convert(void *data, const char *s)
@@ -129,8 +131,9 @@ static void xml_decl_handler(void *user_data, const char *version,
 {
     xml_ctx_t *ctx = user_data;
 
-    if(encoding && ctx->encoding == NULL)
+    if(encoding /*&& ctx->encoding == NULL*/)
     {
+        free(ctx->encoding);
         ctx->encoding = strdup(encoding);
     }
 }
@@ -173,36 +176,109 @@ xml_ctx_t *xml_init_fp(FILE *fp,
     return ctx;
 }
 
+static unsigned char *xml_get_line(xml_ctx_t *ctx, size_t *chunk_size_ret)
+{
+    if(ctx->len > 0)
+    {
+        const char *nl = xstrnchr((char *)ctx->buf, ctx->len, '\n');
+        if(nl)
+        {
+            unsigned char *retbuf = (unsigned char *)xstrndup((char *)ctx->buf, nl - 1 - (char *)ctx->buf);
+            *chunk_size_ret = nl - 1 - (char *)ctx->buf;
+            while(*nl == '\n')
+                ++nl;
+            ctx->len -= nl - (char *)ctx->buf;
+            memmove(ctx->buf, nl, ctx->len);
+            return retbuf;
+        }
+    }
+
+    return NULL;
+}
+
 static char *xml_read_chunk(xml_ctx_t *ctx, size_t *chunk_size_ret)
 {
     if(ctx->fp == NULL || chunk_size_ret == NULL)
         return NULL;
 
-    static unsigned char chunk[8192];
-    size_t read_size = fread(chunk, 1, sizeof(chunk), ctx->fp);
-
-    *chunk_size_ret = read_size;
-
-    if(ctx->encoding && strcasecmp(ctx->encoding, "WINDOWS-1252") == 0)
+    unsigned char *ret = xml_get_line(ctx, chunk_size_ret);
+    if(ret == NULL)
     {
-        size_t i;
-        for(i = 0; i < read_size; i++)
+        size_t read_size = fread(ctx->buf + ctx->len, 1, sizeof(ctx->buf) - ctx->len, ctx->fp);
+        if(read_size == 0)
         {
-            if(chunk[i] == 0x1E ||
-               chunk[i] == 0x0E ||
-               chunk[i] == 0x81 ||
-               chunk[i] == 0x8D ||
-               chunk[i] == 0x8F ||
-               chunk[i] == 0x90 ||
-               chunk[i] == 0x9D)
+            if(ctx->len)
             {
-                printf("replacing 0x%02X with '?'\n", chunk[i]);
-                chunk[i] = '?';
+                ret = (unsigned char *)xstrdup((char *)ctx->buf);
+                *chunk_size_ret = ctx->len;
+                ctx->len = 0;
+                return (char *)ret;
             }
+            return NULL;
         }
+
+        ctx->len += read_size;
+
+        ret = xml_get_line(ctx, chunk_size_ret);
+        return_val_if_fail(ret, NULL);
     }
 
-    return (char *)chunk;
+    if(ctx->encoding)
+    {
+       if(strcasecmp(ctx->encoding, "WINDOWS-1252") == 0)
+       {
+           size_t i;
+           for(i = 0; i < *chunk_size_ret; i++)
+           {
+               if(ret[i] == 0x1E ||
+                       ret[i] == 0x0E ||
+                       ret[i] == 0x81 ||
+                       ret[i] == 0x8D ||
+                       ret[i] == 0x8F ||
+                       ret[i] == 0x90 ||
+                       ret[i] == 0x9D)
+               {
+                   printf("replacing 0x%02X with '?'\n", ret[i]);
+                   ret[i] = '?';
+               }
+           }
+       }
+       else if(strcasecmp(ctx->encoding, "UTF-8") == 0)
+       {
+           const char *start = (const char *)ret;
+           while(true)
+           {
+               const char *end = 0;
+               bool ok = g_utf8_validate(start, *chunk_size_ret, &end);
+               if(!ok)
+               {
+                   g_warning("invalid UTF-8 at offset %u [%s]", end - start, end);
+                   char *next_valid = g_utf8_find_next_char(end, start + *chunk_size_ret);
+                   if(next_valid == NULL)
+                   {
+                       *chunk_size_ret = end - start;
+                       g_warning("truncating input at offset %u", *chunk_size_ret);
+                       break;
+                   }
+                   else
+                   {
+                       char *f = (char *)end;
+                       while(f < next_valid)
+                       {
+                           *f = '?';
+                           f++;
+                       }
+                   }
+               }
+               else
+               {
+                   break;
+               }
+           }
+       }
+    }
+
+    return (char *)ret;
 }
 
 int xml_parse_chunk(xml_ctx_t *ctx)
@@ -218,17 +294,16 @@ int xml_parse_chunk(xml_ctx_t *ctx)
     if(XML_Parse(ctx->parser, chunk, chunk_size, chunk_size == 0)
             == XML_STATUS_ERROR)
     {
-#ifdef TEST
-        printf("Parse error %i at line %i, col %i, offset %u: %s\n",
+        g_warning("Parse error %i at line %i, col %i, offset %u: %s",
                 (int)XML_GetErrorCode(ctx->parser),
                 (int)XML_GetCurrentLineNumber(ctx->parser),
                 (int)XML_GetCurrentColumnNumber(ctx->parser),
                 (unsigned)XML_GetCurrentByteIndex(ctx->parser),
                 XML_ErrorString(XML_GetErrorCode(ctx->parser)));
-        printf("offending character: 0x%02X\n", chunk[XML_GetCurrentByteIndex(ctx->parser) % 8192]);
-#endif
+        free(chunk);
         return -1;
     }
+    free(chunk);
 
     return chunk_size == 0 ? 1 : 0;
 }

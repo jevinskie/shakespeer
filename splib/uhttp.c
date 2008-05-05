@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 Martin Hedenfalk <martin@hedenfalk.se>
+ * Copyright (c) 2006 Martin Hedenfalk <martin@bzero.se>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -360,7 +360,6 @@ int uhttp_read_response_cb(uhttp_t *uhttp,
             g_warning("EOF reading response");
             return -1;
         }
-        g_debug("read %u bytes", rc);
 
         i += rc;
         if(read_cb(uhttp, buf, rc, i, user_data) != 0)

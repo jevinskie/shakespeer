@@ -23,8 +23,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* $Id: xml.h,v 1.2 2006/04/10 15:12:11 mhe Exp $ */
-
 #ifndef _xml_h_
 #define _xml_h_
 
@@ -38,6 +36,9 @@ typedef struct xml_ctx xml_ctx_t;
 struct xml_ctx
 {
     FILE *fp;
+    unsigned char buf[1024];
+    size_t len;
+    
     char *encoding;
     void *user_data;
 

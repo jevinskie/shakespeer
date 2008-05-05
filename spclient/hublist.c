@@ -128,8 +128,6 @@ static void hl_xml_parse_start_element(void *data,
 {
     hublist_t *hlist = data;
 
-    g_debug("got element [%s]", el);
-
     if(strcasecmp(el, "Hub") != 0)
     {
         return;
