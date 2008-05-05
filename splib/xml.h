@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 Martin Hedenfalk <martin.hedenfalk@gmail.com>
+ * Copyright (c) 2006 Martin Hedenfalk <martin@bzero.se>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,7 @@
 
 #include <expat.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 typedef void (*xml_open_func_t)(void *data, const char *el, const char **attr);
 typedef void (*xml_close_func_t)(void *data, const char *el);
@@ -36,8 +37,9 @@ typedef struct xml_ctx xml_ctx_t;
 struct xml_ctx
 {
     FILE *fp;
-    unsigned char buf[1024];
+    char buf[1024];
     size_t len;
+    bool eof;
     
     char *encoding;
     void *user_data;

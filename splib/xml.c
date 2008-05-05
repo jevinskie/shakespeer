@@ -182,19 +182,24 @@ xml_ctx_t *xml_init_fp(FILE *fp,
     return ctx;
 }
 
-static unsigned char *xml_get_line(xml_ctx_t *ctx, size_t *chunk_size_ret)
+static char *xml_get_line(xml_ctx_t *ctx, size_t *chunk_size_ret)
 {
     if(ctx->len > 0)
     {
-        const char *nl = xstrnchr((char *)ctx->buf, ctx->len, '\n');
+        const char *nl = xstrnchr(ctx->buf, ctx->len, '\n');
+        if(nl == NULL && ctx->eof)
+            nl = ctx->buf + ctx->len;
         if(nl)
         {
-            unsigned char *retbuf = (unsigned char *)xstrndup((char *)ctx->buf, nl - 1 - (char *)ctx->buf);
-            *chunk_size_ret = nl - 1 - (char *)ctx->buf;
-            while(*nl == '\n')
+            size_t len = nl - ctx->buf;
+            char *retbuf = malloc(len + 1);
+            xstrlcpy(retbuf, ctx->buf, len + 1);
+
+            while(*nl == '\n' && nl < ctx->buf + ctx->len)
                 ++nl;
-            ctx->len -= nl - (char *)ctx->buf;
+            ctx->len -= nl - ctx->buf;
             memmove(ctx->buf, nl, ctx->len);
+            *chunk_size_ret = len;
             return retbuf;
         }
     }
@@ -207,26 +212,21 @@ static char *xml_read_chunk(xml_ctx_t *ctx, size_t *chunk_size_ret)
     if(ctx->fp == NULL || chunk_size_ret == NULL)
         return NULL;
 
-    unsigned char *ret = xml_get_line(ctx, chunk_size_ret);
+    char *ret = xml_get_line(ctx, chunk_size_ret);
     if(ret == NULL)
     {
-        size_t read_size = fread(ctx->buf + ctx->len, 1, sizeof(ctx->buf) - ctx->len, ctx->fp);
-        if(read_size == 0)
-        {
-            if(ctx->len)
-            {
-                ret = (unsigned char *)xstrdup((char *)ctx->buf);
-                *chunk_size_ret = ctx->len;
-                ctx->len = 0;
-                return (char *)ret;
-            }
-            return NULL;
-        }
+        size_t len = sizeof(ctx->buf) - ctx->len;
+        size_t read_size = fread(ctx->buf + ctx->len, 1, len, ctx->fp);
 
+        if(read_size == 0 && ctx->len == 0)
+            return NULL; /* normal EOF */
+
+        if(read_size < len)
+            ctx->eof = true;
         ctx->len += read_size;
 
         ret = xml_get_line(ctx, chunk_size_ret);
-        return_val_if_fail(ret, NULL);
+        return_val_if_fail(ret, NULL); /* length(line) > sizeof(ctx->buf) */
     }
 
     if(ctx->encoding)
@@ -236,13 +236,9 @@ static char *xml_read_chunk(xml_ctx_t *ctx, size_t *chunk_size_ret)
            size_t i;
            for(i = 0; i < *chunk_size_ret; i++)
            {
-               if(ret[i] == 0x1E ||
-                       ret[i] == 0x0E ||
-                       ret[i] == 0x81 ||
-                       ret[i] == 0x8D ||
-                       ret[i] == 0x8F ||
-                       ret[i] == 0x90 ||
-                       ret[i] == 0x9D)
+               unsigned char c = (unsigned char)ret[i];
+               if(c == 0x1E || c == 0x0E || c == 0x81 ||
+                  c == 0x8D || c == 0x8F || c == 0x90 || c == 0x9D)
                {
                    printf("replacing 0x%02X with '?'\n", ret[i]);
                    ret[i] = '?';
@@ -284,7 +280,7 @@ static char *xml_read_chunk(xml_ctx_t *ctx, size_t *chunk_size_ret)
        }
     }
 
-    return (char *)ret;
+    return ret;
 }
 
 int xml_parse_chunk(xml_ctx_t *ctx)
@@ -405,21 +401,26 @@ void test_encoding(const char *encoding, const char *bar_value, const char *expe
     printf("----- Testing encoding %s\n", encoding);
     
     FILE *fp = tmpfile();
-    /* FILE *fp = fopen("/tmp/xml.tmp", "w+"); */
     fail_unless(fp);
 
     fail_unless(fprintf(fp,
-                "<?xml version=\"1.0\" encoding=\"%s\"?>"
-                "<root>"
-                "  <node>"
-                "    <foo bar=\"%s\"></foo>"
-                "  </node>"
+                "<?xml version=\"1.0\" encoding=\"%s\"?>\n"
+                "<root>\n"
+                "  <node>\n"
+                "    <foo bar=\"%s\"></foo>\n"
+                "  </node>\n"
                 "</root>", encoding, bar_value) > 0);
     rewind(fp);
 
     xml_ctx_t *ctx = xml_init_fp(fp, open_tag, close_tag, (void *)0xDEADBEEF);
     fail_unless(ctx);
 
+    /* parse 6 lines of input, last line should return EOF  */
+    fail_unless(xml_parse_chunk(ctx) == 0);
+    fail_unless(xml_parse_chunk(ctx) == 0);
+    fail_unless(xml_parse_chunk(ctx) == 0);
+    fail_unless(xml_parse_chunk(ctx) == 0);
+    fail_unless(xml_parse_chunk(ctx) == 0);
     fail_unless(xml_parse_chunk(ctx) == 0);
     fail_unless(xml_parse_chunk(ctx) == 1);
 
