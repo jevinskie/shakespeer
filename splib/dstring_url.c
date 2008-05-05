@@ -116,7 +116,7 @@ int main(void)
     dstring_t *ds = dstring_new_from_url("http://www.google.se/");
     fail_unless(ds);
     /* make sure (sorta) that we actually read the file */
-    fail_unless(strstr(ds->string, "<form action=/search"));
+    fail_unless(strstr(ds->string, "<form action="));
     /* fail_unless(strstr(ds->string, "this text should be found in this file")); */
     dstring_free(ds, 1);
     
