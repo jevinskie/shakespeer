@@ -49,7 +49,12 @@ struct sockaddr_in *io_lookup(const char *hostport, xerr_t **err)
     char *host = 0;
     int port = 0;
 
-    split_host_port(hostport, &host, &port);
+    if(split_host_port(hostport, &host, &port) != 0)
+    {
+	xerr_set(err, -1, "%s: invalid address", hostport);
+	return NULL;
+    }
+
     if(port < 0)
     {
         xerr_set(err, -1, "Invalid port: %i", port);
@@ -65,6 +70,7 @@ struct sockaddr_in *io_lookup(const char *hostport, xerr_t **err)
     addr->sin_family = AF_INET;
     addr->sin_port = htons(port);
 
+    DEBUG("resolving host [%s]", host);
     if(inet_aton(host, &addr->sin_addr) == 0)
     {
         he = gethostbyname(host);
@@ -406,4 +412,21 @@ char *io_evbuffer_readline(struct evbuffer *buffer)
 
     return line;
 }
+
+#ifdef TEST
+
+#include "unit_test.h"
+
+int main(void)
+{
+	sp_log_set_level("debug");
+
+	xerr_t *err = NULL;
+	struct sockaddr_in *addr = io_lookup(":28589", &err);
+	fail_unless(addr == NULL);
+
+	return 0;
+}
+
+#endif
 

@@ -2,13 +2,13 @@ TESTS = rx_test bloom_test args_test util_test tiger_test tigertree_test \
 	base32_test he3_test he3_post_test.sh notification_center_test \
 	dstring_test dstring_url_test cmd_table_test quote_test xerr_test \
 	xstr_test nfkc_test encoding_test xml_test test_connection_test \
-	nmdc_test
+	nmdc_test io_test
 
 check_PROGRAMS = rx_test bloom_test args_test util_test tiger_test \
 		 tigertree_test base32_test he3_test \
 		 notification_center_test dstring_test dstring_url_test \
 		 cmd_table_test quote_test xerr_test xstr_test nfkc_test \
-		 encoding_test xml_test test_connection_test nmdc_test
+		 encoding_test xml_test test_connection_test nmdc_test io_test
 
 TOP=..
 include ${TOP}/common.mk
@@ -106,6 +106,9 @@ nmdc_test: nmdc_test.o
 	${LINK}
 
 he3_test: he3_test.o
+	${LINK}
+
+io_test: io_test.o xerr.o
 	${LINK}
 
 he3_post_test.sh:

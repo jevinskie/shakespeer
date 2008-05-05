@@ -47,6 +47,8 @@ int main(void)
     fail_unless( split_host_port("foo:42", NULL, NULL) == -1);
     fail_unless( split_host_port(NULL, &host, &port) == -1);
 
+    fail_unless( split_host_port(":28589", &host, &port) == -1);
+
     /*
      * str_find_word_start
      */
