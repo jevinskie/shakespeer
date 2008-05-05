@@ -20,7 +20,7 @@ noinst_LIBRARIES = libsplib.a
 SOURCES = args.c mkpath.c util.c bz2.c \
 	  bloom.c tiger.c sboxes.c he3.c base32.c log.c \
 	  tigertree.c io.c notification_center.c encoding.c \
-	  eres.c rx.c test_connection.c dstring.c dstring_url.c \
+	  rx.c test_connection.c dstring.c dstring_url.c \
 	  cmd_table.c quote.c nmdc.c base64.c xerr.c xstr.c \
 	  nfkc.c iconv_string.c xml.c \
 	  uhttp.c
