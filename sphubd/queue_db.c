@@ -185,8 +185,9 @@ static int queue_open_db(void)
     }
 
     /* open secondary database to queue_directory_db, adds index by nick */
-    if(open_database(&queue_directory_nick_db, QUEUE_DB_FILENAME, "tth_target",
-               DB_BTREE, DB_DUPSORT) == 0)
+    if(open_database(&queue_directory_nick_db, QUEUE_DB_FILENAME,
+                "directory_nick",
+                DB_BTREE, DB_DUPSORT) == 0)
     {
         int rc = queue_directory_db->associate(queue_directory_db,
                 NULL, queue_directory_nick_db, queue_directory_get_nick,
@@ -206,8 +207,15 @@ int queue_init(void)
 {
     g_message("Initializing queue, using: " DB_VERSION_STRING);
 
-    const char *db_list[] = {"target", "tth_target", "filelist",
-        "source", "directory", NULL};
+    const char *db_list[] = {
+        "target",
+        "sequence",
+        "source",
+        "filelist",
+        "directory",
+        "tth_target",
+        "directory_nick",
+        NULL};
     if(verify_db(QUEUE_DB_FILENAME, db_list) != 0)
     {
         g_warning("Corrupt queue database!");
@@ -234,13 +242,13 @@ int queue_close(void)
 {
     int rc = 0;
 
-    rc += close_db(&queue_tth_db, "tth_target");
-    rc += close_db(&queue_target_db, "target");
-    rc += close_db(&queue_source_db, "source");
-    rc += close_db(&queue_filelist_db, "filelist");
     rc += close_db(&queue_directory_nick_db, "directory_nick");
+    rc += close_db(&queue_tth_db, "tth_target");
     rc += close_db(&queue_directory_db, "directory");
+    rc += close_db(&queue_filelist_db, "filelist");
+    rc += close_db(&queue_source_db, "source");
     rc += close_db(&queue_sequence_db, "sequence");
+    rc += close_db(&queue_target_db, "target");
 
     return rc == 0 ? 0 : -1;
 }

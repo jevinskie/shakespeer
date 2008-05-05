@@ -35,6 +35,7 @@ void close_default_db_environment(void)
 {
     if(default_db_env)
     {
+        g_debug("closing default database environment");
         int rc = default_db_env->close(default_db_env, 0);
         if(rc == -1)
         {
@@ -45,30 +46,76 @@ void close_default_db_environment(void)
     }
 }
 
-DB_ENV *get_default_db_environment(void)
+static void db_err(const DB_ENV *dbenv, const char *errpfx,
+        const char *msg)
+{
+    g_warning("DB: %s", msg);
+}
+
+static void db_msg(const DB_ENV *dbenv, const char *msg)
+{
+    g_message("DB: %s", msg);
+}
+
+int create_default_db_environment(void)
+{
+    return_val_if_fail(default_db_env == NULL, -1);
+
+    g_message("creating default database environment, home = [%s]",
+            global_working_directory);
+    int rc = db_env_create(&default_db_env, 0);
+    if(rc != 0)
+    {
+        g_warning("db_env_create: %s", db_strerror(rc));
+        return -1;
+    }
+
+    default_db_env->set_errcall(default_db_env, db_err);
+    default_db_env->set_msgcall(default_db_env, db_msg);
+
+    return 0;
+}
+
+int open_default_db_environment(u_int32_t flags)
+{
+    return_val_if_fail(create_default_db_environment() == 0, -1);
+    return_val_if_fail(default_db_env, -1);
+
+    g_debug("opening database environment");
+    int rc = default_db_env->open(default_db_env,
+            global_working_directory, flags, 0);
+    if(rc != 0)
+    {
+        g_warning("db_env->open: %s", db_strerror(rc));
+        close_default_db_environment();
+    }
+
+    return rc;
+}
+
+static DB_ENV *get_default_db_environment(void)
 {
     if(default_db_env == NULL)
     {
-        g_message("Opening default database environment, home = [%s]",
-                global_working_directory);
-        int rc = db_env_create(&default_db_env, 0);
-        if(rc != 0)
+        u_int32_t flags = DB_CREATE | DB_INIT_TXN | DB_INIT_LOG |
+            DB_INIT_MPOOL | DB_REGISTER | DB_RECOVER;
+
+        if(open_default_db_environment(flags) == DB_RUNRECOVERY)
         {
-            g_warning("db_env_create: %s", db_strerror(rc));
-            return NULL;
+            flags |= DB_RECOVER;
+            if(open_default_db_environment(flags) == DB_RUNRECOVERY)
+            {
+                flags &= ~DB_RECOVER;
+                flags |= DB_RECOVER_FATAL;
+                g_warning("running fatal recovery");
+                if(open_default_db_environment(flags) != 0)
+                {
+                    g_warning("giving up opening database environment");
+                    exit(2);
+                }
+            }
         }
 
-        return_val_if_fail(default_db_env, NULL);
-        rc = default_db_env->open(default_db_env,
-                    global_working_directory,
-                    DB_CREATE | DB_INIT_TXN | DB_INIT_LOG |
-                    DB_INIT_MPOOL | DB_RECOVER, 0);
-        if(rc != 0)
-        {
-            g_warning("db_env->open: %s", db_strerror(rc));
-            close_default_db_environment();
-            return NULL;
-        }
         default_db_env->set_flags(default_db_env,
                 DB_AUTO_COMMIT | DB_TXN_NOSYNC | DB_LOG_AUTOREMOVE, 1);
     }
@@ -154,7 +201,8 @@ void backup_db(const char *dbfile)
 int open_database(DB **db, const char *dbfile, const char *dbname,
         int type, int flags)
 {
-    return_val_if_fail(db_create(db, get_default_db_environment(), 0) == 0, -1);
+    return_val_if_fail(db_create(db,
+                get_default_db_environment(), 0) == 0, -1);
     return_val_if_fail(*db, -1);
 
     if(flags)

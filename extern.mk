@@ -100,6 +100,9 @@ db-build-${DB_VER}/stamp: db-${DB_VER}.tar.gz
 	    CFLAGS="${UB_CFLAGS}" \
 	    ../dist/configure --disable-shared \
 	                      --enable-static \
+			      --disable-queue \
+			      --disable-statistics \
+			      --disable-replication \
 	                      --disable-cryptography \
 	                      --prefix=$$cwd/db-install && \
 	    ${MAKE} install
