@@ -16,6 +16,7 @@
 		286B19EA0A2A1354001D9687 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 286B19E90A2A1354001D9687 /* Security.framework */; };
 		287851BA0A179F5D00A2992F /* minus.png in Resources */ = {isa = PBXBuildFile; fileRef = 287851B90A179F5D00A2992F /* minus.png */; };
 		287851BC0A179F6500A2992F /* plus.png in Resources */ = {isa = PBXBuildFile; fileRef = 287851BB0A179F6500A2992F /* plus.png */; };
+		2894F7410D6308D100D8B355 /* UKCrashReporter.m in Sources */ = {isa = PBXBuildFile; fileRef = 2894F7400D6308D100D8B355 /* UKCrashReporter.m */; };
 		28A36F4D0A10B21600B6EE86 /* shakespeer.icns in Resources */ = {isa = PBXBuildFile; fileRef = 28A36F490A10B1BD00B6EE86 /* shakespeer.icns */; };
 		28C74ECB0ADBECDF00BACE5C /* Bookmarks.nib in Resources */ = {isa = PBXBuildFile; fileRef = 28C74EB30ADBECDF00BACE5C /* Bookmarks.nib */; };
 		28C74ECC0ADBECDF00BACE5C /* ChatWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = 28C74EB50ADBECDF00BACE5C /* ChatWindow.nib */; };
@@ -173,6 +174,8 @@
 		286B19E90A2A1354001D9687 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		287851B90A179F5D00A2992F /* minus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = minus.png; path = Resources/Images/minus.png; sourceTree = "<group>"; };
 		287851BB0A179F6500A2992F /* plus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = plus.png; path = Resources/Images/plus.png; sourceTree = "<group>"; };
+		2894F73F0D6308D100D8B355 /* UKCrashReporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UKCrashReporter.h; sourceTree = "<group>"; };
+		2894F7400D6308D100D8B355 /* UKCrashReporter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UKCrashReporter.m; sourceTree = "<group>"; };
 		28A36F490A10B1BD00B6EE86 /* shakespeer.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = shakespeer.icns; path = Resources/Images/shakespeer.icns; sourceTree = "<group>"; };
 		28C74EB40ADBECDF00BACE5C /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/Bookmarks.nib; sourceTree = "<group>"; };
 		28C74EB60ADBECDF00BACE5C /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/ChatWindow.nib; sourceTree = "<group>"; };
@@ -366,6 +369,8 @@
 		280318170ADA8800000CC734 /* Other sources */ = {
 			isa = PBXGroup;
 			children = (
+				2894F73F0D6308D100D8B355 /* UKCrashReporter.h */,
+				2894F7400D6308D100D8B355 /* UKCrashReporter.m */,
 				28D1DFA20A2A023000F9F9EE /* SPKeychain.h */,
 				28D1DFA30A2A023000F9F9EE /* SPKeychain.m */,
 				28F0ACF70A29E7E100FFEC99 /* MHSysTree.h */,
@@ -639,10 +644,12 @@
 		FC7E1A16097E69F00087431A /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = FC7E1A17097E69F00087431A /* Build configuration list for PBXProject "ShakesPeer" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 0;
 			mainGroup = FC7E1A14097E69F00087431A;
 			productRefGroup = FC7E1A24097E6A2E0087431A /* Products */;
 			projectDirPath = "";
+			projectRoot = "";
 			targets = (
 				FC7E1A22097E6A2E0087431A /* ShakesPeer */,
 				2805B8E00A02B40700F65FBC /* splib */,
@@ -783,6 +790,7 @@
 				FF05422F09CCB9070032DE2D /* SPClientBridge.m in Sources */,
 				28F0ACFA0A29E7E100FFEC99 /* MHSysTree.m in Sources */,
 				28D1DFA50A2A023000F9F9EE /* SPKeychain.m in Sources */,
+				2894F7410D6308D100D8B355 /* UKCrashReporter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -984,6 +992,10 @@
 		FC7E1A19097E69F00087431A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
 				COPY_PHASE_STRIP = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "";
