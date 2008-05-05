@@ -80,7 +80,6 @@ static float ToolbarHeightForWindow(NSWindow *window)
         [[self window] setToolbar:prefsToolbar];
         
         // Load last viewed pane
-        NSLog(@"lastPrefPane: %@", [[NSUserDefaults standardUserDefaults] objectForKey:@"lastPrefPane"]);
         [self switchToItem:[[NSUserDefaults standardUserDefaults] objectForKey:@"lastPrefPane"]];
 
         [[NSNotificationCenter defaultCenter] addObserver:self

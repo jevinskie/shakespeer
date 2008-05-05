@@ -65,6 +65,7 @@ static SPApplicationController *mySharedApplicationController = nil;
         sp_register_callbacks(sp);
 
         NSDictionary *appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
+            @"Bookmarks", SPPrefsLastSidebarItem,
             @"IdentityItem", SPPrefsLastPrefPane,
             [@"~/Desktop/ShakesPeer Downloads" stringByExpandingTildeInPath], SPPrefsDownloadFolder,
             [@"~/Desktop/ShakesPeer Downloads/Incomplete" stringByExpandingTildeInPath], SPPrefsIncompleteFolder,
@@ -723,14 +724,14 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
     [mainWindowController openHublist:self];
 }
 
-- (IBAction)showDownloadsView:(id)sender
-{
-    [mainWindowController openDownloads:self];
-}
-
 - (IBAction)showBookmarksView:(id)sender
 {
     [mainWindowController openBookmarks:self];
+}
+
+- (IBAction)showDownloadsView:(id)sender
+{
+    [mainWindowController openDownloads:self];
 }
 
 - (IBAction)showUploadsView:(id)sender

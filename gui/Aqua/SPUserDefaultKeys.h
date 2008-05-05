@@ -21,6 +21,7 @@
 
 #import <Foundation/Foundation.h>
 
+extern NSString *SPPrefsLastSidebarItem;
 extern NSString *SPPrefsLastPrefPane;
 extern NSString *SPPrefsDownloadFolder;
 extern NSString *SPPrefsIncompleteFolder;

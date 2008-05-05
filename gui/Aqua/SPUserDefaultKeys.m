@@ -21,6 +21,7 @@
 
 #import "SPUserDefaultKeys.h"
 
+NSString *SPPrefsLastSidebarItem = @"lastSidebarItem";
 NSString *SPPrefsLastPrefPane = @"lastPrefPane";
 NSString *SPPrefsDownloadFolder = @"completeFolder";
 NSString *SPPrefsIncompleteFolder = @"incompleteFolder";

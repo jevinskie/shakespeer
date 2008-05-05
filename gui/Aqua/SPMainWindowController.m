@@ -73,18 +73,27 @@
 - (void)windowDidLoad
 {
     [sideBar setDelegate:self];
-
+    
+    NSString *lastItem = [[NSUserDefaults standardUserDefaults] objectForKey:@"lastSidebarItem"];
+    
     [self openHublist:self];
     [self openBookmarks:self];
     [self openDownloads:self];
     [self openUploads:self];
     
-    // Show bookmarks at startup
-    // TODO: Remember last view instead
-    [self openBookmarks:self];
-
+    if([lastItem isEqualToString:@"Public Hubs"])
+        [self openHublist:self];
+    else if([lastItem isEqualToString:@"Bookmarks"])
+        [self openBookmarks:self];
+    else if([lastItem isEqualToString:@"Downloads"])
+        [self openDownloads:self];
+    else if([lastItem isEqualToString:@"Uploads"])
+        [self openUploads:self];
+    else
+        [self openBookmarks:self];
+    
     contextMenuButton = [[MenuButton alloc] init];
-
+    
     [self initializeToolbar];
 
     /* initialize and register with Growl */
@@ -573,6 +582,16 @@
     [sideBar displayItem:bookmarkController];
 }
 
+- (IBAction)openDownloads:(id)sender
+{
+    if(!queueController)
+    {
+        queueController = [[SPQueueController alloc] init];
+    }
+    [sideBar addItem:queueController];
+    [sideBar displayItem:queueController];
+}
+
 - (IBAction)openUploads:(id)sender
 {
     if(!transferController)
@@ -617,15 +636,7 @@
     }
 }
 
-- (IBAction)openDownloads:(id)sender
-{
-    if(!queueController)
-    {
-        queueController = [[SPQueueController alloc] init];
-    }
-    [sideBar addItem:queueController];
-    [sideBar displayItem:queueController];
-}
+
 
 - (void)performSearchFor:(NSString *)searchString
                     size:(NSString *)searchSize
@@ -769,6 +780,8 @@
     
     if([sideBarItem respondsToSelector:@selector(focusChatInput)])
         [sideBarItem focusChatInput];
+    
+    [[NSUserDefaults standardUserDefaults] setObject:[sideBarItem title] forKey:@"lastSidebarItem"];
 }
 
 - (void)sideBar:(SPSideBar *)aSideBar willCloseItem:(id)sideBarItem
