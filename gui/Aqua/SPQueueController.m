@@ -424,6 +424,7 @@
 
         i = [selectedIndices indexGreaterThanIndex:i];
     }
+    [tableView reloadData];
 }
 
 - (IBAction)removeUserFromQueue:(id)sender
