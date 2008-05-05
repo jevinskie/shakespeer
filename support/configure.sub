@@ -71,10 +71,10 @@ check_function()
 	rc=$?
 	if test $rc -eq 0; then
 		msg yes
-		out HAS_${func}=yes
+		out HAVE_$(echo $func | tr a-z-. A-Z__)=yes
 	else
 		msg no
-		out HAS_${func}=no
+		out HAVE_$(echo $func | tr a-z-. A-Z__)=no
 	fi
 }
 

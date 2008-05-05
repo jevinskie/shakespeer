@@ -27,6 +27,8 @@
 #include "base64.h"
 #include "log.h"
 #include "globals.h"
+#include "compat.h"
+#include "xstr.h"
 
 int tth_entry_cmp(struct tth_entry *a, struct tth_entry *b)
 {

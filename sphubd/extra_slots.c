@@ -27,6 +27,7 @@
 #include "xstr.h"
 #include "extra_slots.h"
 #include "notifications.h"
+#include "compat.h"
 
 #define SLOTS_DB_FILENAME "slots2.db"
 

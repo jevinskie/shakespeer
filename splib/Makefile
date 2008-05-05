@@ -25,6 +25,10 @@ SOURCES = args.c mkpath.c util.c bz2.c \
 	  nfkc.c iconv_string.c xml.c \
 	  uhttp.c
 
+ifeq ($(HAVE_FGETLN),no)
+	SOURCES += fgetln.c
+endif
+
 BUILT_SOURCES=gunibreak.h gunichartables.h gunicomp.h gunidecomp.h
 nfkc.o: ${BUILT_SOURCES}
 gunibreak.h gunichartables.h gunicomp.h gunidecomp.h: gen-unicode-tables.pl

@@ -21,7 +21,7 @@ TOP=..
 include ${TOP}/common.mk
 
 bin_PROGRAMS=sphubd sphashd
-noinst_PROGRAMS=share_tool tthdb_list queue_tool
+noinst_PROGRAMS=share_tool queue_tool
 all-local: ${BUILT_SOURCES} ${bin_PROGRAMS} ${noinst_PROGRAMS}
 
 sphubd_SOURCES=client.c client_cmd.c client_download.c client_upload.c \

@@ -29,6 +29,7 @@
 #include "queue.h"
 #include "notifications.h"
 #include "quote.h"
+#include "compat.h"
 
 #define QUEUE_DB_FILENAME "queue2.db"
 

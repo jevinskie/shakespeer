@@ -25,6 +25,10 @@ CFLAGS+=-D_GNU_SOURCE
 CFLAGS+=-D_FILE_OFFSET_BITS=64
 endif
 
+ifeq ($(HAVE_FGETLN),no)
+	CFLAGS += -DMISSING_FGETLN
+endif
+
 # Disable coredumps for public releases
 ifneq ($(BUILD_PROFILE),release)
 CFLAGS+=-DCOREDUMPS_ENABLED=1
