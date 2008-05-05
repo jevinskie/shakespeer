@@ -63,8 +63,6 @@ char *nmdc_makelock_pk(const char *id, const char *version)
     return lock_pk;
 }
 
-/* lock needs to be at least 1 character
- */
 char *nmdc_lock2key(const char *lock)
 {
     int i;
@@ -73,11 +71,16 @@ char *nmdc_lock2key(const char *lock)
     char *qkey;
 
     len = strlen(lock);
+    if(len < 3)
+    {
+        return strdup("");
+    }
+
     key = malloc(len + 1);
 
     for(i = 1; i < len; i++)
         key[i] = lock[i] ^ lock[i-1];
-    key[0] = lock[0] ^ lock[len-1] ^ (len > 1 ? lock[len-2] : 0) ^ 5;
+    key[0] = lock[0] ^ lock[len-1] ^ lock[len-2] ^ 5;
     for(i = 0; i < len; i++)
         key[i] = ((key[i] << 4) & 0xF0) | ((key[i] >> 4) & 0x0F);
 
@@ -157,6 +160,8 @@ char *nmdc_unescape(const char *str)
 
 #ifdef TEST
 
+#include "unit_test.h"
+
 int main(void)
 {
     /*
@@ -172,6 +177,26 @@ int main(void)
     fail_unless(result);
     fail_unless(strcmp(result, test_message) == 0);
     free(result);
+
+    char *q = nmdc_quote("foo", 3);
+    fail_unless(q);
+    fail_unless(strcmp(q, "foo") == 0);
+    free(q);
+
+    q = nmdc_quote("foo\x05\x05""bar", 8);
+    fail_unless(q);
+    fail_unless(strcmp(q, "foo/%DCN005%//%DCN005%/bar") == 0);
+    free(q);
+
+    char *key = nmdc_lock2key("xx");
+    fail_unless(key);
+    fail_unless(*key == 0);
+    free(key);
+
+    key = nmdc_lock2key("xx");
+    fail_unless(key);
+    fail_unless(*key == 0);
+    free(key);
 
     return 0;
 }
