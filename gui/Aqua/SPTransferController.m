@@ -262,16 +262,18 @@
 
 - (void)filelistFinishedNotification:(NSNotification *)aNotification
 {
-    NSString *nick = [[aNotification userInfo] objectForKey:@"nick"];
-    SPTransferItem *tr = [self findTransferItemWithNick:nick directions:DIR_DOWNLOAD];
-    if(tr)
-    {
-        [self willChangeValueForKey:@"transfers"];
-        [tr setStatus:@"Finished, idle"];
-        [tr setState:SPTransferState_Idle];
-        [tr setOffset:[tr size]];
-        [self didChangeValueForKey:@"transfers"];
-    }
+    NSString *targetFilename = [[aNotification userInfo] objectForKey:@"targetFilename"];
+    SPTransferItem *tr = [self findTransferItemWithTargetFilename:targetFilename];
+    if (!tr)
+        // this is normal. we got a notification when the user loaded a cached filelist, 
+        // so no file list wasn't in the transfers.
+		return;
+    
+    [self willChangeValueForKey:@"transfers"];
+    [tr setStatus:@"Finished, idle"];
+    [tr setState:SPTransferState_Idle];
+    [tr setOffset:[tr size]];
+    [self didChangeValueForKey:@"transfers"];
 }
 
 - (void)uploadStartingNotification:(NSNotification *)aNotification
