@@ -363,7 +363,6 @@ int cc_start_download(cc_t *cc)
     *++e = 0;
     DEBUG("mkpath(%s)", local_dir);
     mkpath(local_dir);
-    free(local_dir);
 
     cc->local_fd = open(target, O_RDWR | O_CREAT, 0644);
     DEBUG("opened %s for writing, fd = %d", target, cc->local_fd);
@@ -372,8 +371,13 @@ int cc_start_download(cc_t *cc)
     if(cc->local_fd == -1)
     {
         WARNING("%s: %s", target, strerror(errno));
+        ui_send_status_message(NULL, cc->hub->address,
+                "Unable to save files to %s: %s",
+                local_dir, strerror(errno));
+        free(local_dir);
         return -1;
     }
+    free(local_dir);
 
     if(lseek(cc->local_fd, cc->offset, SEEK_SET) == -1)
     {
