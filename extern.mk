@@ -90,34 +90,6 @@ bzip2-build-${BZ2_VER}/stamp: bzip2-${BZ2_VER}.tar.gz
 	    ${MAKE} install PREFIX=$$cwd/bzip2-install
 	touch bzip2-build-${BZ2_VER}/stamp
 
-DB_VER=4.5.20.NC
-DB_URL=http://download-uk.oracle.com/berkeley-db/db-${DB_VER}.tar.gz
-DB_MD5=1bfa6256f8d546b97bef1f448ab09875
-db-${DB_VER}.tar.gz:
-	$(call download,db,${DB_VER},${DB_URL},${DB_MD5})
-db: db-build-${DB_VER}/stamp
-db-build-${DB_VER}/stamp: db-${DB_VER}.tar.gz
-	$(call unpack,db,${DB_VER})
-	cwd=`pwd` && cd db-build-${DB_VER}/db-${DB_VER}/build_unix && \
-	    CFLAGS="${UB_CFLAGS}" \
-	    ../dist/configure --disable-shared \
-	                      --enable-static \
-			      --disable-queue \
-			      --disable-verify \
-			      --enable-statistics \
-			      --disable-replication \
-	                      --disable-cryptography \
-	                      --prefix=$$cwd/db-install && \
-	    ${MAKE} install
-	touch db-build-${DB_VER}/stamp
-
-ifneq (${HAS_BDB},yes)
-EXTERN_DEPENDS+=db
-BDB_CFLAGS=-I${TOP}/db-install/include
-BDB_LDFLAGS=-L${TOP}/db-install/lib
-BDB_LIBS=-ldb-4.5
-endif
-
 ifneq (${HAS_BZ2},yes)
 EXTERN_DEPENDS+=bzip2
 BZ2_CFLAGS=-I${TOP}/bzip2-install/include
@@ -150,12 +122,10 @@ CFLAGS+=${BZ2_CFLAGS}
 CFLAGS+=${ICONV_CFLAGS}
 CFLAGS+=${LIBEVENT_CFLAGS}
 CFLAGS+=${EXPAT_CFLAGS}
-CFLAGS+=${BDB_CFLAGS}
 
 LIBS=-L${TOP}/spclient -lspclient -L${TOP}/splib -lsplib \
      ${ICONV_LDFLAGS} ${ICONV_LIBS} \
      ${BZ2_LDFLAGS} ${BZ2_LIBS} \
      ${EXPAT_LDFLAGS} ${EXPAT_LIBS} \
-     ${LIBEVENT_LDFLAGS} ${LIBEVENT_LIBS} \
-     ${BDB_LDFLAGS} ${BDB_LIBS}
+     ${LIBEVENT_LDFLAGS} ${LIBEVENT_LIBS}
 

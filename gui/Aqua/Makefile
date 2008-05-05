@@ -102,9 +102,6 @@ app_bundle.stamp: ShakesPeer
 	cp -f ShakesPeer ShakesPeer.app/Contents/MacOS
 	test -d $(FWDIR)/Growl.framework || \
 		cp -RP Growl.framework $(FWDIR)
-	for a in checkpoint dump load recover upgrade verify stat; do \
-		cp -f ../../db-install/bin/db_$$a $(RES) ; \
-	done
 
 install:
 

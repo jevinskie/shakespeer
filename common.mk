@@ -7,9 +7,6 @@ default: all
 
 -include $(TOP)/config.mk
 
-# Force building local Berkeley DB
-HAS_BDB=no
-
 include $(TOP)/version.mk
 include $(TOP)/extern.mk
 
@@ -39,10 +36,9 @@ UB_LDFLAGS=-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386
 endif
 endif
 
-# Berkeley DB on Linux needs pthread
-# We also need to link with -lresolv
+# Need -lresolv on Linux
 ifeq ($(os),Linux)
-LIBS+=-lpthread -lresolv
+LIBS+=-lresolv
 endif
 
 # search for xcodebuild in path
