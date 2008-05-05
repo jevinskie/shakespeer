@@ -30,9 +30,8 @@ enum
   LOG_LEVEL_ERROR             = 1 << 2,
   LOG_LEVEL_CRITICAL          = 1 << 3,
   LOG_LEVEL_WARNING           = 1 << 4,
-  LOG_LEVEL_MESSAGE           = 1 << 5,
-  LOG_LEVEL_INFO              = 1 << 6,
-  LOG_LEVEL_DEBUG             = 1 << 7,
+  LOG_LEVEL_INFO              = 1 << 5,
+  LOG_LEVEL_DEBUG             = 1 << 6,
 };
 
 int sp_log_init(const char *workdir, const char *prefix);
@@ -48,24 +47,25 @@ void sp_log(int level, const char *fmt, ...);
 #undef g_info
 #define g_info(fmt, ...)  sp_log(LOG_LEVEL_INFO, "[%d] (%s:%i) " fmt, getpid(), __func__, __LINE__, ## __VA_ARGS__)
 
-#undef g_message
-#define g_message(fmt, ...)  sp_log(LOG_LEVEL_MESSAGE, "[%d] (%s:%i) " fmt, getpid(), __func__, __LINE__, ## __VA_ARGS__)
-
 #undef g_warning
 #define g_warning(fmt, ...)  sp_log(LOG_LEVEL_WARNING, "[%d] (%s:%i) " fmt, getpid(), __func__, __LINE__, ## __VA_ARGS__)
+
+#undef g_error
+#define g_error(fmt, ...)  sp_log(LOG_LEVEL_ERROR, "[%d] (%s:%i) " fmt, getpid(), __func__, __LINE__, ## __VA_ARGS__)
 
 #define DEBUG g_debug
 #define INFO g_info
 #define WARNING g_warning
 #define ERROR g_error
+#define g_message g_info
 
 #define return_val_if_fail(cond, retval) do {           \
-        if(!(cond)) { g_warning("assert failed: " #cond); \
+        if(!(cond)) { WARNING("assert failed: " #cond); \
         return (retval); }                                \
     } while(0)
 
 #define return_if_fail(cond) do {                       \
-        if(!(cond)) { g_warning("assert failed: " #cond); \
+        if(!(cond)) { WARNING("assert failed: " #cond); \
         return; }                                        \
     } while(0)
 

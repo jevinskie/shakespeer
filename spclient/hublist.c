@@ -77,7 +77,7 @@ static hublist_hub_t *hl_parse_entry(arg_t *args)
     }
     else
     {
-        /* g_message("failed description: [%s]", args->argv[2]); */
+        /* INFO("failed description: [%s]", args->argv[2]); */
         h->description = strdup(args->argv[2]);
     }
 

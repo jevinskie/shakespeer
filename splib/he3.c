@@ -95,7 +95,7 @@ static int bitfile_get(bitfile_t *bitfile)
     {
         int c = fgetc(bitfile->fp);
         if(c == EOF)
-            g_warning("bitfile_get: EOF!");
+            WARNING("bitfile_get: EOF!");
         bitfile->data = c;
     }
 
@@ -276,7 +276,7 @@ int he3_encode(const char *ifilename, const char *ofilename, xerr_t **err)
         {
             bitfile_nput(&bitfile, codetab[i].code, codetab[i].len);
 #ifdef DEBUG
-            g_message("symbol 0x%02X: code: %s, length: %d",
+            INFO("symbol 0x%02X: code: %s, length: %d",
                     codetab[i].data, bits2str(codetab[i].code, codetab[i].len),
                     codetab[i].len);
 #endif
@@ -286,7 +286,7 @@ int he3_encode(const char *ifilename, const char *ofilename, xerr_t **err)
     bitfile_flush(&bitfile);
 
 #ifdef DEBUG
-    g_message("ftell(fpOut) == %ld", ftell(fpOut));
+    INFO("ftell(fpOut) == %ld", ftell(fpOut));
 #endif
     while((c = fgetc(fpIn)) != EOF)
     {
@@ -364,7 +364,7 @@ int he3_decode(const char *ifilename, const char *ofilename, xerr_t **err)
     len |= (fgetc(fpIn) & 0xFF) << 16;
     len |= (fgetc(fpIn) & 0xFF) << 24;
 #ifdef DEBUG
-    g_message("length == %u", len);
+    INFO("length == %u", len);
 #endif
 
     ncodes = (fgetc(fpIn) & 0xFF);
@@ -398,7 +398,7 @@ int he3_decode(const char *ifilename, const char *ofilename, xerr_t **err)
     }
 
 #ifdef DEBUG
-    g_message("ftell(fpIn) == %ld", ftell(fpIn));
+    INFO("ftell(fpIn) == %ld", ftell(fpIn));
 #endif
 
     calc_crc = 0;

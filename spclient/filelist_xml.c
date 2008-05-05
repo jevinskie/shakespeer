@@ -53,7 +53,7 @@ static void fl_xml_parse_start_tag(void *user_data,
 
         if(dirname == 0)
         {
-            g_warning("Missing Name attribute in Directory tag");
+            WARNING("Missing Name attribute in Directory tag");
         }
         else
         {

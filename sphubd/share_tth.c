@@ -45,14 +45,14 @@ static void share_insert_file(share_t *share, share_mountpoint_t *mp,
         }
         else
         {
-            g_warning("File [%s] not in unhashed tree!?", file->path);
+            WARNING("File [%s] not in unhashed tree!?", file->path);
         }
 
         RB_INSERT(file_tree, &share->files, file);
     }
     else
     {
-        g_warning("File [%s] already in hashed tree!?", file->path);
+        WARNING("File [%s] already in hashed tree!?", file->path);
     }
 
     /* update mountpoint statistics */
@@ -88,7 +88,7 @@ void handle_tth_available_notification(nc_t *nc,
     share_mountpoint_t *mp = share_lookup_local_root(share, file->path);
     if(mp == NULL)
     {
-        g_warning("Mountpoint disappeared!");
+        WARNING("Mountpoint disappeared!");
         return;
     }
 

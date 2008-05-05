@@ -49,7 +49,7 @@ static void sl_in_event(int fd, short condition, void *data)
             (struct sockaddr *)&fromaddr, &fromlen);
     if(bytes_read == -1)
     {
-        g_warning("recvfrom: %s", strerror(errno));
+        WARNING("recvfrom: %s", strerror(errno));
         return;
     }
 
@@ -57,11 +57,11 @@ static void sl_in_event(int fd, short condition, void *data)
     {
         if(bytes_read == 4 && strncmp(buf, "ping", 4) == 0)
         {
-            g_debug("received ping, sending pong");
+            DEBUG("received ping, sending pong");
             if(sendto(fd, "pong", 4, 0,
                         (const struct sockaddr *)&fromaddr, fromlen) == -1)
             {
-                g_warning("sendto(pong): %s", strerror(errno));
+                WARNING("sendto(pong): %s", strerror(errno));
             }
         }
         else
@@ -111,7 +111,7 @@ search_listener_t *search_listener_new(int port)
     fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if(fd == -1)
     {
-        g_warning("socket(): %s", strerror(errno));
+        WARNING("socket(): %s", strerror(errno));
         free(sl);
         return NULL;
     }
@@ -124,13 +124,13 @@ search_listener_t *search_listener_new(int port)
     int on = 1;
     if(setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1)
     {
-        g_warning("unable to enable local address reuse (ignored)");
+        WARNING("unable to enable local address reuse (ignored)");
     }
 
-    g_info("Binding UDP port %i for search responses", port);
+    INFO("Binding UDP port %i for search responses", port);
     if(bind(fd, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) != 0)
     {
-        g_warning("Unable to bind UDP port %i: %s", port, strerror(errno));
+        WARNING("Unable to bind UDP port %i: %s", port, strerror(errno));
         close(fd);
         free(sl);
         return NULL;
@@ -145,7 +145,7 @@ search_listener_t *search_listener_new(int port)
         return NULL;
     }
 
-    g_debug("adding search listener on file descriptor %i", fd);
+    DEBUG("adding search listener on file descriptor %i", fd);
 
     event_set(&sl->in_event, fd, EV_READ|EV_PERSIST, sl_in_event, sl);
     event_add(&sl->in_event, NULL);
@@ -213,7 +213,7 @@ search_response_t *sl_parse_response(const char *buf)
 {
     return_val_if_fail(buf, NULL);
 
-    g_debug("parsing [%s]", buf);
+    DEBUG("parsing [%s]", buf);
 
     if(str_has_prefix(buf, "$SR "))
         buf += 4;
@@ -285,7 +285,7 @@ search_response_t *sl_parse_response(const char *buf)
                 hub = hub_find_encoding_by_nick(nick, &nick_utf8);
                 if(hub == NULL)
                 {
-                    g_warning("unknown hub address '%s'"
+                    WARNING("unknown hub address '%s'"
                             " in search response (skipping)", hub_address);
                     rx_free_subs(subs);
                     free(xbuf);
@@ -299,7 +299,7 @@ search_response_t *sl_parse_response(const char *buf)
 
             if(nick_utf8 == NULL)
             {
-                g_warning("no valid nick in search response (skipping)");
+                WARNING("no valid nick in search response (skipping)");
                 rx_free_subs(subs);
                 free(xbuf);
                 return NULL;
@@ -338,7 +338,7 @@ search_response_t *sl_parse_response(const char *buf)
 
             if(resp->tth && !valid_tth(resp->tth))
             {
-                g_warning("invalid TTH in search response [%s]", xbuf);
+                WARNING("invalid TTH in search response [%s]", xbuf);
                 sl_response_free(resp);
                 resp = NULL;
             }
@@ -347,7 +347,7 @@ search_response_t *sl_parse_response(const char *buf)
     }
     else
     {
-        g_message("regexp failed on: [%s]", xbuf);
+        INFO("regexp failed on: [%s]", xbuf);
     }
     free(xbuf);
 
@@ -373,7 +373,7 @@ int search_listener_handle_response(search_listener_t *sl, const char *buf)
     search_response_t *resp = sl_parse_response(buf);
     if(resp == NULL)
     {
-        g_message("invalid search response (ignored)");
+        INFO("invalid search response (ignored)");
         return 1;
     }
 
@@ -389,7 +389,7 @@ int search_listener_handle_response(search_listener_t *sl, const char *buf)
         if(search_result_matches_request(resp->filename, resp->size,
                     resp->tth, sreq))
         {
-            g_debug("Found search ID %i", sreq->id);
+            DEBUG("Found search ID %i", sreq->id);
             search_id = sreq->id;
             found_search_id = 1;
             break;
@@ -430,7 +430,7 @@ search_request_t *search_listener_create_search_request(const char *words,
         free(words_unescaped);
         if(!valid_tth(sreq->tth))
         {
-            g_debug("invalid TTH [%s], skipping search", sreq->tth);
+            DEBUG("invalid TTH [%s], skipping search", sreq->tth);
             free(sreq->tth);
             free(sreq);
             return NULL;
@@ -443,7 +443,7 @@ search_request_t *search_listener_create_search_request(const char *words,
          */
         if(words_unescaped == NULL)
         {
-            g_warning("invalid encoding in search words, ignoring");
+            WARNING("invalid encoding in search words, ignoring");
             free(sreq);
             return NULL;
         }
@@ -460,7 +460,7 @@ search_request_t *search_listener_create_search_request(const char *words,
         }
         if(*p == 0)
         {
-            g_debug("empty search string");
+            DEBUG("empty search string");
             free(sreq);
             free(p_casefold);
             return NULL;
@@ -544,7 +544,7 @@ void sl_forget_search(search_listener_t *sl, int search_id)
     {
         while((sreq = TAILQ_FIRST(&sl->search_request_head)) != NULL)
         {
-            g_debug("forgetting search ID %i", sreq->id);
+            DEBUG("forgetting search ID %i", sreq->id);
             TAILQ_REMOVE(&sl->search_request_head, sreq, link);
             sl_request_free(sreq);
         }
@@ -557,7 +557,7 @@ void sl_forget_search(search_listener_t *sl, int search_id)
             next = TAILQ_NEXT(sreq, link);
             if(sreq->id == search_id)
             {
-                g_debug("forgetting search ID %i", sreq->id);
+                DEBUG("forgetting search ID %i", sreq->id);
                 TAILQ_REMOVE(&sl->search_request_head, sreq, link);
                 sl_request_free(sreq);
             }

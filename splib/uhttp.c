@@ -50,7 +50,7 @@ int uhttp_open(uhttp_t *uhttp)
     uhttp->fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(uhttp->fd == -1)
     {
-        g_debug("%s", strerror(errno));
+        DEBUG("%s", strerror(errno));
         return -1;
     }
 
@@ -62,19 +62,19 @@ int uhttp_open(uhttp_t *uhttp)
         he = gethostbyname(uhttp->hostname);
         if(!he)
         {
-            g_debug("%s: %s", uhttp->hostname, hstrerror(h_errno));
+            DEBUG("%s: %s", uhttp->hostname, hstrerror(h_errno));
             return -1;
         }
 
         memcpy(&uhttp->raddr.sin_addr, he->h_addr, he->h_length);
     }
 
-    g_debug("Connecting to %s:%d",
+    DEBUG("Connecting to %s:%d",
             inet_ntoa(uhttp->raddr.sin_addr), ntohs(uhttp->raddr.sin_port));
     if(connect(uhttp->fd, (struct sockaddr *)&uhttp->raddr,
                 sizeof(uhttp->raddr)) != 0)
     {
-        g_debug("%s", strerror(errno));
+        DEBUG("%s", strerror(errno));
         return -1;
     }
 
@@ -107,9 +107,9 @@ int uhttp_open_url(uhttp_t *uhttp, const char *urlstr)
     uhttp->hostname = strdup(xurl);
     free(xurl);
 
-    g_debug("hostname: %s", uhttp->hostname);
-    g_debug("port: %i", uhttp->port);
-    g_debug("directory: %s", uhttp->directory);
+    DEBUG("hostname: %s", uhttp->hostname);
+    DEBUG("port: %i", uhttp->port);
+    DEBUG("directory: %s", uhttp->directory);
 
     return uhttp_open(uhttp);
 }
@@ -195,7 +195,7 @@ int uhttp_send_headers(uhttp_t *uhttp)
     for(i = 0; i < uhttp->nheaders; i++)
     {
         uhttp_send_string(uhttp, "%s", uhttp->headers[i]);
-        /* g_debug("Sending header: %s", uhttp->headers[i]); */
+        /* DEBUG("Sending header: %s", uhttp->headers[i]); */
     }
     uhttp_free_headers(uhttp);
     uhttp->headers_sent = 1;
@@ -234,14 +234,14 @@ int uhttp_write_chunk(uhttp_t *uhttp, void *data, unsigned int length)
         uhttp_send_string(uhttp, "");
     }
 
-     g_debug("Sending %u bytes", length);
+     DEBUG("Sending %u bytes", length);
     /* send the content length in hex */
     uhttp_send_string(uhttp, "%X", length);
     if(length)
     {
         if(send(uhttp->fd, data, length, 0) == -1)
         {
-            g_debug("uhttp: %s", strerror(errno));
+            DEBUG("uhttp: %s", strerror(errno));
             return -1;
         }
     } else
@@ -292,7 +292,7 @@ const char *uhttp_get_header(uhttp_t *uhttp, const char *header)
             if(strncmp(header, uhttp->headers[i], e - uhttp->headers[i]) == 0)
             {
                 while(*++e == ' ') /* do nothing */ ;
-                g_debug("found [%s]: %s", header, e);
+                DEBUG("found [%s]: %s", header, e);
                 return e;
             }
         }
@@ -310,7 +310,7 @@ int uhttp_read_response_cb(uhttp_t *uhttp,
     const char *transfer_encoding = uhttp_get_header(uhttp, "transfer-encoding");
     if(transfer_encoding && strcmp(transfer_encoding, "chunked") == 0)
     {
-        g_debug("Detected chunked encoding");
+        DEBUG("Detected chunked encoding");
         uhttp->chunked_encoding = 1;
     }
 
@@ -329,14 +329,14 @@ int uhttp_read_response_cb(uhttp_t *uhttp,
         uhttp->content_length = strtoul(tmp, NULL, 16);
         if(uhttp->content_length == 0)
         {
-            g_debug("End of chunked encoding, reading trailing headers");
+            DEBUG("End of chunked encoding, reading trailing headers");
             /* read trailing headers */
             uhttp_read_response_headers(uhttp);
             return 0;
         }
     }
 
-    g_debug("Reading %u bytes of response data", uhttp->content_length);
+    DEBUG("Reading %u bytes of response data", uhttp->content_length);
 
     char buf[4096];
     size_t i = 0;
@@ -353,12 +353,12 @@ int uhttp_read_response_cb(uhttp_t *uhttp,
         ssize_t rc = recv(uhttp->fd, buf, len, 0);
         if(rc < 0)
         {
-            g_warning("Error reading response: %s", strerror(errno));
+            WARNING("Error reading response: %s", strerror(errno));
             return -1;
         }
         else if(rc == 0)
         {
-            g_warning("EOF reading response");
+            WARNING("EOF reading response");
             return -1;
         }
 
@@ -432,7 +432,7 @@ static int uhttp_read_response_fp_cb(uhttp_t *uhttp, void *data, size_t length,
     size_t rc = fwrite(data, 1, length, fp);
     if(rc < length)
     {
-        g_warning("%s", strerror(errno));
+        WARNING("%s", strerror(errno));
         return -1;
     }
 
@@ -459,7 +459,7 @@ int uhttp_read_response_file(uhttp_t *uhttp, const char *filename)
     FILE *fp = fopen(filename, "w");
     if(fp == NULL)
     {
-        g_warning("%s: %s", filename, strerror(errno));
+        WARNING("%s: %s", filename, strerror(errno));
         return -1;
     }
 
@@ -479,13 +479,13 @@ int uhttp_send_string(uhttp_t *uhttp, const char *fmt, ...)
     va_end(ap);
 
     size_t l = strlen(str);
-    g_debug("sending %lu bytes: [%s]", l, str);
+    DEBUG("sending %lu bytes: [%s]", l, str);
     rc = send(uhttp->fd, str, l, 0);
     if(rc != -1)
         rc = send(uhttp->fd, "\r\n", 2, 0);
 
     if(rc == -1)
-        g_debug("uhttp: %s", strerror(errno));
+        DEBUG("uhttp: %s", strerror(errno));
     free(str);
     return rc;
 }
@@ -507,7 +507,7 @@ char *uhttp_read_string(uhttp_t *uhttp, char *buf, unsigned len)
     buf[i] = 0;
     trim(buf, "\r\n");
 
-    g_debug("Got response: %s", buf);
+    DEBUG("Got response: %s", buf);
 
     return buf;
 }

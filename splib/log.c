@@ -45,7 +45,7 @@ static int sp_log_max_bytes = SP_LOG_MAX_BYTES_NORMAL;
 
 static FILE *logfp = NULL;
 static char *logfile = NULL;
-static int max_log_level = LOG_LEVEL_MESSAGE;
+static int max_log_level = LOG_LEVEL_INFO;
 
 static int sp_log_reinit(void);
 
@@ -58,7 +58,7 @@ void sp_log_set_level(const char *level)
     else if(strcasecmp(level, "warning") == 0)
         max_log_level = LOG_LEVEL_WARNING;
     else if(strcasecmp(level, "message") == 0)
-        max_log_level = LOG_LEVEL_MESSAGE;
+        max_log_level = LOG_LEVEL_INFO;
     else if(strcasecmp(level, "info") == 0)
         max_log_level = LOG_LEVEL_INFO;
     else if(strcasecmp(level, "debug") == 0)
@@ -74,10 +74,10 @@ const char *sp_log_get_level(void)
         return "debug";
     else if(max_log_level == LOG_LEVEL_INFO)
         return "info";
-    else if(max_log_level == LOG_LEVEL_MESSAGE)
-        return "message";
     else if(max_log_level == LOG_LEVEL_WARNING)
         return "warning";
+    else if(max_log_level == LOG_LEVEL_ERROR)
+        return "error";
     else
         return "none";
 }
@@ -194,7 +194,7 @@ static void event_log_callback(int severity, const char *msg)
             log_level = LOG_LEVEL_DEBUG;
             break;
         case _EVENT_LOG_MSG:
-            log_level = LOG_LEVEL_MESSAGE;
+            log_level = LOG_LEVEL_INFO;
             break;
         case _EVENT_LOG_WARN:
             log_level = LOG_LEVEL_WARNING;

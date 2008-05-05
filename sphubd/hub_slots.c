@@ -28,7 +28,7 @@ void hub_free_upload_slot(hub_t *hub, const char *nick, slot_state_t slot_state)
     switch(slot_state)
     {
         case SLOT_EXTRA:
-            g_info("removing extra upload slot for nick %s", nick);
+            INFO("removing extra upload slot for nick %s", nick);
             extra_slots_grant(nick, -1);
             break;
         case SLOT_NORMAL:
@@ -36,11 +36,11 @@ void hub_free_upload_slot(hub_t *hub, const char *nick, slot_state_t slot_state)
 
 	    if(used_slots < 0)
 	    {
-		g_warning("INTERNAL ERROR: used_slots < 0");
+		WARNING("INTERNAL ERROR: used_slots < 0");
 		used_slots = 0;
 	    }
 
-	    g_info("freeing one upload slot for nick %s: %d used, %d free",
+	    INFO("freeing one upload slot for nick %s: %d used, %d free",
 		    nick, used_slots, total_slots - used_slots);
 	    hub_set_need_myinfo_update(true);
             break;
@@ -60,24 +60,24 @@ slot_state_t hub_request_upload_slot(hub_t *hub, const char *nick,
 {
     if(filename == NULL || is_filelist(filename) || size < 64*1024)
     {
-        g_info("allowing free upload slot for file %s", filename);
+        INFO("allowing free upload slot for file %s", filename);
         return SLOT_FREE;
     }
 
     if(extra_slots_get_for_user(nick) > 0)
     {
-        g_info("allowing extra upload slot for nick %s", nick);
+        INFO("allowing extra upload slot for nick %s", nick);
         return SLOT_EXTRA;
     }
 
     if(used_slots >= total_slots)
     {
-	g_info("no free slots left");
+	INFO("no free slots left");
 	return SLOT_NONE;
     }
 
     used_slots++;
-    g_info("allocating one upload slot for file %s: %d used, %d free",
+    INFO("allocating one upload slot for file %s: %d used, %d free",
 	    filename, used_slots, total_slots - used_slots);
     hub_set_need_myinfo_update(true);
 
@@ -88,7 +88,7 @@ void hub_set_slots(int slots, bool per_hub)
 {
     return_if_fail(slots > 0);
 
-    g_debug("setting slots = %d %s", slots, per_hub ? "per hub" : "");
+    DEBUG("setting slots = %d %s", slots, per_hub ? "per hub" : "");
     if(per_hub)
     	total_slots = slots * (hub_count_normal() + hub_count_registered());
     else

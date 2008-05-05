@@ -95,7 +95,7 @@ int cmd_dispatch(const char *cmdline,
     }
     if(args == NULL)
     {
-        /*g_warning("unable to split arguments in [%s] by [%s], max %i",
+        /*WARNING("unable to split arguments in [%s] by [%s], max %i",
                 cmdline, delimiters, max_args);*/
         return -1;
     }
@@ -108,7 +108,7 @@ int cmd_dispatch(const char *cmdline,
 
     if(args->argc < req_args)
     {
-        /*g_warning("command '%s' requires %i arguments, only %i given: [%s]",
+        /*WARNING("command '%s' requires %i arguments, only %i given: [%s]",
                 cmd->name, req_args, args->argc, cmdline);*/
         arg_free(args);
         return 0;

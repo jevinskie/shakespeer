@@ -31,7 +31,7 @@
 
 void share_create_bloom(share_t *share)
 {
-    g_debug("(re)creating bloom filter");
+    DEBUG("(re)creating bloom filter");
 
     return_if_fail(share);
 

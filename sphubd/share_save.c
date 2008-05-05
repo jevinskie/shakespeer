@@ -280,7 +280,7 @@ static int share_save_xml(share_t *share, const char *filename, xerr_t **err)
     g_return_val_if_fail(global_id_generator, -1);
     g_return_val_if_fail(global_id_version, -1);
 
-    g_debug("saving XML filelist to %s...", filename);
+    DEBUG("saving XML filelist to %s...", filename);
     FILE *fp = fopen(filename, "w");
     if(fp == 0)
     {
@@ -332,7 +332,7 @@ int share_save(share_t *share, unsigned type)
         }
         else
         {
-            g_debug("share up to date and file exists,"
+            DEBUG("share up to date and file exists,"
                     " skipping saving xml file");
         }
         free(xml_filename);

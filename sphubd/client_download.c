@@ -128,7 +128,7 @@ int cc_request_download(cc_t *cc)
                  * resolved if the filelist is directly available. Otherwise
                  * the filelist is queued and should be downloaded before the
                  * directory */
-                g_warning("unresolvable directory [%s] ???",
+                WARNING("unresolvable directory [%s] ???",
                         queue->source_filename);
             }
         }
@@ -163,7 +163,7 @@ int cc_request_download(cc_t *cc)
 
             if(stat(target, &stbuf) == 0)
             {
-                g_message("local file in storage dir already exists: [%s]",
+                INFO("local file in download dir already exists: [%s]",
                         target);
                 /* what if size differs? */
                 queue_remove_target(queue->target_filename);
@@ -183,7 +183,7 @@ int cc_request_download(cc_t *cc)
                     queue->offset = stbuf.st_size;
                     if(queue->offset >= queue->size)
                     {
-                        g_message("local file has larger or equal size than remote,"
+                        INFO("local file has larger or equal size than remote,"
                                 " can't resume, removing queue");
 
                         nc_send_download_finished_notification(nc_default(),
@@ -235,10 +235,10 @@ int cc_request_download(cc_t *cc)
 
 void cc_finish_download(cc_t *cc)
 {
-    g_info("finished downloading file");
+    INFO("finished downloading file");
     if(close(cc->local_fd) != 0)
     {
-        g_warning("close: %s", strerror(errno));
+        WARNING("close: %s", strerror(errno));
     }
     cc->local_fd = -1;
 
@@ -254,7 +254,7 @@ void cc_finish_download(cc_t *cc)
         *ext++ = 0;
 
         /* decompress the filelist */
-        g_debug("decompressing filelist [%s] -> [%s]",
+        DEBUG("decompressing filelist [%s] -> [%s]",
                 filepath, filepath_noext);
         xerr_t *err = 0;
         if(strcmp(ext, "bz2") == 0)
@@ -263,7 +263,7 @@ void cc_finish_download(cc_t *cc)
             he3_decode(filepath, filepath_noext, &err);
         if(err)
         {
-            g_warning("failed to decompress filelist: %s", xerr_msg(err));
+            WARNING("failed to decompress filelist: %s", xerr_msg(err));
             ui_send_status_message(NULL, cc->hub->address,
                     "failed to decompress filelist: %s", xerr_msg(err));
             xerr_free(err);
@@ -317,7 +317,7 @@ static int cc_download_write(cc_t *cc, char *buf, size_t bytes_read)
 
     if(write(cc->local_fd, buf, bytes_read) == -1)
     {
-        g_warning("write failed: %s", strerror(errno));
+        WARNING("write failed: %s", strerror(errno));
         return -1;
     }
 
@@ -331,7 +331,7 @@ int cc_start_download(cc_t *cc)
     return_val_if_fail(cc, -1);
     return_val_if_fail(cc->current_queue, -1);
 
-    g_debug("global_incomplete_directory = [%s]", global_incomplete_directory);
+    DEBUG("global_incomplete_directory = [%s]", global_incomplete_directory);
 
     bool dl_dir_exists;
     if(cc->current_queue->is_filelist)
@@ -346,7 +346,7 @@ int cc_start_download(cc_t *cc)
 
     if(!dl_dir_exists)
     {
-        g_warning("download directory [%s] doesn't exist, refuses to download",
+        WARNING("download directory [%s] doesn't exist, refuses to download",
                 global_incomplete_directory);
         ui_send_status_message(NULL, cc->hub->address,
                 "Download directory '%s' doesn't exist"
@@ -373,30 +373,30 @@ int cc_start_download(cc_t *cc)
                global_incomplete_directory, cc->current_queue->target_filename);
     }
 
-    g_debug("target: [%s]", target);
+    DEBUG("target: [%s]", target);
 
     /* make sure target (local) directory exists */
     char *local_dir = strdup(target);
     char *e = strrchr(local_dir, '/');
     assert(e);
     *++e = 0;
-    g_debug("mkpath(%s)", local_dir);
+    DEBUG("mkpath(%s)", local_dir);
     mkpath(local_dir);
     free(local_dir);
 
     cc->local_fd = open(target, O_RDWR | O_CREAT, 0644);
-    g_debug("opened %s for writing, fd = %d", target, cc->local_fd);
+    DEBUG("opened %s for writing, fd = %d", target, cc->local_fd);
     free(target);
     target = cc->current_queue->target_filename;
     if(cc->local_fd == -1)
     {
-        g_warning("%s: %s", target, strerror(errno));
+        WARNING("%s: %s", target, strerror(errno));
         return -1;
     }
 
     if(lseek(cc->local_fd, cc->offset, SEEK_SET) == -1)
     {
-        g_warning("lseek failed: %s", strerror(errno));
+        WARNING("lseek failed: %s", strerror(errno));
         return -1;
     }
 

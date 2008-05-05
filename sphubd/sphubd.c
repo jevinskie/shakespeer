@@ -77,14 +77,14 @@ void set_share_rescan_interval(int interval)
 
     if(interval > 0)
     {
-        g_debug("starting share rescanner with interval %i seconds", interval);
+        DEBUG("starting share rescanner with interval %i seconds", interval);
         last_interval = interval;
         struct timeval tv = {.tv_sec = interval, .tv_usec = 0};
         evtimer_add(&share_rescan_event, &tv);
     }
     else
     {
-        g_debug("disabling share rescanner");
+        DEBUG("disabling share rescanner");
     }
 }
 
@@ -104,7 +104,7 @@ static int connect_trigger_callback(const char *nick, void *user_data)
     if(cc == NULL)
     {
         /* no ongoing client connection with this nick, initiate one */
-        g_info("sending connection request to nick %s", nick);
+        INFO("sending connection request to nick %s", nick);
 
         if(hub->me->passive)
         {
@@ -161,11 +161,11 @@ int start_client_listener(int port)
     {
         if(current_port == port)
         {
-            g_info("already listening on port %i", current_port);
+            INFO("already listening on port %i", current_port);
             return 0;
         }
         event_del(&client_listener_event);
-        g_debug("closing client listener fd %i", client_listener_fd);
+        DEBUG("closing client listener fd %i", client_listener_fd);
         close(client_listener_fd);
         started = 0;
         current_port = -1;
@@ -181,7 +181,7 @@ int start_client_listener(int port)
                     port, err->message);
             return -1;
         }
-        g_debug("adding client connection listener on file descriptor %d",
+        DEBUG("adding client connection listener on file descriptor %d",
                 client_listener_fd);
         event_set(&client_listener_event, client_listener_fd,
                 EV_READ|EV_PERSIST, cc_accept_connection, NULL);
@@ -203,7 +203,7 @@ static void handle_search_response_notification(nc_t *nc, const char *channel,
 
     if(response->id == 0)
     {
-        g_warning("valid search response, but no matching search ID");
+        WARNING("valid search response, but no matching search ID");
     }
     else if(response->id > 0)
     {
@@ -229,7 +229,7 @@ int start_search_listener(int port)
     {
         if(current_port == port)
         {
-            g_info("already listening on port %i", current_port);
+            INFO("already listening on port %i", current_port);
             return 0;
         }
         search_listener_close(global_search_listener);
@@ -312,7 +312,7 @@ static void handle_download_finished_notification(nc_t *nc, const char *channel,
 
     if(access(global_download_directory, F_OK) != 0)
     {
-        g_warning("Download directory doesn't exist, won't move complete file");
+        WARNING("Download directory doesn't exist, won't move complete file");
         return;
     }
 
@@ -329,7 +329,7 @@ static void handle_download_finished_notification(nc_t *nc, const char *channel,
         {
             /* There are more than this file left in the directory, and we
              * don't want to move partial directories. */
-            g_debug("skipping moving partial directory [%s]",
+            DEBUG("skipping moving partial directory [%s]",
                     qd->target_directory);
             return;
         }
@@ -362,7 +362,7 @@ static void handle_download_finished_notification(nc_t *nc, const char *channel,
                 global_download_directory, qd->target_directory);
     }
 
-    g_debug("moving [%s] to download directory [%s]", source, target);
+    DEBUG("moving [%s] to download directory [%s]", source, target);
 
     if(rename(source, target) != 0)
     {
@@ -437,7 +437,7 @@ int main(int argc, char **argv)
             case '?':
             default:
                 /* skip unknown options */
-                g_warning("Unknown option -%c, skipped", c);
+                WARNING("Unknown option -%c, skipped", c);
                 break;
         }
     }
@@ -460,18 +460,18 @@ int main(int argc, char **argv)
     pid_t pid = sp_get_pid(global_working_directory, "sphubd");
     if(pid != -1)
     {
-        g_warning("sphubd already running as pid %u, aborting startup", pid);
+        WARNING("sphubd already running as pid %u, aborting startup", pid);
         return 14;
     }
 
-    g_message("starting up, version = %s, log level = %s",
+    INFO("starting up, version = %s, log level = %s",
             VERSION, debug_level);
 
     /* Put ourselves in the background
      */
     if(!foreground && sp_daemonize() != 0)
     {
-        g_warning("failed to daemonize: %s", strerror(errno));
+        WARNING("failed to daemonize: %s", strerror(errno));
         exit(1);
     }
     sp_write_pid(global_working_directory, "sphubd");
@@ -481,7 +481,7 @@ int main(int argc, char **argv)
     evdns_init();
     /* need two priorities */
     event_priority_init(2);
-    g_message("using libevent version %s, method %s",
+    INFO("using libevent version %s, method %s",
             event_get_version(), event_get_method());
 
     /* install signal handlers
@@ -537,7 +537,7 @@ int main(int argc, char **argv)
     int ui_fd = io_bind_unix_socket(socket_filename);
     if(ui_fd == -1)
         return 1;
-    g_debug("adding local UI listener on file descriptor %d", ui_fd);
+    DEBUG("adding local UI listener on file descriptor %d", ui_fd);
     struct event ui_connect_event;
     event_set(&ui_connect_event, ui_fd, EV_READ|EV_PERSIST,
             ui_accept_connection, NULL);
@@ -548,7 +548,7 @@ int main(int argc, char **argv)
         int ui_tcp_fd = io_bind_tcp_socket(ui_tcp_port, &err);
         if(ui_tcp_fd != -1)
         {
-            g_debug("adding remote UI listener on file descriptor %d", ui_tcp_fd);
+            DEBUG("adding remote UI listener on file descriptor %d", ui_tcp_fd);
             struct event ui_tcp_connect_event;
             event_set(&ui_tcp_connect_event, ui_tcp_fd, EV_READ|EV_PERSIST,
                     ui_accept_connection, NULL);
@@ -556,7 +556,7 @@ int main(int argc, char **argv)
         }
         else
         {
-            g_warning("failed to bind port %i for remote UI connections",
+            WARNING("failed to bind port %i for remote UI connections",
                     ui_tcp_port);
         }
     }
@@ -568,7 +568,7 @@ int main(int argc, char **argv)
     nc_add_download_finished_observer(nc_default(),
             handle_download_finished_notification, NULL);
 
-    g_debug("starting download trigger");
+    DEBUG("starting download trigger");
     struct event download_trigger_event;
     evtimer_set(&download_trigger_event, download_trigger,
             &download_trigger_event);
@@ -579,7 +579,7 @@ int main(int argc, char **argv)
 
     extip_init();
 
-    g_debug("starting main loop");
+    DEBUG("starting main loop");
     event_dispatch();
     g_warning("main loop returned");
     

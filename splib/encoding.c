@@ -264,7 +264,7 @@ char *str_utf8_to_escaped_legacy(const char *string,
     char *utf8_composed_string = g_utf8_normalize(string, -1, G_NORMALIZE_DEFAULT_COMPOSE);
     if(utf8_composed_string == NULL)
     {
-        g_warning("input string not valid UTF-8");
+        WARNING("input string not valid UTF-8");
         return NULL;
     }
 

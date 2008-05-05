@@ -37,7 +37,7 @@
 
 void cc_finish_upload(cc_t *cc)
 {
-    g_info("finished uploading file");
+    INFO("finished uploading file");
     if(cc->local_fd != -1)
     {
         close(cc->local_fd);
@@ -152,7 +152,7 @@ int cc_upload_prepare(cc_t *cc, const char *filename,
         asprintf(&local_filename, "%s/%s", global_working_directory, filename);
         if(share_save(global_share, fl_type) != 0)
         {
-            g_warning("failed to save share");
+            WARNING("failed to save share");
             free(local_filename);
             xerr_set(err, -1, "File Not Available");
             return -1;
@@ -165,14 +165,14 @@ int cc_upload_prepare(cc_t *cc, const char *filename,
 
     if(local_filename == NULL)
     {
-        g_message("%s: couldn't translate path, outside share?", filename);
+        INFO("%s: couldn't translate path, outside share?", filename);
         xerr_set(err, -1, "File Not Available");
         return -1;
     }
 
     if(strcmp(cc->nick, cc->hub->me->nick) == 0)
     {
-        g_warning("attempt to spoof my own nick");
+        WARNING("attempt to spoof my own nick");
         free(local_filename);
         xerr_set(err, -1, "File Not Available");
         return -1;
@@ -181,7 +181,7 @@ int cc_upload_prepare(cc_t *cc, const char *filename,
     struct stat stbuf;
     if(stat(local_filename, &stbuf) != 0)
     {
-        g_message("%s: %s", local_filename, strerror(errno));
+        INFO("%s: %s", local_filename, strerror(errno));
         free(local_filename);
         xerr_set(err, -1, "File Not Available");
         return -1;
@@ -189,7 +189,7 @@ int cc_upload_prepare(cc_t *cc, const char *filename,
 
     if(!S_ISREG(stbuf.st_mode))
     {
-        g_message("%s: not a regular file", local_filename);
+        INFO("%s: not a regular file", local_filename);
         free(local_filename);
         xerr_set(err, -1, "File Not Available");
         return -1;
@@ -199,7 +199,7 @@ int cc_upload_prepare(cc_t *cc, const char *filename,
     {
         if(stbuf.st_size < offset + bytes_to_transfer)
         {
-            g_message("%s: Request for too many bytes: st_size = %llu,"
+            INFO("%s: Request for too many bytes: st_size = %llu,"
                     " offset = %llu, bytes_to_transfer = %llu",
                     local_filename, (uint64_t)stbuf.st_size,
                     offset, bytes_to_transfer);
@@ -213,21 +213,21 @@ int cc_upload_prepare(cc_t *cc, const char *filename,
     {
         cc->bytes_to_transfer = stbuf.st_size - offset;
     }
-    g_debug("set cc->bytes_to_transfer = %llu", cc->bytes_to_transfer);
+    DEBUG("set cc->bytes_to_transfer = %llu", cc->bytes_to_transfer);
 
     cc->local_fd = open(local_filename, O_RDONLY);
     if(cc->local_fd == -1)
     {
-        g_message("failed to open %s: %s", local_filename, strerror(errno));
+        INFO("failed to open %s: %s", local_filename, strerror(errno));
         free(local_filename);
         xerr_set(err, -1, "File Not Available");
         return -1;
     }
-    g_info("opened local file [%s] on fd %d", local_filename, cc->local_fd);
+    INFO("opened local file [%s] on fd %d", local_filename, cc->local_fd);
 
     if(lseek(cc->local_fd, offset, SEEK_SET) == -1)
     {
-        g_warning("lseek failed: %s", strerror(errno));
+        WARNING("lseek failed: %s", strerror(errno));
         free(local_filename);
         xerr_set(err, -1, "File Not Available");
         return -1;

@@ -72,18 +72,18 @@ int share_add(share_t *share, const char *path)
     {
         if(mp->scan_in_progress)
         {
-            g_message("Already scanning [%s], won't re-scan", path);
+            INFO("Already scanning [%s], won't re-scan", path);
             return 0;
         }
 
-        g_message("path already shared, will re-scan: %s", path);
+        INFO("path already shared, will re-scan: %s", path);
         share_remove(share, path, true);
     }
 
     struct stat stbuf;
     if(stat(path, &stbuf) != 0 || !S_ISDIR(stbuf.st_mode))
     {
-        g_warning("unavailable share: [%s]", path);
+        WARNING("unavailable share: [%s]", path);
         return -1;
     }
 
@@ -129,11 +129,11 @@ int share_remove(share_t *share, const char *local_root, bool is_rescan)
     mp = share_lookup_local_root(share, local_root);
     if(mp == NULL)
     {
-        g_warning("no such share: %s", local_root);
+        WARNING("no such share: %s", local_root);
         return -1;
     }
 
-    g_debug("removing share [%s]", local_root);
+    DEBUG("removing share [%s]", local_root);
 
     nc_send_will_remove_share_notification(nc_default(), local_root);
 
@@ -204,20 +204,20 @@ share_mountpoint_t *share_add_mountpoint(share_t *share, const char *local_root)
     {
         if(str_has_prefix(mp->local_root, local_root) && mp->local_root[len] == '/')
         {
-            g_warning("Subdirectory [%s] already shared (trying to add [%s])",
+            WARNING("Subdirectory [%s] already shared (trying to add [%s])",
                     mp->local_root, local_root);
             return NULL;
         }
 
         if(str_has_prefix(local_root, mp->local_root) && local_root[strlen(mp->local_root)] == '/')
         {
-            g_warning("Parent directory [%s] already shared (trying to add [%s])",
+            WARNING("Parent directory [%s] already shared (trying to add [%s])",
                     mp->local_root, local_root);
             return NULL;
         }
     }
 
-    g_debug("Adding mountpoint [%s]", local_root);
+    DEBUG("Adding mountpoint [%s]", local_root);
 
     mp = calloc(1, sizeof(share_mountpoint_t));
     mp->local_root = strdup(local_root);
@@ -457,7 +457,7 @@ char *share_translate_path(share_t *share, const char *virtual_path)
     share_mountpoint_t *mp = share_lookup_mountpoint(share, virtual_root);
     if(mp == 0)
     {
-        g_debug("Warning, can't find mount point for virtual root '%s'",
+        DEBUG("Warning, can't find mount point for virtual root '%s'",
                 virtual_root);
         free(virtual_root);
         return NULL;
@@ -528,7 +528,7 @@ share_file_list_t *share_next_unhashed(share_t *share, unsigned limit)
     return_val_if_fail(share, NULL);
     return_val_if_fail(limit > 0, NULL);
 
-    g_debug("getting batch of unhashed files...");
+    DEBUG("getting batch of unhashed files...");
 
     int olimit = limit;
     
@@ -551,7 +551,7 @@ share_file_list_t *share_next_unhashed(share_t *share, unsigned limit)
         }
     }
 
-    g_debug("Returning %i files", olimit - limit);
+    DEBUG("Returning %i files", olimit - limit);
 
     return unfinished;
 }

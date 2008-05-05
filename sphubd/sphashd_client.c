@@ -79,7 +79,7 @@ static void hs_finish_file(hs_t *hs, const char *filename,
 
     if(file == NULL)
     {
-        g_warning("hashed file not in unfinished list, ignoring");
+        WARNING("hashed file not in unfinished list, ignoring");
     }
     else
     {
@@ -126,7 +126,7 @@ static int hashd_cb_fail_hash(hs_t *hs, const char *filename)
     return_val_if_fail(hs, -1);
     return_val_if_fail(filename, -1);
 
-    g_message("tth failed for file '%s'\n", filename);
+    INFO("tth failed for file '%s'\n", filename);
     hs_finish_file(hs, filename, NULL, NULL, 0.0);
 
     return 0;
@@ -136,7 +136,7 @@ static void hs_close_connection(hs_t *hs)
 {
     return_if_fail(hs);
 
-    g_debug("closing down hash server %p", hs);
+    DEBUG("closing down hash server %p", hs);
     if(hs->bufev)
     {
         bufferevent_free(hs->bufev);
@@ -185,7 +185,7 @@ static void hs_err_event(struct bufferevent *bufev, short why, void *data)
 {
     hs_t *hs = data;
 
-    g_warning("why = 0x%02X", why);
+    WARNING("why = 0x%02X", why);
     hs_close_connection(hs);
 }
 
@@ -220,7 +220,7 @@ static void hs_feed_server(hs_t *hs)
             hs_send_add(hs, file->path);
             ++num_files;
         }
-        g_debug("added %i files", num_files);
+        DEBUG("added %i files", num_files);
 
         if(num_files < HASH_BATCH_SIZE)
         {
@@ -242,7 +242,7 @@ void hs_start_hash_feeder(void)
 
     if(global_hash_server->fd == -1)
     {
-        g_warning("lost connection to sphashd");
+        WARNING("lost connection to sphashd");
         hs_restart_connection(global_hash_server);
         return;
     }
@@ -260,7 +260,7 @@ static void hs_handle_share_scan_finished_notification(
         nc_share_scan_finished_t *data,
         void *user_data)
 {
-    g_debug("finished scanning [%s], starting hash feeder", data->path);
+    DEBUG("finished scanning [%s], starting hash feeder", data->path);
     hs_start_hash_feeder();
 }
 
@@ -301,7 +301,7 @@ int hs_start(void)
     free(sphashd_socket_filename);
     if(fd == -1)
     {
-        g_warning("failed to connect to sphashd");
+        WARNING("failed to connect to sphashd");
         return -1;
     }
 
@@ -312,7 +312,7 @@ int hs_start(void)
     global_hash_server->cb_add_hash = hashd_cb_add_hash;
     global_hash_server->cb_fail_hash = hashd_cb_fail_hash;
 
-    g_debug("adding hashing server on file descriptor %d", fd);
+    DEBUG("adding hashing server on file descriptor %d", fd);
     global_hash_server->bufev = bufferevent_new(fd,
             hs_in_event, hs_out_event, hs_err_event, global_hash_server);
     bufferevent_enable(global_hash_server->bufev, EV_READ | EV_WRITE);

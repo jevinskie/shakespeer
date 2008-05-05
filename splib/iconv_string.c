@@ -59,7 +59,7 @@ char *iconv_string_full(const char *string, ssize_t length,
     cd = iconv_open(dst_encoding, src_encoding);
     if(cd == (iconv_t)-1)
     {
-        g_warning("failed to open iconv: src=[%s], dst=[%s]", src_encoding, dst_encoding);
+        WARNING("failed to open iconv: src=[%s], dst=[%s]", src_encoding, dst_encoding);
         return NULL;
     }
 

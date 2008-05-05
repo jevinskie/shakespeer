@@ -146,13 +146,13 @@ void print_command(const char *command, const char *fmt, ...)
     if(str_has_prefix(command, "$Key"))
     {
         char *hex = data_to_hex(command + 5, strlen(command + 5));
-        g_debug("%s $Key 0x%s|", prestr, hex);
+        DEBUG("%s $Key 0x%s|", prestr, hex);
         free(hex);
     }
     else if(str_has_prefix(command, "$Lock"))
     {
         char *hex = data_to_hex(command + 6, strlen(command + 6));
-        g_debug("%s $Lock %s|", prestr, hex);
+        DEBUG("%s $Lock %s|", prestr, hex);
         free(hex);
     }
     else if(str_has_prefix(command, "add-hash$"))
@@ -162,14 +162,14 @@ void print_command(const char *command, const char *fmt, ...)
 	{
 	    f = strchr(f + 1, '$');
 	    char *l = xstrndup(command, f - command);
-	    g_debug("%s %s", prestr, l);
+	    DEBUG("%s %s", prestr, l);
 	    free(l);
 	}
     }
     else if(str_has_prefix(command, "$MyPass"))
-        g_debug("%s $MyPass ...|", prestr);
+        DEBUG("%s $MyPass ...|", prestr);
     else
-        g_debug("%s %s", prestr, command);
+        DEBUG("%s %s", prestr, command);
 
     free(prestr);
 }
@@ -243,7 +243,7 @@ char *get_working_directory(void)
         if(tmp == NULL) tmp = "/tmp";
 
         basedir = strdup(tmp);
-        g_warning("Couldn't find application support directory,"
+        WARNING("Couldn't find application support directory,"
                   " falling back to temp directory '%s'", basedir);
     }
 
@@ -286,12 +286,12 @@ void set_corelimit(int enabled)
 
         if(setrlimit(RLIMIT_CORE, &rl) == -1)
         {
-            g_warning("setrlimit(RLIMIT_CORE): %s", strerror(errno));
+            WARNING("setrlimit(RLIMIT_CORE): %s", strerror(errno));
         }
     }
     else
     {
-        g_warning("getrlimit(RLIMIT_CORE): %s", strerror(errno));
+        WARNING("getrlimit(RLIMIT_CORE): %s", strerror(errno));
     }
     chdir("/");
     chdir("/tmp");
@@ -301,7 +301,7 @@ int sp_daemonize(void)
 {
     if(daemon(0, 0) != 0)
     {
-        g_warning("failed to daemonize: %s", strerror(errno));
+        WARNING("failed to daemonize: %s", strerror(errno));
         return -1;
     }
     set_corelimit(COREDUMPS_ENABLED); /* enable coredumps */
@@ -311,7 +311,7 @@ int sp_daemonize(void)
     sigemptyset(&sigset);
     sigaddset(&sigset, SIGPIPE);
     if(sigprocmask(SIG_BLOCK, &sigset, NULL) != 0)
-        g_warning("sigprocmask: %s", strerror(errno));
+        WARNING("sigprocmask: %s", strerror(errno));
 
     return 0;
 }
@@ -332,14 +332,14 @@ pid_t sp_get_pid(const char *workdir, const char *appname)
         fclose(fp);
         if(rc != 1)
         {
-            g_warning("failed to read pidfile '%s'", pidfile);
+            WARNING("failed to read pidfile '%s'", pidfile);
             pid = -1;
         }
         else
         {
             if(kill(pid, 0) != 0)
             {
-                g_warning("pid %u from pidfile is invalid, stale pidfile?",
+                WARNING("pid %u from pidfile is invalid, stale pidfile?",
                         pid);
                 pid = -1;
                 sp_remove_pid(workdir, appname);
@@ -361,7 +361,7 @@ int sp_write_pid(const char *workdir, const char *appname)
     FILE *fp = fopen(pidfile, "w");
     if(fp == NULL)
     {
-        g_warning("failed to open pidfile '%s': %s", pidfile, strerror(errno));
+        WARNING("failed to open pidfile '%s': %s", pidfile, strerror(errno));
     }
     else
     {
@@ -585,7 +585,7 @@ int split_host_port(const char *hostport, char **host, int *port)
 
 pid_t sp_exec(const char *path, const char *basedir)
 {
-	g_info("spawning executable: %s -w %s -d %s",
+	INFO("spawning executable: %s -w %s -d %s",
 		path, basedir, sp_log_get_level());
 	pid_t pid = fork();
 	if(pid == 0)
@@ -599,16 +599,16 @@ pid_t sp_exec(const char *path, const char *basedir)
 			"-d", sp_log_get_level(),
 			(char *)NULL);
 
-		g_warning("failed to exec %s: %s", exp_path, strerror(errno));
+		WARNING("failed to exec %s: %s", exp_path, strerror(errno));
 		exit(1);
 	}
 	else if(pid < 0)
 	{
-		g_warning("failed to fork: %s", strerror(errno));
+		WARNING("failed to fork: %s", strerror(errno));
 	}
 	else
 	{
-		g_info("forked, pid = %i", pid);
+		INFO("forked, pid = %i", pid);
 	}
 
 	return pid;

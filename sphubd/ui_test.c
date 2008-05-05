@@ -49,7 +49,7 @@ static GMainLoop *loop = NULL;
 static gboolean test_in_event(GIOChannel *io_channel, GIOCondition condition, gpointer data)
 {
     fail_unless(io_channel);
-    g_message("data available");
+    INFO("data available");
     int rc = TRUE;
     do
     {
@@ -59,7 +59,7 @@ static gboolean test_in_event(GIOChannel *io_channel, GIOCondition condition, gp
             rc = FALSE;
         else
         {
-            g_message("  read command [%s]", line);
+            INFO("  read command [%s]", line);
             str_trim_end_inplace(line, "|");
             rc = ui_dispatch_command(line, "$", TRUE, data) == 0 ? TRUE : FALSE;
             free(line);

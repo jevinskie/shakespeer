@@ -53,7 +53,7 @@ static void ui_send_hub_state(hub_t *hub, void *user_data)
     ui_send_hub_add(ui, hub->address, hub->hubname, hub->me->nick,
             hub->me->description, hub->encoding);
 
-    g_debug("sending nick list on hub '%s' to file descriptor %d",
+    DEBUG("sending nick list on hub '%s' to file descriptor %d",
             hub->address, hub->fd);
     int i;
     for(i = 0; i < HUB_USER_NHASH; i++)
@@ -67,7 +67,7 @@ static void ui_send_hub_state(hub_t *hub, void *user_data)
         }
     }
 
-    g_debug("sending user-commands");
+    DEBUG("sending user-commands");
     hub_user_command_t *uc;
     TAILQ_FOREACH(uc, &hub->user_commands_head, link)
     {
@@ -75,7 +75,7 @@ static void ui_send_hub_state(hub_t *hub, void *user_data)
                 uc->type, uc->context, uc->description, uc->command);
     }
 
-    g_debug("sending hub messages");
+    DEBUG("sending hub messages");
     hub_message_t *hubmsg;
     TAILQ_FOREACH(hubmsg, &hub->messages_head, msg_link)
     {
@@ -93,7 +93,7 @@ static void ui_send_stored_filelists_state(ui_t *ui)
     fsdir = opendir(global_working_directory);
     if(fsdir == 0)
     {
-        g_warning("%s: %s", global_working_directory, strerror(errno));
+        WARNING("%s: %s", global_working_directory, strerror(errno));
         return;
     }
 
@@ -161,7 +161,7 @@ static void ui_send_state(ui_t *ui)
      */
     queue_send_to_ui();
 
-    g_debug("sending hub list to file descriptor %d", ui->fd);
+    DEBUG("sending hub list to file descriptor %d", ui->fd);
     hub_foreach(ui_send_hub_state, ui);
 
     ui_send_port(ui, global_port);
@@ -194,13 +194,13 @@ static void ui_err_event(struct bufferevent *bufev, short why, void *data)
 {
     ui_t *ui = data;
 
-    g_warning("why = 0x%02X", why);
+    WARNING("why = 0x%02X", why);
     ui_close_connection(ui);
 }
 
 void ui_close_connection(ui_t *ui)
 {
-    g_debug("closing down ui %p", ui);
+    DEBUG("closing down ui %p", ui);
 
     if(ui->bufev)
     {
@@ -256,16 +256,16 @@ static int ui_cb_search_common(ui_t *ui, const char *hub_address,
             search_string, size, size_restriction, file_type, id);
     if(sreq == NULL)
     {
-        g_warning("failed to create search request");
+        WARNING("failed to create search request");
         ui_send_status_message(NULL, NULL, "Unable to search for '%s'", search_string);
         return 0;
     }
 
-    g_debug("executing search command: searching for %s", search_string);
+    DEBUG("executing search command: searching for %s", search_string);
 
     if(hub_address == NULL || *hub_address == 0)
     {
-        g_debug("adding search id %i", sreq->id);
+        DEBUG("adding search id %i", sreq->id);
         search_listener_add_request(global_search_listener, sreq);
         hub_foreach((void (*)(hub_t *, void *))hub_search, (void *)sreq);
     }
@@ -274,13 +274,13 @@ static int ui_cb_search_common(ui_t *ui, const char *hub_address,
         hub_t *hub = hub_find_by_address(hub_address);
         if(hub)
         {
-            g_debug("adding search id %i", sreq->id);
+            DEBUG("adding search id %i", sreq->id);
             search_listener_add_request(global_search_listener, sreq);
 
             hub_search(hub, sreq);
         }
         else
-            g_warning("unable to execute search: hub not found");
+            WARNING("unable to execute search: hub not found");
     }
 
     return 0;
@@ -311,7 +311,7 @@ static int ui_cb_connect(ui_t *ui, const char *hub_address, const char *nick,
 
     if(global_port == -1 && passive == 0)
     {
-        g_warning("refused to connect to hub, set-port not yet issued");
+        WARNING("refused to connect to hub, set-port not yet issued");
         ui_send_status_message(ui, NULL, "No port set");
         return 0;
     }
@@ -338,12 +338,12 @@ static int ui_cb_connect(ui_t *ui, const char *hub_address, const char *nick,
 
 static int ui_cb_disconnect(ui_t *ui, const char *hub_address)
 {
-    g_info("disconnecting from hub %s", hub_address);
+    INFO("disconnecting from hub %s", hub_address);
 
     hub_t *hub = hub_find_by_address(hub_address);
     if(hub)
     {
-        g_debug("found hub with name '%s'", hub->hubname);
+        DEBUG("found hub with name '%s'", hub->hubname);
         hub->expected_disconnect = true;
         hub_close_connection(hub);
     }
@@ -386,7 +386,7 @@ static int ui_cb_download_file(ui_t *ui, const char *hub_address,
     hub_t *hub = hub_find_by_address(hub_address);
     if(hub == 0)
     {
-        g_warning("failed to find hub by address '%s'", hub_address);
+        WARNING("failed to find hub by address '%s'", hub_address);
         hub = hub_find_by_nick(nick);
     }
 
@@ -409,7 +409,7 @@ static int ui_cb_download_directory(ui_t *ui, const char *hub_address,
     hub_t *hub = hub_find_by_address(hub_address);
     if(hub == 0)
     {
-        g_warning("failed to find hub by address '%s'", hub_address);
+        WARNING("failed to find hub by address '%s'", hub_address);
         hub = hub_find_by_nick(nick);
     }
 
@@ -436,7 +436,7 @@ static int ui_cb_download_filelist(ui_t *ui, const char *hub_address,
 
     if(hub == 0)
     {
-        g_warning("failed to find hub by address '%s'", hub_address);
+        WARNING("failed to find hub by address '%s'", hub_address);
         hub = hub_find_by_nick(nick);
     }
 
@@ -579,7 +579,7 @@ static int ui_cb_set_port(ui_t *ui, int port)
 {
     if(port <= 0)
     {
-        g_warning("invalid port %i, ignored", port);
+        WARNING("invalid port %i, ignored", port);
         ui_send_status_message(ui, NULL, "Invalid port %i", port);
     }
     else
@@ -645,7 +645,7 @@ static int ui_cb_set_password(ui_t *ui, const char *hub_address, const char *pas
 {
     hub_t *hub = hub_find_by_address(hub_address);
     if(hub == 0)
-        g_warning("hub not found: '%s'", hub_address);
+        WARNING("hub not found: '%s'", hub_address);
     else
     {
         hub_set_password(hub, password);
@@ -691,7 +691,7 @@ static int ui_cb_raw_command(ui_t *ui, const char *hub_address, const char *comm
     hub_t *hub = hub_find_by_address(hub_address);
     if(hub == 0)
     {
-        g_warning("unknown hub [%s]", hub_address);
+        WARNING("unknown hub [%s]", hub_address);
     }
     else
     {
@@ -701,7 +701,7 @@ static int ui_cb_raw_command(ui_t *ui, const char *hub_address, const char *comm
             str_trim_end_inplace(command_unescaped, NULL);
             if(str_has_suffix(command_unescaped, "|") == 0)
             {
-                g_warning("raw command lacks terminating '|', ignoring");
+                WARNING("raw command lacks terminating '|', ignoring");
             }
             else
             {
@@ -836,7 +836,7 @@ void ui_accept_connection(int fd, short condition, void *data)
     ui->cb_set_incomplete_directory = ui_cb_set_incomplete_directory;
 
     /* add the channel to the list of connected uis.  */
-    g_debug("adding new ui on file descriptor %d", afd);
+    DEBUG("adding new ui on file descriptor %d", afd);
 
     /* add the channel to the event loop */
     ui->bufev = bufferevent_new(ui->fd,

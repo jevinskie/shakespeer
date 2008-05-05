@@ -99,13 +99,13 @@ static void io_connect_event(int fd, short condition, void *data)
     getsockopt(fd, SOL_SOCKET, SO_ERROR, &error, &len);
     if(error == 0)
     {
-        g_debug("got connection event on file descriptor %d", fd);
+        DEBUG("got connection event on file descriptor %d", fd);
 
         io_set_blocking(fd, 1);
     }
     else
     {
-        g_info("error in connection event on fd %d: %s", fd, strerror(error));
+        INFO("error in connection event on fd %d: %s", fd, strerror(error));
     }
 
     acd->event_func(fd, error, acd->data);
@@ -123,12 +123,12 @@ int io_connect_async(struct sockaddr_in *remote_addr,
     fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(fd == -1)
     {
-        g_warning("%s", strerror(errno));
+        WARNING("%s", strerror(errno));
         xerr_set(err, -1, "Can't create socket: %s", strerror(errno));
         return -1;
     }
 
-    g_info("connecting to %s:%d...",
+    INFO("connecting to %s:%d...",
             inet_ntoa(remote_addr->sin_addr), ntohs(remote_addr->sin_port));
 
     /* set socket non-blocking */
@@ -143,12 +143,12 @@ int io_connect_async(struct sockaddr_in *remote_addr,
             sizeof(struct sockaddr_in)); 
     if(rc != 0 && errno != EINPROGRESS)
     {
-        g_debug("rc = %d, errno = %d, strerror = %s", rc, errno, strerror(errno));
+        DEBUG("rc = %d, errno = %d, strerror = %s", rc, errno, strerror(errno));
 
         xerr_set(err, -1, "Can't connect to %s:%d: %s",
                 inet_ntoa(remote_addr->sin_addr), ntohs(remote_addr->sin_port),
                 strerror(errno));
-        g_warning("%s", (*err)->message);
+        WARNING("%s", (*err)->message);
         return -1;
     }
 
@@ -169,13 +169,13 @@ int io_connect_tcp(struct sockaddr_in *remote_addr, xerr_t **err)
     fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(fd == -1)
     {
-        g_warning("%s", strerror(errno));
+        WARNING("%s", strerror(errno));
         xerr_set(err, -1, "Can't create socket: %s",
                 strerror(errno));
         return -1;
     }
 
-    g_info("connecting to %s:%d...",
+    INFO("connecting to %s:%d...",
             inet_ntoa(remote_addr->sin_addr), ntohs(remote_addr->sin_port));
 
     int rc = connect(fd, (struct sockaddr *)remote_addr,
@@ -185,7 +185,7 @@ int io_connect_tcp(struct sockaddr_in *remote_addr, xerr_t **err)
         xerr_set(err, -1, "Can't connect to %s:%d: %s",
                 inet_ntoa(remote_addr->sin_addr), ntohs(remote_addr->sin_port),
                 strerror(errno));
-        g_warning("can't connect to %s:%u: %s",
+        WARNING("can't connect to %s:%u: %s",
                 inet_ntoa(remote_addr->sin_addr),
                 ntohs(remote_addr->sin_port), strerror(errno));
         return -1;
@@ -200,13 +200,13 @@ int io_bind_unix_socket(const char *filename)
     int fd = socket(PF_UNIX, SOCK_STREAM, 0);
     if(fd == -1)
     {
-        g_warning("%s", strerror(errno));
+        WARNING("%s", strerror(errno));
         return -1;
     }
 
     if(unlink(filename) != 0 && errno != ENOENT)
     {
-        g_warning("%s: %s", filename, strerror(errno));
+        WARNING("%s: %s", filename, strerror(errno));
         close(fd);
         return -1;
     }
@@ -214,14 +214,14 @@ int io_bind_unix_socket(const char *filename)
     strlcpy(addr.sun_path, filename, sizeof(addr.sun_path));
     if(bind(fd, (struct sockaddr *)&addr, sizeof(struct sockaddr_un)) != 0)
     {
-        g_warning("%s", strerror(errno));
+        WARNING("%s", strerror(errno));
         close(fd);
         return -1;
     }
 
     if(listen(fd, 17) != 0)
     {
-        g_warning("%s", strerror(errno));
+        WARNING("%s", strerror(errno));
         close(fd);
         return -1;
     }
@@ -248,10 +248,10 @@ int io_bind_tcp_socket(int port, xerr_t **err)
     /* enable local address reuse */
     if(setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1)
     {
-        g_warning("unable to enable local address reuse (ignored)");
+        WARNING("unable to enable local address reuse (ignored)");
     }
 
-    g_info("Binding TCP port %u", port);
+    INFO("Binding TCP port %u", port);
     if(bind(fd, (struct sockaddr *)&local_addr, sizeof(struct sockaddr_in)) != 0)
     {
         xerr_set(err, -1, "%s", strerror(errno));
@@ -278,11 +278,11 @@ int io_accept_connection_addr(int fd, char **ip_address)
     int afd = accept(fd, (struct sockaddr *)&addr, &addrlen);
     if(afd == -1)
     {
-        g_warning("accept failed: %s", strerror(errno));
+        WARNING("accept failed: %s", strerror(errno));
     }
     else
     {
-        g_info("accepted connection from %s:%d",
+        INFO("accepted connection from %s:%d",
                 inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
         if(ip_address)
@@ -308,15 +308,15 @@ int io_connect_unix(const char *filename)
         perror("socket");
         return -1;
     }
-    g_info("connecting to socket '%s'...", filename);
+    INFO("connecting to socket '%s'...", filename);
     addr.sun_family = AF_UNIX;
     strncpy(addr.sun_path, filename, sizeof(addr.sun_path));
     if(connect(fd, (struct sockaddr *)&addr, sizeof(struct sockaddr_un)) != 0)
     {
         if(errno == ENOENT)
-            g_info("%s: %s", filename, strerror(errno));
+            INFO("%s: %s", filename, strerror(errno));
         else
-            g_message("%s: %s", filename, strerror(errno));
+            INFO("%s: %s", filename, strerror(errno));
         close(fd);
         return -1;
     }
@@ -347,7 +347,7 @@ int io_exec_and_connect_unix(const char *filename, const char *program_path,
 
     if(fd == -1)
     {
-        g_warning("Failed to connect to '%s' for program '%s'",
+        WARNING("Failed to connect to '%s' for program '%s'",
                 filename, program_path);
     }
 
@@ -364,7 +364,7 @@ int io_set_blocking(int fd, int flag)
 
     if(fcntl(fd, F_SETFL, flags) == -1)
     {
-        g_warning("failed to set channel blocking mode: %s", strerror(errno));
+        WARNING("failed to set channel blocking mode: %s", strerror(errno));
         return -1;
     }
 
@@ -394,7 +394,7 @@ char *io_evbuffer_readline(struct evbuffer *buffer)
 
     if((line = malloc(i - n + 1)) == NULL)
     {
-        g_warning("%s: out of memory\n", __func__);
+        WARNING("%s: out of memory\n", __func__);
         evbuffer_drain(buffer, i);
         return (NULL);
     }

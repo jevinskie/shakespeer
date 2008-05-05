@@ -254,12 +254,12 @@ static char *xml_read_chunk(xml_ctx_t *ctx, size_t *chunk_size_ret)
                bool ok = g_utf8_validate(start, *chunk_size_ret, &end);
                if(!ok)
                {
-                   g_warning("invalid UTF-8 at offset %u [%s]", end - start, end);
+                   WARNING("invalid UTF-8 at offset %u [%s]", end - start, end);
                    char *next_valid = g_utf8_find_next_char(end, start + *chunk_size_ret);
                    if(next_valid == NULL)
                    {
                        *chunk_size_ret = end - start;
-                       g_warning("truncating input at offset %u", *chunk_size_ret);
+                       WARNING("truncating input at offset %u", *chunk_size_ret);
                        break;
                    }
                    else
@@ -296,7 +296,7 @@ int xml_parse_chunk(xml_ctx_t *ctx)
     if(XML_Parse(ctx->parser, chunk, chunk_size, chunk_size == 0)
             == XML_STATUS_ERROR)
     {
-        g_warning("Parse error %i at line %i, col %i, offset %u: %s",
+        WARNING("Parse error %i at line %i, col %i, offset %u: %s",
                 (int)XML_GetErrorCode(ctx->parser),
                 (int)XML_GetCurrentLineNumber(ctx->parser),
                 (int)XML_GetCurrentColumnNumber(ctx->parser),

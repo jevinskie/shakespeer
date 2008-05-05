@@ -62,15 +62,15 @@ cc_t *cc_new(int fd, hub_t *hub)
 
 void cc_free(cc_t *cc)
 {
-    g_debug("cc = %p", cc);
+    DEBUG("cc = %p", cc);
     if(cc)
     {
         if(cc->fd != -1)
         {
-            g_debug("closing file descriptor %d", cc->fd);
+            DEBUG("closing file descriptor %d", cc->fd);
             if(close(cc->fd) != 0)
             {
-                g_message("close(): %s", strerror(errno));
+                INFO("close(): %s", strerror(errno));
             }
         }
         else if(cc->leafdata)
@@ -111,7 +111,7 @@ void cc_free(cc_t *cc)
         }
         if(cc->current_queue)
         {
-            g_warning("cc->current_queue still allocated (state inconsistency?)");
+            WARNING("cc->current_queue still allocated (state inconsistency?)");
             queue_free(cc->current_queue);
         }
         free(cc->local_filename);
@@ -129,7 +129,7 @@ void cc_cancel_transfer(const char *local_filename)
     }
     else
     {
-        g_debug("didn't find any connection for '%s'", local_filename);
+        DEBUG("didn't find any connection for '%s'", local_filename);
     }
 }
 
@@ -138,7 +138,7 @@ void cc_cancel_directory_transfers(const char *target_directory)
     while(*target_directory == '/')
         ++target_directory;
 
-    g_debug("cancelling transfers for directory [%s]", target_directory);
+    DEBUG("cancelling transfers for directory [%s]", target_directory);
 
     cc_t *cc = NULL;
     do
@@ -146,7 +146,7 @@ void cc_cancel_directory_transfers(const char *target_directory)
         cc = cc_find_by_target_directory(target_directory);
         if(cc)
         {
-            g_debug("cancelling directory transfer with nick [%s]", cc->nick);
+            DEBUG("cancelling directory transfer with nick [%s]", cc->nick);
             if(cc->direction == CC_DIR_DOWNLOAD)
             {
                 return_if_fail(cc->current_queue);
@@ -215,7 +215,7 @@ int cc_send_command_as_is(cc_t *cc, const char *fmt, ...)
 
 void cc_close_connection(cc_t *cc)
 {
-    g_debug("closing down cc on fd %i", cc->fd);
+    DEBUG("closing down cc on fd %i", cc->fd);
 
     if(cc->bufev)
     {
@@ -238,7 +238,7 @@ void cc_close_connection(cc_t *cc)
     }
     /* FIXME: must clean up any allocated slots if transfer broken */
 
-    g_info("removing client connection with nick [%s]",
+    INFO("removing client connection with nick [%s]",
             cc->nick ? cc->nick : "unknown");
 
     if(cc->nick && cc->state >= CC_STATE_READY)
@@ -299,7 +299,7 @@ void cc_in_event(struct bufferevent *bufev, void *data)
         print_command(cmd, "<- (fd %d)", cc->fd);
         if(strcmp(cmd, "ping") == 0)
         {
-            g_debug("received ping, sending pong");
+            DEBUG("received ping, sending pong");
             cc_send_command_as_is(cc, "pong|");
             free(cmd);
             return;
@@ -309,7 +309,7 @@ void cc_in_event(struct bufferevent *bufev, void *data)
         free(cmd);
         if(rc < 0)
         {
-            g_warning("command [%s] returned -1, closing connection on fd %i",
+            WARNING("command [%s] returned -1, closing connection on fd %i",
                     cmd, cc->fd);
             cc_close_connection(cc);
             break;
@@ -317,7 +317,7 @@ void cc_in_event(struct bufferevent *bufev, void *data)
 
         if(fcntl(cc->fd, F_GETFL, 0) < 0 && errno == EBADF)
         {
-            g_warning("fd %i closed, breaking loop", cc->fd);
+            WARNING("fd %i closed, breaking loop", cc->fd);
             break;
         }
         
@@ -353,7 +353,7 @@ void cc_out_event(struct bufferevent *bufev, void *data)
             ssize_t bytes_read = cc_upload_read(cc, buf, nbytes);
             if(bytes_read == -1)
             {
-                g_warning("read failed: %s", strerror(errno));
+                WARNING("read failed: %s", strerror(errno));
                 cc_close_connection(cc);
             }
             else
@@ -369,7 +369,7 @@ static void cc_err_event(struct bufferevent *bufev, short why, void *data)
 {
     cc_t *cc = data;
 
-    g_warning("why = 0x%02X", why);
+    WARNING("why = 0x%02X", why);
     cc_close_connection(cc);
 }
 
@@ -378,7 +378,7 @@ static void cc_expire_handshake_timer_event_func(int fd, short condition, void *
     cc_t *cc = data;
 
     return_if_fail(cc);
-    g_warning("client handshake timeout exceeded on fd %i (nick %s)", cc->fd, cc->nick ? cc->nick : "unknown");
+    WARNING("client handshake timeout exceeded on fd %i (nick %s)", cc->fd, cc->nick ? cc->nick : "unknown");
     cc_close_connection(cc);
 }
 
@@ -396,7 +396,7 @@ static void cc_add_channel(int fd, bool incoming_connection, hub_t *hub,
 
     io_set_blocking(fd, 0);
 
-    g_debug("adding file descriptor %d to client connections", fd);
+    DEBUG("adding file descriptor %d to client connections", fd);
     cc->bufev = bufferevent_new(fd, cc_in_event, cc_out_event, cc_err_event, cc);
     bufferevent_enable(cc->bufev, EV_READ | EV_WRITE);
 
@@ -470,7 +470,7 @@ cc_t *cc_find_by_target_directory(const char *target_directory)
     else
         asprintf(&x, "%s/", target_directory);
 
-    g_debug("looking for transfers with prefix [%s]", x);
+    DEBUG("looking for transfers with prefix [%s]", x);
 
     cc_t *cc = NULL;
     LIST_FOREACH(cc, &cc_list_head, next)
@@ -510,7 +510,7 @@ void cc_trigger_download(void)
         /* disconnect from clients after inactivity */
         if(cc->state == CC_STATE_READY && now - cc->last_activity > 180)
         {
-            g_info("disconnecting from nick %s after 180 seconds of inactivity",
+            INFO("disconnecting from nick %s after 180 seconds of inactivity",
                     cc->nick);
             cc_close_connection(cc);
         }
@@ -585,7 +585,7 @@ void cc_set_transfer_stats_interval(int interval)
 
     if(interval != -1)
     {
-        g_debug("starting transfer-stats sender with interval %i seconds", interval);
+        DEBUG("starting transfer-stats sender with interval %i seconds", interval);
         last_interval = interval;
     }
     else
@@ -630,7 +630,7 @@ void cc_accept_connection(int fd, short condition, void *data)
     int rc = getpeername(afd, (struct sockaddr *)&addr, &addrlen);
     if(rc != 0)
     {
-        g_warning("getpeername: %s (ignored)", strerror(errno));
+        WARNING("getpeername: %s (ignored)", strerror(errno));
     }
 
     cc_add_channel(afd, true, NULL, &addr);
@@ -646,7 +646,7 @@ static void cc_connect_event(int fd, int error, void *user_data)
     }
     else
     {
-        g_warning("connection failed: %s", strerror(error));
+        WARNING("connection failed: %s", strerror(error));
     }
 }
 
@@ -657,14 +657,14 @@ int cc_connect(const char *address, hub_t *hub)
     struct sockaddr_in *cc_addr = io_lookup(address, &err);
     if(cc_addr == NULL)
     {
-        g_warning("failed to lookup '%s': %s", address, xerr_msg(err));
+        WARNING("failed to lookup '%s': %s", address, xerr_msg(err));
         xerr_free(err);
         return -1;
     }
 
     if(io_connect_async(cc_addr, cc_connect_event, hub, &err) != 0)
     {
-        g_warning("failed to connect to client '%s': %s",
+        WARNING("failed to connect to client '%s': %s",
                 address, xerr_msg(err));
         xerr_free(err);
         rc = -1;

@@ -129,7 +129,7 @@ fl_dir_t *fl_parse_dclst(const char *filename)
     FILE *fp = fopen(filename, "r");
     if(fp == NULL)
     {
-        g_message("failed to open %s: %s", filename, strerror(errno));
+        INFO("failed to open %s: %s", filename, strerror(errno));
         return NULL;
     }
     char *saved = 0;

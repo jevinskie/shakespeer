@@ -104,7 +104,7 @@ int share_search(share_t *share, const share_search_t *search,
                 if(bloom_check_filename(share->bloom,
                             search->words->argv[i]) != 0)
                 {
-                    g_debug("[%s] failed bloom check, skipping search",
+                    DEBUG("[%s] failed bloom check, skipping search",
                             search->words->argv[i]);
                     return 0;
                 }
@@ -184,7 +184,7 @@ share_search_t *share_search_parse_nmdc(const char *command,
         s->port = strtoul(port_or_user, NULL, 10);
         if(s->port <= 0)
         {
-            g_message("Invalid port number '%s' in search request (ignored)",
+            INFO("Invalid port number '%s' in search request (ignored)",
                     port_or_user);
             free(port_or_user);
             goto error;
@@ -243,7 +243,7 @@ share_search_t *share_search_parse_nmdc(const char *command,
                 encoding);
         if(search_string_utf8 == NULL)
         {
-            g_message("Invalid search string encoding.");
+            INFO("Invalid search string encoding.");
             goto error;
         }
 
@@ -269,7 +269,7 @@ error:
     free(s->nick);
     free(s);
 
-    g_debug("Invalid search request: [%s]", original_command);
+    DEBUG("Invalid search request: [%s]", original_command);
 
     return NULL;
 }

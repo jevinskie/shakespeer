@@ -75,7 +75,7 @@ static int hub_search_match_callback(const share_search_t *search,
 
     char *virtual_path = share_local_to_virtual_path(global_share, file->path);
 
-    g_debug("sending SR for %s", virtual_path);
+    DEBUG("sending SR for %s", virtual_path);
 
     if(file->type == SHARE_TYPE_DIRECTORY)
     {
@@ -123,7 +123,7 @@ static int hub_search_match_callback(const share_search_t *search,
 
             if(hsd->dest.active.fd == -1)
             {
-                g_warning("socket(): %s", strerror(errno));
+                WARNING("socket(): %s", strerror(errno));
                 free(response);
                 return -1;
             }
@@ -148,7 +148,7 @@ static int hub_search_match_callback(const share_search_t *search,
 
         if(rc == -1)
         {
-            g_warning("unable to send UDP response: %s", strerror(errno));
+            WARNING("unable to send UDP response: %s", strerror(errno));
             free(response);
             return -1;
         }
@@ -309,13 +309,13 @@ static int hub_cmd_RevConnectToMe(void *opaque_param, int argc, char **argv)
 {
     hub_t *hub = (hub_t *)opaque_param;
 
-    g_debug("got reverse connection request from %s", argv[0]);
+    DEBUG("got reverse connection request from %s", argv[0]);
 
     return_val_if_fail(hub, -1);
 
     if(strcmp(argv[1], hub->me->nick) != 0)
     {
-        g_warning("strange $RevConnectToMe request: I'm not '%s'", argv[1]);
+        WARNING("strange $RevConnectToMe request: I'm not '%s'", argv[1]);
         return 0;
     }
 
@@ -334,12 +334,12 @@ static int hub_cmd_RevConnectToMe(void *opaque_param, int argc, char **argv)
              */
             if(!user->passive)
             {
-                g_debug("bouncing back a RevConnectToMe to requesting user [%s]",
+                DEBUG("bouncing back a RevConnectToMe to requesting user [%s]",
                         argv[0]);
                 hub_send_command(hub, "$RevConnectToMe %s %s|",
                         hub->me->nick, argv[0]);
             }
-            g_message("ignoring $RevConnectToMe to user %s: we're also passive",
+            INFO("ignoring $RevConnectToMe to user %s: we're also passive",
                     argv[0]);
         }
 
@@ -348,7 +348,7 @@ static int hub_cmd_RevConnectToMe(void *opaque_param, int argc, char **argv)
     }
     else
     {
-        g_message("Got RevConnectToMe from non-logged-in user '%s' (ignored)",
+        INFO("Got RevConnectToMe from non-logged-in user '%s' (ignored)",
                 argv[0]);
     }
 
@@ -446,7 +446,7 @@ static int hub_cmd_Search(void *data, int argc, char **argv)
 
     if(hub_search_from_self(hub, s))
     {
-        g_info("Ignoring my own search request");
+        INFO("Ignoring my own search request");
         share_search_free(s);
 
         return 0;
@@ -464,7 +464,7 @@ static int hub_cmd_Search(void *data, int argc, char **argv)
         memset(&hsd.dest.active.addr, 0, sizeof(struct sockaddr_in));
         if(inet_aton(s->host, &hsd.dest.active.addr.sin_addr) == 0)
         {
-            g_warning("invalid IPv4 address in search request: '%s'"
+            WARNING("invalid IPv4 address in search request: '%s'"
                     " (skipping search request)", s->host);
             share_search_free(s);
 
@@ -531,12 +531,12 @@ static int hub_cmd_OpList(void *data, int argc, char **argv)
         if(g_utf8_collate(ops->argv[i], hub->me->nick) == 0)
         {
             hub->me->is_operator = true;
-            g_info("I am an operator");
+            INFO("I am an operator");
             if(!hub->sent_user_commands && !hub->sent_default_user_commands)
                 hub_send_nmdc_default_user_commands(hub);
         }
         else
-            g_info("User '%s' is an operator", ops->argv[i]);
+            INFO("User '%s' is an operator", ops->argv[i]);
 
         user_t *user = hub_lookup_user(hub, ops->argv[i]);
         int update_op_status = 0;
@@ -576,7 +576,7 @@ static int hub_cmd_HubName(void *data, int argc, char **argv)
 
     return_val_if_fail(argv[0] && argv[0][0], 0);
 
-    g_info("new hubname: %s", argv[0]);
+    INFO("new hubname: %s", argv[0]);
     ui_send_hubname(NULL, hub->address, argv[0]);
 
     free(hub->hubname);
@@ -602,7 +602,7 @@ static int hub_cmd_UserIP(void *data, int argc, char **argv)
             struct in_addr tmp;
             if(inet_aton(b->argv[1], &tmp) == 0)
             {
-                g_warning("Public IP address received from hub is invalid (%s),"
+                WARNING("Public IP address received from hub is invalid (%s),"
                         " ignored", b->argv[1]);
             }
             else
@@ -612,7 +612,7 @@ static int hub_cmd_UserIP(void *data, int argc, char **argv)
                  * know best.
                  */
 
-                g_info("Hub reported my active IP as %s", b->argv[1]);
+                INFO("Hub reported my active IP as %s", b->argv[1]);
                 user_set_ip(hub->me, b->argv[1]);
             }
         }
@@ -646,7 +646,7 @@ static int hub_cmd_Supports(void *data, int argc, char **argv)
         else if(strcmp(argv[i], "UserIP2") == 0)
             hub->has_userip = true;
         else
-            g_info("Hub supports unknown feature %s", argv[i]);
+            INFO("Hub supports unknown feature %s", argv[i]);
     }
 
 #if 0   /* FIXME: shouldn't we enable this? */
@@ -681,7 +681,7 @@ static int hub_cmd_GetPass(void *data, int argc, char **argv)
 static int hub_cmd_LogedIn(void *data, int argc, char **argv)
 {
     hub_set_need_myinfo_update(true);
-    g_debug("Ok, seems we're logged in...");
+    DEBUG("Ok, seems we're logged in...");
     return 0;
 }
 
@@ -689,7 +689,7 @@ static int hub_cmd_BadPass(void *data, int argc, char **argv)
 {
     hub_t *hub = data;
 
-    g_info("Wrong password");
+    INFO("Wrong password");
     hub->expected_disconnect = true;
     hub_close_connection(hub);
     return 0;
@@ -711,7 +711,7 @@ static int hub_cmd_Lock(hub_t *hub, const char *args)
 {
     if(hub->got_lock)
     {
-        g_debug("Already got a lock, ignoring");
+        DEBUG("Already got a lock, ignoring");
         return 0;
     }
 
@@ -753,7 +753,7 @@ static int hub_cmd_Usercommand(void *data, int argc, char **argv)
 
     if((context & 0x0F) == 0)
     {
-        g_message("unrecognized user-command context %i (ignored)", type);
+        INFO("unrecognized user-command context %i (ignored)", type);
     }
     else
     {
@@ -800,14 +800,14 @@ static int hub_cmd_Usercommand(void *data, int argc, char **argv)
             }
             else
             {
-                g_message("malformed user-command [%s] (ignored), argc = %i",
+                INFO("malformed user-command [%s] (ignored), argc = %i",
                         argv[0], details ? details->argc : -1);
             }
             arg_free(details);
         }
         else
         {
-            g_message("unrecognized user-command type %i (ignored)", type);
+            INFO("unrecognized user-command type %i (ignored)", type);
         }
     }
 
@@ -858,7 +858,7 @@ int hub_dispatch_command(hub_t *hub, char *cmdstr)
         char *cmdstr_utf8 = str_legacy_to_utf8_lossy(cmdstr, hub->encoding);
         if(cmdstr_utf8 == NULL)
         {
-            g_warning("command [%s] failed to convert to (lossy) UTF-8", cmdstr);
+            WARNING("command [%s] failed to convert to (lossy) UTF-8", cmdstr);
             return 0;
         }
 
@@ -933,7 +933,7 @@ static void hub_err_event(struct bufferevent *bufev, short why, void *data)
 {
     hub_t *hub = data;
 
-    g_warning("why = 0x%02X", why);
+    WARNING("why = 0x%02X", why);
     hub_close_connection(hub);
 }
 
@@ -943,7 +943,7 @@ void hub_attach_io_channel(hub_t *hub, int fd)
 
     hub->fd = fd;
 
-    g_debug("adding hub on fd %d to main loop", fd);
+    DEBUG("adding hub on fd %d to main loop", fd);
     hub->bufev = bufferevent_new(fd, hub_in_event, hub_out_event, hub_err_event, hub);
     bufferevent_enable(hub->bufev, EV_READ | EV_WRITE);
 }

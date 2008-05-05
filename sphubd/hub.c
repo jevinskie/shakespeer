@@ -54,7 +54,7 @@ static void hub_send_keep_alive(int fd, short condition, void *data)
     hub_t *hub = data;
     return_if_fail(hub);
 
-    g_debug("sending keep-alive to hub '%s'", hub->address);
+    DEBUG("sending keep-alive to hub '%s'", hub->address);
     if(hub_send_string(hub, "|") != 0)
     {
         hub_close_connection(hub);
@@ -136,7 +136,7 @@ void hub_send_myinfo(hub_t *hub)
 
     if(!hub->logged_in)
     {
-        g_info("ignored sending myinfo as we're not logged in yet");
+        INFO("ignored sending myinfo as we're not logged in yet");
         return;
     }
 
@@ -182,11 +182,11 @@ void hub_all_send_myinfo(void)
 
 static hub_t *hub_new_from_hcd(hub_connect_data_t *hcd)
 {
-    g_debug("creating new hub with nick %s...", hcd->nick);
+    DEBUG("creating new hub with nick %s...", hcd->nick);
     hub_t *hub = hub_new();
     if(hub == NULL)
     {
-        g_warning("failed to create hub...");
+        WARNING("failed to create hub...");
         ui_send_status_message(NULL, NULL, "failed to create hub...");
         return NULL;
     }
@@ -258,7 +258,7 @@ static void hub_connect_event(int fd, int error, void *user_data)
             if(hub->reconnect_attempt > 0)
             {
                 /* yes, remove the old one and create a new */
-                g_debug("replacing reconnection hub");
+                DEBUG("replacing reconnection hub");
                 hub_close_connection(hub);
                 hub = hub_new_from_hcd(hcd);
             }
@@ -287,7 +287,7 @@ static void hub_connect_event(int fd, int error, void *user_data)
     else
     {
         /* must be an error */
-        g_warning("connection failed: %s", strerror(error));
+        WARNING("connection failed: %s", strerror(error));
         ui_send_status_message(NULL, hcd->address,
                 "Failed to connect to hub %s: %s",
                 hcd->address, strerror(error));
@@ -298,7 +298,7 @@ static void hub_connect_event(int fd, int error, void *user_data)
         hub_t *hub = hub_find_by_address(hcd->address);
         if(hub && hub->reconnect_attempt > 0)
         {
-            g_debug("found reconnection hub with address [%s]", hub->address);
+            DEBUG("found reconnection hub with address [%s]", hub->address);
             hub_schedule_reconnect_event(hub);
         }
     }
@@ -319,7 +319,7 @@ static void hub_connect_async(hub_connect_data_t *hcd, struct in_addr *addr)
     int rc = io_connect_async(&saddr, hub_connect_event, hcd, &err);
     if(rc != 0)
     {
-        g_warning("Failed to connect to hub '%s': %s",
+        WARNING("Failed to connect to hub '%s': %s",
                 hcd->address, xerr_msg(err));
         ui_send_status_message(NULL, hcd->address,
                 "Failed to connect to hub '%s': %s",
@@ -345,7 +345,7 @@ static void hub_lookup_event(int result, char type, int count, int ttl,
     else
     {
         const char *errmsg = evdns_err_to_string(result);
-        g_warning("Failed to lookup '%s': %s", hcd->address, errmsg);
+        WARNING("Failed to lookup '%s': %s", hcd->address, errmsg);
         ui_send_status_message(NULL, hcd->address,
                 "Failed to lookup '%s': %s", hcd->address, errmsg);
     }
@@ -399,7 +399,7 @@ int hub_connect(const char *hubname, const char *nick, const char *email,
         free(host);
         if(rc != DNS_ERR_NONE)
         {
-            g_warning("Failed to lookup '%s': %s", hubname, evdns_err_to_string(rc));
+            WARNING("Failed to lookup '%s': %s", hubname, evdns_err_to_string(rc));
             ui_send_status_message(NULL, hubname, "Failed to lookup '%s': %s",
                     hubname, evdns_err_to_string(rc));
             hcd_free(hcd);
@@ -447,7 +447,7 @@ void hub_search(hub_t *hub, search_request_t *request)
     {
         if(request->words == NULL)
         {
-            g_warning("no search words?");
+            WARNING("no search words?");
             return;
         }
         words_joined = arg_join(request->words, 0, -1, "$");
@@ -498,7 +498,7 @@ static void hub_schedule_reconnect_event(hub_t *hub)
 
     if(event_pending(&hub->reconnect_event, EV_TIMEOUT, NULL))
     {
-        g_debug("ignoring manual reconnection");
+        DEBUG("ignoring manual reconnection");
         return;
     }
 
@@ -541,7 +541,7 @@ void hub_close_connection(hub_t *hub)
     {
         /* no */
 
-        g_debug("closing down hub on fd %d (address %s)", hub->fd, hub->address);
+        DEBUG("closing down hub on fd %d (address %s)", hub->fd, hub->address);
         if(hub->bufev)
         {
             bufferevent_free(hub->bufev);
@@ -724,7 +724,7 @@ void hub_set_encoding(hub_t *hub, const char *encoding)
     return_if_fail(hub);
     return_if_fail(encoding);
 
-    g_debug("setting encoding [%s] for hub [%s]", encoding, hub->address);
+    DEBUG("setting encoding [%s] for hub [%s]", encoding, hub->address);
 
     free(hub->encoding);
     hub->encoding = strdup(encoding);

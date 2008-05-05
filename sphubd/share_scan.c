@@ -81,7 +81,7 @@ static void share_scan_add_file(share_scan_state_t *ctx,
     f->inode = SHARE_STAT_TO_INODE(stbuf);
     f->mtime = stbuf->st_mtime;
 
-    /* g_debug("adding file [%s], inode %llu", f->path, f->inode); */
+    /* DEBUG("adding file [%s], inode %llu", f->path, f->inode); */
 
     /* is it already hashed? */
     bool already_hashed = false;
@@ -198,7 +198,7 @@ static char *share_scan_absolute_path(const char *dirpath,
     char *utf8_filename = g_filename_to_utf8(filename, -1, NULL, NULL, NULL);
     if(utf8_filename == 0)
     {
-        g_warning("encoding conversion failed (skipping '%s/%s')",
+        WARNING("encoding conversion failed (skipping '%s/%s')",
                 /*utf_err->message,*/ dirpath, filename);
         /* g_error_free(utf_err); */
         /* utf_err = 0; */
@@ -208,7 +208,7 @@ static char *share_scan_absolute_path(const char *dirpath,
 
     if(!g_utf8_validate(filename, -1, NULL))
     {
-        g_warning("Unknown encoding in filename [%s]", filename);
+        WARNING("Unknown encoding in filename [%s]", filename);
         return NULL;
     }
     /* FIXME: if filename is not in utf-8, try to convert from some
@@ -249,7 +249,7 @@ static void share_scan_context(share_scan_state_t *ctx,
 
     if(strcmp(dirpath, global_incomplete_directory) == 0)
     {
-	g_info("Refused to share incomplete download directory [%s]",
+	INFO("Refused to share incomplete download directory [%s]",
 	    dirpath);
 
 	ui_send_status_message(NULL, NULL,
@@ -258,12 +258,12 @@ static void share_scan_context(share_scan_state_t *ctx,
 
 	return;
     }
-    /* g_debug("scanning directory [%s]", dirpath); */
+    /* DEBUG("scanning directory [%s]", dirpath); */
 
     fsdir = opendir(dirpath);
     if(fsdir == 0)
     {
-        g_warning("%s: %s", dirpath, strerror(errno));
+        WARNING("%s: %s", dirpath, strerror(errno));
         return;
     }
 
@@ -272,7 +272,7 @@ static void share_scan_context(share_scan_state_t *ctx,
         const char *filename = dp->d_name;
         if(share_skip_file(filename))
         {
-            /* g_message("- skipping file %s/%s", dirpath, filename); */
+            /* INFO("- skipping file %s/%s", dirpath, filename); */
             continue;
         }
 
@@ -290,7 +290,7 @@ static void share_scan_context(share_scan_state_t *ctx,
             else if(S_ISREG(stbuf.st_mode))
             {
                 if(stbuf.st_size == 0)
-                    g_info("- skipping zero-sized file '%s'", filepath);
+                    INFO("- skipping zero-sized file '%s'", filepath);
                 else
                 {
                     share_scan_add_file(ctx, filepath, &stbuf);
@@ -298,13 +298,13 @@ static void share_scan_context(share_scan_state_t *ctx,
             }
             else /* neither directory nor regular file */
             {
-                g_info("- skipping file %s (not a regular file)", filename);
+                INFO("- skipping file %s (not a regular file)", filename);
             }
         }
         else
         {
             /* stat failed */
-            g_warning("%s: %s", filepath, strerror(errno));
+            WARNING("%s: %s", filepath, strerror(errno));
         }
 
         free(filepath);
@@ -323,7 +323,7 @@ static void share_scan_event(int fd, short why, void *user_data)
         share_scan_directory_t *d = LIST_FIRST(&ctx->directories);
         if(d == NULL)
         {
-            g_message("Done scanning directory [%s]", ctx->mp->local_root);
+            INFO("Done scanning directory [%s]", ctx->mp->local_root);
             nc_send_share_scan_finished_notification(nc_default(),
                     ctx->mp->local_root);
             ctx->share->uptodate = 0;

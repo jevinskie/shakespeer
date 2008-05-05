@@ -132,7 +132,7 @@ void build_share(int64_t mount_id, tdir_t *dirs)
                             " VALUES ('%q', '%q', %llu, %lli, %i, 0)",
                             f->name, f->tth, f->size, dir_id, share_filetype(f->name));
                 if(err)
-                    g_warning("%s", err->message);
+                    WARNING("%s", err->message);
                 fail_unless(err == 0);
                 fail_unless(rc == 0);
             }

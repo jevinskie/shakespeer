@@ -70,7 +70,7 @@ hub_t *hub_new(void)
 
 void hub_free(hub_t *hub)
 {
-    g_debug("hub_free(%p)", hub);
+    DEBUG("hub_free(%p)", hub);
     if(hub)
     {
         /* free all users */

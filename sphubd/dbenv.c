@@ -49,7 +49,7 @@ void close_default_db_environment(void)
         int rc = default_db_env->close(default_db_env, 0);
         if(rc == -1)
         {
-            g_warning("Failed to close default database environment: %s",
+            WARNING("Failed to close default database environment: %s",
                     db_strerror(rc));
         }
         default_db_env = NULL;
@@ -59,7 +59,7 @@ void close_default_db_environment(void)
 static void db_err(const DB_ENV *dbenv, const char *errpfx,
         const char *msg)
 {
-    g_warning("DB: %s", msg);
+    WARNING("DB: %s", msg);
 }
 
 static void db_msg(const DB_ENV *dbenv, const char *msg)

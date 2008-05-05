@@ -75,14 +75,14 @@ int sp_connect_remote(sp_t *sp, const char *remote_address)
     struct sockaddr_in *addr = io_lookup(remote_address, &err);
     if(addr == NULL)
     {
-        g_warning("unable to lookup %s: %s\n", remote_address, xerr_msg(err));
+        WARNING("unable to lookup %s: %s\n", remote_address, xerr_msg(err));
         xerr_free(err);
         return -1;
     }
     int fd = io_connect_tcp(addr, &err);
     if(fd == -1)
     {
-        g_warning("%s", xerr_msg(err));
+        WARNING("%s", xerr_msg(err));
         xerr_free(err);
         return -1;
     }
@@ -95,7 +95,7 @@ int sp_disconnect(sp_t *sp)
 
     if(sp->fd != -1)
     {
-        g_debug("closing fd %d", sp->fd);
+        DEBUG("closing fd %d", sp->fd);
         close(sp->fd);
         sp->fd = -1;
     }

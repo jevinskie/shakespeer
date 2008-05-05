@@ -107,11 +107,11 @@ static void share_hasher(hc_t *hc)
         hc->current_entry = TAILQ_FIRST(&hc->hash_queue_head);
         if(hc->current_entry == NULL)
         {
-            g_debug("no more unhashed files");
+            DEBUG("no more unhashed files");
             return;
         }
 
-        g_debug("starting hashing %s", hc->current_entry->filename);
+        DEBUG("starting hashing %s", hc->current_entry->filename);
 
         gettimeofday(&start, NULL);
 
@@ -119,7 +119,7 @@ static void share_hasher(hc_t *hc)
         if(stat(hc->current_entry->filename, &sb) != 0 ||
            (hc->current_fd = open(hc->current_entry->filename, O_RDONLY)) == -1)
         {
-            g_warning("%s: %s", hc->current_entry->filename, strerror(errno));
+            WARNING("%s: %s", hc->current_entry->filename, strerror(errno));
 
             if(hc_send_fail_hash(hc, hc->current_entry->filename) != 0)
             {
@@ -150,7 +150,7 @@ static void share_hasher(hc_t *hc)
     {
         if(len < 0)
         {
-            g_warning("read(fd = %i): %s", hc->current_fd, strerror(errno));
+            WARNING("read(fd = %i): %s", hc->current_fd, strerror(errno));
 
             /* unreadable?, disable the file */
             if(hc_send_fail_hash(hc, hc->current_entry->filename) != 0)
@@ -161,7 +161,7 @@ static void share_hasher(hc_t *hc)
         }
         else /* len == 0 */
         {
-            g_debug("finished hashing %s", hc->current_entry->filename);
+            DEBUG("finished hashing %s", hc->current_entry->filename);
 
             struct timeval end;
             gettimeofday(&end, NULL);
@@ -169,7 +169,7 @@ static void share_hasher(hc_t *hc)
             double s = start.tv_sec + (double)start.tv_usec / 1000000;
             double d = e - s;
             double Mps = ((double)size / (1024*1024)) / d;
-            g_debug("Hashing speed: %.1lf MiB/s", Mps);
+            DEBUG("Hashing speed: %.1lf MiB/s", Mps);
 
             tt_digest(&hc->tth, NULL);
             char *hash_base32 = tt_base32(&hc->tth);
@@ -187,10 +187,10 @@ static void share_hasher(hc_t *hc)
 static void shutdown_sphashd_event(int fd, short condition, void *data)
 {
     /* close all client connections and exit */
-    g_info("shutting down");
+    INFO("shutting down");
     if(socket_filename && unlink(socket_filename) != 0)
     {
-        g_warning("failed to unlink socket file '%s': %s", socket_filename, strerror(errno));
+        WARNING("failed to unlink socket file '%s': %s", socket_filename, strerror(errno));
     }
 
     sp_remove_pid(working_directory, "sphashd");
@@ -212,7 +212,7 @@ int hc_cb_add(hc_t *hc, const char *filename)
         }
     }
 
-    g_debug("adding filename [%s]", filename);
+    DEBUG("adding filename [%s]", filename);
     entry = calloc(1, sizeof(struct hash_entry));
     entry->filename = strdup(filename);
     TAILQ_INSERT_TAIL(&hc->hash_queue_head, entry, link);
@@ -265,7 +265,7 @@ static void hc_close_connection(hc_t *hc)
 {
     return_if_fail(hc);
 
-    g_debug("closing down hash client on fd %i", hc->fd);
+    DEBUG("closing down hash client on fd %i", hc->fd);
     if(hc->bufev)
     {
         bufferevent_free(hc->bufev);
@@ -307,7 +307,7 @@ static void hc_err_event(struct bufferevent *bufev, short why, void *data)
 {
     hc_t *hc = data;
 
-    g_warning("why = 0x%02X", why);
+    WARNING("why = 0x%02X", why);
     hc_close_connection(hc);
 }
 
@@ -322,7 +322,7 @@ void hash_accept_connection(int fd, short condition, void *data)
 
     io_set_blocking(afd, 0);
 
-    g_debug("adding hash client on fd %i", afd);
+    DEBUG("adding hash client on fd %i", afd);
 
     hc_t *hc = hc_init();
     hc->fd = afd;
@@ -396,10 +396,10 @@ int main(int argc, char **argv)
     /* set lower priority */
     if(setpriority(PRIO_PROCESS, 0 /* current process */, 10) != 0)
     {
-        g_warning("setpriority: %s (ignored)", strerror(errno));
+        WARNING("setpriority: %s (ignored)", strerror(errno));
     }
 
-    g_debug("starting main loop");
+    DEBUG("starting main loop");
     while(1)
     {
         event_loop(EVLOOP_NONBLOCK);
@@ -419,7 +419,7 @@ int main(int argc, char **argv)
         if(block)
         {
             /* nothing to do, block for one event */
-            g_debug("blocking for next event");
+            DEBUG("blocking for next event");
             event_loop(EVLOOP_ONCE);
         }
         else if(global_delay)
@@ -427,7 +427,7 @@ int main(int argc, char **argv)
             usleep(global_delay);
         }
     }
-    g_debug("main loop finished");
+    DEBUG("main loop finished");
 
     return 0;
 }

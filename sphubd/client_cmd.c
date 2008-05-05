@@ -101,7 +101,7 @@ static int cc_cmd_Get(void *data, int argc, char **argv)
     char *e = strchr(argv[0], '$');
     if(e == NULL || e == argv[0])
     {
-        g_info("malformed Get request, ignoring");
+        INFO("malformed Get request, ignoring");
         return 0;
     }
     *e = 0;
@@ -116,7 +116,7 @@ static int cc_cmd_Get(void *data, int argc, char **argv)
     }
     else
     {
-        g_warning("Zero offset in $Get command");
+        WARNING("Zero offset in $Get command");
     }
 
     xerr_t *err = 0;
@@ -151,8 +151,8 @@ static int cc_cmd_ADCGET(void *data, int argc, char **argv)
     rx_subs_t *subs = rx_search(argv[0], "([^ ]+) (.+) ([0-9]+) (-?[0-9]+)");
     if(subs == NULL || subs->nsubs != 4)
     {
-        g_info("invalid ADCGET request");
-        g_debug("string = [%s]", argv[0]);
+        INFO("invalid ADCGET request");
+        DEBUG("string = [%s]", argv[0]);
         cc_send_command_as_is(cc, "$Error Invalid request|");
         rx_free_subs(subs);
         return 0;
@@ -175,7 +175,7 @@ static int cc_cmd_ADCGET(void *data, int argc, char **argv)
         else
         {
             /* This must be a really borken client */
-            g_warning("Asks for leafdata by filename: borken client");
+            WARNING("Asks for leafdata by filename: borken client");
 
             char *local_path = share_translate_path(global_share, subs->subs[1]);
             if(local_path)
@@ -213,7 +213,7 @@ static int cc_cmd_ADCGET(void *data, int argc, char **argv)
 
     if(strcmp(subs->subs[0], "file") != 0)
     {
-        g_info("unhandled ADCGET type [%s], ignoring", (char *)subs->subs[0]);
+        INFO("unhandled ADCGET type [%s], ignoring", (char *)subs->subs[0]);
         rx_free_subs(subs);
         return -1;
     }
@@ -266,7 +266,7 @@ static int cc_cmd_UGetBlock(void *data, int argc, char **argv)
     rx_subs_t *subs = rx_search(argv[0], "([0-9]+) ([0-9]+) (.*)");
     if(subs == NULL || subs->nsubs != 3)
     {
-        g_info("invalid UGetBlock request");
+        INFO("invalid UGetBlock request");
         rx_free_subs(subs);
         return cc_send_command(cc, "$Error Invalid request|");
     }
@@ -275,7 +275,7 @@ static int cc_cmd_UGetBlock(void *data, int argc, char **argv)
     char *filename_utf8 = subs->subs[2];
     if(filename_utf8 == NULL)
     {
-        g_warning("Invalid filename encoding in UGetBlock request:"
+        WARNING("Invalid filename encoding in UGetBlock request:"
                 " [%s] (ignored command)", argv[0]);
         rx_free_subs(subs);
         return cc_send_command(cc, "$Error File Not Available|");
@@ -339,8 +339,8 @@ static int cc_cmd_ADCSND(void *data, int argc, char **argv)
     rx_subs_t *subs = rx_search(argv[0], "([^ ]+) (.+) ([0-9]+) (-?[0-9]+)");
     if(subs == NULL || subs->nsubs != 4)
     {
-        g_info("invalid ADCSND request");
-        g_debug("string = [%s]", argv[0]);
+        INFO("invalid ADCSND request");
+        DEBUG("string = [%s]", argv[0]);
         rx_free_subs(subs);
         return -1;
     }
@@ -384,7 +384,7 @@ static int cc_cmd_FileLength(void *data, int argc, char **argv)
     {
         if(cc->current_queue->size != cc->filesize)
         {
-            g_warning("requested size differs from reported (%llu != %llu)",
+            WARNING("requested size differs from reported (%llu != %llu)",
                     cc->filesize, cc->current_queue->size);
             queue_set_size(cc->current_queue, cc->filesize);
         }
@@ -418,7 +418,7 @@ static int cc_cmd_Direction(void *data, int argc, char **argv)
     {
         if(cc->direction == CC_DIR_UPLOAD)
         {
-            g_info("double upload connection, aborting");
+            INFO("double upload connection, aborting");
             return -1;
         }
     }
@@ -427,23 +427,23 @@ static int cc_cmd_Direction(void *data, int argc, char **argv)
         if(cc->direction == CC_DIR_DOWNLOAD)
         {
             unsigned challenge = strtoul(argv[1], 0, 10);
-            g_info("double download connection");
+            INFO("double download connection");
             if(cc->challenge < challenge)
             {
-                g_info("switching to upload");
+                INFO("switching to upload");
                 cc->direction = CC_DIR_UPLOAD;
                 return_val_if_fail(cc->current_queue == NULL, -1);
             }
             else if(cc->challenge == challenge)
             {
-                g_message("direction collision, aborting");
+                INFO("direction collision, aborting");
                 return -1;
             }
         }
     }
     else
     {
-        g_message("unknown direction: %s", argv[0]);
+        INFO("unknown direction: %s", argv[0]);
         return -1;
     }
 
@@ -472,7 +472,7 @@ static int cc_cmd_Supports(void *data, int argc, char **argv)
             else if(strcmp(argv[i], "TTHF") == 0)
                 cc->has_tthf = true;
             else
-                g_info("Client supports unknown feature %s", argv[i]);
+                INFO("Client supports unknown feature %s", argv[i]);
         }
     }
 
@@ -505,7 +505,7 @@ static int cc_cmd_Lock(void *data, int argc, char **argv)
     if(str_has_prefix(argv[0], "EXTENDEDPROTOCOL"))
     {
         cc->extended_protocol = true;
-        g_debug("Detected extended protocol: %s %s", argv[0], argv[1]);
+        DEBUG("Detected extended protocol: %s %s", argv[0], argv[1]);
     }
 
     if(cc->extended_protocol)
@@ -537,7 +537,7 @@ static int cc_cmd_MyNick(void *data, int argc, char **argv)
 
     if(strchr(nick, '$'))
     {
-        g_message("invalid character in nick name (dropping client)");
+        INFO("invalid character in nick name (dropping client)");
         return -1;
     }
 
@@ -545,13 +545,13 @@ static int cc_cmd_MyNick(void *data, int argc, char **argv)
     cc->hub = hub_find_encoding_by_nick(nick, &utf8_nick);
     if(cc->hub == NULL)
     {
-        g_message("Closing client connection with non-logged in user '%s'", nick);
+        INFO("Closing client connection with non-logged in user '%s'", nick);
         return -1;
     }
     return_val_if_fail(utf8_nick, -1);
 
-    g_debug("set client nick to '%s'", utf8_nick);
-    g_debug("Set corresponding hub to %s", cc->hub->address);
+    DEBUG("set client nick to '%s'", utf8_nick);
+    DEBUG("Set corresponding hub to %s", cc->hub->address);
 
     /* upload or download? */
     if(queue_has_source_for_nick(utf8_nick))
@@ -567,7 +567,7 @@ static int cc_cmd_MyNick(void *data, int argc, char **argv)
     cc->nick = utf8_nick;
     if(xcc)
     {
-        g_warning("already connected to %s (direction %s), closing connection",
+        WARNING("already connected to %s (direction %s), closing connection",
                 utf8_nick, cc_dir2str(cc->direction));
         return -1;
     }
