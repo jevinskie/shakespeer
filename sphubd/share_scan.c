@@ -36,6 +36,9 @@
 #include "log.h"
 #include "notifications.h"
 
+#include "globals.h"
+#include "ui_send.h"
+
 typedef struct share_scan_directory share_scan_directory_t;
 struct share_scan_directory
 {
@@ -244,6 +247,17 @@ static void share_scan_context(share_scan_state_t *ctx,
     DIR *fsdir;
     struct dirent *dp;
 
+    if(strcmp(dirpath, global_download_directory) == 0)
+    {
+	g_info("Refused to share incomplete download directory [%s]",
+	    dirpath);
+
+	ui_send_status_message(NULL, NULL,
+	    "Refused to share incomplete download directory '%s'",
+	    dirpath);
+
+	return;
+    }
     /* g_debug("scanning directory [%s]", dirpath); */
 
     fsdir = opendir(dirpath);
