@@ -181,6 +181,7 @@ static int cmd_complete_transfers(WordCompletion *cpl, const char *line,
             free(q);
         }
     }
+    free(partial);
 
     return 0;
 }
