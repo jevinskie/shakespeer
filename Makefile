@@ -37,7 +37,7 @@ release:
 	else \
 	  darcs get --partial -v $(TAG_OPTION) $(REPO_URL) && \
 	  cd shakespeer ; \
-	fi && $(MAKE) all BUILD_PROFILE=release
+	fi && $(MAKE) all BUILD_PROFILE=release && $(MAKE) check
 
 tag-dmg: tag-release
 	cd $(RELEASE_DIR)/shakespeer && \
