@@ -86,7 +86,7 @@ static char *hub_make_tag(hub_t *hub)
             global_id_version,
             hub->me->passive ? 'P' : 'A',
             hub_count_normal(), hub_count_registered(), hub_count_operator(),
-            hub_slots_free());
+            hub_slots_total());
 
     return tag;
 }

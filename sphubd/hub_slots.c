@@ -42,7 +42,6 @@ void hub_free_upload_slot(hub_t *hub, const char *nick, slot_state_t slot_state)
 
 	    INFO("freeing one upload slot for nick %s: %d used, %d free",
 		    nick, used_slots, total_slots - used_slots);
-	    hub_set_need_myinfo_update(true);
             break;
         case SLOT_FREE:
         case SLOT_NONE:
@@ -79,7 +78,6 @@ slot_state_t hub_request_upload_slot(hub_t *hub, const char *nick,
     used_slots++;
     INFO("allocating one upload slot for file %s: %d used, %d free",
 	    filename, used_slots, total_slots - used_slots);
-    hub_set_need_myinfo_update(true);
 
     return SLOT_NORMAL;
 }
