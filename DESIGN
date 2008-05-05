@@ -5,7 +5,7 @@ Processes and inter-process communication
 -----------------------------------------
 The ShakesPeer program is not really one program, but three. Those are sphubd,
 sphashd and the UI (user interface). Those three parts are run as separate
-processes.  Inter-process communication betweeh those thre programs is achieved
+processes.  Inter-process communication between those three programs is achieved
 by using sockets. By default, unix sockets are used, which are local. Using
 unix sockets, all programs must be running on the same computer. Replacing the
 unix socket with a TCP socket enables the programs to run on different
