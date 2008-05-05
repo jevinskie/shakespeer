@@ -657,14 +657,14 @@ static int hub_cmd_Supports(void *data, int argc, char **argv)
     return 0;
 }
 
-static int hub_cmd_GetPass(void *data, int argc, char **argv)
+static int
+hub_cmd_GetPass(void *data, int argc, char **argv)
 {
     hub_t *hub = data;
-    char *passwd = hub->password;
 
     hub->is_registered = true;
 
-    if(passwd == 0)
+    if(hub->password == NULL)
     {
         /* FIXME: should probably only send this to the ui that initiated the
          * connection */
@@ -676,14 +676,16 @@ static int hub_cmd_GetPass(void *data, int argc, char **argv)
     return 0;
 }
 
-static int hub_cmd_LogedIn(void *data, int argc, char **argv)
+static int
+hub_cmd_LogedIn(void *data, int argc, char **argv)
 {
     hub_set_need_myinfo_update(true);
     DEBUG("Ok, seems we're logged in...");
     return 0;
 }
 
-static int hub_cmd_BadPass(void *data, int argc, char **argv)
+static int
+hub_cmd_BadPass(void *data, int argc, char **argv)
 {
     hub_t *hub = data;
 

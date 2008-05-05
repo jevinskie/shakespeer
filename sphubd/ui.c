@@ -337,8 +337,8 @@ static int ui_cb_search(ui_t *ui, const char *hub_address, const char *search_st
 }
 
 static int ui_cb_connect(ui_t *ui, const char *hub_address, const char *nick,
-        const char *email, const char *description, const char *speed, int passive, const char *password,
-        const char *encoding)
+        const char *email, const char *description, const char *speed,
+	int passive, const char *password, const char *encoding)
 {
     assert(ui);
     assert(hub_address);
@@ -372,7 +372,8 @@ static int ui_cb_connect(ui_t *ui, const char *hub_address, const char *nick,
     }
     else
     {
-        hub_connect(hub_address, nick, email, description, speed, passive, password, encoding);
+        hub_connect(hub_address, nick, email, description, speed, passive,
+	    password, encoding);
     }
 
     return 0;

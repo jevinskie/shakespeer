@@ -120,7 +120,8 @@ int hub_send_command(hub_t *hub, const char *fmt, ...)
     return rc;
 }
 
-void hub_send_password(hub_t *hub)
+void
+hub_send_password(hub_t *hub)
 {
     /* XXX: encoding?
      */
@@ -178,7 +179,8 @@ void hub_all_send_myinfo(void)
     hub_foreach(hub_all_send_myinfo_GFunc, NULL);
 }
 
-static hub_t *hub_new_from_hcd(hub_connect_data_t *hcd)
+static hub_t *
+hub_new_from_hcd(hub_connect_data_t *hcd)
 {
     DEBUG("creating new hub with nick %s...", hcd->nick);
     hub_t *hub = hub_new();
@@ -188,7 +190,8 @@ static hub_t *hub_new_from_hcd(hub_connect_data_t *hcd)
         ui_send_status_message(NULL, NULL, "failed to create hub...");
         return NULL;
     }
-    hub->me = user_new(hcd->nick, NULL, hcd->speed, hcd->description, hcd->email, 0ULL, hub);
+    hub->me = user_new(hcd->nick, NULL, hcd->speed, hcd->description,
+	hcd->email, 0ULL, hub);
     hub->me->passive = hcd->passive;
     hub->password = xstrdup(hcd->password);
     hub->address = strdup(hcd->address);
@@ -204,14 +207,16 @@ static hub_t *hub_new_from_hcd(hub_connect_data_t *hcd)
     hub_list_add(hub);
     hub_set_need_myinfo_update(true);
 
-    ui_send_hub_add(NULL, hub->address, hub->hubname, hub->me->nick, hub->me->description, hub->encoding);
+    ui_send_hub_add(NULL, hub->address, hub->hubname, hub->me->nick,
+	hub->me->description, hub->encoding);
 
     hub_set_idle_timeout(hub);
 
     return hub;
 }
 
-static void hcd_free(hub_connect_data_t *hcd)
+static void
+hcd_free(hub_connect_data_t *hcd)
 {
     if(hcd)
     {
@@ -227,7 +232,8 @@ static void hcd_free(hub_connect_data_t *hcd)
     }
 }
 
-static void hub_connect_event(int fd, int error, void *user_data)
+static void
+hub_connect_event(int fd, int error, void *user_data)
 {
     hub_connect_data_t *hcd = user_data;
 
@@ -239,7 +245,8 @@ static void hub_connect_event(int fd, int error, void *user_data)
         hub_t *hub = hub_find_by_address(hcd->address);
         if(hub)
         {
-            /* found a hub with same address, check if it's a reconnection attempt */
+	    /* found a hub with same address, check if it's a reconnection
+	     * attempt */
             if(hub->reconnect_attempt > 0)
             {
                 /* yes, remove the old one and create a new */
@@ -363,6 +370,9 @@ int hub_connect(const char *hubname, const char *nick, const char *email,
         const char *description, const char *speed, bool passive,
         const char *password, const char *encoding)
 {
+    return_val_if_fail(nick, -1);
+    return_val_if_fail(hubname, -1);
+
     char *host = 0;
     int port = 0;
     if(split_host_port(hubname, &host, &port) != 0)
@@ -385,13 +395,13 @@ int hub_connect(const char *hubname, const char *nick, const char *email,
 
     hub_connect_data_t *hcd = calloc(1, sizeof(hub_connect_data_t));
     hcd->nick = strdup(nick);
-    hcd->email = email ? strdup(email) : NULL;
-    hcd->description = description ? strdup(description) : NULL;
-    hcd->speed = speed ? strdup(speed) : NULL;
+    hcd->email = xstrdup(email);
+    hcd->description = xstrdup(description);
+    hcd->speed = xstrdup(speed);
     hcd->address = strdup(hubname);
     hcd->passive = passive;
-    hcd->password = password ? strdup(password) : NULL;
-    hcd->encoding = encoding ? strdup(encoding) : NULL;
+    hcd->password = xstrdup(password);
+    hcd->encoding = xstrdup(encoding);
     hcd->port = port;
 
     struct in_addr xaddr;
@@ -407,7 +417,8 @@ int hub_connect(const char *hubname, const char *nick, const char *email,
         free(host);
         if(rc != DNS_ERR_NONE)
         {
-            WARNING("Failed to lookup '%s': %s", hubname, evdns_err_to_string(rc));
+            WARNING("Failed to lookup '%s': %s",
+		hubname, evdns_err_to_string(rc));
             ui_send_status_message(NULL, hubname, "Failed to lookup '%s': %s",
                     hubname, evdns_err_to_string(rc));
             hcd_free(hcd);
@@ -491,7 +502,8 @@ void hub_search(hub_t *hub, search_request_t *request)
     free(words_joined);
 }
 
-void hub_reconnect_event_func(int fd, short condition, void *data)
+void
+hub_reconnect_event_func(int fd, short why, void *data)
 {
     hub_t *hub = data;
 
@@ -502,7 +514,8 @@ void hub_reconnect_event_func(int fd, short condition, void *data)
 	hub->password, hub->encoding);
 }
 
-static void hub_schedule_reconnect_event(hub_t *hub)
+static void
+hub_schedule_reconnect_event(hub_t *hub)
 {
     return_if_fail(hub);
 
@@ -542,7 +555,8 @@ static void hub_schedule_reconnect_event(hub_t *hub)
     evtimer_add(&hub->reconnect_event, &tv);
 }
 
-void hub_close_connection(hub_t *hub)
+void
+hub_close_connection(hub_t *hub)
 {
     return_if_fail(hub);
 
@@ -622,7 +636,8 @@ int user_is_logged_in_on_hub(const char *nick, hub_t *hub)
     return hub_lookup_user(hub, nick) ? 1 : 0;
 }
 
-void hub_set_password(hub_t *hub, const char *password)
+void
+hub_set_password(hub_t *hub, const char *password)
 {
     return_if_fail(hub);
     free(hub->password);
