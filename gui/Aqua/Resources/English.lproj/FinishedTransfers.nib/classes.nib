@@ -1,0 +1,25 @@
+{
+    IBClasses = (
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            ACTIONS = {toggleColumn = id; }; 
+            CLASS = SPFinishedTransferController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                arrayController = NSArrayController; 
+                columnsMenu = NSMenu; 
+                finishedTransferTable = NSTableView; 
+                myView = NSView; 
+                tcFilename = NSTableColumn; 
+                tcHub = NSTableColumn; 
+                tcSize = NSTableColumn; 
+                tcSpeed = NSTableColumn; 
+                tcTotal = NSTableColumn; 
+                tcUser = NSTableColumn; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {CLASS = XBorderedView; LANGUAGE = ObjC; SUPERCLASS = NSView; }
+    ); 
+    IBVersion = 1; 
+}

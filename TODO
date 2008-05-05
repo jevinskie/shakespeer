@@ -1,0 +1,68 @@
+sphubd:
+-------
+
+* increase priority for UI connections?
+* verify reconnection with password
+
+! MUST send client connected status, even if no transfer is taking place
+
+Low(er) priority:
+
+* fix transfer-stats when uploading the same file to two or more users
+* detect and handle hub redirection loops
+* make extip_detect asynchronous
+* check TTH on downloaded files
+* configurable number of download slots (now unlimited)
+* report (total) up/download statistics continuously
+* parse $HubTopic commands
+* remember timestamps on chat messages
+
+Propably won't happen any time soon:
+
+? same user with different shares on multiple hubs (http://shakespeer.tweakbase.net/forum/viewtopic.php?t=285)
+* automatic multiple-sources concurrent downloads using tths
+
+
+sphashd:
+--------
+
+
+
+gui:
+----
+
+* Merge queue menu item "Search for alternates" and "Search by TTH"
+  - check what to do based on existence of a TTH
+* Add "Grant extra slot" menu items to queue and transfer menus
+* Remove 'Keep backend running in background' option
+* Add Filemenu item "Quit but keep backend running"
+* kill -TERM/-KILL sphubd + sphashd if not gone after shutdown
+
+* rework download queue / transfer lists
+  - rename to Downloads
+  - remove finished transfers (keep them greyed out in the dl queue instead)
+  - add command to remove completed transfers from the download (as in soulseeX)
+  ? finished transfers: persistent transfer history
+  - replace Transfers view with Uploads
+  - show stats for complete directory tree in downloads
+
+* Tab completion on nicknames in main chat
+? Menu option to download to separate location
+  + pre-defined locations (music, movies, etc...)
+* implement user-command commands in filelist view
+* ability to see stats in bottom of main window (#1294025)
+* Filtering improvements, space-separated keywords should be logically ANDed (#1328730)
+* Filter kick messages from main chat
+* Add menu item to download file and open in TextEdit (Search view, Filelist view)
+* add "stalled" status to transfer items
+* away mode + prefs
+
+graphical glitches (low priority):
+
+* Fix string truncation in filelist view
+* fix jumpy selection in nick table (and search table)
+* add grey metal iTunes-like table header in sidebar
+* progress spinner when refreshing hublist
+* icons in nick table representing active/passive state
+* fix backgrounds in tables with alt. row background
+

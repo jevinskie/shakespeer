@@ -1,0 +1,47 @@
+{
+    IBClasses = (
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            ACTIONS = {
+                cancelUpdate = id; 
+                checkForUpdates = id; 
+                closeCurrentSidebarItem = id; 
+                connectToBackendServer = id; 
+                donate = id; 
+                downloadUpdate = id; 
+                nextSidebarItem = id; 
+                openSPForums = id; 
+                openSPWebpage = id; 
+                prevSidebarItem = id; 
+                recentOpenHub = id; 
+                reportBug = id; 
+                rescanSharedFolders = id; 
+                showAdvancedSearch = id; 
+                showBookmarkView = id; 
+                showConnectView = id; 
+                showPreferences = id; 
+                showQueueView = id; 
+                showServerMessages = id; 
+                showTransferView = id; 
+            }; 
+            CLASS = SPApplicationController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                cancelButton = NSButton; 
+                currentVersionField = NSTextField; 
+                detailsView = NSTextView; 
+                downloadButton = NSButton; 
+                lastVersionField = NSTextField; 
+                menuFilelists = NSMenu; 
+                menuItemNextSidebarItem = NSMenuItem; 
+                menuItemPrevSidebarItem = NSMenuItem; 
+                menuOpenRecent = NSMenu; 
+                releaseDateField = NSTextField; 
+                updateTitleField = NSTextField; 
+                updateWindow = NSWindow; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }
+    ); 
+    IBVersion = 1; 
+}
