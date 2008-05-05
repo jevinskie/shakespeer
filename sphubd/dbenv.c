@@ -31,6 +31,12 @@
 
 static DB_ENV *default_db_env = NULL;
 
+int db_transaction(DB_TXN **txn)
+{
+    return_val_if_fail(default_db_env, -1);
+    return default_db_env->txn_begin(default_db_env, NULL, txn, 0);
+}
+
 void close_default_db_environment(void)
 {
     if(default_db_env)

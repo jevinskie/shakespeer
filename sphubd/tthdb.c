@@ -142,10 +142,10 @@ static int tthdb_put(const char *tth, struct tthdb_data *tthdata, int flags)
     val.data = tthdata;
     val.size = sizeof(struct tthdb_data) + tthdata->leafdata_len;
 
-    int rc = tth_db->put(tth_db, NULL, &key, &val, flags);
+    DB_TXN *txn;
+    return_val_if_fail(db_transaction(&txn) == 0, -1);
 
-    /* if(rc == DB_KEYEXIST) */
-        /* g_debug("TTH already exist"); */
+    int rc = tth_db->put(tth_db, txn, &key, &val, flags);
 
     if(rc == 0 || rc == DB_KEYEXIST)
     {
@@ -164,15 +164,26 @@ static int tthdb_put(const char *tth, struct tthdb_data *tthdata, int flags)
         val.data = &ti;
         val.size = sizeof(tth_inode_t);
 
-        int rc2 = tth_inode_db->put(tth_inode_db, NULL, &key, &val, 0);
+        int rc2 = tth_inode_db->put(tth_inode_db, txn, &key, &val, 0);
         if(rc2 != 0)
         {
             g_warning("Failed to add inode: %s", db_strerror(rc2));
         }
         else if(rc == DB_KEYEXIST)
-            return DB_KEYEXIST;
+            rc2 = DB_KEYEXIST;
 
-        return rc2;
+        rc = rc2;
+    }
+
+    if(rc == 0 || rc == DB_KEYEXIST)
+    {
+	g_debug("committing transaction");
+	txn->commit(txn, 0);
+    }
+    else
+    {
+	g_warning("aborting transaction");
+	txn->abort(txn);
     }
 
     return rc;

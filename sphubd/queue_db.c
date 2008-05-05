@@ -69,9 +69,12 @@ static int queue_directory_get_nick(DB *sdb, const DBT *pkey,
 /* resets active state for targets */
 static int queue_reset_db(void)
 {
+    DB_TXN *txn;
+    return_val_if_fail(db_transaction(&txn) == 0, -1);
+
     DBC *qtc;
-    queue_target_db->cursor(queue_target_db, NULL, &qtc, 0);
-    return_val_if_fail(qtc, -1);
+    queue_target_db->cursor(queue_target_db, txn, &qtc, 0);
+    txn_return_val_if_fail(qtc, -1);
 
     DBT key, val;
     memset(&key, 0, sizeof(DBT));
@@ -88,12 +91,13 @@ static int queue_reset_db(void)
         }
     }
 
-    qtc->c_close(qtc);
+    txn_return_val_if_fail(qtc->c_close(qtc) == 0, -1);
+    return_val_if_fail(txn->commit(txn, 0) == 0, -1);
 
-
+    return_val_if_fail(db_transaction(&txn) == 0, -1);
     DBC *qfc;
     queue_filelist_db->cursor(queue_filelist_db, NULL, &qfc, 0);
-    return_val_if_fail(qfc, -1);
+    txn_return_val_if_fail(qfc, -1);
 
     memset(&key, 0, sizeof(DBT));
     memset(&val, 0, sizeof(DBT));
@@ -109,7 +113,8 @@ static int queue_reset_db(void)
         }
     }
 
-    qfc->c_close(qfc);
+    txn_return_val_if_fail(qfc->c_close(qfc) == 0, -1);
+    return_val_if_fail(txn->commit(txn, 0) == 0, -1);
 
     return 0;
 }
@@ -605,9 +610,12 @@ int queue_remove_sources(const char *target_filename)
 
     g_debug("removing sources for target [%s]", target_filename);
 
+    DB_TXN *txn;
+    return_val_if_fail(db_transaction(&txn) == 0, -1);
+
     DBC *qsc;
-    queue_source_db->cursor(queue_source_db, NULL, &qsc, 0);
-    return_val_if_fail(qsc, -1);
+    queue_source_db->cursor(queue_source_db, txn, &qsc, 0);
+    txn_return_val_if_fail(qsc, -1);
 
     DBT key, val;
     memset(&key, 0, sizeof(DBT));
@@ -624,7 +632,8 @@ int queue_remove_sources(const char *target_filename)
         }
     }
 
-    qsc->c_close(qsc);
+    txn_return_val_if_fail(qsc->c_close(qsc) == 0, -1);
+    return_val_if_fail(txn->commit(txn, 0) == 0, -1);
 
     return 0;
 }

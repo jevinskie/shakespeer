@@ -31,6 +31,7 @@
 #include "xstr.h"
 #include "log.h"
 #include "notifications.h"
+#include "dbenv.h"
 
 extern DB *queue_target_db;
 extern DB *queue_source_db;
@@ -321,8 +322,12 @@ int queue_remove_source(const char *target_filename, const char *nick)
     return_val_if_fail(target_filename, -1);
     return_val_if_fail(nick, -1);
 
+    DB_TXN *txn;
+    return_val_if_fail(db_transaction(&txn) == 0, -1);
+
     DBC *qsc;
-    queue_source_db->cursor(queue_source_db, NULL, &qsc, 0);
+    queue_source_db->cursor(queue_source_db, txn, &qsc, 0);
+    txn_return_val_if_fail(qsc, -1);
 
     DBT key, val;
     memset(&val, 0, sizeof(DBT));
@@ -343,7 +348,13 @@ int queue_remove_source(const char *target_filename, const char *nick)
         {
             g_debug("removing source [%s], target [%s]",
                     nick, qs->target_filename);
-            qsc->c_del(qsc, 0);
+            if(qsc->c_del(qsc, 0) != 0)
+	    {
+		g_warning("failed to delete entry");
+		qsc->c_close(qsc);
+		txn->abort(txn);
+		return -1;
+	    }
 
             nc_send_queue_source_removed_notification(nc_default(),
                     qs->target_filename, nick);
@@ -352,7 +363,8 @@ int queue_remove_source(const char *target_filename, const char *nick)
         }
     }
 
-    qsc->c_close(qsc);
+    txn_return_val_if_fail(qsc->c_close(qsc) == 0, -1);
+    return_val_if_fail(txn->commit(txn, 0), -1);
 
     return 0;
 }

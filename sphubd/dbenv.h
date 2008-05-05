@@ -29,6 +29,7 @@ void backup_db(const char *dbfile);
 int open_database(DB **db, const char *dbfile, const char *dbname,
         int type, int flags);
 int close_db(DB **db, const char *dbname);
+int db_transaction(DB_TXN **txn);
 
 #endif
 

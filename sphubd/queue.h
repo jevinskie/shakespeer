@@ -31,6 +31,12 @@
 #include <time.h>
 #include <db.h> /* for db_seq_t */
 
+#define txn_return_val_if_fail(cond, retval) do {           \
+        if(!(cond)) { g_warning("assert failed: " #cond); \
+	txn->abort(txn); \
+        return (retval); }                                \
+    } while(0)
+
 typedef struct queue_target queue_target_t;
 struct queue_target /* indexed by filename */
 {
