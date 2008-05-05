@@ -14,6 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <sys/time.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
