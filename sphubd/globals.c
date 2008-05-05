@@ -22,5 +22,5 @@ char *global_id_lock = 0;
  * "complete" download directory (global_download_directory). Otherwise the
  * files are moved once the whole directory is complete (all files are done).
  */
-bool global_move_partial_directories = true;
+bool global_move_partial_directories = false;
 
