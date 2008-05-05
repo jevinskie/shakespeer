@@ -1,3 +1,5 @@
+#include "sys_queue.h"
+
 #include <string.h>
 
 #include "util.h"
@@ -5,68 +7,46 @@
 #include "globals.h"
 #include "queue.h"
 
-extern DB *queue_target_db;
-extern DB *queue_source_db;
-extern DB *queue_directory_db;
+extern struct queue_store *q_store;
 
 int main(int argc, char **argv)
 {
-    global_working_directory = get_working_directory();
-    sp_log_set_level("debug");
-    if(queue_init() != 0)
-        return 1;
+	global_working_directory = get_working_directory();
+	sp_log_set_level("debug");
+	queue_init();
 
-    DBT key, val;
-    memset(&key, 0, sizeof(DBT));
-    memset(&val, 0, sizeof(DBT));
+	printf("Filelists:\n");
+	queue_filelist_t *qf;
+	TAILQ_FOREACH(qf, &q_store->filelists, link)
+	{
+		printf("%s\n", qf->nick);
+	}
 
+	printf("Directories:\n");
+	queue_directory_t *qd;
+	TAILQ_FOREACH(qd, &q_store->directories, link)
+	{
+		printf("%s (%i/%i left)\n",
+			qd->target_directory, qd->nleft, qd->nfiles);
+	}
 
-    DBC *qfc;
-    queue_source_db->cursor(queue_source_db, NULL, &qfc, 0);
-    printf("Filelists:\n");
-    while(qfc->c_get(qfc, &key, &val, DB_NEXT) == 0)
-    {
-        char *nick = key.data;
-        /* queue_filelist_t *qf = val.data; */
-        printf("%10s: %30s\n", (char *)key.data, nick);
-    }
-    qfc->c_close(qfc);
+	printf("Targets:\n");
+	queue_target_t *qt;
+	TAILQ_FOREACH(qt, &q_store->targets, link)
+	{
+		printf("%30s (directory %s)\n",
+			qt->filename, qt->target_directory);
+	}
 
+	printf("Sources:\n");
+	queue_source_t *qs;
+	TAILQ_FOREACH(qs, &q_store->sources, link)
+	{
+		printf("%10s: %30s\n", qs->nick, qs->target_filename);
+	}
 
-    DBC *qdc;
-    queue_directory_db->cursor(queue_directory_db, NULL, &qdc, 0);
-    printf("Directories:\n");
-    while(qdc->c_get(qdc, &key, &val, DB_NEXT) == 0)
-    {
-        queue_directory_t *qd = val.data;
-        printf("%s (%i/%i left)\n", qd->target_directory, qd->nleft, qd->nfiles);
-    }
-    qdc->c_close(qdc);
+	queue_close();
 
-
-    DBC *qtc;
-    queue_target_db->cursor(queue_target_db, NULL, &qtc, 0);
-    printf("Targets:\n");
-    while(qtc->c_get(qtc, &key, &val, DB_NEXT) == 0)
-    {
-        queue_target_t *qt = val.data;
-        printf("%30s (directory %s)\n", qt->filename, qt->target_directory);
-    }
-    qtc->c_close(qtc);
-
-
-    DBC *qsc;
-    queue_source_db->cursor(queue_source_db, NULL, &qsc, 0);
-    printf("Sources:\n");
-    while(qsc->c_get(qsc, &key, &val, DB_NEXT) == 0)
-    {
-        queue_source_t *qs = val.data;
-        printf("%10s: %30s\n", (char *)key.data, qs->target_filename);
-    }
-    qsc->c_close(qsc);
-
-    queue_close();
-
-    return 0;
+	return 0;
 }
 
