@@ -47,6 +47,8 @@
     NSString *nick;
     NSString *descriptionString;
     NSArray *users;
+    NSArray *filter;
+    NSArray *filteredUsers;
     MHSysTree *usersTree;
     BOOL needUpdating;
     NSTimer *updateTimer;
@@ -65,6 +67,7 @@
 - (IBAction)toggleColumn:(id)sender;
 - (IBAction)bookmarkHub:(id)sender;
 - (IBAction)grantExtraSlot:(id)sender;
+- (IBAction)filter:(id)sender;
 
 - (void)updateUserTable:(NSTimer *)aTimer;
 - (id)initWithAddress:(NSString *)anAddress nick:(NSString *)aNick;

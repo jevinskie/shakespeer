@@ -20,6 +20,7 @@
                 autoMatchFilelist = id; 
                 bookmarkHub = id; 
                 browseUser = id; 
+                filter = id; 
                 grantExtraSlot = id; 
                 sendMessage = id; 
                 startPrivateChat = id; 
@@ -40,7 +41,6 @@
                 tcShare = NSTableColumn; 
                 tcSpeed = NSTableColumn; 
                 tcTag = NSTableColumn; 
-                userArrayController = FilteringArrayController; 
                 userScrollView = NSScrollView; 
                 userTable = NSTableView; 
             }; 

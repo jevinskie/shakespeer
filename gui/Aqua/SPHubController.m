@@ -149,6 +149,40 @@
     numStaticNickMenuEntries = [nickMenu numberOfItems];
 }
 
+- (void)filterUsers
+{
+    if(filter == nil || [filter count] == 0)
+    {
+        [filteredUsers release];
+        filteredUsers = [users retain];
+        return;
+    }
+
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[users count]];
+    NSEnumerator *e = [users objectEnumerator];
+    SPUser *user;
+    while((user = [e nextObject]) != nil)
+    {
+        NSEnumerator *f = [filter objectEnumerator];
+        NSString *fs;
+        BOOL add = YES;
+        while((fs = [f nextObject]) != nil)
+        {
+            if([fs length] > 0 &&
+               [[user nick] rangeOfString:fs options:NSCaseInsensitiveSearch].location == NSNotFound)
+            {
+                add = NO;
+                break;
+            }
+        }
+        if(add)
+            [array addObject:user];
+    }
+
+    [filteredUsers release];
+    filteredUsers = [array retain];
+}
+
 - (void)updateUserTable:(NSTimer *)aTimer
 {
     if(needUpdating)
@@ -165,6 +199,7 @@
 
         [users release];
         users = [[usersTree allObjects] retain];
+        [self filterUsers];
         [userTable reloadData];
         needUpdating = NO;
 
@@ -819,6 +854,18 @@
     }
 }
 
+- (IBAction)filter:(id)sender
+{
+    NSString *filterString = [sender stringValue];
+    [filter release];
+    filter = nil;
+    if([filterString length] > 0)
+        filter = [[filterString componentsSeparatedByString:@" "] retain];
+
+    [self filterUsers];
+    [userTable reloadData];
+}
+
 #pragma mark -
 #pragma mark NSSplitView delegates
 
@@ -872,14 +919,14 @@
 
 - (int)numberOfRowsInTableView:(NSTableView *)aTableView
 {
-    return [users count];
+    return [filteredUsers count];
 }
 
 - (id)tableView:(NSTableView *)aTableView
  objectValueForTableColumn:(NSTableColumn *)aTableColumn
             row:(int)rowIndex
 {
-    SPUser *user = [users objectAtIndex:rowIndex];
+    SPUser *user = [filteredUsers objectAtIndex:rowIndex];
 
     if(user)
     {
