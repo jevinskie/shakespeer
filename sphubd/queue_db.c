@@ -83,20 +83,24 @@ static int queue_reset_db(void)
     while(qtc->c_get(qtc, &key, &val, DB_NEXT) == 0)
     {
         queue_target_t *qt = val.data;
-        qt->flags &= ~QUEUE_TARGET_ACTIVE;
-        int rc = qtc->c_put(qtc, &key, &val, DB_CURRENT);
-        if(rc != 0)
-        {
-            g_warning("update: %s", db_strerror(rc));
-        }
+	if((qt->flags & QUEUE_TARGET_ACTIVE) == QUEUE_TARGET_ACTIVE)
+	{
+	    qt->flags &= ~QUEUE_TARGET_ACTIVE;
+	    int rc = qtc->c_put(qtc, &key, &val, DB_CURRENT);
+	    if(rc != 0)
+	    {
+		g_warning("update: %s", db_strerror(rc));
+	    }
+	}
     }
 
     txn_return_val_if_fail(qtc->c_close(qtc) == 0, -1);
     return_val_if_fail(txn->commit(txn, 0) == 0, -1);
 
+    txn = NULL;
     return_val_if_fail(db_transaction(&txn) == 0, -1);
     DBC *qfc;
-    queue_filelist_db->cursor(queue_filelist_db, NULL, &qfc, 0);
+    queue_filelist_db->cursor(queue_filelist_db, txn, &qfc, 0);
     txn_return_val_if_fail(qfc, -1);
 
     memset(&key, 0, sizeof(DBT));
@@ -105,12 +109,15 @@ static int queue_reset_db(void)
     while(qfc->c_get(qfc, &key, &val, DB_NEXT) == 0)
     {
         queue_filelist_t *qf = val.data;
-        qf->flags &= ~QUEUE_TARGET_ACTIVE;
-        int rc = qfc->c_put(qfc, &key, &val, DB_CURRENT);
-        if(rc != 0)
-        {
-            g_warning("update: %s", db_strerror(rc));
-        }
+	if((qf->flags & QUEUE_TARGET_ACTIVE) == QUEUE_TARGET_ACTIVE)
+	{
+	    qf->flags &= ~QUEUE_TARGET_ACTIVE;
+	    int rc = qfc->c_put(qfc, &key, &val, DB_CURRENT);
+	    if(rc != 0)
+	    {
+		g_warning("update: %s", db_strerror(rc));
+	    }
+	}
     }
 
     txn_return_val_if_fail(qfc->c_close(qfc) == 0, -1);
