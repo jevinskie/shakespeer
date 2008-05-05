@@ -33,9 +33,7 @@
         isOperator:(BOOL)isOp
        extraSlots:(unsigned)anExtraSlots
 {
-    self = [super init];
-    if(self)
-    {
+    if ((self = [super init])) {
         nick = [aNick copy];
         [self setDescription:aDescription];
         [self setTag:aTag];
@@ -46,6 +44,7 @@
         [self setExtraSlots:anExtraSlots];
         [self updateDisplayNick];
     }
+    
     return self;
 }
 
@@ -108,7 +107,7 @@
 {
     int op_diff = ([aUser isOperator] ? 1 : 0) - (isOperator ? 1 : 0);
 
-    if(op_diff == 0)
+    if (op_diff == 0)
         return [nick caseInsensitiveCompare:[aUser nick]];
     return op_diff;
 }
@@ -169,8 +168,7 @@
 
 - (void)setExtraSlots:(int)aValue
 {
-    if(aValue != extraSlots)
-    {
+    if (aValue != extraSlots) {
         extraSlots = aValue;
         [self updateDisplayNick];
     }
@@ -180,13 +178,11 @@
 {
     [displayNick release];
 
-    if(extraSlots > 0)
-    {
+    if (extraSlots > 0) {
         displayNick = [[NSString stringWithFormat:@"%@ (+%u)", nick, extraSlots]
                                   truncatedString:NSLineBreakByTruncatingTail];
     }
-    else
-    {
+    else {
         displayNick = [nick truncatedString:NSLineBreakByTruncatingTail];
     }
 }

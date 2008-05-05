@@ -43,10 +43,9 @@ void registerSPTransformers(void)
 + (id)defaultHumanSizeTransformer
 {
     static id def = nil;
-    if(def == nil)
-    {
+    if (def == nil)
         def = [[HumanSizeTransformer alloc] init];
-    }
+    
     return def;
 }
 
@@ -63,6 +62,7 @@ void registerSPTransformers(void)
 - (id)transformedValue:(id)value
 {
     NSAttributedString *str = [[NSString stringWithUTF8String:str_size_human([value longLongValue])] truncatedString:NSLineBreakByTruncatingTail];
+    
     return [str autorelease];
 }
 @end
@@ -84,11 +84,11 @@ void registerSPTransformers(void)
     NSString *str;
     int num = [value intValue];
 
-    if(num < 1024)
+    if (num < 1024)
         str = [NSString stringWithFormat:@"%i B/s", num];
-    else if(num < 999.0*1024) /* kilobinary */
+    else if (num < 999.0*1024) /* kilobinary */
         str = [NSString stringWithFormat:@"%.1f KiB/s", (float)num/1024];
-    else if(num < 999.0*1024*1024) /* megabinary */
+    else if (num < 999.0*1024*1024) /* megabinary */
         str = [NSString stringWithFormat:@"%.1f MiB/s", (float)num/(1024*1024)];
     else
         str = [NSString stringWithFormat:@"%.1f GiB/s", (float)num/(1024*1024*1024)];
@@ -126,9 +126,11 @@ void registerSPTransformers(void)
 
 - (id)init
 {
-    self = [super init];
-    defaultImage = [[NSImage imageNamed:@"user"] retain];
-    opImage = [[NSImage imageNamed:@"op"] retain];
+    if ((self = [super init])) {
+        defaultImage = [[NSImage imageNamed:@"user"] retain];
+        opImage = [[NSImage imageNamed:@"op"] retain];
+    }
+    
     return self;
 }
 
@@ -142,10 +144,10 @@ void registerSPTransformers(void)
 + (id)defaultNickImageTransformer
 {
     static id def = nil;
-    if(def == nil)
-    {
+    
+    if (def == nil)
         def = [[NickImageTransformer alloc] init];
-    }
+    
     return def;
 }
 
@@ -161,7 +163,7 @@ void registerSPTransformers(void)
 
 - (id)transformedValue:(id)value
 {
-    if([value isOperator])
+    if ([value isOperator])
         return opImage;
     else
         return defaultImage;
@@ -172,41 +174,42 @@ void registerSPTransformers(void)
 
 - (id)init
 {
-    self = [super init];
-    audioImage = [[[NSWorkspace sharedWorkspace] iconForFileType:@".mp3"] retain];
-    [audioImage setSize:NSMakeSize(16.0, 16.0)];
-
-    compressedImage = [[[NSWorkspace sharedWorkspace] iconForFileType:@".gz"] retain];
-    [compressedImage setSize:NSMakeSize(16.0, 16.0)];
-
-    documentImage = [[[NSWorkspace sharedWorkspace] iconForFileType:@".pdf"] retain];
-    [documentImage setSize:NSMakeSize(16.0, 16.0)];
-
-    executableImage = [[[NSWorkspace sharedWorkspace] iconForFileType:@".sh"] retain];
-    [executableImage setSize:NSMakeSize(16.0, 16.0)];
-
-    pictureImage = [[[NSWorkspace sharedWorkspace] iconForFileType:@".jpg"] retain];
-    [pictureImage setSize:NSMakeSize(16.0, 16.0)];
-
-    videoImage = [[[NSWorkspace sharedWorkspace] iconForFileType:@".avi"] retain];
-    [videoImage setSize:NSMakeSize(16.0, 16.0)];
-
-    folderImage = [[[NSWorkspace sharedWorkspace] iconForFile:@"/usr"] retain];
-    [folderImage setSize:NSMakeSize(16.0, 16.0)];
-
-    anyImage = [[[NSWorkspace sharedWorkspace] iconForFileType:@".asdfqs"] retain];
-    [anyImage setSize:NSMakeSize(16.0, 16.0)];
-
+    if ((self = [super init])) {
+        audioImage = [[[NSWorkspace sharedWorkspace] iconForFileType:@".mp3"] retain];
+        [audioImage setSize:NSMakeSize(16.0, 16.0)];
+        
+        compressedImage = [[[NSWorkspace sharedWorkspace] iconForFileType:@".gz"] retain];
+        [compressedImage setSize:NSMakeSize(16.0, 16.0)];
+        
+        documentImage = [[[NSWorkspace sharedWorkspace] iconForFileType:@".pdf"] retain];
+        [documentImage setSize:NSMakeSize(16.0, 16.0)];
+        
+        executableImage = [[[NSWorkspace sharedWorkspace] iconForFileType:@".sh"] retain];
+        [executableImage setSize:NSMakeSize(16.0, 16.0)];
+        
+        pictureImage = [[[NSWorkspace sharedWorkspace] iconForFileType:@".jpg"] retain];
+        [pictureImage setSize:NSMakeSize(16.0, 16.0)];
+        
+        videoImage = [[[NSWorkspace sharedWorkspace] iconForFileType:@".avi"] retain];
+        [videoImage setSize:NSMakeSize(16.0, 16.0)];
+        
+        folderImage = [[[NSWorkspace sharedWorkspace] iconForFile:@"/usr"] retain];
+        [folderImage setSize:NSMakeSize(16.0, 16.0)];
+        
+        anyImage = [[[NSWorkspace sharedWorkspace] iconForFileType:@".asdfqs"] retain];
+        [anyImage setSize:NSMakeSize(16.0, 16.0)];
+    }
+    
     return self;
 }
 
 + (id)defaultFiletypeImageTransformer
 {
     static id def = nil;
-    if(def == nil)
-    {
+    
+    if (def == nil)
         def = [[FiletypeImageTransformer alloc] init];
-    }
+    
     return def;
 }
 
@@ -237,8 +240,7 @@ void registerSPTransformers(void)
 {
     NSImage *img = nil;
     
-    switch([value intValue])
-    {
+    switch([value intValue]) {
         case SHARE_TYPE_AUDIO:
             img = audioImage;
             break;
@@ -285,6 +287,7 @@ void registerSPTransformers(void)
 - (id)transformedValue:(id)value
 {
     share_type_t ftype = share_filetype([value UTF8String]);
+    
     return [[FiletypeImageTransformer defaultFiletypeImageTransformer]
         transformedValue:[NSNumber numberWithInt:ftype]];
 }
@@ -294,11 +297,13 @@ void registerSPTransformers(void)
 
 - (id)init
 {
-    self = [super init];
-    downloadImage = [[NSImage imageNamed:@"download"] retain];
-    uploadImage = [[NSImage imageNamed:@"upload"] retain];
-    idleImage = [[NSImage imageNamed:@"idle"] retain];
-    errorImage = [[NSImage imageNamed:@"error"] retain];
+    if ((self = [super init])) {
+        downloadImage = [[NSImage imageNamed:@"download"] retain];
+        uploadImage = [[NSImage imageNamed:@"upload"] retain];
+        idleImage = [[NSImage imageNamed:@"idle"] retain];
+        errorImage = [[NSImage imageNamed:@"error"] retain];
+    }
+    
     return self;
 }
 
@@ -324,8 +329,7 @@ void registerSPTransformers(void)
 - (id)transformedValue:(id)value
 {
     int state = [value intValue];
-    switch(state)
-    {
+    switch(state) {
         case SPTransferState_Downloading:
             return downloadImage;
             break;

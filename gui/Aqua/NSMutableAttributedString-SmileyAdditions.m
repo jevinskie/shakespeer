@@ -26,8 +26,7 @@
 {
     static NSDictionary *smilies = nil;
 
-    if(smilies == nil)
-    {
+    if (smilies == nil) {
         smilies = [[NSDictionary alloc] initWithObjectsAndKeys:
                                                    @"face-smile.png", @":-)",
                                                    @"face-smile.png", @":)",
@@ -52,16 +51,13 @@
     }
 
     BOOL found;
-    do
-    {
+    do {
         found = NO;
         NSEnumerator *e = [smilies keyEnumerator];
         NSString *smiley;
-        while((smiley = [e nextObject]))
-        {
+        while ((smiley = [e nextObject])) {
             NSRange smileyRange = [[self mutableString] rangeOfString:smiley];
-            if(smileyRange.location != NSNotFound)
-            {
+            if (smileyRange.location != NSNotFound) {
                 NSString *filename = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:[smilies objectForKey:smiley]];
                 NSFileWrapper *myFileWrapper = [[[NSFileWrapper alloc] initWithPath:filename] autorelease];
                 NSTextAttachment *myTextAtt = [[[NSTextAttachment alloc] initWithFileWrapper:myFileWrapper] autorelease];
@@ -71,8 +67,7 @@
                 found = YES;
             }
         }
-    } while(found);
+    } while (found);
 }
 
 @end
-

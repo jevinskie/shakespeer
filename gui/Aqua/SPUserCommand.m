@@ -31,15 +31,14 @@
             context:(int)aContext
                 hub:(NSString *)anAddress
 {
-    self = [super init];
-    if(self)
-    {
+    if ((self = [super init])) {
         title = [aTitle retain];
         command = [aCommand retain];
         address = [anAddress retain];
         type = aType;
         context = aContext;
     }
+    
     return self;
 }
 
@@ -86,24 +85,22 @@
                                          range:NSMakeRange(0, [mutableCommand length])];
 
     /* replace all %[line:xxx] placeholders */
-    while(1)
-    {
+    while (1) {
         NSRange lineRange = [mutableCommand rangeOfString:@"%\x5bline:"];
-        if(lineRange.location == NSNotFound)
+        if (lineRange.location == NSNotFound)
             break;
         unsigned s = lineRange.location + lineRange.length;
         NSRange nameRange = [mutableCommand rangeOfString:@"\x5d"
                                                   options:0
                                                     range:NSMakeRange(s, [mutableCommand length] - s)];
-        if(nameRange.location == NSNotFound)
+        if (nameRange.location == NSNotFound)
             break;
         lineRange.length += nameRange.location - s + 1;
 
         NSString *param = [[SPMainWindowController sharedMainWindowController]
             requestUserCommandParameter:[mutableCommand substringWithRange:NSMakeRange(s, nameRange.location - s)]
                                   title:title];
-        if(param == nil)
-        {
+        if (param == nil) {
             [mutableCommand release];
             return;
         }
@@ -117,18 +114,14 @@
     NSLog(@"instantiating usercommand [%@]", mutableCommand);
 
     /* handle cases where there are no nick parameters */
-    if([nickArray count] == 0)
-    {
-        if([mutableCommand rangeOfString:@"%\x5b"].location != NSNotFound)
-        {
+    if ([nickArray count] == 0) {
+        if ([mutableCommand rangeOfString:@"%\x5b"].location != NSNotFound)
             NSLog(@"No nick parameters, skipping user command [%s]", mutableCommand);
-        }
         else
-        {
             [[SPApplicationController sharedApplicationController] sendRawCommand:mutableCommand toHub:address];
-        }
 
         [mutableCommand release];
+        
         return;
     }
 
@@ -136,24 +129,20 @@
     NSDictionary *nickParameter;
 
     /* handle nick-once type of commands: make nicks unique */
-    if([self type] == 2)
-    {
+    if ([self type] == 2) {
         NSMutableDictionary *uniqueNicks = [[[NSMutableDictionary alloc] init] autorelease];
-        while((nickParameter = [e nextObject]) != nil)
-        {
+        while ((nickParameter = [e nextObject]) != nil)
             [uniqueNicks setObject:nickParameter forKey:[nickParameter objectForKey:@"nick"]];
-        }
+        
         e = [uniqueNicks objectEnumerator];
     }
 
-    while((nickParameter = [e nextObject]) != nil)
-    {
+    while ((nickParameter = [e nextObject]) != nil) {
         NSMutableString *nickCommand = [mutableCommand mutableCopy];
-
         NSEnumerator *npe = [nickParameter keyEnumerator];
         NSString *param;
-        while((param = [npe nextObject]) != nil)
-        {
+        
+        while ((param = [npe nextObject]) != nil) {
             [nickCommand replaceOccurrencesOfString:[NSString stringWithFormat:@"%%[%@]", param]
                                          withString:[nickParameter objectForKey:param]
                                             options:NSCaseInsensitiveSearch
@@ -163,6 +152,7 @@
         [[SPApplicationController sharedApplicationController] sendRawCommand:nickCommand toHub:address];
         [nickCommand release];
     }
+    
     [mutableCommand release];
 }
 

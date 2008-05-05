@@ -48,8 +48,7 @@
 {
     static id sharedMainWindowController = nil;
 
-    if(sharedMainWindowController == nil)
-    {
+    if (sharedMainWindowController == nil) {
         sharedMainWindowController = [[SPMainWindowController alloc] init];
     }
 
@@ -59,8 +58,7 @@
 - (id)init
 {
     self = [super initWithWindowNibName:@"MainWindow"];
-    if(self)
-    {
+    if (self) {
         privateChats = [[NSMutableDictionary alloc] init];
         currentSearchType = SHARE_TYPE_ANY;
         [self setWindowFrameAutosaveName:@"MainWindow"];
@@ -81,13 +79,13 @@
     [self openDownloads:self];
     [self openUploads:self];
     
-    if([lastItem isEqualToString:@"Public Hubs"])
+    if ([lastItem isEqualToString:@"Public Hubs"])
         [self openHublist:self];
-    else if([lastItem isEqualToString:@"Bookmarks"])
+    else if ([lastItem isEqualToString:@"Bookmarks"])
         [self openBookmarks:self];
-    else if([lastItem isEqualToString:@"Downloads"])
+    else if ([lastItem isEqualToString:@"Downloads"])
         [self openDownloads:self];
-    else if([lastItem isEqualToString:@"Uploads"])
+    else if ([lastItem isEqualToString:@"Uploads"])
         [self openUploads:self];
     else
         [self openBookmarks:self];
@@ -178,25 +176,24 @@
     NSArray *tcs = [transferDrawerTable tableColumns];
     NSEnumerator *e = [tcs objectEnumerator];
     NSTableColumn *tc;
-    while((tc = [e nextObject]) != nil)
-    {
+    while ((tc = [e nextObject]) != nil) {
         [[tc dataCell] setWraps:YES];
         
-        if(tc == tcUser)
+        if (tc == tcUser)
             [[columnsMenu itemWithTag:0] setState:NSOnState];
-        else if(tc == tcStatus)
+        else if (tc == tcStatus)
             [[columnsMenu itemWithTag:1] setState:NSOnState];
-        else if(tc == tcTimeLeft)
+        else if (tc == tcTimeLeft)
             [[columnsMenu itemWithTag:2] setState:NSOnState];
-        else if(tc == tcSpeed)
+        else if (tc == tcSpeed)
             [[columnsMenu itemWithTag:3] setState:NSOnState];
-        else if(tc == tcFilename)
+        else if (tc == tcFilename)
             [[columnsMenu itemWithTag:4] setState:NSOnState];
-        else if(tc == tcSize)
+        else if (tc == tcSize)
             [[columnsMenu itemWithTag:5] setState:NSOnState];
-        else if(tc == tcPath)
+        else if (tc == tcPath)
             [[columnsMenu itemWithTag:6] setState:NSOnState];
-        else if(tc == tcHub)
+        else if (tc == tcHub)
             [[columnsMenu itemWithTag:7] setState:NSOnState];
     }
     
@@ -236,10 +233,8 @@
 
 - (void)highlightItem:(id)anItem
 {
-    if(anItem != currentSidebarItem)
-    {
-        if([anItem respondsToSelector:@selector(setHighlighted:)])
-        {
+    if (anItem != currentSidebarItem) {
+        if ([anItem respondsToSelector:@selector(setHighlighted:)]) {
             [anItem setHighlighted:YES];
             [sideBar setNeedsDisplay];
         }
@@ -302,8 +297,7 @@
 {
     NSString *path = [[aNotification userInfo] objectForKey:@"path"];
 
-    if([path isEqualToString:@""])
-    {
+    if ([path isEqualToString:@""]) {
         uint64_t size = [[[aNotification userInfo] objectForKey:@"size"] unsignedLongLongValue];
         uint64_t totsize = [[[aNotification userInfo] objectForKey:@"totsize"] unsignedLongLongValue];
         uint64_t dupsize = [[[aNotification userInfo] objectForKey:@"dupsize"] unsignedLongLongValue];
@@ -320,18 +314,16 @@
 - (void)userCommandNotification:(NSNotification *)aNotification
 {
     int context = [[[aNotification userInfo] objectForKey:@"context"] intValue];
-    /* if((context & 4) == 4) */
+    /* if ((context & 4) == 4) */
     {
         NSString *ucHub = [[aNotification userInfo] objectForKey:@"hubAddress"];
 
-        if(userCommands == nil)
-        {
+        if (userCommands == nil) {
             userCommands = [[NSMutableDictionary alloc] initWithCapacity:1];
         }
 
         NSMutableArray *ucArray = [userCommands objectForKey:ucHub];
-        if(ucArray == nil)
-        {
+        if (ucArray == nil) {
             ucArray = [[NSMutableArray alloc] initWithCapacity:1];
             [userCommands setObject:ucArray forKey:ucHub];
         }
@@ -366,17 +358,14 @@
     NSString *chatKey = [NSString stringWithFormat:@"%@@%@", chatRemoteNick, chatHubAddress];
 
     SPChatWindowController *chatController = [privateChats objectForKey:chatKey];
-    if(chatController == nil)
-    {
+    if (chatController == nil) {
         chatController = [[SPChatWindowController alloc] initWithRemoteNick:chatRemoteNick
                                                                         hub:chatHubAddress
                                                                      myNick:chatMyNick];
-        if(chatController == nil)
-        {
+        if (chatController == nil) {
             NSLog(@"failed to create chat controller");
         }
-        else
-        {
+        else {
             [sideBar addItem:chatController];
             /* [sideBar displayItem:chatController]; */
             [privateChats setObject:chatController forKey:chatKey];
@@ -392,8 +381,7 @@
 
     NSString *storedPassword = [[SPBookmarkController sharedBookmarkController]
         passwordForHub:passwordHub nick:passwordNick];
-    if(storedPassword && [storedPassword length] > 0)
-    {
+    if (storedPassword && [storedPassword length] > 0) {
         [[SPApplicationController sharedApplicationController]
             setPassword:storedPassword
                  forHub:passwordHub];
@@ -440,8 +428,7 @@
                                                           repeats:NO] retain];
     NSString *message;
 #if 0
-    if([hubAddress length])
-    {
+    if ([hubAddress length]) {
         message = [NSString stringWithFormat:@"%@: %@", hubAddress, aMessage];
     }
     else
@@ -467,12 +454,10 @@
     SPFilelistController *fl = [[SPFilelistController alloc] initWithFile:filename
                                                                      nick:nick
                                                                       hub:hubAddress];
-    if(fl == nil)
-    {
+    if (fl == nil) {
         NSLog(@"failed to create filelist controller");
     }
-    else
-    {
+    else {
         [sideBar addItem:fl];
         /* [sideBar displayItem:fl]; */
         [fl release];
@@ -485,8 +470,7 @@
     NSString *newAddress = [[aNotification userInfo] objectForKey:@"newAddress"];
 
     SPHubController *hubController = [hubs objectForKey:hubAddress];
-    if(hubController)
-    {
+    if (hubController) {
         [hubs removeObjectForKey:hubAddress];
         [hubs setObject:hubController forKey:newAddress];
         [self syncHubsToDisk];
@@ -502,18 +486,15 @@
     NSArray *hubsArray = [sideBar itemsInSection:@"Hubs"]; /* XXX: oh no! */
     NSEnumerator *e = [hubsArray objectEnumerator];
     SPHubController *hub;
-    while((hub = [e nextObject]) != nil)
-    {
-        if([[hub address] isEqualToString:hubAddress])
-        {
+    while ((hub = [e nextObject]) != nil) {
+        if ([[hub address] isEqualToString:hubAddress]) {
             hubController = hub;
             break;
         }
     }
 
     /* none found, create a new one */
-    if(hubController == nil)
-    {
+    if (hubController == nil) {
         hubController = [[SPHubController alloc] initWithAddress:hubAddress
                                                             nick:[[aNotification userInfo] objectForKey:@"nick"]];
         [hubController setDescriptionString:[[aNotification userInfo] objectForKey:@"description"]];
@@ -524,8 +505,7 @@
         [hubs setObject:hubController forKey:hubAddress];
         [hubController release];
     }
-    else
-    {
+    else {
         [hubController setConnected];
     }
     
@@ -587,15 +567,14 @@
     NSString *password = [connectPassword stringValue];
     
     // check if a nickname was filled in
-    if(!nickname || [nickname length] == 0)
+    if (!nickname || [nickname length] == 0)
         nickname = nil;
     
     // check if a password was filled in
-    if(!password || [password length] == 0)
+    if (!password || [password length] == 0)
         password = nil;
     
-    if(address && [address length])
-    {
+    if (address && [address length]) {
         [[SPApplicationController sharedApplicationController] connectWithAddress:address
                                                                              nick:nickname
                                                                       description:nil
@@ -614,8 +593,7 @@
 
 - (IBAction)openHublist:(id)sender
 {
-    if(!publicHubsController)
-    {
+    if (!publicHubsController) {
         publicHubsController = [[SPPublicHubsController alloc] init];
     }
     [sideBar addItem:publicHubsController];
@@ -631,8 +609,7 @@
 
 - (IBAction)openDownloads:(id)sender
 {
-    if(!queueController)
-    {
+    if (!queueController) {
         queueController = [[SPQueueController alloc] init];
     }
     [sideBar addItem:queueController];
@@ -641,8 +618,7 @@
 
 - (IBAction)openUploads:(id)sender
 {
-    if(!transferController)
-    {
+    if (!transferController) {
         transferController = [[SPTransferController alloc] init];
     }
     [sideBar addItem:transferController];
@@ -657,8 +633,7 @@
 - (IBAction)toggleColumn:(id)sender
 {
     NSTableColumn *tc = nil;
-    switch([sender tag])
-    {
+    switch([sender tag]) {
         case 0: tc = tcUser; break;
         case 1: tc = tcStatus; break;
         case 2: tc = tcTimeLeft; break;
@@ -668,16 +643,14 @@
         case 6: tc = tcPath; break;
         case 7: tc = tcHub; break;
     }
-    if(tc == nil)
+    if (tc == nil)
         return;
     
-    if([sender state] == NSOffState)
-    {
+    if ([sender state] == NSOffState) {
         [sender setState:NSOnState];
         [transferDrawerTable addTableColumn:tc];
     }
-    else
-    {
+    else {
         [sender setState:NSOffState];
         [transferDrawerTable removeTableColumn:tc];
     }
@@ -692,8 +665,7 @@
               hubAddress:(NSString *)hubAddress
 {
 #if 0
-    if([currentSidebarItem isKindOfClass:[SPSearchWindowController class]])
-    {
+    if ([currentSidebarItem isKindOfClass:[SPSearchWindowController class]]) {
         [currentSidebarItem newSearchWithString:searchString
                                            size:searchSize
                                 sizeRestriction:sizeRestriction
@@ -732,8 +704,7 @@
 {
     NSString *searchString = [toolbarSearchField stringValue];
 
-    if([searchString length])
-    {
+    if ([searchString length]) {
         [self performSearchFor:searchString
                           size:nil
                sizeRestriction:SHARE_SIZE_NONE
@@ -747,7 +718,7 @@
 {
     currentSearchType = [(NSMenuItem *)sender tag];
     int i;
-    for(i = 1; i <= 8; i++)
+    for (i = 1; i <= 8; i++)
         [[searchFieldMenu itemWithTag:i] setState:NSOffState];
     [[searchFieldMenu itemWithTag:currentSearchType] setState:NSOnState];
 
@@ -776,7 +747,7 @@
 - (float)splitView:(NSSplitView *)sender constrainMinCoordinate:(float)proposedMin
        ofSubviewAt:(int)offset
 {
-    if(sender == sidebarSplitView)
+    if (sender == sidebarSplitView)
         return SIDEBAR_MIN_SIZE;
     return proposedMin;
 }
@@ -784,7 +755,7 @@
 - (float)splitView:(NSSplitView *)sender constrainMaxCoordinate:(float)proposedMax
        ofSubviewAt:(int)offset
 {
-    if(sender == sidebarSplitView)
+    if (sender == sidebarSplitView)
         return SIDEBAR_MAX_SIZE;
     return proposedMax;
 }
@@ -805,8 +776,7 @@
     NSRect firstFrame = [firstView frame];
     NSRect secondFrame = [secondView frame];
 
-    if(sender == sidebarSplitView)
-    {
+    if (sender == sidebarSplitView) {
         /* keep sidebar in constant width */
         secondFrame.size.width = newFrame.size.width - (firstFrame.size.width + dividerThickness);
         secondFrame.size.height = newFrame.size.height;
@@ -825,7 +795,7 @@
     [[self window] setTitle:[NSString stringWithFormat:@"ShakesPeer - %@", [sideBarItem title]]];
     [contextMenuButton setMenu:[sideBarItem menu]];
     
-    if([sideBarItem respondsToSelector:@selector(focusChatInput)])
+    if ([sideBarItem respondsToSelector:@selector(focusChatInput)])
         [sideBarItem focusChatInput];
     
     [[NSUserDefaults standardUserDefaults] setObject:[sideBarItem title] forKey:@"lastSidebarItem"];
@@ -833,18 +803,16 @@
 
 - (void)sideBar:(SPSideBar *)aSideBar willCloseItem:(id)sideBarItem
 {
-    if([sideBarItem isKindOfClass:[SPHubController class]])
-    {
+    if ([sideBarItem isKindOfClass:[SPHubController class]]) {
         [hubs removeObjectForKey:[(SPHubController *)sideBarItem address]];
     }
 }
 
 - (void)sideBar:(SPSideBar *)aSideBar didCloseItem:(id)sideBarItem
 {
-    if([sideBarItem respondsToSelector:@selector(sectionTitle)])
-    {
+    if ([sideBarItem respondsToSelector:@selector(sectionTitle)]) {
         NSString *sectionTitle = [sideBarItem sectionTitle];
-        if([sideBar numberOfItemsInSection:sectionTitle] == 0)
+        if ([sideBar numberOfItemsInSection:sectionTitle] == 0)
             [sideBar removeItem:sectionTitle];
     }
 }
@@ -872,16 +840,14 @@
 {
     /* fill in the connected hubs in the hubs popup menu */
     /* first remove all hub items (except the first "All hubs" item) */
-    while([advSearchHubs numberOfItems] > 1)
-    {
+    while ([advSearchHubs numberOfItems] > 1) {
         [advSearchHubs removeItemAtIndex:1];
     }
     NSArray *hubsArray = [sideBar itemsInSection:@"Hubs"]; /* XXX: oh no! */
     NSMutableArray *hubTitlesArray = [NSMutableArray arrayWithCapacity:[hubsArray count]];
     NSEnumerator *e = [hubsArray objectEnumerator];
     SPHubController *hub;
-    while((hub = [e nextObject]) != nil)
-    {
+    while ((hub = [e nextObject]) != nil) {
         [hubTitlesArray addObject:[hub address]];
     }
     [advSearchHubs addItemsWithTitles:hubTitlesArray];
@@ -896,18 +862,16 @@
 - (IBAction)advSearchExecute:(id)sender
 {
     NSString *searchString = [advSearchField stringValue];
-    if([searchString length] == 0)
+    if ([searchString length] == 0)
         return;
     
     [NSApp endSheet:advSearchWindow];
 
-    if(sender != advSearchField)
-    {
+    if (sender != advSearchField) {
         /* Need to manually add the search string to the recent searches menu
          * of the search field(s) */
         NSArray *recentSearches = [advSearchField recentSearches];
-        if([recentSearches containsObject:searchString] == NO)
-        {
+        if ([recentSearches containsObject:searchString] == NO) {
             NSArray *newRecentSearches = [NSArray arrayWithObject:searchString];
             NSArray *mergedRecentSearches = [newRecentSearches arrayByAddingObjectsFromArray:recentSearches];
             [advSearchField setRecentSearches:mergedRecentSearches];
@@ -919,16 +883,14 @@
     share_size_restriction_t sizeRestriction = SHARE_SIZE_NONE;
     NSString *searchSizeString = [advSearchSize stringValue];
 
-    if([searchSizeString length])
-    {
+    if ([searchSizeString length]) {
         /* convert the string to an integer and apply the suffix
         */
         uint64_t searchSize = [searchSizeString unsignedLongLongValue];
         int suffix = [advSearchSizeSuffix indexOfSelectedItem];
-        if(suffix < 0)
+        if (suffix < 0)
             suffix = 0;
-        if(suffix > 0)
-        {
+        if (suffix > 0) {
             searchSize = searchSize << (10 * suffix);
         }
 
@@ -940,8 +902,7 @@
     }
 
     NSString *hubAddress = nil;
-    if([advSearchHubs indexOfSelectedItem] > 0)
-    {
+    if ([advSearchHubs indexOfSelectedItem] > 0) {
         hubAddress = [advSearchHubs titleOfSelectedItem];
     }
 

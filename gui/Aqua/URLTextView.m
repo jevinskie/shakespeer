@@ -7,18 +7,18 @@
 #import "URLTextView.h"
 
 static NSCursor *sHandCursor = nil;
-static NSRectArray NSCopyRectArray( NSRectArray inSomeRects, int inArraySize );
-static BOOL NSMouseInRects( NSPoint inPoint, NSRectArray inSomeRects, int inArraySize, BOOL inFlipped );
+static NSRectArray NSCopyRectArray(NSRectArray inSomeRects, int inArraySize);
+static BOOL NSMouseInRects(NSPoint inPoint, NSRectArray inSomeRects, int inArraySize, BOOL inFlipped);
 
 @implementation URLTextView
 
 - (id)initWithFrame:(NSRect)inFrame
 {
-    if( ![super initWithFrame:inFrame] )
-        return nil;
-
-    [[self window] resetCursorRects];
-    [self setFrame:[self frame]];
+    if ((self = [super initWithFrame:inFrame])) {
+        [[self window] resetCursorRects];
+        [self setFrame:[self frame]];
+    }
+    
     return self;
 }
 
@@ -49,10 +49,9 @@ static BOOL NSMouseInRects( NSPoint inPoint, NSRectArray inSomeRects, int inArra
     charIndex = [[self layoutManager] characterIndexForGlyphAtIndex:glyphIndex];
 
     // Check if click is in valid link attributed range, and is inside the bounds of that style range, else fall back to default handler    
-    if( [[self textStorage] length] > 0 )
+    if ([[self textStorage] length] > 0)
         linkURL = [[self textStorage] attribute:NSLinkAttributeName atIndex:charIndex effectiveRange:&linkRange];
-    if( !linkURL )
-    {
+    if (!linkURL) {
         [super mouseDown:inEvent];
         return;
     }
@@ -68,34 +67,30 @@ static BOOL NSMouseInRects( NSPoint inPoint, NSRectArray inSomeRects, int inArra
                                     withinSelectedCharacterRange:linkRange
                                                  inTextContainer:[self textContainer]
                                                        rectCount:&linkCount];
-    linkRects = NSCopyRectArray( linkRects, linkCount );
+    linkRects = NSCopyRectArray(linkRects, linkCount);
 
     // One last check to make sure we're really in the bounds of the link.
     // Useful when the link runs up to the end of the document and a click in
     // the black area below still passes the style range test above.
-    if( !NSMouseInRects( mouseLoc, linkRects, linkCount, NO ) )
-    {
-        free( linkRects );
+    if (!NSMouseInRects(mouseLoc, linkRects, linkCount, NO)) {
+        free(linkRects);
         [super mouseDown:inEvent];
         return;
     }
 
     // Draw outselves as clicked and kick off tracking
     [[self textStorage] addAttribute:NSForegroundColorAttributeName value:[NSColor orangeColor] range:linkRange];
-    while( !done )
-    {
+    while (!done) {
         // Get the next event and mouse location
         inEvent = [NSApp nextEventMatchingMask:eventMask untilDate:distantFuture inMode:NSEventTrackingRunLoopMode dequeue:YES];
         mouseLoc = [self convertPoint:[inEvent locationInWindow] fromView:nil];
 
-        switch( [inEvent type] )
-        {
+        switch([inEvent type]) {
             // Case Done Tracking Click
             case NSRightMouseUp:
-             case NSLeftMouseUp:
-
+            case NSLeftMouseUp:
                 // If we were still inside the link, draw unclicked and open link
-                if( NSMouseInRects( mouseLoc, linkRects, linkCount, NO ) )
+                if (NSMouseInRects(mouseLoc, linkRects, linkCount, NO))
                     [[NSWorkspace sharedWorkspace] openURL:linkURL];
 
                 [[self textStorage] addAttribute:NSForegroundColorAttributeName
@@ -104,27 +99,25 @@ static BOOL NSMouseInRects( NSPoint inPoint, NSRectArray inSomeRects, int inArra
                 done = YES;
                 break;
 
-                // Case Mouse Moved
-             case NSLeftMouseDragged:
+            // Case Mouse Moved
+            case NSLeftMouseDragged:
             case NSRightMouseDragged:
-
                 // Check if we moved into the link
-                if( NSMouseInRects( mouseLoc, linkRects, linkCount, NO ) && inRects == NO )
-                {
+                if (NSMouseInRects(mouseLoc, linkRects, linkCount, NO) && inRects == NO) {
                     [[self textStorage] addAttribute:NSForegroundColorAttributeName
                                                value:[NSColor orangeColor]
                                                range:linkRange];
                     inRects = YES;
                 }
-                else
+                else {
                     // Check if we moved out of the link
-                    if( !NSMouseInRects( mouseLoc, linkRects, linkCount, NO ) && inRects == YES )
-                    {
+                    if (!NSMouseInRects(mouseLoc, linkRects, linkCount, NO) && inRects == YES) {
                         [[self textStorage] addAttribute:NSForegroundColorAttributeName
                                                    value:[NSColor colorWithCalibratedRed:0.1 green:0.3 blue:0.8 alpha:1.0]
                                                    range:linkRange];
                         inRects = NO;
                     }
+                }
                 break;
 
             default:
@@ -133,7 +126,7 @@ static BOOL NSMouseInRects( NSPoint inPoint, NSRectArray inSomeRects, int inArra
     }
 
     // Free our copy of the link region
-    free( linkRects );
+    free(linkRects);
 }
 
 - (void)resetCursorRects
@@ -148,8 +141,8 @@ static BOOL NSMouseInRects( NSPoint inPoint, NSRectArray inSomeRects, int inArra
     unsigned int index;
 
     // Create the hand cursor if it hasn't already been made
-    if( !sHandCursor )
-        sHandCursor = [[NSCursor alloc] initWithImage:[NSImage imageNamed:@"URLTextViewHand"] hotSpot:NSMakePoint( 5.0, 0.0 )];
+    if (!sHandCursor)
+        sHandCursor = [[NSCursor alloc] initWithImage:[NSImage imageNamed:@"URLTextViewHand"] hotSpot:NSMakePoint(5.0, 0.0)];
 
     // Find the range of visible characters
     visRect = [[self enclosingScrollView] documentVisibleRect];
@@ -158,17 +151,15 @@ static BOOL NSMouseInRects( NSPoint inPoint, NSRectArray inSomeRects, int inArra
 
     // Loop through all the visible characters
     scanLoc = charRange.location;
-    while( scanLoc < charRange.location + charRange.length )
-    {
+    while (scanLoc < charRange.location + charRange.length) {
         // Find the next range of characters with a link attribute
-        if( [[self textStorage] attribute:NSLinkAttributeName atIndex:scanLoc effectiveRange:&linkRange] )
-        {
+        if ([[self textStorage] attribute:NSLinkAttributeName atIndex:scanLoc effectiveRange:&linkRange]) {
             // Get the array of rects represented by an attribute range
             linkRects = [[self layoutManager] rectArrayForCharacterRange:linkRange withinSelectedCharacterRange:linkRange inTextContainer:[self textContainer] rectCount:&linkCount];
 
             // Loop through these rects adding them as cursor rects
-            for( index = 0; index < linkCount; index++ )
-                [self addCursorRect:NSIntersectionRect( visRect, linkRects[ index ] ) cursor:sHandCursor];
+            for (index = 0; index < linkCount; index++)
+                [self addCursorRect:NSIntersectionRect(visRect, linkRects[index]) cursor:sHandCursor];
         }
 
         // Even if we didn't find a link, the range returned tells us where to check next
@@ -178,23 +169,22 @@ static BOOL NSMouseInRects( NSPoint inPoint, NSRectArray inSomeRects, int inArra
 
 @end
 
-NSRectArray NSCopyRectArray( NSRectArray inSomeRects, int inArraySize )
+NSRectArray NSCopyRectArray(NSRectArray inSomeRects, int inArraySize)
 {
     NSRectArray array;
 
-    array = malloc( sizeof( NSRect ) * inArraySize );
-    memcpy( array, inSomeRects, sizeof( NSRect ) * inArraySize );
+    array = malloc(sizeof(NSRect) * inArraySize);
+    memcpy(array, inSomeRects, sizeof(NSRect) * inArraySize);
 
     return array;
 }
 
-BOOL NSMouseInRects( NSPoint inPoint, NSRectArray inSomeRects, int inArraySize, BOOL inFlipped )
+BOOL NSMouseInRects(NSPoint inPoint, NSRectArray inSomeRects, int inArraySize, BOOL inFlipped)
 {
     int index;
 
-    for( index = 0; index < inArraySize; index++ )
-    {
-        if( NSMouseInRect( inPoint, inSomeRects[ index ], inFlipped ) )
+    for (index = 0; index < inArraySize; index++) {
+        if (NSMouseInRect(inPoint, inSomeRects[index], inFlipped))
             return YES;
     }
 

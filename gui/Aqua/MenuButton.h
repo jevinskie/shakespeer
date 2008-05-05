@@ -33,19 +33,21 @@
     NSControlSize _controlSize;
     NSImage* _originalImage;
 }
-- (void) dealloc;
 
-- (void) mouseDown:(NSEvent *) theEvent;
-- (void) mouseUp:(NSEvent *) theEvent;
+- (void)dealloc;
 
-- (void) setMenuDelay:(NSTimeInterval) aDelay;
-- (NSTimeInterval) menuDelay;
+- (void)mouseDown:(NSEvent *)theEvent;
+- (void)mouseUp:(NSEvent *)theEvent;
 
-- (void) setMenu:(NSMenu *) aMenu;
-- (NSMenu *) menu;
+- (void)setMenuDelay:(NSTimeInterval)aDelay;
+- (NSTimeInterval)menuDelay;
 
-- (void) displayMenu;
+- (void)setMenu:(NSMenu *)aMenu;
+- (NSMenu *)menu;
+
+- (void)displayMenu;
 
 - (void)setControlSize:(NSControlSize)size;
 - (void)setToolbarItem:(NSToolbarItem*)item;
+
 @end

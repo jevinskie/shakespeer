@@ -31,8 +31,7 @@
 + (SPBookmarkController *)sharedBookmarkController
 {
     static SPBookmarkController *sharedBookmarkController = nil;
-    if(sharedBookmarkController == nil)
-    {
+    if (sharedBookmarkController == nil) {
         sharedBookmarkController = [[SPBookmarkController alloc] init];
     }
     
@@ -41,31 +40,25 @@
 
 - (id)init
 {
-    self = [super init];
-    
-    if(self)
-    {
+    if ((self = [super init])) {
         [NSBundle loadNibNamed:@"Bookmarks" owner:self];
         NSArray *defaultBookmarks = [[NSUserDefaults standardUserDefaults] arrayForKey:@"bookmarks"];
-        if(defaultBookmarks == nil)
-        {
+        if (defaultBookmarks == nil) {
             [self setBookmarks:[NSArray array]];
         }
-        else
-        {
+        else {
             [self setBookmarks:defaultBookmarks];
             
             // below is bookmark migration stuff
             NSEnumerator *e = [bookmarks objectEnumerator];
             NSMutableDictionary *bm;
-            while((bm = [e nextObject]) != nil)
-            {
+            while ((bm = [e nextObject]) != nil) {
                 // add the key "name" for all bookmarks if it doesn't exist
-                if([bm objectForKey:@"name"] == nil)
+                if ([bm objectForKey:@"name"] == nil)
                     [bm setObject:[bm objectForKey:@"address"] forKey:@"name"];
                 
                 // migrate any passwords to the keychain
-                if([bm objectForKey:@"password"]) {
+                if ([bm objectForKey:@"password"]) {
                     NSError *error = nil;
                     [SPKeychain setPassword:[bm objectForKey:@"password"]
                                   forServer:[bm objectForKey:@"address"]
@@ -126,13 +119,11 @@
 - (void)connectToBookmark:(NSDictionary *)bm
 {
     NSString *address = [bm objectForKey:@"address"];
-    if([address length])
-    {
+    if ([address length]) {
         NSNumber *encodingIndex = [bm objectForKey:@"encodingIndex"];
         NSString *encoding = nil;
-        if(encodingIndex && [encodingIndex intValue] > 0 && /* 0 = default */
-           [encodingIndex intValue] < [[self allowedEncodings] count])
-        {
+        if (encodingIndex && [encodingIndex intValue] > 0 && /* 0 = default */
+           [encodingIndex intValue] < [[self allowedEncodings] count]) {
             encoding = [[self allowedEncodings] objectAtIndex:[encodingIndex intValue]];
         }
 
@@ -154,8 +145,7 @@
 - (IBAction)connectToSelectedBookmark:(id)sender
 {
     NSArray *selectedObjects = [arrayController selectedObjects];
-    if([selectedObjects count])
-    {
+    if ([selectedObjects count]) {
         NSDictionary *bm = [selectedObjects objectAtIndex:0];
         [self connectToBookmark:bm];
     }
@@ -202,10 +192,8 @@
 {
     NSEnumerator *e = [bookmarks objectEnumerator];
     NSMutableDictionary *bm;
-    while((bm = [e nextObject]) != nil)
-    {
-        if([[bm objectForKey:@"autoConnect"] boolValue] == YES)
-        {
+    while ((bm = [e nextObject]) != nil) {
+        if ([[bm objectForKey:@"autoConnect"] boolValue] == YES) {
             [self connectToBookmark:bm];
         }
     }
@@ -213,8 +201,7 @@
 
 - (void)setBookmarks:(NSArray *)anArray
 {
-    if(anArray != bookmarks)
-    {
+    if (anArray != bookmarks) {
         [bookmarks release];
 
         bookmarks = [[NSMutableArray alloc] initWithCapacity:[anArray count]];
@@ -222,11 +209,9 @@
         /* deep mutable copy of the bookmarks in user defaults */
         NSEnumerator *e = [anArray objectEnumerator];
         NSDictionary *bm;
-        while((bm = [e nextObject]) != nil)
-        {
+        while ((bm = [e nextObject]) != nil) {
             NSMutableDictionary *mutable_bm = [bm mutableCopy];
-            if([mutable_bm objectForKey:@"encodingIndex"] == nil)
-            {
+            if ([mutable_bm objectForKey:@"encodingIndex"] == nil) {
                 /* set encoding to default if no encoding set */
                 [mutable_bm setObject:[NSNumber numberWithInt:0] forKey:@"encodingIndex"];
             }
@@ -242,11 +227,9 @@
     NSString *thePassword = nil;
     NSEnumerator *e = [bookmarks objectEnumerator];
     NSDictionary *bm;
-    while((bm = [e nextObject]) != nil)
-    {
-        if([[bm objectForKey:@"address"] isEqualToString:aHubAddress] &&
-           [[bm objectForKey:@"nick"] isEqualToString:aNick])
-        {
+    while ((bm = [e nextObject]) != nil) {
+        if ([[bm objectForKey:@"address"] isEqualToString:aHubAddress] &&
+           [[bm objectForKey:@"nick"] isEqualToString:aNick]) {
             // get password from keychain
             NSError *error = nil;
             thePassword = [SPKeychain passwordForServer:[bm objectForKey:@"address"]
@@ -375,8 +358,7 @@
 {
     // read values from the selected bookmark
     NSArray *selectedObjects = [arrayController selectedObjects];
-    if([selectedObjects count])
-    {
+    if ([selectedObjects count]) {
         NSDictionary *bm = [selectedObjects objectAtIndex:0];
         
         // get password from keychain
@@ -430,8 +412,7 @@
         [editBookmarkName setStringValue:[editBookmarkAddress stringValue]];
     
     NSArray *selectedObjects = [arrayController selectedObjects];
-    if([selectedObjects count])
-    {
+    if ([selectedObjects count]) {
         NSMutableDictionary *bm = [selectedObjects objectAtIndex:0];
         [bm setObject:[editBookmarkName stringValue] forKey:@"name"];
         [bm setObject:[editBookmarkAddress stringValue] forKey:@"address"];
@@ -466,8 +447,7 @@
 - (IBAction)duplicateBookmark:(id)sender
 {
     NSArray *selectedObjects = [arrayController selectedObjects];
-    if([selectedObjects count])
-    {
+    if ([selectedObjects count]) {
         NSDictionary *bm = [selectedObjects objectAtIndex:0];
         
         // Duplicate the selected bookmark
@@ -503,8 +483,7 @@
 {
     if (returnCode == NSAlertFirstButtonReturn) {
         NSArray *selectedObjects = [arrayController selectedObjects];
-        if([selectedObjects count])
-        {
+        if ([selectedObjects count]) {
             NSMutableDictionary *bm = [selectedObjects objectAtIndex:0];
             NSString *server = [bm objectForKey:@"address"];
             NSString *account = [bm objectForKey:@"nick"];

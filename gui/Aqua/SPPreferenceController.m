@@ -36,8 +36,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
     float toolbarHeight = 0.0;
     NSRect windowFrame;
 
-    if(toolbar && [toolbar isVisible])
-    {
+    if (toolbar && [toolbar isVisible]) {
         windowFrame = [NSWindow contentRectForFrameRect:[window frame]
                                               styleMask:[window styleMask]];
         toolbarHeight = NSHeight(windowFrame) - NSHeight([[window contentView] frame]);
@@ -51,8 +50,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 - (id)init
 {
     self = [super initWithWindowNibName:@"Preferences"];
-    if(self)
-    {
+    if (self) {
         // Define preference labels and identifiers
         prefItems = [[NSDictionary alloc] initWithObjectsAndKeys:
             @"Identity", @"IdentityItem",
@@ -93,8 +91,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 
         NSEnumerator *e = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:SPPrefsSharedPaths] objectEnumerator];
         NSString *path;
-        while((path = [e nextObject]) != nil)
-        {
+        while ((path = [e nextObject]) != nil) {
             [self addSharedPathsPath:path];
         }
 
@@ -109,8 +106,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
     // Localize predefined download location names and add icons
     NSEnumerator *e = [predefinedDownloadLocations objectEnumerator];
     NSString *path;
-    while((path = [e nextObject]) != nil)
-    {
+    while ((path = [e nextObject]) != nil) {
         NSString *name = [path lastPathComponent];
         
         // Set the icon
@@ -130,8 +126,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 + (SPPreferenceController *)sharedPreferences
 {
     static SPPreferenceController *sharedPreferenceController = nil;
-    if(sharedPreferenceController == nil)
-    {
+    if (sharedPreferenceController == nil) {
         sharedPreferenceController = [[SPPreferenceController alloc] init];
     }
     return sharedPreferenceController;
@@ -198,30 +193,25 @@ static float ToolbarHeightForWindow(NSWindow *window)
     NSString *identifier;
     
     // If the call is from a toolbar button, the sender will be an NSToolbarItem and we will need to fetch its itemIdentifier. If we want to call this method by hand, we can send it an NSString which will be used instead.
-    if([item respondsToSelector:@selector(itemIdentifier)])
+    if ([item respondsToSelector:@selector(itemIdentifier)])
         identifier = [item itemIdentifier];
     else
         identifier = item;
     
-    if([identifier isEqualToString:@"IdentityItem"])
-    {
+    if ([identifier isEqualToString:@"IdentityItem"]) {
         view = identityView;
     }
-    else if([identifier isEqualToString:@"ShareItem"])
-    {
+    else if ([identifier isEqualToString:@"ShareItem"]) {
         view = sharesView;
     }
-    else if([identifier isEqualToString:@"NetworkItem"])
-    {
+    else if ([identifier isEqualToString:@"NetworkItem"]) {
         view = networkView;
     }
-    else if([identifier isEqualToString:@"AdvancedItem"])
-    {
+    else if ([identifier isEqualToString:@"AdvancedItem"]) {
         view = advancedView;
     }
     
-    if(view)
-    {
+    if (view) {
         [self switchToView:view];
         [prefsToolbar setSelectedItemIdentifier:identifier];
         [[NSUserDefaults standardUserDefaults] setObject:identifier forKey:@"lastPrefPane"];
@@ -243,8 +233,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 
 - (NSArray *)toolbarAllowedItemIdentifiers:(NSToolbar *)toolbar
 {
-    if(toolbar == prefsToolbar)
-    {
+    if (toolbar == prefsToolbar) {
         return [prefItems allKeys];
     }
     return nil;
@@ -252,8 +241,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 
 - (NSArray *)toolbarDefaultItemIdentifiers:(NSToolbar *)toolbar
 {
-    if(toolbar == prefsToolbar)
-    {
+    if (toolbar == prefsToolbar) {
         return [prefItems allKeys];
     }
     return nil;
@@ -261,8 +249,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 
 -(NSArray *)toolbarSelectableItemIdentifiers:(NSToolbar *)toolbar
 {
-    if(toolbar == prefsToolbar)
-    {
+    if (toolbar == prefsToolbar) {
         return [prefItems allKeys];
     }
     return nil;
@@ -292,13 +279,11 @@ static float ToolbarHeightForWindow(NSWindow *window)
     [op setCanChooseFiles:NO];
     [op setAllowsMultipleSelection:YES];
 
-    if([op runModalForTypes:nil] == NSOKButton)
-    {
+    if ([op runModalForTypes:nil] == NSOKButton) {
         NSEnumerator *e = [[op filenames] objectEnumerator];
         NSString *path;
 
-        while((path = [e nextObject]))
-        {
+        while ((path = [e nextObject])) {
             [[SPApplicationController sharedApplicationController] addSharedPath:path];
 
             NSArray *tmp = [[NSUserDefaults standardUserDefaults] stringArrayForKey:SPPrefsSharedPaths];
@@ -317,8 +302,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
     NSEnumerator *enumerator = [selectedPaths objectEnumerator];
     NSDictionary *record;
 
-    while((record = [enumerator nextObject]))
-    {
+    while ((record = [enumerator nextObject])) {
         [[SPApplicationController sharedApplicationController] removeSharedPath:[record objectForKey:@"path"]];
 
         NSMutableArray *x = [[[NSMutableArray alloc] init] autorelease];
@@ -328,10 +312,8 @@ static float ToolbarHeightForWindow(NSWindow *window)
 
         NSEnumerator *e = [sharedPaths objectEnumerator];
         NSMutableDictionary *dict;
-        while((dict = [e nextObject]) != nil)
-        {
-            if([[dict objectForKey:@"path"] isEqualToString:[record objectForKey:@"path"]])
-            {
+        while ((dict = [e nextObject]) != nil) {
+            if ([[dict objectForKey:@"path"] isEqualToString:[record objectForKey:@"path"]]) {
                 [self willChangeValueForKey:@"sharedPaths"];
                 [sharedPaths removeObject:dict];
                 [self didChangeValueForKey:@"sharedPaths"];
@@ -350,8 +332,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 {
     NSString *path = [[aNotification userInfo] objectForKey:@"path"];
     
-    if([path isEqualToString:@""])
-    {
+    if ([path isEqualToString:@""]) {
         uint64_t size = [[[aNotification userInfo] objectForKey:@"size"] unsignedLongLongValue];
         [self setTotalShareSize:size];
         return;
@@ -359,10 +340,8 @@ static float ToolbarHeightForWindow(NSWindow *window)
     
     NSEnumerator *e = [sharedPaths objectEnumerator];
     NSMutableDictionary *dict;
-    while((dict = [e nextObject]) != nil)
-    {
-        if([[dict objectForKey:@"path"] isEqualToString:path])
-        {
+    while ((dict = [e nextObject]) != nil) {
+        if ([[dict objectForKey:@"path"] isEqualToString:path]) {
             uint64_t size = [[[aNotification userInfo] objectForKey:@"size"] unsignedLongLongValue];
             uint64_t totsize = [[[aNotification userInfo] objectForKey:@"totsize"] unsignedLongLongValue];
             uint64_t dupsize = [[[aNotification userInfo] objectForKey:@"dupsize"] unsignedLongLongValue];
@@ -398,8 +377,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 {
     NSEnumerator *enumerator = [sharedPaths objectEnumerator];
     NSDictionary *record;
-    while((record = [enumerator nextObject]))
-    {
+    while ((record = [enumerator nextObject])) {
         [[SPApplicationController sharedApplicationController] addSharedPath:[record objectForKey:@"path"]];
     }
 }
@@ -409,8 +387,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
     NSArray *selectedPaths = [sharedPathsController selectedObjects];
     NSEnumerator *enumerator = [selectedPaths objectEnumerator];
     NSDictionary *record;
-    while((record = [enumerator nextObject]))
-    {
+    while ((record = [enumerator nextObject])) {
         [[SPApplicationController sharedApplicationController] addSharedPath:[record objectForKey:@"path"]];
     }
 }
@@ -423,8 +400,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
     [op setCanChooseFiles:NO];
     [op setAllowsMultipleSelection:NO];
 
-    if([op runModalForTypes:nil] == NSOKButton)
-    {
+    if ([op runModalForTypes:nil] == NSOKButton) {
         return [[op filenames] objectAtIndex:0];
     }
     
@@ -435,8 +411,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 {
     NSString *path = nil;
     
-    switch([sender tag])
-    {
+    switch([sender tag]) {
         case 0: // Current folder
             path = [sender title]; break;
         case 1:
@@ -454,8 +429,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
             [downloadFolderButton selectItemAtIndex:0];
             break;
     }
-    if(path)
-    {
+    if (path) {
         NSLog(@"Changed download folder to: %@", path);
         [[NSUserDefaults standardUserDefaults] setObject:path forKey:SPPrefsDownloadFolder];
         [[SPApplicationController sharedApplicationController] setDownloadFolder:path];
@@ -467,8 +441,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 {
     NSString *path = nil;
     
-    switch([sender tag])
-    {
+    switch([sender tag]) {
         case 0: // Current folder
             path = [sender title]; break;
         case 1: // Other…
@@ -478,8 +451,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
             break;
         }
     }
-    if(path)
-    {
+    if (path) {
         NSLog(@"Changed incomplete folder to: %@", path);
         [[NSUserDefaults standardUserDefaults] setObject:path forKey:SPPrefsIncompleteFolder];
         [[SPApplicationController sharedApplicationController] setIncompleteFolder:path];
@@ -494,7 +466,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 
 - (IBAction)setIPAddress:(id)sender
 {
-    if([IPAddressField isEnabled])
+    if ([IPAddressField isEnabled])
         [[SPApplicationController sharedApplicationController] setIPAddress:[IPAddressField stringValue]];
     else
         [[SPApplicationController sharedApplicationController] setIPAddress:@""];
@@ -515,24 +487,19 @@ static float ToolbarHeightForWindow(NSWindow *window)
     int status = [wrappedStatus intValue];
 
     [testConnectionProgress stopAnimation:self];
-    if(status == TC_RET_OK)
-    {
+    if (status == TC_RET_OK) {
         [testResults setStringValue:@"Both TCP and UDP tested OK"];
     }
-    else
-    {
+    else {
         [testResults setTextColor:[NSColor redColor]];
         NSString *errmsg = nil;
-        if(status & TC_RET_PRIVPORT)
-        {
+        if (status & TC_RET_PRIVPORT) {
             errmsg = @"Refused to test privileged port";
         }
-        else if((status & TC_RET_TCP_FAIL) || (status & TC_RET_UDP_FAIL))
-        {
+        else if ((status & TC_RET_TCP_FAIL) || (status & TC_RET_UDP_FAIL)) {
             errmsg = @"TCP and/or UDP port unreachable";
         }
-        else
-        {
+        else {
             errmsg = @"Internal error";
         }
         [testResults setStringValue:errmsg];
@@ -567,8 +534,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
     [testResults setStringValue:[NSString stringWithFormat:@"Testing port %i", port]];
     [testConnectionProgress startAnimation:self];
 
-    if(testInProgress == NO)
-    {
+    if (testInProgress == NO) {
         [NSThread detachNewThreadSelector:@selector(testConnectionThread:) toTarget:self withObject:nil];
     }
 
@@ -584,7 +550,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 {
     int passive = [sender indexOfSelectedItem];
 
-    if(passive)
+    if (passive)
         [[SPApplicationController sharedApplicationController] setPassiveMode];
     else
         [self setPort:portField];
@@ -607,14 +573,12 @@ static float ToolbarHeightForWindow(NSWindow *window)
 
 - (IBAction)togglePauseHashing:(id)sender
 {
-    if(hashingPaused)
-    {
+    if (hashingPaused) {
         [[SPApplicationController sharedApplicationController] resumeHashing];
         [sender setTitle:@"Pause hashing"];
         hashingPaused = NO;
     }
-    else
-    {
+    else {
         [[SPApplicationController sharedApplicationController] pauseHashing];
         [sender setTitle:@"Resume hashing"];
         hashingPaused = YES;
@@ -655,8 +619,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 
 - (IBAction)setHublistURL:(id)sender
 {
-    if([hublistsComboBox indexOfItemWithObjectValue:[sender stringValue]] == NSNotFound)
-    {
+    if ([hublistsComboBox indexOfItemWithObjectValue:[sender stringValue]] == NSNotFound) {
         [hublistsController insertObject:[sender stringValue] atArrangedObjectIndex:0];
     }
 }

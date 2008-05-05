@@ -33,13 +33,12 @@
 
 - (id)initWithRemoteNick:(NSString *)remoteNick hub:(NSString *)aHubAddress myNick:(NSString *)aMyNick
 {
-    self = [super init];
-    if(self)
-    {
+    if ((self = [super init])) {
         [NSBundle loadNibNamed:@"ChatWindow" owner:self];
         nick = [remoteNick copy];
         hubAddress = [aHubAddress copy];
-        if(aMyNick)
+        
+        if (aMyNick)
             myNick = [aMyNick copy];
         else
             myNick = [[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsNickname] retain];
@@ -62,6 +61,7 @@
         hubname = [[[[SPMainWindowController sharedMainWindowController] hubWithAddress:aHubAddress] name] retain];
         firstMessage = TRUE;
     }
+    
     return self;
 }
 
@@ -128,41 +128,37 @@
 
     BOOL meMessage = NO;
     NSString *msg;
-    if([theMessage hasPrefix:@"/me "])
-    {
+    if ([theMessage hasPrefix:@"/me "]) {
         msg = [NSString stringWithFormat:@"[%@] %@ %@\n",
                 dateString, theNick, [theMessage substringWithRange:NSMakeRange(4, [theMessage length] - 4)]];
         meMessage = TRUE;
     }
-    else
-    {
+    else {
         msg = [NSString stringWithFormat:@"[%@] <%@> %@\n", dateString, theNick, theMessage];
     }
 
     NSMutableAttributedString *attrmsg = [[NSMutableAttributedString alloc] initWithString:msg];
 
     NSColor *textColor;
-    if([theNick isEqualToString:myNick])
+    if ([theNick isEqualToString:myNick])
         textColor = [NSColor blueColor];
     else
         textColor = [NSColor redColor];
 
-    if(meMessage)
-    {
+    if (meMessage) {
         unsigned int dateLength = [dateString length] + 3;
         [attrmsg addAttribute:NSForegroundColorAttributeName
                         value:textColor
                         range:NSMakeRange(dateLength, [attrmsg length] - dateLength)];
     }
-    else
-    {
+    else {
         [attrmsg addAttribute:NSForegroundColorAttributeName
                         value:textColor
                         range:NSMakeRange([dateString length] + 3, 2 + [theNick length])];
     }
 
     [attrmsg detectURLs:[NSColor blueColor]];
-    if([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsShowSmileyIcons])
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsShowSmileyIcons])
         [attrmsg replaceSmilies];
     [[chatTextView textStorage] appendAttributedString:attrmsg];
     [chatTextView scrollRangeToVisible:NSMakeRange([[chatTextView textStorage] length], 0)];
@@ -176,8 +172,7 @@
     NSString *theDisplayNick = [[aNotification userInfo] objectForKey:@"display_nick"];
     NSString *theMessage = [[aNotification userInfo] objectForKey:@"message"];
 
-    if([hubAddress isEqualToString:theHubAddress] && [nick isEqualToString:theNick])
-    {
+    if ([hubAddress isEqualToString:theHubAddress] && [nick isEqualToString:theNick]) {
         [self addChatMessage:theMessage fromNick:theDisplayNick];
         [[SPMainWindowController sharedMainWindowController] highlightItem:self];
 
@@ -190,9 +185,8 @@
 - (void)commonLoginLogoutNotification:(NSNotification *)aNotification isLogin:(BOOL)loginFlag
 {
     NSString *aNick = [[aNotification userInfo] objectForKey:@"nick"];
-    if([[[aNotification userInfo] objectForKey:@"hubAddress"] isEqualToString:hubAddress] &&
-       [aNick isEqualToString:nick])
-    {
+    if ([[[aNotification userInfo] objectForKey:@"hubAddress"] isEqualToString:hubAddress] &&
+       [aNick isEqualToString:nick]) {
         NSString *dateString = [[NSDate date] descriptionWithCalendarFormat:@"%H:%M"
                                                                    timeZone:nil
                                                                      locale:nil];

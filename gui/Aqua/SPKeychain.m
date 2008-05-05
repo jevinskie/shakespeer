@@ -72,9 +72,8 @@
     
     if (outError) {
         NSError *error = nil;
-        if (err != noErr) {
+        if (err != noErr)
             error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:nil];
-        }
         *outError = error;
     }
 }
@@ -128,9 +127,8 @@
     
     if (outError) {
         NSError *error = nil;
-        if (err != noErr) {
+        if (err != noErr)
             error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:nil];
-        }
         *outError = error;
     }
     
@@ -162,7 +160,8 @@
                                     account:account
                                keychainItem:outKeychainItem
                                       error:outError];
-    } else {
+    }
+    else {
         // add the password if it doesn't exist
         NSError *error = nil;
         
@@ -188,8 +187,10 @@
                 [(NSObject *)item autorelease];
                 
                 if (error) {
-                    if (outError) *outError = error;
-                } else {
+                    if (outError)
+                        *outError = error;
+                }
+                else {
                     NSString *passwordStr = [NSString stringWithString:password];
                     NSData *passwordData = [passwordStr dataUsingEncoding:NSUTF8StringEncoding];
                     

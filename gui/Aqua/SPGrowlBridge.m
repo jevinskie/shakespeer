@@ -34,30 +34,26 @@ NSString *SP_GROWL_DOWNLOAD_FINISHED = @"Download finished";
 {
     static SPGrowlBridge *sharedGrowlBridge = nil;
 
-    if(sharedGrowlBridge == nil)
-    {
+    if (sharedGrowlBridge == nil)
         sharedGrowlBridge = [[SPGrowlBridge alloc] init];
-    }
+    
     return sharedGrowlBridge;
 }
 
 - (id)init
 {
-    self = [super init];
-    if(self)
-    {
+    if ((self = [super init])) {
         [GrowlApplicationBridge setGrowlDelegate:self];
     }
+    
     return self;
 }
 
 - (void)notifyWithName:(NSString *)name
             description:(NSString *)aDescription
 {
-    if([[NSApplication sharedApplication] isActive])
-    {
+    if ([[NSApplication sharedApplication] isActive])
         return;
-    }
 
     [GrowlApplicationBridge notifyWithTitle:name
                                 description:aDescription

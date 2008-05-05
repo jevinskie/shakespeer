@@ -22,16 +22,19 @@
 #import <Cocoa/Cocoa.h>
 
 @interface HumanSizeTransformer : NSValueTransformer
-{}
+{
+}
 + (id)defaultHumanSizeTransformer;
 @end
 
 @interface HumanSpeedTransformer : NSValueTransformer
-{}
+{
+}
 @end
 
 @interface HumanTimeTransformer : NSValueTransformer
-{}
+{
+}
 @end
 
 @interface NickImageTransformer: NSValueTransformer
@@ -76,4 +79,3 @@
 @end
 
 void registerSPTransformers(void);
-

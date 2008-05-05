@@ -36,12 +36,11 @@ int id_cmp(struct rb_entry *a, struct rb_entry *b)
 
 - (id)init
 {
-    self = [super init];
-    if(self)
-    {
+    if ((self = [super init])) {
         RB_INIT(&root);
         nitems = 0;
     }
+    
     return self;
 }
 
@@ -63,10 +62,8 @@ int id_cmp(struct rb_entry *a, struct rb_entry *b)
 {
     NSEnumerator *e = [anArray objectEnumerator];
     id obj;
-    while((obj = [e nextObject]) != nil)
-    {
+    while ((obj = [e nextObject]) != nil)
         [self addObject:obj];
-    }
 }
 
 - (void)removeEntry:(struct rb_entry *)anEntry
@@ -80,10 +77,8 @@ int id_cmp(struct rb_entry *a, struct rb_entry *b)
 - (void)removeObject:(id)anObject
 {
     struct rb_entry *e = [self lookup:anObject];
-    if(e)
-    {
+    if (e)
         [self removeEntry:e];
-    }
 }
 
 - (unsigned)count
@@ -93,12 +88,13 @@ int id_cmp(struct rb_entry *a, struct rb_entry *b)
 
 - (BOOL)containsObject:(id)anObject
 {
-    return [self lookup:anObject] == NULL ? NO : YES;
+    return [self lookup:anObject] == nil ? NO : YES;
 }
 
 - (id)find:(id)anObject
 {
     struct rb_entry *e = [self lookup:anObject];
+    
     return e ? e->obj : nil;
 }
 
@@ -106,6 +102,7 @@ int id_cmp(struct rb_entry *a, struct rb_entry *b)
 {
     struct rb_entry find;
     find.obj = anObject;
+    
     return RB_FIND(id_tree, &root, &find);
 }
 
@@ -113,8 +110,7 @@ int id_cmp(struct rb_entry *a, struct rb_entry *b)
 {
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:nitems];
     struct rb_entry *e;
-    RB_FOREACH(e, id_tree, &root)
-    {
+    RB_FOREACH(e, id_tree, &root) {
         [array addObject:e->obj];
     }
 
@@ -127,8 +123,7 @@ int id_cmp(struct rb_entry *a, struct rb_entry *b)
     unsigned i = 0;
 
     struct rb_entry *e;
-    RB_FOREACH(e, id_tree, &root)
-    {
+    RB_FOREACH(e, id_tree, &root) {
         [e->obj retain];
         array[i++] = e->obj;
     }
@@ -139,8 +134,7 @@ int id_cmp(struct rb_entry *a, struct rb_entry *b)
 - (void)removeAllObjects
 {
     struct rb_entry *e, *next;
-    for(e = RB_MIN(id_tree, &root); e; e = next)
-    {
+    for (e = RB_MIN(id_tree, &root); e; e = next) {
         next = RB_NEXT(id_tree, &root, e);
         [self removeEntry:e];
     }

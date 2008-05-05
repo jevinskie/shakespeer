@@ -32,8 +32,10 @@
 {
     NSCharacterSet *backslashSet = [NSCharacterSet characterSetWithCharactersInString:@"\\"];
     NSRange r = [self rangeOfCharacterFromSet:backslashSet options:NSBackwardsSearch];
-    if(r.location == NSNotFound)
+    
+    if (r.location == NSNotFound)
         return [self stringByDeletingLastPathComponent];
+    
     return [self substringToIndex:r.location];
 }
 
@@ -41,8 +43,10 @@
 {
     NSCharacterSet *backslashSet = [NSCharacterSet characterSetWithCharactersInString:@"\\"];
     NSRange r = [self rangeOfCharacterFromSet:backslashSet options:NSBackwardsSearch];
-    if(r.location == NSNotFound)
+    
+    if (r.location == NSNotFound)
         return [self lastPathComponent];
+    
     return [self substringFromIndex:r.location+1];
 }
 
@@ -68,15 +72,14 @@
     NSRange range = NSMakeRange(0, [self length]);
     int found = 0;
 
-    while(1)
-    {
+    while (1) {
         NSRange foundRange = [self rangeOfString:aString options:NSLiteralSearch range:range];
-        if(foundRange.location == NSNotFound)
+        if (foundRange.location == NSNotFound)
             break;
         found++;
         range.location = foundRange.location + foundRange.length;
         range.length = [self length] - range.location;
-        if(range.length <= 0)
+        if (range.length <= 0)
             break;
     }
 
@@ -88,6 +91,7 @@
     NSScanner *scanner = [NSScanner scannerWithString:self];
     int64_t ullValue;
     [scanner scanLongLong:&ullValue];
+    
     return (uint64_t)ullValue;
 }
 
@@ -99,6 +103,7 @@
     [truncatedString addAttribute:NSParagraphStyleAttributeName
                             value:style
                             range:NSMakeRange(0, [self length])];
+    
     return truncatedString; /* not autoreleased */
 }
 

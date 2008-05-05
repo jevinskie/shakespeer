@@ -27,14 +27,15 @@
 
 - (id)initWithFrame:(NSRect)frameRect
 {
-    self = [super initWithFrame:frameRect];
-    _controlSize = NSRegularControlSize;
-    [self setButtonType: NSMomentaryPushButton];
-    [self setBordered: NO];
-    [self setImagePosition: NSImageOnly];
-    [[self cell] setHighlightsBy:NSPushInCellMask];
-    [[self cell] setShowsStateBy:NSContentsCellMask];
-    [self setState: 0];
+    if ((self = [super initWithFrame:frameRect])) {
+        _controlSize = NSRegularControlSize;
+        [self setButtonType:NSMomentaryPushButton];
+        [self setBordered:NO];
+        [self setImagePosition:NSImageOnly];
+        [[self cell] setHighlightsBy:NSPushInCellMask];
+        [[self cell] setShowsStateBy:NSContentsCellMask];
+        [self setState:0];
+    }
 
     return self;
 }
@@ -53,39 +54,44 @@
     [super dealloc];
 }
 
-- (void) mouseDown:(NSEvent *) theEvent
+- (void)mouseDown:(NSEvent *)theEvent
 {
-    if( ! [self isEnabled] ) return;
-    if( ! menu )
-    {
+    if (![self isEnabled])
+        return;
+    
+    if (!menu) {
         [super mouseDown:theEvent];
         return;
     }
+    
     [self highlight:YES];
     [clickHoldTimer invalidate];
     [clickHoldTimer autorelease];
     menuDidDisplay = NO;
     clickHoldTimer = [[NSTimer scheduledTimerWithTimeInterval:menuDelay
                                                        target:self
-                                                     selector:@selector( displayMenu )
+                                                     selector:@selector(displayMenu)
                                                      userInfo:nil
                                                       repeats:NO] retain];
 }
 
-- (void) mouseUp:(NSEvent *) theEvent
+- (void)mouseUp:(NSEvent *)theEvent
 {
     [clickHoldTimer invalidate];
     [clickHoldTimer autorelease];
     clickHoldTimer = nil;
-    if( ! menuDidDisplay && ([theEvent type] & NSLeftMouseUp) )
+    
+    if (!menuDidDisplay && ([theEvent type] & NSLeftMouseUp))
         [self sendAction:[self action] to:[self target]];
-    if( menuDidDisplay && ([theEvent type] & NSLeftMouseUp) )
+    
+    if (menuDidDisplay && ([theEvent type] & NSLeftMouseUp))
         menuDidDisplay = NO;
+    
     [self highlight:NO];
     [super mouseUp:theEvent];
 }
 
-- (void) mouseDragged:(NSEvent *) theEvent
+- (void)mouseDragged:(NSEvent *)theEvent
 {
     return;
 }
@@ -100,19 +106,19 @@
     return menuDelay;
 }
 
-- (void) setMenu:(NSMenu *) aMenu
+- (void)setMenu:(NSMenu *)aMenu
 {
     [menu autorelease];
     menu = [aMenu copy];
     [self setEnabled:(menu != nil)];
 }
 
-- (NSMenu *) menu
+- (NSMenu *)menu
 {
     return menu;
 }
 
-- (void) displayMenu
+- (void)displayMenu
 {
     [NSMenu popUpContextMenu:menu withEvent:[[NSApplication sharedApplication] currentEvent] forView:self];
     menuDidDisplay = YES;
@@ -126,16 +132,6 @@
     _originalImage = [image copy];
     newImage = [image copy];
     [newImage setScalesWhenResized:NO];
-#if 0
-    if (_controlSize == NSRegularControlSize)
-    {
-        [newImage setSize:NSMakeSize(32,32)];
-    }
-    else
-    {
-        [newImage setSize:NSMakeSize(24,24)];
-    }
-#endif
     [newImage setSize:NSMakeSize(28,22)];
     [super setImage:newImage];
     [newImage release];
@@ -145,24 +141,9 @@
 {
     NSImage* newImage = [[_originalImage copy] autorelease];
     [newImage setScalesWhenResized:NO];
-#if 0
-    if (size == NSRegularControlSize)
-    {
-        [toolbarItem setMinSize:NSMakeSize(32,32)];
-        [toolbarItem setMaxSize:NSMakeSize(32,32)];
-        [newImage setSize:NSMakeSize(32,32)];
-    }
-    else
-    {
-        [toolbarItem setMinSize:NSMakeSize(24,24)];
-        [toolbarItem setMaxSize:NSMakeSize(24,24)];
-        [newImage setSize:NSMakeSize(24,24)];
-    }
-#else
     [toolbarItem setMinSize:NSMakeSize(28,22)];
     [toolbarItem setMaxSize:NSMakeSize(28,22)];
     [newImage setSize:NSMakeSize(28,22)];
-#endif
     _controlSize = size;
     [super setImage:newImage];
 }
@@ -188,4 +169,3 @@
 }
 
 @end
-

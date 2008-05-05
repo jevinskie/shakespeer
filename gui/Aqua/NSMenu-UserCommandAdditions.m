@@ -27,13 +27,11 @@
 {
     NSMenu *subMenu = nil;
     NSMenuItem *subMenuItem = [aMenu itemWithTitle:menuTitle];
-    if(subMenuItem)
-    {
+    if (subMenuItem) {
         /* if one already exists, return it */
         subMenu = [subMenuItem submenu];
     }
-    else
-    {
+    else {
         /* otherwise create the new menu */
         subMenu = [[[NSMenu alloc] initWithTitle:menuTitle] autorelease];
         NSMenuItem *menuItem = [aMenu addItemWithTitle:menuTitle
@@ -41,41 +39,34 @@
                                          keyEquivalent:@""];
         [menuItem setSubmenu:subMenu];
     }
+    
     return subMenu;
 }
 
 - (void)addUserCommand:(SPUserCommand *)userCommand action:(SEL)anAction
                 target:(id)aTarget staticEntries:(int)staticEntries
 {
-    if([userCommand type] == 255)
-    {
+    if ([userCommand type] == 255) {
         /* erase all sent commands */
         int i;
-        for(i = [self numberOfItems]; i > staticEntries; i--)
-        {
-            if(i - 1 >= 0)
+        for (i = [self numberOfItems]; i > staticEntries; i--) {
+            if (i - 1 >= 0)
                 [self removeItemAtIndex:i - 1];
         }
     }
-    else if([userCommand type] == 0)
-    {
+    else if ([userCommand type] == 0) {
         /* separator */
         /* prevent multiple consecutive separators */
         int n = [self numberOfItems];
-        if(n > 0 && [[self itemAtIndex:n-1] isSeparatorItem] == NO)
-        {
+        if (n > 0 && [[self itemAtIndex:n-1] isSeparatorItem] == NO)
             [self addItem:[NSMenuItem separatorItem]];
-        }
     }
-    else if([userCommand type] == 1 || [userCommand type] == 2)
-    {
+    else if ([userCommand type] == 1 || [userCommand type] == 2) {
         NSArray *titleArray = [[userCommand title] componentsSeparatedByString:@"\\"];
         unsigned int i;
         NSMenu *subMenu = self;
-        for(i = 0; i < [titleArray count]; i++)
-        {
-            if(i == [titleArray count] - 1)
-            {
+        for (i = 0; i < [titleArray count]; i++) {
+            if (i == [titleArray count] - 1) {
                 NSMenuItem *menuItem = [subMenu addItemWithTitle:[titleArray objectAtIndex:i]
                                                           action:anAction
                                                    keyEquivalent:@""];
@@ -83,8 +74,7 @@
                 [menuItem setEnabled:YES];
                 [menuItem setRepresentedObject:userCommand];
             }
-            else
-            {
+            else {
                 subMenu = [self makeSubMenuIn:subMenu withTitle:[titleArray objectAtIndex:i]];
             }
         }

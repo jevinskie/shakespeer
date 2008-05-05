@@ -40,15 +40,16 @@
 
 static int spcb_port(sp_t *sp, int port)
 {
-    if(port == -1)
-    {
-        if([[NSUserDefaults standardUserDefaults] integerForKey:SPPrefsConnectionMode] == 0)
+    if (port == -1) {
+        if ([[NSUserDefaults standardUserDefaults] integerForKey:SPPrefsConnectionMode] == 0)
             sp_send_set_port(sp, [[NSUserDefaults standardUserDefaults] integerForKey:SPPrefsPort]);
         else
             [[SPApplicationController sharedApplicationController] setPassiveMode];
+        
         [[SPBookmarkController sharedBookmarkController] autoConnectBookmarks];
         [[SPMainWindowController sharedMainWindowController] restoreLastHubSession];
     }
+    
     return 0;
 }
 
@@ -391,12 +392,12 @@ static int spcb_get_password(sp_t *sp, const char *hub_address, const char *nick
 
 static int spcb_server_version(sp_t *sp, const char *version)
 {
-    if(strcmp(version, VERSION) != 0)
-    {
+    if (strcmp(version, VERSION) != 0) {
         [[SPApplicationController sharedApplicationController] removeSphubdConnection];
         [[SPApplicationController sharedApplicationController]
             versionMismatch:[NSString stringWithUTF8String:version]];
     }
+    
     return 0;
 }
 
@@ -434,10 +435,8 @@ static int spcb_stored_filelists(sp_t *sp, const char *nicks)
 {
     NSArray *nicksArray = [[NSString stringWithUTF8String:nicks] componentsSeparatedByString:@" "];
 
-    if([nicksArray count] > 0)
-    {
+    if ([nicksArray count] > 0)
         sendNotification(SPNotificationStoredFilelists, @"nicks", nicksArray, nil);
-    }
 
     return 0;
 }
@@ -493,10 +492,9 @@ void sendNotification(NSString *notificationName, NSString *key1, id arg1, ...)
     va_start(ap, arg1);
     id key;
     id arg;
-    while((key = va_arg(ap, id)) != nil)
-    {
+    while ((key = va_arg(ap, id)) != nil) {
         arg = va_arg(ap, id);
-        if(arg == nil)
+        if (arg == nil)
             break;
         [argDict setObject:arg forKey:key];
     }
@@ -513,14 +511,11 @@ static void sp_queue_write(sp_t *sp)
     assert(sp);
 
     NSLog(@"Writing %i queued bytes", EVBUFFER_LENGTH(sp->output));
-    if(evbuffer_write(sp->output, sp->fd) == -1)
-    {
+    if (evbuffer_write(sp->output, sp->fd) == -1) {
         NSLog(@"evbuffer_write: %s", strerror(errno));
     }
-    else
-    {
-        if(EVBUFFER_LENGTH(sp->output) == 0)
-        {
+    else {
+        if (EVBUFFER_LENGTH(sp->output) == 0) {
             /* all queued data is written, disable output callback */
             CFSocketDisableCallBacks((CFSocketRef)sp->user_data, kCFSocketWriteCallBack);
         }
@@ -533,14 +528,11 @@ void sp_callback(CFSocketRef s, CFSocketCallBackType callbackType,
     sp_t *sp = info;
     assert(sp);
 
-    if(callbackType == kCFSocketWriteCallBack)
-    {
+    if (callbackType == kCFSocketWriteCallBack) {
         sp_queue_write(sp);
     }
-    else
-    {
-        if(sp_in_event(sp->fd, 0, sp) != 0)
-        {
+    else {
+        if (sp_in_event(sp->fd, 0, sp) != 0) {
             [[SPApplicationController sharedApplicationController] removeSphubdConnection];
             sendNotification(SPNotificationServerDied, @"errorMessage", @"unknown error", nil);
         }
@@ -569,26 +561,21 @@ int sp_send_string(sp_t *sp, const char *string)
     return_val_if_fail(sp->fd != -1, -1);
     return_val_if_fail(string, -1);
 
-    if(EVBUFFER_LENGTH(sp->output) > 0)
-    {
+    if (EVBUFFER_LENGTH(sp->output) > 0) {
         should_queue = 1;
     }
-    else
-    {
+    else {
         rc = write(sp->fd, string, nbytes);
-        if(rc == 0)
-        {
+        if (rc == 0) {
             /* EOF */
             return -1;
         }
-        else if(rc < nbytes || (rc == -1 && errno == EAGAIN))
-        {
+        else if (rc < nbytes || (rc == -1 && errno == EAGAIN)) {
             should_queue = 1;
         }
     }
 
-    if(should_queue)
-    {
+    if (should_queue) {
         int d = (rc <= 0 ? 0 : rc);
         nbytes -= d;
         sp_queue_data(sp, string + d, nbytes);

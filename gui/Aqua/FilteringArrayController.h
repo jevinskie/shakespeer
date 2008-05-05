@@ -6,7 +6,6 @@
 @interface FilteringArrayController : NSArrayController
 {
     NSString *searchString;
-  //	id newObj;
     NSArray *searchKeys;
 }
 
@@ -16,7 +15,6 @@
 - (void)setSearchKeys:(NSArray *)newSearchKeys;
 
 @end
-
 
 /* Modified by Martin Hedenfalk <martin@bzero.se> for use in ShakesPeer
  * 2004-03-29: Added searchKeys

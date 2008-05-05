@@ -27,8 +27,7 @@
 
 - (void)setDelegate:(id)aDelegate
 {
-    if(aDelegate != delegate)
-    {
+    if (aDelegate != delegate) {
         [delegate release];
         delegate = [aDelegate retain];
     }
@@ -36,10 +35,8 @@
 
 - (void)tabView:(NSTabView *)tabView didSelectTabViewItem:(NSTabViewItem *)tabViewItem
 {
-    if(delegate && [delegate respondsToSelector:@selector(sideBar:didSelectItem:)])
-    {
+    if (delegate && [delegate respondsToSelector:@selector(sideBar:didSelectItem:)])
         [delegate sideBar:self didSelectItem:[tabViewItem identifier]];
-    }
 }
 
 - (BOOL)tableView:(NSTableView *)aTableView shouldSelectRow:(int)rowIndex
@@ -52,10 +49,8 @@
 {
     NSIndexSet *selectedIndexes = [self selectedRowIndexes];
     unsigned int selectedIndex = [selectedIndexes firstIndex];
-    if(selectedIndex != NSNotFound)
-    {
+    if (selectedIndex != NSNotFound)
         [self displayItem:[items objectAtIndex:selectedIndex]];
-    }
 }
 
 - (void)frameDidChange:(NSNotification *)aNotification
@@ -67,10 +62,9 @@
 - (void)awakeFromNib
 {   
     /* Remove all tabs */
-    while([tabView numberOfTabViewItems] > 0)
-    {
+    while ([tabView numberOfTabViewItems] > 0)
         [tabView removeTabViewItem:[tabView tabViewItemAtIndex:0]];
-    }
+    
     [tabView setDelegate:self];
 
     /* Make the intercell spacing similar to that used in iCal's Calendars list. */
@@ -103,11 +97,10 @@
 
 - (id)initWithCoder:(NSCoder *)decoder
 {
-    self = [super initWithCoder:decoder];
-    if(self)
-    {
+    if ((self = [super initWithCoder:decoder])) {
         items = [[NSMutableArray alloc] init];
     }
+    
     return self;
 }
 - (void)dealloc
@@ -119,8 +112,7 @@
 - (void)insertItem:(id <SPSideBarItem>)anItem atIndex:(int)anIndex
 {
     /* Check that anItem is not already in the sidebar. */
-    if([tabView indexOfTabViewItemWithIdentifier:anItem] == NSNotFound)
-    {
+    if ([tabView indexOfTabViewItemWithIdentifier:anItem] == NSNotFound) {
         NSTabViewItem *tabItem = [[NSTabViewItem alloc] initWithIdentifier:anItem];
         [tabItem setView:[anItem view]];
         [tabView addTabViewItem:tabItem];
@@ -144,15 +136,13 @@
 
 - (void)addItem:(id <SPSideBarItem>)anItem
 {
-    if([(NSObject *)anItem respondsToSelector:@selector(sectionTitle)])
-    {
+    if ([(NSObject *)anItem respondsToSelector:@selector(sectionTitle)]) {
         NSString *sectionTitle = [(id<SPSideBarItemInformalProtocol>)anItem sectionTitle];
-        if([self hasSection:sectionTitle] == NO)
+        if ([self hasSection:sectionTitle] == NO)
             [self addSection:sectionTitle];
         [self addItem:anItem toSection:sectionTitle];
     }
-    else
-    {
+    else {
         [self insertItem:anItem atIndex:[items count]];
     }
 }
@@ -160,32 +150,33 @@
 - (unsigned int)numberOfItemsInSection:(NSString *)aSection
 {
     unsigned int index = [items indexOfObject:aSection];
-    if(index == NSNotFound)
-    {
+    
+    if (index == NSNotFound)
         return 0;
-    }
+    
     unsigned int i = index + 1;
     unsigned int n = 0;
-    while(i < [items count])
-    {
-        if([[items objectAtIndex:i] isKindOfClass:[NSString class]])
+    while (i < [items count]) {
+        if ([[items objectAtIndex:i] isKindOfClass:[NSString class]])
             break;
         i++;
         n++;
     }
+    
     return n;
 }
 
 - (NSArray *)itemsInSection:(NSString *)aSection
 {
     unsigned int startIndex = [items indexOfObject:aSection];
-    if(startIndex == NSNotFound)
+    if (startIndex == NSNotFound)
         return nil;
     NSRange range;
     range.location = startIndex + 1;
     range.length = [self numberOfItemsInSection:aSection];
-    if(range.length == 0)
+    if (range.length == 0)
         return nil;
+    
     return [items subarrayWithRange:range];
 }
 
@@ -204,11 +195,11 @@
 {
     NSEnumerator *e = [items objectEnumerator];
     id item;
-    while((item = [e nextObject]) != nil)
-    {
-        if([item respondsToSelector:@selector(title)] && [aTitle isEqualToString:[item title]])
+    while ((item = [e nextObject]) != nil) {
+        if ([item respondsToSelector:@selector(title)] && [aTitle isEqualToString:[item title]])
             return item;
     }
+    
     return nil;
 }
 
@@ -216,32 +207,29 @@
 {
     /* Is the item in the tabView? */
     int index =  [tabView indexOfTabViewItemWithIdentifier:anItem];
-    if(index != NSNotFound)
-    {
+    if (index != NSNotFound) {
         [tabView selectTabViewItemAtIndex:index];
         [self selectRowIndexes:[NSIndexSet indexSetWithIndex:[items indexOfObject:anItem]]
           byExtendingSelection:NO];
 
-        if([anItem respondsToSelector:@selector(setHighlighted:)])
-        {
+        if ([anItem respondsToSelector:@selector(setHighlighted:)])
             [anItem setHighlighted:NO];
-        }
     }
 }
 
 - (void)removeItem:(id)anItem
 {
     int index = [tabView indexOfTabViewItemWithIdentifier:anItem];
-    if(index != NSNotFound)
-    {
+    if (index != NSNotFound) {
         NSTabViewItem *tabViewItem = [tabView tabViewItemAtIndex:index];
         [tabView removeTabViewItem:tabViewItem];
 
         NSTabViewItem *selectedTabItem = [tabView selectedTabViewItem];
-        if(selectedTabItem && ![anItem isKindOfClass:[NSString class]])
+        if (selectedTabItem && ![anItem isKindOfClass:[NSString class]])
             index = [items indexOfObject:[selectedTabItem identifier]];
         else
             index = 0;
+        
         [self selectRowIndexes:[NSIndexSet indexSetWithIndex:index] byExtendingSelection:NO];
     }
 
@@ -249,17 +237,18 @@
      * controller has retained it's target (if the target is File's
      * Owner), so we have to explicitly unbind the controller
      */
-    if([anItem respondsToSelector:@selector(unbindControllers)])
-          [anItem unbindControllers];
+    if ([anItem respondsToSelector:@selector(unbindControllers)])
+        [anItem unbindControllers];
 
-    if([delegate respondsToSelector:@selector(sideBar:willCloseItem:)])
+    if ([delegate respondsToSelector:@selector(sideBar:willCloseItem:)])
         [delegate sideBar:self willCloseItem:anItem];
 
     [anItem retain];
     [items removeObject:anItem];
 
-    if([delegate respondsToSelector:@selector(sideBar:didCloseItem:)])
+    if ([delegate respondsToSelector:@selector(sideBar:didCloseItem:)])
         [delegate sideBar:self didCloseItem:anItem];
+    
     [anItem release];
 
     [self reloadData];
@@ -268,13 +257,10 @@
 /* Called from the close icon in the table */
 - (void)closeSelectedItem:(id)sender
 {
-    if([self selectedRow] != -1)
-    {
+    if ([self selectedRow] != -1) {
         id item = [items objectAtIndex:[self selectedRow]];
-        if([item respondsToSelector:@selector(canClose)] && [item canClose])
-        {
+        if ([item respondsToSelector:@selector(canClose)] && [item canClose])
             [self removeItem:item];
-        }
     }
 }
 
@@ -292,22 +278,22 @@
 - (void)selectPreviousItem
 {
     int index = [self selectedRow];
-    do
-    {
-        if(--index < 0)
+    do {
+        if (--index < 0)
             index = [items count] - 1;
-    } while([[items objectAtIndex:index] isKindOfClass:[NSString class]]);
+    } while ([[items objectAtIndex:index] isKindOfClass:[NSString class]]);
+    
     [self displayItem:[items objectAtIndex:index]];
 }
 
 - (void)selectNextItem
 {
     int index = [self selectedRow];
-    do
-    {
-        if(++index >= [items count])
+    do {
+        if (++index >= [items count])
             index = 0;
-    } while([[items objectAtIndex:index] isKindOfClass:[NSString class]]);
+    } while ([[items objectAtIndex:index] isKindOfClass:[NSString class]]);
+    
     [self displayItem:[items objectAtIndex:index]];
 }
 

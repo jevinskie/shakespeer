@@ -34,7 +34,7 @@ extern NSString *SP_GROWL_DOWNLOAD_FINISHED;
 
 + (SPGrowlBridge *)sharedGrowlBridge;
 - (void)notifyWithName:(NSString *)name
-            description:(NSString *)aDescription;
+           description:(NSString *)aDescription;
 
 @end
 

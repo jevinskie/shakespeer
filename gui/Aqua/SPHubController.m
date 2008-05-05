@@ -45,8 +45,7 @@
 - (id)initWithAddress:(NSString *)anAddress nick:(NSString *)aNick
 {
     self = [super initWithWindowNibName:@"Hub"];
-    if(self)
-    {
+    if (self) {
         usersTree = [[MHSysTree alloc] init];
         nops = 0;
         totsize = 0ULL;
@@ -124,23 +123,22 @@
     NSArray *tcs = [userTable tableColumns];
     NSEnumerator *e = [tcs objectEnumerator];
     NSTableColumn *tc;
-    while((tc = [e nextObject]) != nil)
-    {
+    while ((tc = [e nextObject]) != nil) {
         [[tc dataCell] setWraps:YES];
 
-        if(tc == tcNick)
+        if (tc == tcNick)
             [[columnsMenu itemWithTag:0] setState:NSOnState];
-        else if(tc == tcShare)
+        else if (tc == tcShare)
             [[columnsMenu itemWithTag:1] setState:NSOnState];
-        else if(tc == tcTag)
+        else if (tc == tcTag)
             [[columnsMenu itemWithTag:2] setState:NSOnState];
-        else if(tc == tcSpeed)
+        else if (tc == tcSpeed)
             [[columnsMenu itemWithTag:3] setState:NSOnState];
-        else if(tc == tcDescription)
+        else if (tc == tcDescription)
             [[columnsMenu itemWithTag:4] setState:NSOnState];
-        else if(tc == tcEmail)
+        else if (tc == tcEmail)
             [[columnsMenu itemWithTag:5] setState:NSOnState];
-        else if(tc == tcIcon)
+        else if (tc == tcIcon)
             [[columnsMenu itemWithTag:6] setState:NSOnState];
     }
 
@@ -151,8 +149,7 @@
 
 - (void)filterUsers
 {
-    if(filter == nil || [filter count] == 0)
-    {
+    if (filter == nil || [filter count] == 0) {
         [filteredUsers release];
         filteredUsers = [users retain];
         return;
@@ -161,21 +158,18 @@
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:[users count]];
     NSEnumerator *e = [users objectEnumerator];
     SPUser *user;
-    while((user = [e nextObject]) != nil)
-    {
+    while ((user = [e nextObject]) != nil) {
         NSEnumerator *f = [filter objectEnumerator];
         NSString *fs;
         BOOL add = YES;
-        while((fs = [f nextObject]) != nil)
-        {
-            if([fs length] > 0 &&
-               [[user nick] rangeOfString:fs options:NSCaseInsensitiveSearch].location == NSNotFound)
-            {
+        while ((fs = [f nextObject]) != nil) {
+            if ([fs length] > 0 &&
+               [[user nick] rangeOfString:fs options:NSCaseInsensitiveSearch].location == NSNotFound) {
                 add = NO;
                 break;
             }
         }
-        if(add)
+        if (add)
             [array addObject:user];
     }
 
@@ -185,14 +179,12 @@
 
 - (void)updateUserTable:(NSTimer *)aTimer
 {
-    if(needUpdating)
-    {
+    if (needUpdating) {
 #if 0
         NSRect visibleRect = [userTable visibleRect];
         int firstIndex = [userTable rowAtPoint:NSMakePoint(visibleRect.origin.x, visibleRect.origin.y + visibleRect.size.height - 1)];
         SPUser *topUser = nil;
-        if(firstIndex >= 0 && (unsigned int)firstIndex < [[userArrayController arrangedObjects] count])
-        {
+        if (firstIndex >= 0 && (unsigned int)firstIndex < [[userArrayController arrangedObjects] count]) {
             topUser = [[userArrayController arrangedObjects] objectAtIndex:firstIndex];
         }
 #endif
@@ -204,8 +196,7 @@
         needUpdating = NO;
 
 #if 0
-        if(topUser)
-        {
+        if (topUser) {
             /* [[userScrollView contentView] scrollToPoint:visibleRect.origin]; */
             [userTable scrollRowToVisible:[[userArrayController arrangedObjects] indexOfObjectIdenticalTo:topUser]];
             /* [userTable scrollRowToVisible:firstIndex]; */
@@ -254,8 +245,7 @@
 
 - (void)setName:(NSString *)aName
 {
-    if(name != aName)
-    {
+    if (name != aName) {
         [name release];
         name = [aName retain];
     }
@@ -263,8 +253,7 @@
 
 - (void)setDescriptionString:(NSString *)aDescription
 {
-    if(aDescription != descriptionString)
-    {
+    if (aDescription != descriptionString) {
         [descriptionString release];
         descriptionString = [aDescription retain];
     }
@@ -277,8 +266,7 @@
 
 - (void)setEncoding:(NSString *)anEncoding
 {
-    if(encoding != anEncoding)
-    {
+    if (encoding != anEncoding) {
         [encoding release];
         encoding = [anEncoding retain];
     }
@@ -353,8 +341,7 @@
                                 extraSlots:0];
     SPUser *user = [usersTree find:cmpUser];
 
-    if(user == nil)
-    {
+    if (user == nil) {
         // no regular user found, let's see if there's any op with this nick.
         [cmpUser setIsOperator:YES];
         user = [usersTree find:cmpUser];
@@ -366,8 +353,7 @@
 - (void)userLoginNotification:(NSNotification *)aNotification
 {
     NSDictionary *userinfo = [aNotification userInfo];
-    if([[userinfo objectForKey:@"hubAddress"] isEqualToString:address])
-    {
+    if ([[userinfo objectForKey:@"hubAddress"] isEqualToString:address]) {
         BOOL isOp = [[userinfo objectForKey:@"isOperator"] boolValue];
         NSString *theNick = [userinfo objectForKey:@"nick"];
         SPUser *user = [SPUser userWithNick:theNick
@@ -383,7 +369,7 @@
         needUpdating = YES;
 
         totsize += [[userinfo objectForKey:@"size"] unsignedLongLongValue];
-        if(isOp)
+        if (isOp)
             nops++;
     }
 }
@@ -391,8 +377,7 @@
 - (void)userUpdateNotification:(NSNotification *)aNotification
 {
     NSDictionary *userinfo = [aNotification userInfo];
-    if([[userinfo objectForKey:@"hubAddress"] isEqualToString:address])
-    {
+    if ([[userinfo objectForKey:@"hubAddress"] isEqualToString:address]) {
         NSString *theNick = [userinfo objectForKey:@"nick"];
         SPUser *user = [self findUserWithNick:theNick];
         if (!user) {
@@ -404,11 +389,10 @@
             BOOL oldOperatorFlag = [user isOperator];
             BOOL newOperatorFlag = [[userinfo objectForKey:@"isOperator"] boolValue];
 
-            if(oldOperatorFlag)
+            if (oldOperatorFlag)
                 nops--;
 
-            if(oldOperatorFlag != newOperatorFlag)
-            {
+            if (oldOperatorFlag != newOperatorFlag) {
                 /* Ouch, operator status changed, which affects sort ordering. */
                 /* Remove and re-insert the entry. */
                 [user retain];
@@ -428,7 +412,7 @@
             [user setExtraSlots:[[userinfo objectForKey:@"extraSlots"] unsignedIntValue]];
 
             totsize += [user size];
-            if(newOperatorFlag)
+            if (newOperatorFlag)
                 nops++;
 
             needUpdating = YES;
@@ -438,14 +422,12 @@
 
 - (void)userLogoutNotification:(NSNotification *)aNotification
 {
-    if([[[aNotification userInfo] objectForKey:@"hubAddress"] isEqualToString:address])
-    {
+    if ([[[aNotification userInfo] objectForKey:@"hubAddress"] isEqualToString:address]) {
         NSString *theNick = [[aNotification userInfo] objectForKey:@"nick"];
         SPUser *user = [self findUserWithNick:theNick];
-        if(user)
-        {
+        if (user) {
             totsize -= [user size];
-            if([user isOperator])
+            if ([user isOperator])
                 nops--;
 
             [usersTree removeObject:user];
@@ -457,8 +439,7 @@
 - (void)addChatMessage:(NSMutableAttributedString *)attrString
 {
     [attrString detectURLs:[NSColor blueColor]];
-    if([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsShowSmileyIcons])
-    {
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsShowSmileyIcons]) {
         [attrString replaceSmilies];
     }
 
@@ -480,8 +461,7 @@
 
 - (void)publicMessageNotification:(NSNotification *)aNotification
 {
-    if([[[aNotification userInfo] objectForKey:@"hubAddress"] isEqualToString:address])
-    {
+    if ([[[aNotification userInfo] objectForKey:@"hubAddress"] isEqualToString:address]) {
         NSString *dateString = [[NSDate date] descriptionWithCalendarFormat:@"%H:%M"
                                                                    timeZone:nil
                                                                      locale:nil];
@@ -490,29 +470,24 @@
         NSString *aMessage = [[aNotification userInfo] objectForKey:@"message"];
         NSString *msg;
         BOOL meMessage = NO;
-        if([aMessage hasPrefix:@"/me "])
-        {
+        if ([aMessage hasPrefix:@"/me "]) {
             msg = [NSString stringWithFormat:@"[%@] %@ %@\n",
                 dateString, aNick, [aMessage substringWithRange:NSMakeRange(4, [aMessage length] - 4)]];
             meMessage = TRUE;
         }
-        else
-        {
+        else {
             msg = [NSString stringWithFormat:@"[%@] <%@> %@\n", dateString, aNick, aMessage];
         }
         NSMutableAttributedString *attrmsg = [[[NSMutableAttributedString alloc] initWithString:msg] autorelease];
 
         NSColor *textColor;
-        if([aNick isEqualToString:nick])
-        {
+        if ([aNick isEqualToString:nick]) {
             textColor = [NSColor blueColor];
         }
-        else
-        {
+        else {
             textColor = [NSColor redColor];
 
-            if([aMessage rangeOfString:nick options:NSCaseInsensitiveSearch].location != NSNotFound)
-            {
+            if ([aMessage rangeOfString:nick options:NSCaseInsensitiveSearch].location != NSNotFound) {
                 /* our nick was mentioned in chat */
                 [[SPGrowlBridge sharedGrowlBridge] notifyWithName:SP_GROWL_NICK_IN_MAINCHAT
                                                       description:[NSString stringWithFormat:@"%@: %@", aNick, aMessage]];
@@ -521,14 +496,12 @@
         }
 
         unsigned int dateLength = [dateString length] + 3;
-        if(meMessage)
-        {
+        if (meMessage) {
             [attrmsg addAttribute:NSForegroundColorAttributeName
                             value:textColor
                             range:NSMakeRange(dateLength, [attrmsg length] - dateLength)];
         }
-        else
-        {
+        else {
             [attrmsg addAttribute:NSForegroundColorAttributeName
                             value:textColor
                             range:NSMakeRange(dateLength, 2 + [aNick length])];
@@ -540,8 +513,7 @@
 
 - (void)hubRedirectNotification:(NSNotification *)aNotification
 {
-    if([[[aNotification userInfo] objectForKey:@"hubAddress"] isEqualToString:address])
-    {
+    if ([[[aNotification userInfo] objectForKey:@"hubAddress"] isEqualToString:address]) {
         [self willChangeValueForKey:@"title"];
         [address release];
         address = [[[aNotification userInfo] objectForKey:@"newAddress"] retain];
@@ -556,8 +528,7 @@
     NSArray *nicks = nil;
 
     int row = [userTable selectedRow];
-    if(row != -1)
-    {
+    if (row != -1) {
         SPUser *user = [filteredUsers objectAtIndex:row];
 
         NSMutableDictionary *parameters = [NSMutableDictionary dictionaryWithCapacity:1];
@@ -571,10 +542,9 @@
 
 - (void)userCommandNotification:(NSNotification *)aNotification
 {
-    if([address isEqualToString:[[aNotification userInfo] objectForKey:@"hubAddress"]])
-    {
+    if ([address isEqualToString:[[aNotification userInfo] objectForKey:@"hubAddress"]]) {
         int context = [[[aNotification userInfo] objectForKey:@"context"] intValue];
-        if((context & 3) > 0) /* context 1 (hub) or 2 (user) */
+        if ((context & 3) > 0) /* context 1 (hub) or 2 (user) */
         {
             int type = [[[aNotification userInfo] objectForKey:@"type"] intValue];
             NSString *title = [[aNotification userInfo] objectForKey:@"description"];
@@ -596,17 +566,15 @@
 
 - (void)hubnameChangedNotification:(NSNotification *)aNotification
 {
-    if([address isEqualToString:[[aNotification userInfo] objectForKey:@"hubAddress"]])
-    {
+    if ([address isEqualToString:[[aNotification userInfo] objectForKey:@"hubAddress"]]) {
         [self setName:[[aNotification userInfo] objectForKey:@"newHubname"]];
     }
 }
 
 - (void)hubDisconnectedNotification:(NSNotification *)aNotification
 {
-    if(!disconnected &&
-       [address isEqualToString:[[aNotification userInfo] objectForKey:@"hubAddress"]])
-    {
+    if (!disconnected &&
+       [address isEqualToString:[[aNotification userInfo] objectForKey:@"hubAddress"]]) {
         disconnected = YES;
         [usersTree removeAllObjects];
         needUpdating = YES;
@@ -622,12 +590,11 @@
 - (IBAction)grantExtraSlot:(id)sender
 {
     int row = [userTable selectedRow];
-    if(row == -1)
+    if (row == -1)
         return;
 
     SPUser *user = [filteredUsers objectAtIndex:row];
-    if(user)
-    {
+    if (user) {
         [[SPApplicationController sharedApplicationController] grantExtraSlotToNick:[user nick]];
     }
 }
@@ -641,7 +608,7 @@
                                                                            description:descriptionString
                                                                            autoconnect:NO
                                                                               encoding:nil];
-    if(result)
+    if (result)
         [self addStatusMessage:[NSString stringWithFormat:@"Hub %@ added to bookmarks\n", address]];
     else
         [self addStatusMessage:[NSString stringWithFormat:@"Hub %@ already added to bookmarks\n", address]];
@@ -662,14 +629,12 @@
         }
         
         // COMMAND: /clear
-        else if([cmd isEqualToString:@"/clear"])
-        {
+        else if ([cmd isEqualToString:@"/clear"]) {
             [[chatView textStorage] setAttributedString:[[[NSMutableAttributedString alloc] initWithString:@""] autorelease]];
         }
         
         // COMMAND: /help
-        else if([cmd isEqualToString:@"/help"])
-        {
+        else if ([cmd isEqualToString:@"/help"]) {
             [self addStatusMessage:@"Available commands:\n"
               "  /fav or /favorite: add this hub as a bookmark\n"
               "  /clear: clear the chat window\n"
@@ -683,10 +648,8 @@
         }
         
         // COMMAND: /pm
-        else if([cmd isEqualToString:@"/pm"])
-        {
-            if([args count] == 2)
-            {
+        else if ([cmd isEqualToString:@"/pm"]) {
+            if ([args count] == 2) {
                 sendNotification(SPNotificationStartChat,
                         @"remote_nick", [args objectAtIndex:1],
                         @"hubAddress", address,
@@ -698,16 +661,13 @@
         }
         
         // COMMAND: /refresh
-        else if([cmd isEqualToString:@"/refresh"])
-        {
+        else if ([cmd isEqualToString:@"/refresh"]) {
             [[SPPreferenceController sharedPreferences] updateAllSharedPaths];
         }
         
         // COMMAND: /join
-        else if([cmd isEqualToString:@"/join"])
-        {
-            if([args count] >= 2)
-            {
+        else if ([cmd isEqualToString:@"/join"]) {
+            if ([args count] >= 2) {
                 [[SPApplicationController sharedApplicationController] connectWithAddress:[args objectAtIndex:1]
                                                                                      nick:nil
                                                                               description:nil
@@ -719,10 +679,8 @@
         }
         
         // COMMAND: /search
-        else if([cmd isEqualToString:@"/search"])
-        {
-            if([args count] > 1)
-            {
+        else if ([cmd isEqualToString:@"/search"]) {
+            if ([args count] > 1) {
                 [[SPMainWindowController sharedMainWindowController]
                     performSearchFor:[message substringFromIndex:8]
                                 size:nil
@@ -737,10 +695,8 @@
         }
         
         // COMMAND: /userlist
-        else if([cmd isEqualToString:@"/userlist"])
-        {
-            if([args count] >= 2)
-            {
+        else if ([cmd isEqualToString:@"/userlist"]) {
+            if ([args count] >= 2) {
                 [[SPApplicationController sharedApplicationController]
                     downloadFilelistFromUser:[args objectAtIndex:1]
                                        onHub:address
@@ -754,10 +710,8 @@
         }
         
         // COMMAND: /reconnect
-        else if([cmd isEqualToString:@"/reconnect"])
-        {
-            if(disconnected == NO)
-            {
+        else if ([cmd isEqualToString:@"/reconnect"]) {
+            if (disconnected == NO) {
                 [self addStatusMessage:@"Still connected\n"];
             }
             else
@@ -771,7 +725,7 @@
         }
         
         // COMMAND: /np
-        else if([cmd isEqualToString:@"/np"]) {
+        else if ([cmd isEqualToString:@"/np"]) {
             // Display the current playing track in iTunes
             NSString *path = [[NSBundle mainBundle] pathForResource:@"np" ofType:@"scpt"];
             if (path != nil) {
@@ -805,13 +759,12 @@
                 } // url
             } // path
         } // np
-        else
-        {
+        else {
             [self addStatusMessage:[NSString stringWithFormat:@"Unknown command: %@\n", cmd]];
         }
     }
     else {
-        if(disconnected) {
+        if (disconnected) {
             [self addStatusMessage:@"Disconnected from hub, use /reconnect to reconnect\n"];
         }
         else {
@@ -835,12 +788,11 @@
 - (void)processFilelist:(id)sender autoMatch:(BOOL)autoMatchFlag
 {
     int row = [userTable selectedRow];
-    if(row == -1)
+    if (row == -1)
         return;
 
     SPUser *user = [filteredUsers objectAtIndex:row];
-    if(user)
-    {
+    if (user) {
         [[SPApplicationController sharedApplicationController] downloadFilelistFromUser:[user nick]
                                                                                   onHub:address
                                                                             forceUpdate:NO
@@ -861,12 +813,11 @@
 - (IBAction)startPrivateChat:(id)sender
 {
     int row = [userTable selectedRow];
-    if(row == -1)
+    if (row == -1)
         return;
 
     SPUser *user = [filteredUsers objectAtIndex:row];
-    if(user)
-    {
+    if (user) {
         sendNotification(SPNotificationStartChat,
                 @"remote_nick", [user nick],
                 @"hubAddress", address,
@@ -878,8 +829,7 @@
 - (IBAction)toggleColumn:(id)sender
 {
     NSTableColumn *tc = nil;
-    switch([sender tag])
-    {
+    switch([sender tag]) {
         case 0: tc = tcNick; break;
         case 1: tc = tcShare; break;
         case 2: tc = tcTag; break;
@@ -888,16 +838,14 @@
         case 5: tc = tcEmail; break;
         case 6: tc = tcIcon; break;
     }
-    if(tc == nil)
+    if (tc == nil)
         return;
 
-    if([sender state] == NSOffState)
-    {
+    if ([sender state] == NSOffState) {
         [sender setState:NSOnState];
         [userTable addTableColumn:tc];
     }
-    else
-    {
+    else {
         [sender setState:NSOffState];
         [userTable removeTableColumn:tc];
     }
@@ -908,7 +856,7 @@
     NSString *filterString = [sender stringValue];
     [filter release];
     filter = nil;
-    if([filterString length] > 0)
+    if ([filterString length] > 0)
         filter = [[filterString componentsSeparatedByString:@" "] retain];
 
     [self filterUsers];
@@ -950,8 +898,7 @@
     firstFrame.size.width = newFrame.size.width - (secondFrame.size.width + dividerThickness);
     firstFrame.size.height = newFrame.size.height;
 
-    if(firstFrame.size.width < 0)
-    {
+    if (firstFrame.size.width < 0) {
         firstFrame.size.width = 0;
         secondFrame.size.width = newFrame.size.width - firstFrame.size.width - dividerThickness;
     }
@@ -977,35 +924,27 @@
 {
     SPUser *user = [filteredUsers objectAtIndex:rowIndex];
 
-    if(user)
-    {
+    if (user) {
         NSString *identifier = [aTableColumn identifier];
-        if([identifier isEqualToString:@"nick"])
-        {
+        if ([identifier isEqualToString:@"nick"]) {
             return [user displayNick];
         }
-        else if([identifier isEqualToString:@"size"])
-        {
+        else if ([identifier isEqualToString:@"size"]) {
             return [NSString stringWithUTF8String:str_size_human([user size])];
         }
-        else if([identifier isEqualToString:@"tag"])
-        {
+        else if ([identifier isEqualToString:@"tag"]) {
             return [user tag];
         }
-        else if([identifier isEqualToString:@"speed"])
-        {
+        else if ([identifier isEqualToString:@"speed"]) {
             return [user speed];
         }
-        else if([identifier isEqualToString:@"email"])
-        {
+        else if ([identifier isEqualToString:@"email"]) {
             return [user email];
         }
-        else if([identifier isEqualToString:@"descriptionString"])
-        {
+        else if ([identifier isEqualToString:@"descriptionString"]) {
             return [user descriptionString];
         }
-        else if([identifier isEqualToString:@"icon"])
-        {
+        else if ([identifier isEqualToString:@"icon"]) {
             return [[NickImageTransformer defaultNickImageTransformer] transformedValue:user];
         }
     }

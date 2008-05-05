@@ -34,9 +34,7 @@
 
 - (id)init
 {
-    self = [super init];
-    if(self)
-    {
+    if ((self = [super init])) {
         [NSBundle loadNibNamed:@"PublicHubs" owner:self];
         [hubTable setTarget:self];
         [hubTable setDoubleAction:@selector(tableDoubleActionConnect:)];
@@ -48,12 +46,10 @@
 
         char *hublist_filename = hl_get_current();
 
-        if(hublist_filename)
-        {
+        if (hublist_filename) {
             xerr_t *err = 0;
             hublist_t *hublist = hl_parse_file(hublist_filename, &err);
-            if(hublist == NULL)
-            {
+            if (hublist == NULL) {
                 [[SPMainWindowController sharedMainWindowController]
                     statusMessage:[NSString stringWithFormat:@"Failed to load hublist: %s", xerr_msg(err)]
                               hub:nil];
@@ -63,8 +59,7 @@
             hl_free(hublist);
             free(hublist_filename);
         }
-        else
-        {
+        else {
             [self refresh:self];
         }
     }
@@ -86,25 +81,24 @@
     NSArray *tcs = [hubTable tableColumns];
     NSEnumerator *e = [tcs objectEnumerator];
     NSTableColumn *tc;
-    while((tc = [e nextObject]) != nil)
-    {
+    while ((tc = [e nextObject]) != nil) {
         [[tc dataCell] setWraps:YES];
         
-        if(tc == tcName)
+        if (tc == tcName)
             [[columnsMenu itemWithTag:0] setState:NSOnState];
-        else if(tc == tcDescription)
+        else if (tc == tcDescription)
             [[columnsMenu itemWithTag:1] setState:NSOnState];
-        else if(tc == tcAddress)
+        else if (tc == tcAddress)
             [[columnsMenu itemWithTag:2] setState:NSOnState];
-        else if(tc == tcLocation)
+        else if (tc == tcLocation)
             [[columnsMenu itemWithTag:3] setState:NSOnState];
-        else if(tc == tcUsers)
+        else if (tc == tcUsers)
             [[columnsMenu itemWithTag:4] setState:NSOnState];
-        else if(tc == tcMinshare)
+        else if (tc == tcMinshare)
             [[columnsMenu itemWithTag:5] setState:NSOnState];
-        else if(tc == tcMinslots)
+        else if (tc == tcMinslots)
             [[columnsMenu itemWithTag:6] setState:NSOnState];
-        else if(tc == tcMaxhubs)
+        else if (tc == tcMaxhubs)
             [[columnsMenu itemWithTag:7] setState:NSOnState];
     }
     
@@ -160,8 +154,7 @@
 - (IBAction)tableDoubleActionConnect:(id)sender
 {
     NSString *address = [[[arrayController selection] valueForKey:@"address"] string];
-    if(address)
-    {
+    if (address) {
         [[SPApplicationController sharedApplicationController] connectWithAddress:address
                                                                              nick:nil
                                                                       description:nil
@@ -177,8 +170,7 @@
     NSArray *items = [arrayController selectedObjects];
     NSEnumerator *e = [items objectEnumerator];
     NSDictionary *dict;
-    while((dict = [e nextObject]) != nil)
-    {
+    while ((dict = [e nextObject]) != nil) {
         address = [[dict valueForKey:@"address"] string];
         [[SPApplicationController sharedApplicationController] connectWithAddress:address
                                                                              nick:nil
@@ -191,11 +183,9 @@
 - (void)setHubsFromList:(hublist_t *)hublist
 {
     NSMutableArray *hubArray = [[NSMutableArray alloc] init];
-    if(hublist)
-    {
+    if (hublist) {
         hublist_hub_t *h;
-        LIST_FOREACH(h, hublist, link)
-        {
+        LIST_FOREACH(h, hublist, link) {
             NSMutableDictionary *hub = [NSMutableDictionary dictionary];
 
             NSString *str = h->name ? [NSString stringWithUTF8String:h->name] : @"";
@@ -240,8 +230,7 @@
     hublist_t *hublist = hl_parse_url(
             [[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsHublistURL] UTF8String],
             working_directory, &err);
-    if(hublist == NULL)
-    {
+    if (hublist == NULL) {
         [[SPMainWindowController sharedMainWindowController]
             statusMessage:[NSString stringWithFormat:@"Failed to load hublist: %s", xerr_msg(err)]
                       hub:nil];
@@ -260,8 +249,7 @@
 
 - (IBAction)refresh:(id)sender
 {
-    if(refreshInProgress == NO)
-    {
+    if (refreshInProgress == NO) {
         [NSThread detachNewThreadSelector:@selector(refreshThread:) toTarget:self withObject:nil];
     }
 }
@@ -269,8 +257,7 @@
 - (IBAction)toggleColumn:(id)sender
 {
     NSTableColumn *tc = nil;
-    switch([sender tag])
-    {
+    switch([sender tag]) {
         case 0: tc = tcName; break;
         case 1: tc = tcDescription; break;
         case 2: tc = tcAddress; break;
@@ -280,16 +267,14 @@
         case 6: tc = tcMinslots; break;
         case 7: tc = tcMaxhubs; break;
     }
-    if(tc == nil)
+    if (tc == nil)
         return;
     
-    if([sender state] == NSOffState)
-    {
+    if ([sender state] == NSOffState) {
         [sender setState:NSOnState];
         [hubTable addTableColumn:tc];
     }
-    else
-    {
+    else {
         [sender setState:NSOffState];
         [hubTable removeTableColumn:tc];
     }
@@ -306,8 +291,7 @@
     NSArray *items = [arrayController selectedObjects];
     NSEnumerator *e = [items objectEnumerator];
     NSDictionary *dict;
-    while((dict = [e nextObject]) != nil)
-    {
+    while ((dict = [e nextObject]) != nil) {
         [[SPBookmarkController sharedBookmarkController] addBookmarkWithName:[[dict valueForKey:@"name"] string]
                                                                      address:[[dict valueForKey:@"address"] string]
                                                                         nick:@""

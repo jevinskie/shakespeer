@@ -42,8 +42,7 @@
           hubAddress:(NSString *)aHubAddress
 {
     self = [super initWithWindowNibName:@"SearchWindow"];
-    if(self)
-    {
+    if (self) {
         searchResults = [[NSMutableArray alloc] init];
         arrangedSearchResults = [searchResults retain];
         searchResultsDelta = [[NSMutableArray alloc] init];
@@ -83,22 +82,19 @@
     [searchResultsIndex removeAllObjects];
     needUpdating = (searchString == aSearchString);
 
-    if(tag != -1)
-    {
+    if (tag != -1) {
         [[SPApplicationController sharedApplicationController] forgetSearch:tag];
         tag = -1;
     }
 
-    if(searchString != aSearchString)
-    {
+    if (searchString != aSearchString) {
         [self willChangeValueForKey:@"title"];
         [searchString release];
         searchString = [aSearchString copy];
         [self didChangeValueForKey:@"title"];
     }
 
-    if(searchSize != aSearchSize)
-    {
+    if (searchSize != aSearchSize) {
         [searchSize release];
         searchSize = [aSearchSize copy];
     }
@@ -106,8 +102,7 @@
     sizeRestriction = aSizeRestriction;
     searchType = aSearchType;
 
-    if(hubAddress != aHubAddress)
-    {
+    if (hubAddress != aHubAddress) {
         [hubAddress release];
         hubAddress = [aHubAddress retain];
     }
@@ -117,11 +112,9 @@
 
 - (void)updateSearchResults:(NSTimer *)aTimer
 {
-    if(needUpdating)
-    {
+    if (needUpdating) {
         [searchResults addObjectsFromArray:searchResultsDelta];
-        if(searchResults != arrangedSearchResults)
-        {
+        if (searchResults != arrangedSearchResults) {
             [self filterSearchResults:lastFilterString flags:lastFlags];
         }
         [self sortArray:arrangedSearchResults usingDescriptors:[searchResultTable sortDescriptors]];
@@ -153,33 +146,32 @@
     NSArray *tcs = [searchResultTable tableColumns];
     NSEnumerator *e = [tcs objectEnumerator];
     NSTableColumn *tc;
-    while((tc = [e nextObject]) != nil)
-    {
+    while ((tc = [e nextObject]) != nil) {
         [[tc dataCell] setWraps:YES];
         [[tc dataCell] setFont:[NSFont systemFontOfSize:[[NSUserDefaults standardUserDefaults] floatForKey:@"fontSize"]]];
             
-        if(tc == tcNick)
+        if (tc == tcNick)
             [[columnsMenu itemWithTag:0] setState:NSOnState];
-        else if(tc == tcSize)
+        else if (tc == tcSize)
             [[columnsMenu itemWithTag:1] setState:NSOnState];
-        else if(tc == tcTTH)
+        else if (tc == tcTTH)
             [[columnsMenu itemWithTag:2] setState:NSOnState];
-        else if(tc == tcSlots)
+        else if (tc == tcSlots)
             [[columnsMenu itemWithTag:3] setState:NSOnState];
-        else if(tc == tcPath)
+        else if (tc == tcPath)
             [[columnsMenu itemWithTag:4] setState:NSOnState];
-        else if(tc == tcHub)
+        else if (tc == tcHub)
             [[columnsMenu itemWithTag:5] setState:NSOnState];
-        else if(tc == tcSpeed)
+        else if (tc == tcSpeed)
             [[columnsMenu itemWithTag:6] setState:NSOnState];
     }
         
     [[searchResultTable headerView] setMenu:columnsMenu];
     
     int flags = 0;
-    if([[NSUserDefaults standardUserDefaults] boolForKey:@"requireOpenSlots"])
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"requireOpenSlots"])
         flags |= 1;
-    if([[NSUserDefaults standardUserDefaults] boolForKey:@"requireTTH"])
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"requireTTH"])
         flags |= 2;
     
     lastFlags = flags;
@@ -268,8 +260,7 @@
 - (void)searchResponseNotification:(NSNotification *)aNotification
 {
     int theTag = [[[aNotification userInfo] objectForKey:@"tag"] intValue];
-    if(theTag == tag)
-    {
+    if (theTag == tag) {
         NSString *filename = [[aNotification userInfo] objectForKey:@"filename"];
         uint64_t exactSize = [[[aNotification userInfo] objectForKey:@"size"] unsignedLongLongValue];
         int openslots = [[[aNotification userInfo] objectForKey:@"openslots"] intValue];
@@ -297,14 +288,12 @@
         [sr setObject:[[[sr objectForKey:@"hub"] truncatedString:NSLineBreakByTruncatingTail] autorelease] forKey:@"attributedHub"];
 
         NSMutableDictionary *parent = nil;
-        if([tth length] > 0)
+        if ([tth length] > 0)
             parent = [searchResultsIndex objectForKey:tth];
 
-        if(parent)
-        {
+        if (parent) {
             NSMutableArray *children = [parent objectForKey:@"children"];
-            if(children == nil)
-            {
+            if (children == nil) {
                 children = [[[NSMutableArray alloc] init] autorelease];
                 NSMutableDictionary *parentCopy = [[[NSMutableDictionary alloc] init] autorelease];
                 [parentCopy addEntriesFromDictionary:parent];
@@ -322,8 +311,7 @@
             [parent setObject:[NSString stringWithFormat:@"%u users", [children count]] forKey:@"nick"];
             [sr setObject:[[[sr objectForKey:@"nick"] truncatedString:NSLineBreakByTruncatingTail] autorelease] forKey:@"attributedNick"];
         }
-        else
-        {
+        else {
             [searchResultsIndex setObject:sr forKey:tth];
             [searchResultsDelta addObject:sr];
         }
@@ -340,13 +328,10 @@
     NSIndexSet *selectedIndices = [searchResultTable selectedRowIndexes];
     NSMutableArray *nicks = [NSMutableArray arrayWithCapacity:[selectedIndices count]];
     unsigned int i = [selectedIndices firstIndex];
-    while(i != NSNotFound)
-    {
+    while (i != NSNotFound) {
         NSDictionary *sr = [searchResultTable itemAtRow:i];
-        if([sr objectForKey:@"children"] == nil)
-        {
-            if([[uc address] isEqualToString:[sr objectForKey:@"hub"]])
-            {
+        if ([sr objectForKey:@"children"] == nil) {
+            if ([[uc address] isEqualToString:[sr objectForKey:@"hub"]]) {
                 NSMutableDictionary *parameters = [NSMutableDictionary dictionaryWithCapacity:2];
                 [parameters setObject:[sr objectForKey:@"nick"] forKey:@"nick"];
                 [parameters setObject:[NSString stringWithFormat:@"%@\\%@", [sr objectForKey:@"path"], [sr objectForKey:@"filename"]]
@@ -367,8 +352,7 @@
 - (IBAction)toggleColumn:(id)sender
 {
     NSTableColumn *tc = nil;
-    switch([sender tag])
-    {
+    switch([sender tag]) {
         case 0: tc = tcNick; break;
         case 1: tc = tcSize; break;
         case 2: tc = tcTTH; break;
@@ -377,16 +361,14 @@
         case 5: tc = tcHub; break;
         case 6: tc = tcSpeed; break;
     }
-    if(tc == nil)
+    if (tc == nil)
         return;
     
-    if([sender state] == NSOffState)
-    {
+    if ([sender state] == NSOffState) {
         [sender setState:NSOnState];
         [searchResultTable addTableColumn:tc];
     }
-    else
-    {
+    else {
         [sender setState:NSOffState];
         [searchResultTable removeTableColumn:tc];
     }
@@ -394,50 +376,42 @@
 
 - (IBAction)doSearch:(id)sender
 {
-    if([searchString length] == 0)
+    if ([searchString length] == 0)
         return;
 
     uint64_t size = 0ULL;
-    if([searchSize length] > 0)
-    {
+    if ([searchSize length] > 0) {
         NSScanner *scan = [NSScanner scannerWithString:searchSize];
         [scan scanLongLong:(int64_t *)&size];
-        if([scan isAtEnd] == NO)
-        {
+        if ([scan isAtEnd] == NO) {
             NSString *suffix = [[searchSize substringFromIndex:[scan scanLocation]] uppercaseString];
-            if([suffix hasPrefix:@"K"])
+            if ([suffix hasPrefix:@"K"])
                 size *= 1024;
-            else if([suffix hasPrefix:@"M"])
+            else if ([suffix hasPrefix:@"M"])
                 size *= 1024 * 1024;
-            else if([suffix hasPrefix:@"G"])
+            else if ([suffix hasPrefix:@"G"])
                 size *= 1024 * 1024 * 1024;
         }
     }
 
-    if(valid_tth([searchString UTF8String]))
-    {
-        if(hubAddress)
-        {
+    if (valid_tth([searchString UTF8String])) {
+        if (hubAddress) {
             tag = [[SPApplicationController sharedApplicationController] searchHub:hubAddress
                                                                             forTTH:searchString];
         }
-        else
-        {
+        else {
             tag = [[SPApplicationController sharedApplicationController] searchAllHubsForTTH:searchString];
         }
     }
-    else
-    {
-        if(hubAddress)
-        {
+    else {
+        if (hubAddress) {
             tag = [[SPApplicationController sharedApplicationController] searchHub:hubAddress
                                                                          forString:searchString
                                                                               size:size
                                                                    sizeRestriction:sizeRestriction
                                                                           fileType:searchType];
         }
-        else
-        {
+        else {
             tag = [[SPApplicationController sharedApplicationController] searchAllHubsForString:searchString
                                                                                            size:size
                                                                                 sizeRestriction:sizeRestriction
@@ -450,18 +424,15 @@
 {
     NSIndexSet *selectedIndices = [searchResultTable selectedRowIndexes];
     unsigned int i = [selectedIndices firstIndex];
-    if(i != NSNotFound)
-    {
+    if (i != NSNotFound) {
         NSDictionary *item = [searchResultTable itemAtRow:i];
-        if([item objectForKey:@"children"])
-        {
-            if([searchResultTable isItemExpanded:item])
+        if ([item objectForKey:@"children"]) {
+            if ([searchResultTable isItemExpanded:item])
                 [searchResultTable collapseItem:item];
             else
                 [searchResultTable expandItem:item];
         }
-        else
-        {
+        else {
             [self downloadFile:sender];
         }
     }
@@ -471,31 +442,26 @@
 {
     NSIndexSet *selectedIndices = [searchResultTable selectedRowIndexes];
     unsigned int i = [selectedIndices firstIndex];
-    while(i != NSNotFound)
-    {
+    while (i != NSNotFound) {
         NSDictionary *sr = [searchResultTable itemAtRow:i];
 
         NSString *targetPath = [sr objectForKey:@"filename"];
         NSString *sourcePath = [NSString stringWithFormat:@"%@\\%@", [sr objectForKey:@"path"],
                                          [sr objectForKey:@"filename"]];
 
-        if([[sr objectForKey:@"type"] intValue] == SHARE_TYPE_DIRECTORY)
-        {
+        if ([[sr objectForKey:@"type"] intValue] == SHARE_TYPE_DIRECTORY) {
             [[SPApplicationController sharedApplicationController] downloadDirectory:sourcePath
                                                                             fromNick:[sr objectForKey:@"nick"]
                                                                                onHub:[sr objectForKey:@"hub"]
                                                                     toLocalDirectory:targetPath];
         }
-        else
-        {
+        else {
             NSString *tth = [sr objectForKey:@"tth"];
             NSDictionary *parent = [searchResultsIndex objectForKey:tth];
             NSArray *children = [parent objectForKey:@"children"];
-            if(children)
-            {
+            if (children) {
                 NSEnumerator *e = [children objectEnumerator];
-                while((sr = [e nextObject]) != nil)
-                {
+                while ((sr = [e nextObject]) != nil) {
                     sourcePath = [NSString stringWithFormat:@"%@\\%@", [sr objectForKey:@"path"],
                                            [sr objectForKey:@"filename"]];
                     [[SPApplicationController sharedApplicationController] downloadFile:sourcePath
@@ -525,12 +491,10 @@
 {
     NSIndexSet *selectedIndices = [searchResultTable selectedRowIndexes];
     unsigned int i = [selectedIndices firstIndex];
-    if(i != NSNotFound)
-    {
+    if (i != NSNotFound) {
         NSDictionary *sr = [searchResultTable itemAtRow:i];
 
-        if([sr objectForKey:@"children"] == nil)
-        {
+        if ([sr objectForKey:@"children"] == nil) {
             NSString *sourceDirectory = [sr objectForKey:@"path"];
             NSString *targetPath = [sourceDirectory lastWindowsPathComponent];
 
@@ -547,11 +511,9 @@
     NSIndexSet *selectedIndices = [searchResultTable selectedRowIndexes];
     NSMutableDictionary *requests = [NSMutableDictionary dictionaryWithCapacity:[selectedIndices count]];
     unsigned int i = [selectedIndices firstIndex];
-    while(i != NSNotFound)
-    {
+    while (i != NSNotFound) {
         NSDictionary *sr = [searchResultTable itemAtRow:i];
-        if([sr objectForKey:@"children"] == nil)
-        {
+        if ([sr objectForKey:@"children"] == nil) {
             [requests setObject:sr forKey:[sr objectForKey:@"nick"]];
         }
         i = [selectedIndices indexGreaterThanIndex:i];
@@ -559,8 +521,7 @@
 
     NSEnumerator *e = [requests keyEnumerator];
     NSString *aNick;
-    while((aNick = [e nextObject]) != nil)
-    {
+    while ((aNick = [e nextObject]) != nil) {
         NSDictionary *sr = [requests objectForKey:aNick];
         [[SPApplicationController sharedApplicationController]
             downloadFilelistFromUser:aNick
@@ -584,12 +545,10 @@
 {
     NSIndexSet *selectedIndices = [searchResultTable selectedRowIndexes];
     unsigned int i = [selectedIndices firstIndex];
-    if(i != NSNotFound)
-    {
+    if (i != NSNotFound) {
         NSDictionary *sr = [searchResultTable itemAtRow:i];
         NSString *tth = [sr objectForKey:@"tth"];
-        if(tth)
-        {
+        if (tth) {
             NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
             [pasteboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
             [pasteboard setString:tth forType:NSStringPboardType];
@@ -602,11 +561,9 @@
     NSIndexSet *selectedIndices = [searchResultTable selectedRowIndexes];
     NSMutableDictionary *requests = [NSMutableDictionary dictionaryWithCapacity:[selectedIndices count]];
     unsigned int i = [selectedIndices firstIndex];
-    while(i != NSNotFound)
-    {
+    while (i != NSNotFound) {
         NSDictionary *sr = [searchResultTable itemAtRow:i];
-        if([sr objectForKey:@"children"] == nil)
-        {
+        if ([sr objectForKey:@"children"] == nil) {
             [requests setObject:sr forKey:[sr objectForKey:@"nick"]];
         }
         i = [selectedIndices indexGreaterThanIndex:i];
@@ -614,8 +571,7 @@
 
     NSEnumerator *e = [requests keyEnumerator];
     NSString *aNick;
-    while((aNick = [e nextObject]) != nil)
-    {
+    while ((aNick = [e nextObject]) != nil) {
         NSDictionary *sr = [requests objectForKey:aNick];
         sendNotification(SPNotificationStartChat,
                 /* FIXME: we don't have any real own nick here... dunno */
@@ -631,27 +587,22 @@
     NSString *nick = [item objectForKey:@"nick"];
     NSString *path = [item objectForKey:@"path"];
 
-    if((flags & 1) == 1)
-    {
-        if([[item objectForKey:@"slotsPercent"] floatValue] == 0)
-        {
+    if ((flags & 1) == 1) {
+        if ([[item objectForKey:@"slotsPercent"] floatValue] == 0) {
             return NO;
         }
     }
 
-    if((flags & 2) == 2)
-    {
-        if([(NSString *)[item objectForKey:@"tth"] length] == 0)
-        {
+    if ((flags & 2) == 2) {
+        if ([(NSString *)[item objectForKey:@"tth"] length] == 0) {
             return NO;
         }
     }
 
-    if([filterString length] == 0 ||
+    if ([filterString length] == 0 ||
        [filename rangeOfString:filterString options:NSCaseInsensitiveSearch].location != NSNotFound ||
        [nick rangeOfString:filterString options:NSCaseInsensitiveSearch].location != NSNotFound ||
-       [path rangeOfString:filterString options:NSCaseInsensitiveSearch].location != NSNotFound)
-    {
+       [path rangeOfString:filterString options:NSCaseInsensitiveSearch].location != NSNotFound) {
         return YES;
     }
 
@@ -662,10 +613,8 @@
 {
     NSEnumerator *e = [children objectEnumerator];
     NSDictionary *item;
-    while((item = [e nextObject]) != nil)
-    {
-        if([self filterString:filterString flags:flags matchesItem:item])
-        {
+    while ((item = [e nextObject]) != nil) {
+        if ([self filterString:filterString flags:flags matchesItem:item]) {
             return YES;
         }
     }
@@ -677,12 +626,10 @@
     NSMutableArray *arrangedObjects = [NSMutableArray arrayWithCapacity:[searchResults count]];
     NSEnumerator *e = [searchResults objectEnumerator];
     NSDictionary *item;
-    while((item = [e nextObject]) != nil)
-    {
+    while ((item = [e nextObject]) != nil) {
         NSArray *children = [item objectForKey:@"children"];
-        if([self filterString:filterString flags:flags matchesItem:item] ||
-           [self filterString:filterString flags:flags matchesChildren:children])
-        {
+        if ([self filterString:filterString flags:flags matchesItem:item] ||
+           [self filterString:filterString flags:flags matchesChildren:children]) {
             [arrangedObjects addObject:item];
         }
     }
@@ -692,12 +639,10 @@
 - (void)filterSearchResults:(NSString *)filterString flags:(int)flags
 {
     [arrangedSearchResults release];
-    if([filterString length] > 0 || flags > 0)
-    {
+    if ([filterString length] > 0 || flags > 0) {
         arrangedSearchResults = [self filterOnString:filterString flags:flags];
     }
-    else
-    {
+    else {
         arrangedSearchResults = searchResults;
     }
     [arrangedSearchResults retain];
@@ -707,19 +652,15 @@
 {
     NSString *filterString = [searchField stringValue];
     int flags = 0;
-    if([requireOpenSlotButton state] == NSOnState)
-    {
+    if ([requireOpenSlotButton state] == NSOnState) {
         flags |= 1;
     }
-    if([requireTTHButton state] == NSOnState)
-    {
+    if ([requireTTHButton state] == NSOnState) {
         flags |= 2;
     }
     
-    if(filterString != lastFilterString || flags != lastFlags)
-    {
-        if(filterString != lastFilterString)
-        {
+    if (filterString != lastFilterString || flags != lastFlags) {
+        if (filterString != lastFilterString) {
             [lastFilterString release];
             lastFilterString = [filterString retain];
         }
@@ -743,7 +684,7 @@
 
 - (int)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
 {
-    if(item == nil)
+    if (item == nil)
         return [arrangedSearchResults count];
     return [[item objectForKey:@"children"] count];
 }
@@ -755,7 +696,7 @@
 
 - (id)outlineView:(NSOutlineView *)outlineView child:(int)index ofItem:(id)item
 {
-    if(item == nil)
+    if (item == nil)
         return [arrangedSearchResults objectAtIndex:index];
     return [[item objectForKey:@"children"] objectAtIndex:index];
 }
@@ -770,8 +711,7 @@
      forTableColumn:(NSTableColumn *)tableColumn
                item:(id)item
 {
-    if([[tableColumn identifier] isEqualToString:@"attributedFilename"])
-    {
+    if ([[tableColumn identifier] isEqualToString:@"attributedFilename"]) {
         share_type_t type = [[item objectForKey:@"type"] intValue];
         NSImage *img = [[FiletypeImageTransformer defaultFiletypeImageTransformer]
             transformedValue:[NSNumber numberWithInt:type]];
@@ -786,11 +726,9 @@
 
     NSEnumerator *e = [anArray objectEnumerator];
     NSDictionary *item;
-    while((item = [e nextObject]) != nil)
-    {
+    while ((item = [e nextObject]) != nil) {
         NSMutableArray *children = [item objectForKey:@"children"];
-        if(children)
-        {
+        if (children) {
             [self sortArray:children usingDescriptors:sortDescriptors];
         }
     }
@@ -812,32 +750,28 @@
     /* erase all previous user commands */
     int indexOfTTHItem = [contextMenu indexOfItem:menuItemCopyTTH];
     int j;
-    for(j = [contextMenu numberOfItems]-1; j > indexOfTTHItem; j--)
+    for (j = [contextMenu numberOfItems]-1; j > indexOfTTHItem; j--)
         [contextMenu removeItemAtIndex:j];
 
     /* get a unique set of selected hubs */
     NSIndexSet *selectedIndices = [searchResultTable selectedRowIndexes];
     NSMutableSet *uniqueHubs = [[NSMutableSet alloc] init];
     unsigned int i = [selectedIndices firstIndex];
-    while(i != NSNotFound)
-    {
+    while (i != NSNotFound) {
         NSDictionary *sr = [searchResultTable itemAtRow:i];
         [uniqueHubs addObject:[sr objectForKey:@"hub"]];
         i = [selectedIndices indexGreaterThanIndex:i];
     }
 
-    if([uniqueHubs count])
-    {
+    if ([uniqueHubs count]) {
         /* add a separator before user commands submenus */
         [contextMenu addItem:[NSMenuItem separatorItem]];
 
         NSEnumerator *e = [uniqueHubs objectEnumerator];
         NSString *hub;
-        while((hub = [e nextObject]) != nil)
-        {
+        while ((hub = [e nextObject]) != nil) {
             NSArray *ucArray = [[SPMainWindowController sharedMainWindowController] userCommandsForHub:hub];
-            if([ucArray count])
-            {
+            if ([ucArray count]) {
                 /* add a submenu for this hubs usercommands */
                 /* [contextMenu addItemWithTitle:hub action:nil keyEquivalent:@""]; */
                 NSMenu *subMenu = [[[NSMenu alloc] initWithTitle:hub] autorelease];
@@ -848,9 +782,8 @@
 
                 NSEnumerator *e2 = [ucArray objectEnumerator];
                 SPUserCommand *uc;
-                while((uc = [e2 nextObject]) != nil)
-                {
-                    if(([uc context] & 4) == 4)
+                while ((uc = [e2 nextObject]) != nil) {
+                    if (([uc context] & 4) == 4)
                     {
                         [subMenu addUserCommand:uc
                                          action:@selector(executeSearchUserCommand:)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Markus Magnuson <markus@konstochvanligasaker.se>
+ * Copyright 2006 Markus Magnuson <markus.magnuson@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

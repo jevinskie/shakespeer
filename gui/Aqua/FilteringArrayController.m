@@ -20,9 +20,8 @@
 
 - (NSArray *)arrangeObjects:(NSArray *)objects
 {
-    if(!searchString || [[searchString stringWithoutWhitespace] length] == 0 ||
-       !searchKeys || [searchKeys count] == 0)
-    {
+    if (!searchString || [[searchString stringWithoutWhitespace] length] == 0 ||
+       !searchKeys || [searchKeys count] == 0) {
         return [super arrangeObjects:objects];   
     }
     
@@ -41,8 +40,7 @@
     id currentItem;
     NSEnumerator *unfilteredObjectsEnumerator = [objects objectEnumerator];
     
-    while((currentItem = [unfilteredObjectsEnumerator nextObject]))
-    {
+    while ((currentItem = [unfilteredObjectsEnumerator nextObject])) {
         // we're allocing and autoreleasing tons of objects in this scope,
         // so having our own pool is good to avoid defragmenting memory.
         NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -54,9 +52,9 @@
         // let's start out by cleaning up the array. we might have a bunch of attributed (styled)
         // strings, so get all raw strings before we do the search.
         NSMutableArray *cleanSearchTerms = [NSMutableArray arrayWithCapacity:[searchKeys count]];
-        while((searchKey = [keysEnumerator nextObject])) {
+        while ((searchKey = [keysEnumerator nextObject])) {
             NSString *cellValue = [currentItem valueForKeyPath:searchKey];
-            if([cellValue isKindOfClass:[NSAttributedString class]])
+            if ([cellValue isKindOfClass:[NSAttributedString class]])
                 cellValue = [(NSAttributedString *)cellValue string];
             
             [cleanSearchTerms addObject:cellValue];
@@ -68,6 +66,7 @@
         
         [pool release];
     }
+    
     return [super arrangeObjects:matchedObjects];
 }
 
@@ -120,8 +119,7 @@
 
 - (void)setSearchString:(NSString *)newSearchString
 {
-    if (searchString != newSearchString)
-    {
+    if (searchString != newSearchString) {
         [searchString autorelease];
         searchString = [newSearchString copy];
     }
@@ -129,16 +127,13 @@
 
 - (void)setSearchKeys:(NSArray *)newSearchKeys
 {
-    if(searchKeys != newSearchKeys)
-    {
+    if (searchKeys != newSearchKeys) {
         [searchKeys autorelease];
         searchKeys = [newSearchKeys copy];
     }
 }
 
 @end
-
-
 
 /* Modified by Martin Hedenfalk <martin@bzero.se> for use in ShakesPeer
  * 2004-03-29: Added handling of searchKeys

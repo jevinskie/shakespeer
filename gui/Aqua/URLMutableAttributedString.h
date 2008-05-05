@@ -6,5 +6,7 @@
 #import <Cocoa/Cocoa.h>
 
 @interface NSMutableAttributedString (URLTextViewAdditions)
+
 - (void)detectURLs:(NSColor*)linkColor;
+
 @end

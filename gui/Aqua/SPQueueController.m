@@ -35,9 +35,7 @@
 
 - (id)init
 {
-    self = [super init];
-    if(self)
-    {
+    if ((self = [super init])) {
         [NSBundle loadNibNamed:@"Downloads" owner:self];
 
         rootItems = [[NSMutableArray alloc] init];
@@ -125,24 +123,23 @@
     NSArray *tcs = [tableView tableColumns];
     NSEnumerator *e = [tcs objectEnumerator];
     NSTableColumn *tc;
-    while((tc = [e nextObject]) != nil)
-    {
+    while ((tc = [e nextObject]) != nil) {
         [[tc dataCell] setWraps:YES];
         [[tc dataCell] setFont:[NSFont systemFontOfSize:[[NSUserDefaults standardUserDefaults] floatForKey:@"fontSize"]]];
         
-        if(tc == tcSize)
+        if (tc == tcSize)
             [[columnsMenu itemWithTag:0] setState:NSOnState];
-        else if(tc == tcUsers)
+        else if (tc == tcUsers)
             [[columnsMenu itemWithTag:1] setState:NSOnState];
-        else if(tc == tcStatus)
+        else if (tc == tcStatus)
             [[columnsMenu itemWithTag:2] setState:NSOnState];
-        else if(tc == tcPriority)
+        else if (tc == tcPriority)
             [[columnsMenu itemWithTag:3] setState:NSOnState];
-        else if(tc == tcPath)
+        else if (tc == tcPath)
             [[columnsMenu itemWithTag:4] setState:NSOnState];
-        else if(tc == tcTTH)
+        else if (tc == tcTTH)
             [[columnsMenu itemWithTag:5] setState:NSOnState];
-        else if(tc == tcExactSize)
+        else if (tc == tcExactSize)
             [[columnsMenu itemWithTag:6] setState:NSOnState];
     }
     
@@ -200,15 +197,14 @@
 - (void)emptyMenu:(NSMenu *)aMenu
 {
     int i;
-    for(i = [aMenu numberOfItems]; i > 0; i--)
+    for (i = [aMenu numberOfItems]; i > 0; i--)
         [aMenu removeItemAtIndex:i - 1];
 }
 
 - (BOOL)validateMenuItem:(id)sender
 {
     /* populate menu, and only do it once */
-    if(sender == menuItemSearchByTTH)
-    {
+    if (sender == menuItemSearchByTTH) {
         [self emptyMenu:menuRemoveSource];
         [self emptyMenu:menuRemoveUserFromQueue];
         [self emptyMenu:menuBrowseUsersFiles];
@@ -217,19 +213,16 @@
         NSMutableSet *nicks = [[NSMutableSet alloc] init];
         NSIndexSet *selectedIndices = [tableView selectedRowIndexes];
         unsigned int i = [selectedIndices firstIndex];
-        while(i != NSNotFound)
-        {
+        while (i != NSNotFound) {
             SPQueueItem *qi = [tableView itemAtRow:i];
             [nicks addObjectsFromArray:[qi nicks]];
             i = [selectedIndices indexGreaterThanIndex:i];
         }
 
-        if([nicks count])
-        {
+        if ([nicks count]) {
             NSEnumerator *e = [nicks objectEnumerator];
             NSString *nickName;
-            while((nickName = [e nextObject]) != nil)
-            {
+            while ((nickName = [e nextObject]) != nil) {
                 id nickMenuItem;
 
                 nickMenuItem = [menuRemoveSource addItemWithTitle:nickName
@@ -255,8 +248,7 @@
                 [menuItemBrowseUsersFiles setEnabled:YES];
             }
         }
-        else
-        {
+        else {
             [menuItemRemoveSource setEnabled:NO];
             [menuItemRemoveUserFromQueue setEnabled:NO];
             [menuItemBrowseUsersFiles setEnabled:NO];
@@ -264,17 +256,14 @@
         [nicks release];
     }
 
-    if(sender == menuItemSearchByTTH)
-    {
+    if (sender == menuItemSearchByTTH) {
         /* only enable if there is any TTH available */
         NSIndexSet *selectedIndices = [tableView selectedRowIndexes];
         unsigned int i = [selectedIndices firstIndex];
         BOOL hasTTH = NO;
-        while(i != NSNotFound)
-        {
+        while (i != NSNotFound) {
             SPQueueItem *qi = [tableView itemAtRow:i];
-            if([[qi tth] length] > 0)
-            {
+            if ([[qi tth] length] > 0) {
                 hasTTH = YES;
                 break;
             }
@@ -285,8 +274,7 @@
 
 #if 0
     /* if the tag is set to 4711, only enable if single selection */
-    if([sender tag] == 4711)
-    {
+    if ([sender tag] == 4711) {
         BOOL singleSelection = ([[tableView selectedRowIndexes] count] == 1);
         return singleSelection;
     }
@@ -302,12 +290,10 @@
 {
     NSEnumerator *e = [rootItems objectEnumerator];
     SPQueueItem *qi;
-    while((qi = [e nextObject]) != nil)
-    {
-        if([qi isFilelist])
-        {
+    while ((qi = [e nextObject]) != nil) {
+        if ([qi isFilelist]) {
             NSString *filelistNick = [[qi nicks] objectAtIndex:0];
-            if([filelistNick isEqualToString:aNick])
+            if ([filelistNick isEqualToString:aNick])
                 return qi;
         }
     }
@@ -318,10 +304,8 @@
 {
     NSEnumerator *e = [anArray objectEnumerator];
     SPQueueItem *qi;
-    while((qi = [e nextObject]) != nil)
-    {
-        if([[qi filename] isEqualToString:name])
-        {
+    while ((qi = [e nextObject]) != nil) {
+        if ([[qi filename] isEqualToString:name]) {
             return qi;
         }
     }
@@ -332,18 +316,15 @@
                        inArray:(NSMutableArray *)anArray
                           root:(NSString *)root
 {
-    if([components count] == 0)
-    {
+    if ([components count] == 0) {
         return anArray;
     }
 
     NSString *parentName = [components objectAtIndex:0];
     NSString *newRoot = root ? [NSString stringWithFormat:@"%@/%@", root, parentName] : nil;
     SPQueueItem *parent = [self findItemWithFilename:parentName inArray:anArray];
-    if(parent == nil)
-    {
-        if(root)
-        {
+    if (parent == nil) {
+        if (root) {
             parent = [[SPQueueItem alloc] initWithTarget:newRoot];
             [anArray addObject:parent];
             [parent setIsDirectory];
@@ -370,8 +351,7 @@
     NSMutableArray *parentArray = [self findParent:[self extraPathComponents:targetFilename]
                                            inArray:rootItems
                                               root:nil];
-    if(parentArray)
-    {
+    if (parentArray) {
         return [self findItemWithFilename:[targetFilename lastPathComponent] inArray:parentArray];
     }
     return nil;
@@ -384,17 +364,14 @@
 {
     SPQueueItem *qi = [tableView itemAtRow:[tableView selectedRow]];
 
-    if(qi)
-    {
-        if([qi isDirectory])
-        {
-            if([tableView isItemExpanded:qi])
+    if (qi) {
+        if ([qi isDirectory]) {
+            if ([tableView isItemExpanded:qi])
                 [tableView collapseItem:qi];
             else
                 [tableView expandItem:qi];
         }
-        else
-        {
+        else {
             [self openSelected:self];
         }
     }
@@ -404,24 +381,20 @@
 {
     NSIndexSet *selectedIndices = [tableView selectedRowIndexes];
     unsigned int i = [selectedIndices firstIndex];
-    while(i != NSNotFound)
-    {
+    while (i != NSNotFound) {
         SPQueueItem *qi = [tableView itemAtRow:i];
         
         // set the download as pending removal from the queue, once we have
         // the notification from the backend that the download is aborted.
         [qi setIsWaitingToBeRemoved:YES];
         
-        if([qi isFilelist])
-        {
+        if ([qi isFilelist]) {
             [[SPApplicationController sharedApplicationController] removeFilelistForNick:[[qi nicks] objectAtIndex:0]];
         }
-        else if([qi isDirectory])
-        {
+        else if ([qi isDirectory]) {
             [[SPApplicationController sharedApplicationController] removeDirectory:[qi target]];
         }
-        else
-        {
+        else {
             [[SPApplicationController sharedApplicationController] removeQueue:[qi target]];
         }
 
@@ -433,8 +406,7 @@
 - (IBAction)removeUserFromQueue:(id)sender
 {
     NSString *aNick = [sender title];
-    if(aNick)
-    {
+    if (aNick) {
         [[SPApplicationController sharedApplicationController] removeAllSourcesWithNick:aNick];
     }
 }
@@ -442,15 +414,13 @@
 - (IBAction)removeSource:(id)sender
 {
     NSString *aNick = [sender title];
-    if(aNick)
-    {
+    if (aNick) {
         NSIndexSet *selectedIndices = [tableView selectedRowIndexes];
         unsigned int i = [selectedIndices firstIndex];
-        while(i != NSNotFound)
-        {
+        while (i != NSNotFound) {
             SPQueueItem *qi = [tableView itemAtRow:i];
 
-            if([qi isFilelist])
+            if ([qi isFilelist])
                 [[SPApplicationController sharedApplicationController] removeFilelistForNick:aNick];
             else
                 [[SPApplicationController sharedApplicationController] removeSource:[qi target] nick:aNick];
@@ -470,14 +440,11 @@
 {
     NSEnumerator *e = [anArray objectEnumerator];
     SPQueueItem *qi;
-    while((qi = [e nextObject]) != nil)
-    {
-        if([qi isFinished])
-        {
+    while ((qi = [e nextObject]) != nil) {
+        if ([qi isFinished]) {
             [anArray removeObject:qi];
         }
-        else if([qi isDirectory])
-        {
+        else if ([qi isDirectory]) {
             [self clearAllFinishedDownloadsRecursivelyInArray:[qi children]];
         }
     }
@@ -487,14 +454,11 @@
 {
     NSEnumerator *e = [anArray objectEnumerator];
     SPQueueItem *qi;
-    while((qi = [e nextObject]) != nil)
-    {
-        if([qi isDirectory])
-        {
+    while ((qi = [e nextObject]) != nil) {
+        if ([qi isDirectory]) {
             [self setPriority:priority recursivelyInArray:[qi children]];
         }
-        else
-        {
+        else {
             [[SPApplicationController sharedApplicationController] setPriority:priority onTarget:[qi target]];
         }
     }
@@ -504,16 +468,13 @@
 {
     NSIndexSet *selectedIndices = [tableView selectedRowIndexes];
     unsigned int i = [selectedIndices firstIndex];
-    while(i != NSNotFound)
-    {
+    while (i != NSNotFound) {
         SPQueueItem *qi = [tableView itemAtRow:i];
 
-        if([qi isDirectory])
-        {
+        if ([qi isDirectory]) {
             [self setPriority:[sender tag] recursivelyInArray:[qi children]];
         }
-        else
-        {
+        else {
             [[SPApplicationController sharedApplicationController] setPriority:[sender tag] onTarget:[qi target]];
         }
 
@@ -525,13 +486,11 @@
 {
     NSIndexSet *selectedIndices = [tableView selectedRowIndexes];
     unsigned int i = [selectedIndices firstIndex];
-    while(i != NSNotFound)
-    {
+    while (i != NSNotFound) {
         SPQueueItem *qi = [tableView itemAtRow:i];
 
         NSString *tth = [qi tth];
-        if([tth length] > 0)
-        {
+        if ([tth length] > 0) {
             [[SPMainWindowController sharedMainWindowController] performSearchFor:tth
                                                                              size:0
                                                                   sizeRestriction:SHARE_SIZE_NONE
@@ -547,16 +506,14 @@
 {
     NSIndexSet *selectedIndices = [tableView selectedRowIndexes];
     unsigned int i = [selectedIndices firstIndex];
-    while(i != NSNotFound)
-    {
+    while (i != NSNotFound) {
         SPQueueItem *qi = [tableView itemAtRow:i];
 
         NSMutableString *searchString = [NSMutableString stringWithString:[qi filename]];
         NSCharacterSet *punctuationSet = [NSCharacterSet punctuationCharacterSet];
-        while(1)
-        {
+        while (1) {
             NSRange r = [searchString rangeOfCharacterFromSet:punctuationSet];
-            if(r.location == NSNotFound)
+            if (r.location == NSNotFound)
                 break;
             [searchString replaceCharactersInRange:r withString:@" "];
         }
@@ -583,8 +540,7 @@
 - (IBAction)toggleColumn:(id)sender
 {
     NSTableColumn *tc = nil;
-    switch([sender tag])
-    {
+    switch([sender tag]) {
         case 0: tc = tcSize; break;
         case 1: tc = tcUsers; break;
         case 2: tc = tcStatus; break;
@@ -593,16 +549,14 @@
         case 5: tc = tcTTH; break;
         case 6: tc = tcExactSize; break;
     }
-    if(tc == nil)
+    if (tc == nil)
         return;
 
-    if([sender state] == NSOffState)
-    {
+    if ([sender state] == NSOffState) {
         [sender setState:NSOnState];
         [tableView addTableColumn:tc];
     }
-    else
-    {
+    else {
         [sender setState:NSOffState];
         [tableView removeTableColumn:tc];
     }
@@ -612,8 +566,7 @@
 {
     NSIndexSet *selectedIndices = [tableView selectedRowIndexes];
     unsigned int i = [selectedIndices firstIndex];
-    while(i != NSNotFound)
-    {
+    while (i != NSNotFound) {
         SPQueueItem *qi = [tableView itemAtRow:i];
 
         NSString *downloadFolder = [[NSUserDefaults standardUserDefaults]
@@ -630,8 +583,7 @@
 {
     NSIndexSet *selectedIndices = [tableView selectedRowIndexes];
     unsigned int i = [selectedIndices firstIndex];
-    while(i != NSNotFound)
-    {
+    while (i != NSNotFound) {
         SPQueueItem *qi = [tableView itemAtRow:i];
 
         NSString *downloadFolder = [[NSUserDefaults standardUserDefaults]
@@ -650,7 +602,7 @@
 
 - (int)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
 {
-    if(item == nil)
+    if (item == nil)
         return [rootItems count];
     return [[(SPQueueItem *)item children] count];
 }
@@ -662,7 +614,7 @@
 
 - (id)outlineView:(NSOutlineView *)outlineView child:(int)index ofItem:(id)item
 {
-    if(item == nil)
+    if (item == nil)
         return [rootItems objectAtIndex:index];
     return [[(SPQueueItem *)item children] objectAtIndex:index];
 }
@@ -671,40 +623,32 @@
 {
     SPQueueItem *qi = item;
     NSString *identifier = [tableColumn identifier];
-    if([identifier isEqualToString:@"filename"])
-    {
+    if ([identifier isEqualToString:@"filename"]) {
         NSAttributedString *attributedDisplayName = [[[qi displayName] truncatedString:NSLineBreakByTruncatingMiddle] autorelease];
         return attributedDisplayName;
     }
-    else if([identifier isEqualToString:@"tth"])
-    {
+    else if ([identifier isEqualToString:@"tth"]) {
         return [qi attributedTTH];
     }
-    else if([identifier isEqualToString:@"path"])
-    {
+    else if ([identifier isEqualToString:@"path"]) {
         return nil;
     }
-    else if([identifier isEqualToString:@"users"])
-    {
+    else if ([identifier isEqualToString:@"users"]) {
         return [qi isDirectory] ? @"" : [qi users];
     }
-    else if([identifier isEqualToString:@"size"])
-    {
-        if([qi isDirectory])
+    else if ([identifier isEqualToString:@"size"]) {
+        if ([qi isDirectory])
             return [NSString stringWithFormat:@"%u files", [[(SPQueueItem *)item children] count]];
         else
            return [[HumanSizeTransformer defaultHumanSizeTransformer] transformedValue:[qi size]];
     }
-    else if([identifier isEqualToString:@"exactSize"])
-    {
+    else if ([identifier isEqualToString:@"exactSize"]) {
         return [qi isDirectory] ? nil : [qi exactSize];
     }
-    else if([identifier isEqualToString:@"priority"])
-    {
+    else if ([identifier isEqualToString:@"priority"]) {
         return [qi isDirectory] ? nil : [qi priorityString];
     }
-    else if([identifier isEqualToString:@"status"])
-    {
+    else if ([identifier isEqualToString:@"status"]) {
         return [qi isDirectory] ? nil : [qi status];
     }
     else
@@ -718,10 +662,9 @@
 {
     SPQueueItem *qi = item;
 
-    if([[tableColumn identifier] isEqualToString:@"filename"])
-    {
+    if ([[tableColumn identifier] isEqualToString:@"filename"]) {
         share_type_t type = [qi filetype];
-        if([qi isDirectory])
+        if ([qi isDirectory])
             type = SHARE_TYPE_DIRECTORY;
         NSImage *img = [[FiletypeImageTransformer defaultFiletypeImageTransformer]
             transformedValue:[NSNumber numberWithInt:type]];
@@ -730,8 +673,7 @@
         [cell setFont:[NSFont systemFontOfSize:[[NSUserDefaults standardUserDefaults] floatForKey:@"fontSize"]]];
     }
 
-    if([qi isFinished])
-    {
+    if ([qi isFinished]) {
         NSAttributedString *as = [cell attributedStringValue];
         NSMutableAttributedString *mas = [[NSMutableAttributedString alloc] initWithAttributedString:as];
         [mas addAttribute:NSForegroundColorAttributeName
@@ -747,11 +689,9 @@
 
     NSEnumerator *e = [anArray objectEnumerator];
     SPQueueItem *item;
-    while((item = [e nextObject]) != nil)
-    {
+    while ((item = [e nextObject]) != nil) {
         NSMutableArray *children = [item children];
-        if(children)
-        {
+        if (children) {
             [self sortArray:children usingDescriptors:sortDescriptors];
         }
     }
@@ -792,8 +732,7 @@
     NSString *targetDirectory = [[aNotification userInfo] objectForKey:@"targetDirectory"];
 
     SPQueueItem *qi = [self findItemWithTarget:targetDirectory];
-    if(qi == nil)
-    {
+    if (qi == nil) {
         /* assemble the queue item */
         SPQueueItem *qi = [[SPQueueItem alloc] initWithTarget:targetDirectory];
         [qi setIsDirectory];
@@ -830,8 +769,7 @@
     NSString *targetFilename = [[aNotification userInfo] objectForKey:@"targetFilename"];
     SPQueueItem *qi = [self findItemWithTarget:targetFilename];
 
-    if(qi)
-    {
+    if (qi) {
         NSString *sourceFilename = [[aNotification userInfo] objectForKey:@"sourceFilename"];
         NSString *nick = [[aNotification userInfo] objectForKey:@"nick"];
         [qi addSource:sourceFilename nick:nick];
@@ -844,12 +782,10 @@
 {
     [qi setFinished];
 
-    if([qi isDirectory])
-    {
+    if ([qi isDirectory]) {
         NSEnumerator *e = [[qi children] objectEnumerator];
         SPQueueItem *qic;
-        while((qic = [e nextObject]) != nil)
-        {
+        while ((qic = [e nextObject]) != nil) {
             [self setFinished:qic];
         }
     }
@@ -862,11 +798,9 @@
                                            inArray:rootItems
                                               root:nil];
 
-    if(parentArray)
-    {
+    if (parentArray) {
         SPQueueItem *qi = [self findItemWithFilename:[targetFilename lastPathComponent] inArray:parentArray];
-        if(qi)
-        {
+        if (qi) {
             if ([qi isWaitingToBeRemoved]) {
                 // download was aborted by the user, so remove it.
                 [parentArray removeObject:qi];
@@ -882,8 +816,7 @@
 - (void)removeFilelistNotification:(NSNotification *)aNotification
 {
     SPQueueItem *qi = [self findFilelistItemWithNick:[[aNotification userInfo] objectForKey:@"nick"]];
-    if(qi)
-    {
+    if (qi) {
         /* filelist items are always in the root */
         [rootItems removeObject:qi];
         [tableView reloadData];
@@ -895,8 +828,7 @@
     NSString *targetFilename = [[aNotification userInfo] objectForKey:@"targetFilename"];
     SPQueueItem *qi = [self findItemWithTarget:targetFilename];
 
-    if(qi)
-    {
+    if (qi) {
         NSString *nick = [[aNotification userInfo] objectForKey:@"nick"];
 
         [qi removeSourceForNick:nick];
@@ -909,8 +841,7 @@
     NSString *targetFilename = [[aNotification userInfo] objectForKey:@"targetFilename"];
     SPQueueItem *qi = [self findItemWithTarget:targetFilename];
 
-    if(qi)
-    {
+    if (qi) {
         [qi setPriority:[[aNotification userInfo] objectForKey:@"priority"]];
         [tableView reloadData];
     }
@@ -919,8 +850,7 @@
 - (void)setStatus:(NSString *)aStatusString forTarget:(NSString *)targetFilename
 {
     SPQueueItem *qi = [self findItemWithTarget:targetFilename];
-    if(qi)
-    {
+    if (qi) {
         [qi setStatus:aStatusString];
         [tableView reloadData];
     }
@@ -936,8 +866,7 @@
 {
     NSString *targetFilename = [[aNotification userInfo] objectForKey:@"targetFilename"];
     SPQueueItem *qi = [self findItemWithTarget:targetFilename];
-    if(qi)
-    {
+    if (qi) {
         uint64_t offset = [[[aNotification userInfo] objectForKey:@"offset"]
             unsignedLongLongValue];
         uint64_t size = [[[aNotification userInfo] objectForKey:@"size"]
@@ -960,9 +889,7 @@
 
 - (id)initWithTarget:(NSString *)aTarget
 {
-    self = [super init];
-    if(self)
-    {
+    if ((self = [super init])) {
         target = [aTarget retain];
         path = [[[aTarget stringByDeletingLastPathComponent] stringByAbbreviatingWithTildeInPath] retain];
         filename = [[aTarget lastPathComponent] retain];
@@ -981,6 +908,7 @@
         [displayName autorelease];
         displayName = [aDisplayName copy];
     }
+    
     return self;
 }
 
@@ -1033,8 +961,7 @@
 
 - (void)setTTH:(NSString *)aTTH
 {
-    if(aTTH != tth)
-    {
+    if (aTTH != tth) {
         [tth release];
         tth = [aTTH retain];
         [attributedTTH release];
@@ -1054,8 +981,7 @@
 
 - (void)setSize:(NSNumber *)aSize
 {
-    if(aSize != size)
-    {
+    if (aSize != size) {
         [size release];
         size = [aSize retain];
     }
@@ -1094,7 +1020,7 @@
 - (void)setIsDirectory
 {
     isDirectory = YES;
-    if(children == nil)
+    if (children == nil)
         children = [[NSMutableArray alloc] init];
 }
 
@@ -1108,8 +1034,7 @@
     NSArray *nicks = [self nicks];
 
     NSString *usersString = nil;
-    switch([nicks count])
-    {
+    switch([nicks count]) {
         case 0:
             usersString = @"none";
             break;
@@ -1146,15 +1071,13 @@
 
 - (void)setPriority:(NSNumber *)aPriority
 {
-    if(aPriority != priority)
-    {
+    if (aPriority != priority) {
         [priority release];
         priority = [aPriority retain];
 
         [priorityString release];
 
-        switch([aPriority unsignedIntValue])
-        {
+        switch([aPriority unsignedIntValue]) {
             case 0:
                 priorityString = [@"Paused" truncatedString:NSLineBreakByTruncatingMiddle];
                 break;

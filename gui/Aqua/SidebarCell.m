@@ -38,8 +38,7 @@
     [paragraphStyle setAlignment:NSLeftTextAlignment];
     [paragraphStyle setLineBreakMode:NSLineBreakByTruncatingTail];
 
-    if([objectValue isKindOfClass:[NSString class]])
-    {
+    if ([objectValue isKindOfClass:[NSString class]]) {
         [controlView lockFocus];
 
         NSColor *textColor = [NSColor grayColor];
@@ -51,9 +50,9 @@
 
         NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:
             textColor, NSForegroundColorAttributeName,
-        paragraphStyle, NSParagraphStyleAttributeName,
-        [NSFont systemFontOfSize:fontSize], NSFontAttributeName,
-        nil];
+            paragraphStyle, NSParagraphStyleAttributeName,
+            [NSFont systemFontOfSize:fontSize], NSFontAttributeName,
+            nil];
 
         NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:objectValue
                                                                                attributes:attributes];
@@ -70,8 +69,7 @@
         int y = inset.origin.y + [objectValue sizeWithAttributes:attributes].height - 2;
         NSPoint fromPoint = NSMakePoint(cellFrame.origin.x, y);
         NSPoint toPoint = NSMakePoint(cellFrame.origin.x + cellFrame.size.width - 2, y);
-        if(toPoint.x > fromPoint.x)
-        {
+        if (toPoint.x > fromPoint.x) {
             [[NSColor colorWithCalibratedRed:0.702 green:0.702 blue:0.702 alpha:1.0] set];
             [NSBezierPath setDefaultLineWidth:2.0];
             NSGraphicsContext* context = [NSGraphicsContext currentContext];
@@ -82,6 +80,7 @@
         }
 
         [controlView unlockFocus];
+        
         return;
     }
 
@@ -89,14 +88,12 @@
     /* Determine whether we should draw a blue or grey gradient. */
     /* We will automatically redraw when our parent view loses/gains focus, 
     or when our parent window loses/gains main/key status. */
-    if(([[controlView window] firstResponder] == controlView) && 
+    if (([[controlView window] firstResponder] == controlView) && 
             [[controlView window] isMainWindow] &&
-            [[controlView window] isKeyWindow])
-    {
+            [[controlView window] isKeyWindow]) {
         gradient = [NSImage imageNamed:@"highlight_blue.tiff"];
     }
-    else
-    {
+    else {
         gradient = [NSImage imageNamed:@"highlight_grey.tiff"];
     }
 
@@ -106,12 +103,10 @@
     
     [controlView lockFocus];
 
-    if([self isHighlighted])
-    {
+    if ([self isHighlighted]) {
         /* We're selected, so draw the gradient background. */
         NSSize gradientSize = [gradient size];
-        for (i = cellFrame.origin.x; i < (cellFrame.origin.x + cellFrame.size.width); i += gradientSize.width)
-        {
+        for (i = cellFrame.origin.x; i < (cellFrame.origin.x + cellFrame.size.width); i += gradientSize.width) {
             [gradient drawInRect:NSMakeRect(i, cellFrame.origin.y, gradientSize.width, cellFrame.size.height)
                         fromRect:NSMakeRect(0, 0, gradientSize.width, gradientSize.height)
                        operation:NSCompositeSourceOver
@@ -138,11 +133,11 @@
 
     /* Now draw our text */
     NSColor *textColor = [NSColor blackColor];
-    if([self isHighlighted])
+    if ([self isHighlighted])
         textColor = [NSColor whiteColor];
 
     BOOL canClose = [objectValue respondsToSelector:@selector(canClose)] && [objectValue canClose];
-    if(canClose && cellFrame.size.width <= 34)
+    if (canClose && cellFrame.size.width <= 34)
         canClose = NO;
 
     NSRect inset = cellFrame;
@@ -151,11 +146,11 @@
     inset.origin.y += floor(((float)cellFrame.size.height - fontSize) / 2) - 2;
 
     BOOL highlighted = NO;
-    if([objectValue respondsToSelector:@selector(isHighlighted)])
+    if ([objectValue respondsToSelector:@selector(isHighlighted)])
         highlighted = [objectValue isHighlighted];
 
     NSFont *cellFont;
-    if(highlighted)
+    if (highlighted)
         cellFont = [NSFont boldSystemFontOfSize:fontSize];
     else
         cellFont = [NSFont systemFontOfSize:fontSize];
@@ -172,8 +167,7 @@
     [attributedString drawInRect:inset];
     [attributedString release];
 
-    if(canClose)
-    {
+    if (canClose) {
         /* display the close button */
         img = [NSImage imageNamed:hoveringClose ? @"TableClosePressed.tiff" : @"TableClose.tiff"];
         imgSize = [img size];
@@ -198,8 +192,7 @@
 /* Start Tracking.  Redisplay the close button as pressed */
 - (BOOL)startTrackingAt:(NSPoint)startPoint inView:(NSView *)controlView
 {
-    if(NSPointInRect(startPoint, closeButtonRect))
-    {
+    if (NSPointInRect(startPoint, closeButtonRect)) {
         hoveringClose = YES;
         [controlView setNeedsDisplayInRect:closeButtonRect];
     }
@@ -211,8 +204,7 @@
 {
     BOOL hovering = NSPointInRect(currentPoint, closeButtonRect);
 
-    if(hoveringClose != hovering)
-    {
+    if (hoveringClose != hovering) {
         hoveringClose = hovering;
         [controlView setNeedsDisplayInRect:closeButtonRect];
     }
@@ -224,8 +216,7 @@
 {
     BOOL hovering = NSPointInRect(stopPoint, closeButtonRect);
 
-    if (hovering)
-    {
+    if (hovering) {
         /* If the mouse was released over the close button, close our tab */
         [(SPSideBar *)controlView closeSelectedItem:self];
     }

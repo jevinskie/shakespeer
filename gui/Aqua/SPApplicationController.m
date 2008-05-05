@@ -54,9 +54,7 @@ static SPApplicationController *mySharedApplicationController = nil;
 
 - (id)init
 {
-    self = [super init];
-    if(self)
-    {
+    if ((self = [super init])) {
         mySharedApplicationController = self;
 
         char *working_directory = get_working_directory();
@@ -133,6 +131,7 @@ static SPApplicationController *mySharedApplicationController = nil;
                                                      name:SPNotificationStoredFilelists
                                                    object:nil];
     }
+    
     return self;
 }
 
@@ -150,14 +149,12 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 {
     NSString *urlString = [[event paramDescriptorForKeyword:keyDirectObject] stringValue];
     NSURL *url = [NSURL URLWithString:urlString];
-    if(url == nil)
-    {
+    if (url == nil) {
         NSLog(@"Malformed URL: %@", urlString);
     }
-    else
-    {
+    else {
         NSString *address = nil;
-        if([url port])
+        if ([url port])
             address = [NSString stringWithFormat:@"%@:%@", [url host], [url port]];
         else
             address = [url host];
@@ -178,28 +175,22 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 - (BOOL)setupSphubdConnection
 {
     NSString *remoteSphubdAddress = nil;
-    if([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsConnectRemotely] == YES)
-    {
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsConnectRemotely] == YES) {
         remoteSphubdAddress = [[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsRemoteSphubdAddress];
     }
 
-    if(remoteSphubdAddress && [remoteSphubdAddress length] > 0)
-    {
-        if(sp_connect_remote(sp, [remoteSphubdAddress UTF8String]) != 0)
-        {
+    if (remoteSphubdAddress && [remoteSphubdAddress length] > 0) {
+        if (sp_connect_remote(sp, [remoteSphubdAddress UTF8String]) != 0) {
             SPLog(@"Failed to connect to remote sphubd");
             /* FIXME: Must return YES here */
             return NO;
         }
     }
-    else
-    {
-        /* NSString *launchPath = [[NSBundle mainBundle] pathForAuxiliaryExecutable:@"sphubd"]; */
+    else {
         NSString *launchPath = [NSString stringWithFormat:@"%@/sphubd", [[NSBundle mainBundle] resourcePath]];
         const char *workDir = "~/Library/Application Support/ShakesPeer";
 
-        if(sp_connect(sp, workDir, [launchPath UTF8String]) != 0)
-        {
+        if (sp_connect(sp, workDir, [launchPath UTF8String]) != 0) {
             NSLog(@"Failed to execute sphubd");
             return NO;
         }
@@ -208,8 +199,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
     /* FIXME: this is just silly! We should not use any libevent stuff here! */
     sp->output = evbuffer_new();
 
-    /* Attach the socket to the run loop
-     */
+    /* Attach the socket to the run loop */
     CFSocketContext spContext;
     spContext.version = 0;
     spContext.info = sp; /* user data passed to the callbacks */
@@ -219,8 +209,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 
     sphubdSocket = CFSocketCreateWithNative(kCFAllocatorDefault, sp->fd,
             kCFSocketReadCallBack | kCFSocketWriteCallBack, sp_callback, &spContext);
-    if(sphubdSocket == NULL)
-    {
+    if (sphubdSocket == NULL) {
         NSLog(@"Failed to create a CFSocket");
         return NO;
     }
@@ -234,8 +223,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
     [self setLogLevel:[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsLogLevel]];
     sp_send_forget_search(sp, 0);
     sp_send_transfer_stats_interval(sp, 1);
-    if([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsAutodetectIPAddress] == NO)
-    {
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsAutodetectIPAddress] == NO) {
         sp_send_set_ip_address(sp, [[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsExternalIPAddress] UTF8String]);
     }
 
@@ -265,12 +253,10 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 - (void)versionMismatchAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode
                        contextInfo:(void *)contextInfo
 {
-    if(returnCode == NSAlertSecondButtonReturn)
-    {
+    if (returnCode == NSAlertSecondButtonReturn) {
         [[NSApplication sharedApplication] terminate:self];
     }
-    else
-    {
+    else {
         sp_send_shutdown(sp);
         sleep(2);
         [self setupSphubdConnection];
@@ -308,8 +294,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 
 - (IBAction)connectToBackendServer:(id)sender
 {
-    if([self setupSphubdConnection] == NO)
-    {
+    if ([self setupSphubdConnection] == NO) {
         SPLog(@"Unable to exec/connect to sphubd!");
 
         NSAlert *alert = [NSAlert alertWithMessageText:@"Unable to start/connect to backend server"
@@ -319,17 +304,14 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
                              informativeTextWithFormat:@""];
         [alert setAlertStyle:NSCriticalAlertStyle];
         int rc = [alert runModal];
-        if(rc == 1)
-        {
+        if (rc == 1) {
             exit(1);
         }
-        else if(rc == 0)
-        {
+        else if (rc == 0) {
             [self showPreferences:self];
         }
     }
-    else
-    {
+    else {
         mainWindowController = [SPMainWindowController sharedMainWindowController];
         [mainWindowController showWindow:self];
 
@@ -337,8 +319,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
         NSArray *sharedPaths = [[NSUserDefaults standardUserDefaults] arrayForKey:SPPrefsSharedPaths];
         NSEnumerator *e = [sharedPaths objectEnumerator];
         NSString *sharedPath;
-        while((sharedPath = [e nextObject]) != nil)
-        {
+        while ((sharedPath = [e nextObject]) != nil) {
             sp_send_add_shared_path(sp, [sharedPath UTF8String]);
         }
 
@@ -346,8 +327,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
         NSArray *recentHubs = [[NSUserDefaults standardUserDefaults] stringArrayForKey:SPPrefsRecentHubs];
         e = [recentHubs objectEnumerator];
         NSString *recentHub;
-        while((recentHub = [e nextObject]) != nil)
-        {
+        while ((recentHub = [e nextObject]) != nil) {
             [self addRecentHub:recentHub];
         }
 
@@ -361,21 +341,21 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 - (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem
 {
     SEL action = [menuItem action];
-    if(action == @selector(connectToBackendServer:))
+    if (action == @selector(connectToBackendServer:))
         return !connectedToBackend;
-    else if(action == @selector(showConnectView:))
+    else if (action == @selector(showConnectView:))
         return connectedToBackend;
-    else if(action == @selector(showAdvancedSearch:))
+    else if (action == @selector(showAdvancedSearch:))
         return connectedToBackend;
-    else if(action == @selector(showBookmarkView:))
+    else if (action == @selector(showBookmarkView:))
         return connectedToBackend;
-    else if(action == @selector(showQueueView:))
+    else if (action == @selector(showQueueView:))
         return connectedToBackend;
-    else if(action == @selector(showTransferView:))
+    else if (action == @selector(showTransferView:))
         return connectedToBackend;
-    else if(action == @selector(closeCurrentSidebarItem:))
+    else if (action == @selector(closeCurrentSidebarItem:))
         return connectedToBackend;
-    /* else if(menuItem == menuItemRecentHubs) */
+    /* else if (menuItem == menuItemRecentHubs) */
         /* return connectedToBackend; */
     return YES;
 }
@@ -402,12 +382,10 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
     [self connectToBackendServer:self];
 
     NSUserDefaults *standardUserDefaults = [NSUserDefaults standardUserDefaults];
-    if([standardUserDefaults boolForKey:SPPrefsAutoCheckUpdates] == YES)
-    {
+    if ([standardUserDefaults boolForKey:SPPrefsAutoCheckUpdates] == YES) {
         NSDate *previousDate = [standardUserDefaults objectForKey:SPPrefsDateOfPreviousVersionCheck];
         NSDate *twoDaysAgo = [NSDate dateWithTimeIntervalSinceNow:-48.0*60.0*60.0];
-        if(previousDate == nil || [previousDate compare:twoDaysAgo] == NSOrderedAscending)
-        {
+        if (previousDate == nil || [previousDate compare:twoDaysAgo] == NSOrderedAscending) {
             automaticUpdate = YES;
             [self checkForUpdates:self];
         }
@@ -445,13 +423,13 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
                   encoding:(NSString *)anEncoding
 {
     NSString *nick;
-    if(aNick == nil || [aNick length] == 0)
+    if (aNick == nil || [aNick length] == 0)
         nick = [[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsNickname];
     else
         nick = aNick;
 
     NSString *description;
-    if(aDescription == nil || [aDescription length] == 0)
+    if (aDescription == nil || [aDescription length] == 0)
         description = [[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsDescription];
     else
         description = aDescription;
@@ -465,8 +443,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 
     /* add the hub to the recent hubs menu */
     NSArray *recentHubs = [[NSUserDefaults standardUserDefaults] stringArrayForKey:SPPrefsRecentHubs];
-    if([recentHubs indexOfObject:anAddress] == NSNotFound)
-    {
+    if ([recentHubs indexOfObject:anAddress] == NSNotFound) {
         [self addRecentHub:anAddress];
         [[NSUserDefaults standardUserDefaults] setObject:[recentHubs arrayByAddingObject:anAddress]
                                                   forKey:SPPrefsRecentHubs];
@@ -591,7 +568,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 
 - (void)setIPAddress:(NSString *)anIPAddress
 {
-    if(anIPAddress && [anIPAddress length] > 0)
+    if (anIPAddress && [anIPAddress length] > 0)
         sp_send_set_ip_address(sp, [anIPAddress UTF8String]);
     else
         sp_send_set_ip_address(sp, "auto-detect");
@@ -756,16 +733,13 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 
 - (IBAction)closeCurrentSidebarItem:(id)sender
 {
-    if([[SPPreferenceController sharedPreferences] isKeyWindow])
-    {
+    if ([[SPPreferenceController sharedPreferences] isKeyWindow]) {
         [[SPPreferenceController sharedPreferences] close];
     }
-    else if([[SPMessagePanel sharedMessagePanel] isKeyWindow])
-    {
+    else if ([[SPMessagePanel sharedMessagePanel] isKeyWindow]) {
         [[SPMessagePanel sharedMessagePanel] close];
     }
-    else
-    {
+    else {
         [mainWindowController closeCurrentSidebarItem];
     }
 }
@@ -802,8 +776,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 - (void)applicationWillTerminate:(NSNotification *)aNotification
 {
     SPLog(@"shutting down application");
-    if([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsKeepServerRunning] == NO)
-    {
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsKeepServerRunning] == NO) {
         /* read in pid from pidfile */
         sp_send_shutdown(sp);
         /* 'kill -0 pid' until sphubd is dead, with timeout */
@@ -831,7 +804,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 
 - (BOOL)isNewerVersion:(NSString *)lastVersion than:(NSString *)currentVersion
 {
-    if([lastVersion isEqualToString:currentVersion])
+    if ([lastVersion isEqualToString:currentVersion])
         return FALSE;
 
     NSArray *lastVersionArray = [lastVersion componentsSeparatedByString:@"."];
@@ -839,16 +812,15 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 
     unsigned int i;
     int maxc = [lastVersionArray count];
-    if([currentVersionArray count] > maxc)
+    if ([currentVersionArray count] > maxc)
         maxc = [currentVersionArray count];
 
-    for(i = 0; i < maxc; i++)
-    {
+    for (i = 0; i < maxc; i++) {
         int l = (i >= [lastVersionArray count]) ?  0 : [[lastVersionArray objectAtIndex:i] intValue];
         int c = (i >= [currentVersionArray count]) ?  0 : [[currentVersionArray objectAtIndex:i] intValue];
-        if(l > c)
+        if (l > c)
             return TRUE;
-        else if(c > l)
+        else if (c > l)
             return FALSE;
     }
 
@@ -870,16 +842,13 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 
     [[NSUserDefaults standardUserDefaults] setObject:[NSDate dateWithTimeIntervalSinceNow:0.0] forKey:SPPrefsDateOfPreviousVersionCheck];
 
-    if(displayNotice)
-    {
-        if(newVersion)
-        {
+    if (displayNotice) {
+        if (newVersion) {
             [downloadButton setTitle:@"Download..."];
             [cancelButton setEnabled:YES];
             [updateTitleField setStringValue:@"There is a new version of ShakesPeer available."];
         }
-        else
-        {
+        else {
             [downloadButton setTitle:@"OK"];
             [cancelButton setEnabled:NO];
             [updateTitleField setStringValue:@"You're running the latest version of ShakesPeer."];
@@ -888,8 +857,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
         [[detailsView textStorage] setAttributedString:[[[NSMutableAttributedString alloc] initWithString:@""] autorelease]];
         NSEnumerator *e = [features objectEnumerator];
         NSString *feat;
-        while((feat = [e nextObject]) != nil)
-        {
+        while ((feat = [e nextObject]) != nil) {
             NSAttributedString *attrString = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"- %@\n", feat]];
             [[detailsView textStorage] appendAttributedString:[attrString autorelease]];
         }
@@ -909,8 +877,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
         [NSApp endSheet:updateWindow];
         [updateWindow orderOut:self];
 
-        if(rc == 0 && newVersion)
-        {
+        if (rc == 0 && newVersion) {
             NSLog(@"download update");
             [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:downloadLink]];
         }
@@ -925,26 +892,22 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
     BOOL reachable = NO;
     SCNetworkConnectionFlags flags;
     BOOL success = SCNetworkCheckReachabilityByName([[versionURL host] UTF8String], &flags);
-    if(success && (flags & kSCNetworkFlagsReachable) && !(flags & kSCNetworkFlagsConnectionRequired))
-    {
+    if (success && (flags & kSCNetworkFlagsReachable) && !(flags & kSCNetworkFlagsConnectionRequired)) {
         reachable = YES;
     }
 
-    if(reachable)
-    {
+    if (reachable) {
         NSDictionary *versionDict = [NSDictionary dictionaryWithContentsOfURL:versionURL];
 
-        if(versionDict)   // check for valid/complete dictionary
+        if (versionDict)   // check for valid/complete dictionary
         {
             [self performSelectorOnMainThread:@selector(compareVersions:) withObject:versionDict waitUntilDone:YES];
         }
-        else
-        {
+        else {
             NSLog(@"Failed to get version dictionary");
         }
     }
-    else
-    {
+    else {
         NSLog(@"host %@ not reachable", [versionURL host]);
     }
     automaticUpdate = NO;
@@ -961,12 +924,10 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 
 - (void)serverDiedAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo
 {
-    if(returnCode == NSAlertSecondButtonReturn)
-    {
+    if (returnCode == NSAlertSecondButtonReturn) {
         [[NSApplication sharedApplication] terminate:self];
     }
-    else
-    {
+    else {
         [self setupSphubdConnection];
     }
 }
@@ -998,8 +959,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 
     NSEnumerator *e = [nicks objectEnumerator];
     NSString *nick;
-    while((nick = [e nextObject]) != nil)
-    {
+    while ((nick = [e nextObject]) != nil) {
         [self addRecentFilelist:nick];
     }
 }
@@ -1016,8 +976,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 - (void)addRecentFilelist:(NSString *)nick
 {
     NSMenuItem *browseMenuItem = [menuFilelists itemWithTitle:nick];
-    if(browseMenuItem == nil)
-    {
+    if (browseMenuItem == nil) {
         browseMenuItem = (NSMenuItem *)[menuFilelists addItemWithTitle:nick
                                                                 action:@selector(openRecentFilelist:)
                                                          keyEquivalent:@""];

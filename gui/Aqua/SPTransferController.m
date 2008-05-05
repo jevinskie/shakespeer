@@ -38,9 +38,7 @@
 
 - (id)init
 {
-    self = [super init];
-    if(self)
-    {
+    if ((self = [super init])) {
         [NSBundle loadNibNamed:@"Uploads" owner:self];
         transfers = [[NSMutableArray alloc] init];
 
@@ -97,25 +95,24 @@
     NSArray *tcs = [transferTable tableColumns];
     NSEnumerator *e = [tcs objectEnumerator];
     NSTableColumn *tc;
-    while((tc = [e nextObject]) != nil)
-    {
+    while ((tc = [e nextObject]) != nil) {
         [[tc dataCell] setWraps:YES];
         
-        if(tc == tcUser)
+        if (tc == tcUser)
             [[columnsMenu itemWithTag:0] setState:NSOnState];
-        else if(tc == tcStatus)
+        else if (tc == tcStatus)
             [[columnsMenu itemWithTag:1] setState:NSOnState];
-        else if(tc == tcTimeLeft)
+        else if (tc == tcTimeLeft)
             [[columnsMenu itemWithTag:2] setState:NSOnState];
-        else if(tc == tcSpeed)
+        else if (tc == tcSpeed)
             [[columnsMenu itemWithTag:3] setState:NSOnState];
-        else if(tc == tcFilename)
+        else if (tc == tcFilename)
             [[columnsMenu itemWithTag:4] setState:NSOnState];
-        else if(tc == tcSize)
+        else if (tc == tcSize)
             [[columnsMenu itemWithTag:5] setState:NSOnState];
-        else if(tc == tcPath)
+        else if (tc == tcPath)
             [[columnsMenu itemWithTag:6] setState:NSOnState];
-        else if(tc == tcHub)
+        else if (tc == tcHub)
             [[columnsMenu itemWithTag:7] setState:NSOnState];
     }
     
@@ -171,14 +168,12 @@
 {
     NSString *filename = [dict objectForKey:@"targetFilename"];
     SPTransferItem *tr = [self findTransferItemWithTargetFilename:filename];
-    if(tr == nil)
-    {
+    if (tr == nil) {
         tr = [self findTransferItemWithNick:[dict objectForKey:@"nick"] directions:aDirection];
     }
 
     BOOL add = NO;
-    if(tr == nil)
-    {
+    if (tr == nil) {
         tr = [[SPTransferItem alloc] initWithNick:[dict objectForKey:@"nick"]
                                          filename:filename
                                              size:[[dict objectForKey:@"size"] unsignedLongLongValue]
@@ -186,16 +181,14 @@
                                         direction:aDirection];
         add = YES;
     }
-    else
-    {
+    else {
         [tr setFilename:filename];
     }
 
     [self willChangeValueForKey:@"transfers"];
     [tr setStatus:aDirection == DIR_DOWNLOAD ? @"starting download" : @"starting upload"];
     [tr setState:aDirection == DIR_DOWNLOAD ? SPTransferState_Downloading : SPTransferState_Uploading];
-    if(add)
-    {
+    if (add) {
         [transfers addObject:tr];
         [tr release];
     }
@@ -206,10 +199,8 @@
 {
     NSEnumerator *e = [transfers objectEnumerator];
     SPTransferItem *tr;
-    while((tr = [e nextObject]) != nil)
-    {
-        if([aTargetFilename isEqualToString:[tr targetFilename]])
-        {
+    while ((tr = [e nextObject]) != nil) {
+        if ([aTargetFilename isEqualToString:[tr targetFilename]]) {
             return tr;
         }
     }
@@ -220,10 +211,8 @@
 {
     NSEnumerator *e = [transfers objectEnumerator];
     SPTransferItem *tr;
-    while((tr = [e nextObject]) != nil)
-    {
-        if([aNick isEqualToString:[tr nick]] && ([tr direction] & aDirectionMask) > 0)
-        {
+    while ((tr = [e nextObject]) != nil) {
+        if ([aNick isEqualToString:[tr nick]] && ([tr direction] & aDirectionMask) > 0) {
             return tr;
         }
     }
@@ -237,8 +226,7 @@
 {
     SPTransferItem *tr = [self findTransferItemWithTargetFilename:
                            [[aNotification userInfo] objectForKey:@"targetFilename"]];
-    if(tr)
-    {
+    if (tr) {
         [self willChangeValueForKey:@"transfers"];
         [tr setStatus:@"Aborted"];
         [tr setState:SPTransferState_Error];
@@ -250,8 +238,7 @@
 {
     NSString *targetFilename = [[aNotification userInfo] objectForKey:@"targetFilename"];
     SPTransferItem *tr = [self findTransferItemWithTargetFilename:targetFilename];
-    if(tr)
-    {
+    if (tr) {
         [self willChangeValueForKey:@"transfers"];
         [tr setStatus:@"Finished, idle"];
         [tr setState:SPTransferState_Idle];
@@ -290,8 +277,7 @@
 {
     NSString *targetFilename = [[aNotification userInfo] objectForKey:@"targetFilename"];
     SPTransferItem *tr = [self findTransferItemWithTargetFilename:targetFilename];
-    if(tr)
-    {
+    if (tr) {
         uint64_t offset = [[[aNotification userInfo] objectForKey:@"offset"]
             unsignedLongLongValue];
         uint64_t size = [[[aNotification userInfo] objectForKey:@"size"]
@@ -312,11 +298,9 @@
     NSString *nick = [[aNotification userInfo] objectForKey:@"nick"];
     int direction = [[[aNotification userInfo] objectForKey:@"direction"] intValue];
 
-    while(YES)
-    {
+    while (YES) {
         SPTransferItem *tr = [self findTransferItemWithNick:nick directions:direction];
-        if(tr)
-        {
+        if (tr) {
             [self willChangeValueForKey:@"transfers"];
             [transfers removeObject:tr];
             [self didChangeValueForKey:@"transfers"];
@@ -331,12 +315,10 @@
 
 - (void)cancelTransfersInArray:(NSArray *)selectedTransfers
 {
-    if(selectedTransfers && [selectedTransfers count])
-    {
+    if (selectedTransfers && [selectedTransfers count]) {
         NSString *targetFilename = [[selectedTransfers objectAtIndex:0] valueForKey:@"targetFilename"];
 
-        if(targetFilename)
-        {
+        if (targetFilename) {
             [[SPApplicationController sharedApplicationController] cancelTransfer:targetFilename];
         }
     }
@@ -349,13 +331,11 @@
 
 - (void)removeSourcesInArray:(NSArray *)selectedTransfers
 {
-    if(selectedTransfers && [selectedTransfers count])
-    {
+    if (selectedTransfers && [selectedTransfers count]) {
         NSString *targetFilename = [[selectedTransfers objectAtIndex:0] valueForKey:@"targetFilename"];
         NSString *remoteNick = [[selectedTransfers objectAtIndex:0] valueForKey:@"nick"];
 
-        if(targetFilename && remoteNick)
-        {
+        if (targetFilename && remoteNick) {
             [[SPApplicationController sharedApplicationController] removeSource:targetFilename
                                                                            nick:remoteNick];
         }
@@ -369,12 +349,10 @@
 
 - (void)removeQueuesInArray:(NSArray *)selectedTransfers
 {
-    if(selectedTransfers && [selectedTransfers count])
-    {
+    if (selectedTransfers && [selectedTransfers count]) {
         NSString *targetFilename = [[selectedTransfers objectAtIndex:0] valueForKey:@"targetFilename"];
 
-        if(targetFilename)
-        {
+        if (targetFilename) {
             [[SPApplicationController sharedApplicationController] removeQueue:targetFilename];
         }
     }
@@ -387,11 +365,9 @@
 
 - (void)removeAllSourcesWithNicksInArray:(NSArray *)selectedTransfers
 {
-    if(selectedTransfers && [selectedTransfers count])
-    {
+    if (selectedTransfers && [selectedTransfers count]) {
         NSString *remoteNick = [[selectedTransfers objectAtIndex:0] valueForKey:@"nick"];
-        if(remoteNick)
-        {
+        if (remoteNick) {
             [[SPApplicationController sharedApplicationController] removeAllSourcesWithNick:remoteNick];
         }
     }
@@ -405,11 +381,10 @@
 - (void)browseUserInArray:(NSArray *)selectedTransfers
 {
     NSDictionary *dict = nil;
-    if([selectedTransfers count])
+    if ([selectedTransfers count])
         dict = [selectedTransfers objectAtIndex:0];
 
-    if(dict)
-    {
+    if (dict) {
         NSString *nick = [dict valueForKey:@"nick"];
         NSString *hubAddress = [dict valueForKey:@"hubAddress"];
         [[SPApplicationController sharedApplicationController] downloadFilelistFromUser:nick
@@ -427,16 +402,14 @@
 - (void)privateMessageInArray:(NSArray *)selectedTransfers
 {
     NSDictionary *dict = nil;
-    if([selectedTransfers count])
+    if ([selectedTransfers count])
         dict = [selectedTransfers objectAtIndex:0];
 
-    if(dict)
-    {
+    if (dict) {
         NSString *hubAddress = [dict valueForKey:@"hubAddress"];
         SPHubController *hub = [[SPMainWindowController sharedMainWindowController] hubWithAddress:hubAddress];
         NSString *myNick = nil;
-        if(hub)
-        {
+        if (hub) {
             myNick = [hub nick];
         }
         sendNotification(SPNotificationStartChat,
@@ -455,8 +428,7 @@
 - (IBAction)toggleColumn:(id)sender
 {
     NSTableColumn *tc = nil;
-    switch([sender tag])
-    {
+    switch([sender tag]) {
         case 0: tc = tcUser; break;
         case 1: tc = tcStatus; break;
         case 2: tc = tcTimeLeft; break;
@@ -466,16 +438,14 @@
         case 6: tc = tcPath; break;
         case 7: tc = tcHub; break;
     }
-    if(tc == nil)
+    if (tc == nil)
         return;
     
-    if([sender state] == NSOffState)
-    {
+    if ([sender state] == NSOffState) {
         [sender setState:NSOnState];
         [transferTable addTableColumn:tc];
     }
-    else
-    {
+    else {
         [sender setState:NSOffState];
         [transferTable removeTableColumn:tc];
     }
@@ -494,9 +464,7 @@
         hubAddress:(NSString *)aHubAddress
          direction:(int)aDirection
 {
-    self = [super init];
-    if(self)
-    {
+    if ((self = [super init])) {
         nick = [aNick retain];
         hubAddress = [aHubAddress retain];
         direction = aDirection;
@@ -504,6 +472,7 @@
         [self setSize:aSize];
         [self setState:SPTransferState_Idle];
     }
+    
     return self;
 }
 
@@ -532,8 +501,7 @@
 
 - (void)setFilename:(NSString *)aFilename
 {
-    if(aFilename != targetFilename)
-    {
+    if (aFilename != targetFilename) {
         [filename release];
         filename = [[aFilename lastPathComponent] truncatedString:NSLineBreakByTruncatingHead];
 
@@ -559,8 +527,7 @@
 
 - (void)setStatus:(NSString *)aStatusString
 {
-    if(status != aStatusString)
-    {
+    if (status != aStatusString) {
         [status release];
         status = [aStatusString retain];
     }

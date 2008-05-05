@@ -44,8 +44,7 @@
     [item setTag:0];
     [item setTarget:self];
 
-    if([itemIdentifier isEqualToString:@"quickSearchItem"])
-    {
+    if ([itemIdentifier isEqualToString:@"quickSearchItem"]) {
         NSRect fRect = [toolbarSearchView frame];
         [item setLabel:@"Quick Search"];
         [item setToolTip:@"Quick Search"];
@@ -53,23 +52,20 @@
         [item setMinSize:fRect.size];
         [item setMaxSize:fRect.size];
     }
-    else if([itemIdentifier isEqualToString:@"advSearchItem"])
-    {
+    else if ([itemIdentifier isEqualToString:@"advSearchItem"]) {
         [item setLabel:@"Advanced Search"];
         [item setToolTip:@"Advanced Search"];
         [item setImage:[NSImage imageNamed:@"ToolbarAdvancedSearch"]];
         [item setAction:@selector(advSearchShow:)];
     }
-    else if([itemIdentifier isEqualToString:@"toggleDrawer"])
-    {
+    else if ([itemIdentifier isEqualToString:@"toggleDrawer"]) {
         [item setLabel:@"Toggle transfer drawer"];
         [item setToolTip:@"Toggle transfer drawer"];
         [item setTarget:transferDrawer];
         [item setImage:[NSImage imageNamed:@"ToolbarDrawer"]];
         [item setAction:@selector(toggle:)];
     }
-    else if([itemIdentifier isEqualToString:@"contextMenu"])
-    {
+    else if ([itemIdentifier isEqualToString:@"contextMenu"]) {
         [item setLabel:@"Context Menu"];
         [item setToolTip:@"Context Menu"];
         [item setTarget:self];
@@ -79,8 +75,7 @@
         [contextMenuButton setControlSize:NSRegularControlSize];
         [contextMenuButton setMenu:nil];
     }
-    else if([itemIdentifier isEqualToString:@"connectButton"])
-    {
+    else if ([itemIdentifier isEqualToString:@"connectButton"]) {
         [item setLabel:@"Connect"];
         [item setToolTip:@"Connect to server"];
         [item setImage:[NSImage imageNamed:@"ToolbarConnect"]];

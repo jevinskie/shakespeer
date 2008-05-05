@@ -35,6 +35,8 @@
 @end
 
 @interface NSMutableAttributedString (ShakesPeerExtensions)
+
 - (NSComparisonResult)compare:(NSMutableAttributedString *)aString;
+
 @end
 

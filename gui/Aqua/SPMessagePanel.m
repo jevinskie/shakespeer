@@ -28,19 +28,15 @@
 {
     static id sharedMessagePanel = nil;
 
-    if(sharedMessagePanel == nil)
-    {
+    if (sharedMessagePanel == nil)
         sharedMessagePanel = [[SPMessagePanel alloc] init];
-    }
 
     return sharedMessagePanel;
 }
 
 - (id)init
 {
-    self = [super initWithWindowNibName:@"MessagePanel" owner:self];
-    if(self)
-    {
+    if ((self = [super initWithWindowNibName:@"MessagePanel" owner:self])) {
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(statusMessageNotification:)
                                                      name:SPNotificationStatusMessage
@@ -49,9 +45,10 @@
         /* force loading of the window, otherwise the textView won't be bound
          * when status message notifications are received */
         [self window];
-
+        
         [self setWindowFrameAutosaveName:@"MessagePanel"];
     }
+    
     return self;
 }
 
