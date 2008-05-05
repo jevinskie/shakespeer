@@ -14,8 +14,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: dstring.h,v 1.3 2006/04/09 12:54:31 mhe Exp $ */
-
 #ifndef _dstring_h_
 #define _dstring_h_
 

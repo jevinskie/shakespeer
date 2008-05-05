@@ -192,7 +192,7 @@ static hub_t *hub_new_from_hcd(hub_connect_data_t *hcd)
     }
     hub->me = user_new(hcd->nick, NULL, hcd->speed, hcd->description, hcd->email, 0ULL, hub);
     hub->me->passive = hcd->passive;
-    hub->password = hcd->password ? strdup(hcd->password) : NULL;
+    hub->password = xstrdup(hcd->password);
     hub->address = strdup(hcd->address);
     hub->port = hcd->port;
     free(hub->hubname);
@@ -352,7 +352,7 @@ static void hub_lookup_event(int result, char type, int count, int ttl,
 }
 
 int hub_connect(const char *hubname, const char *nick, const char *email,
-        const char *description, const char *speed, int passive,
+        const char *description, const char *speed, bool passive,
         const char *password, const char *encoding)
 {
     char *host = 0;
@@ -598,7 +598,7 @@ bool hub_user_is_passive(hub_t *hub, const char *nick)
     user_t *user = hub_lookup_user(hub, nick);
     if(user)
         return user->passive;
-    return 0;
+    return false;
 }
 
 int user_is_logged_in(const char *nick)
@@ -680,13 +680,13 @@ static void hub_set_passive_GFunc(hub_t *hub, void *user_data)
     return_if_fail(hub);
     return_if_fail(hub->me);
 
-    int *on = user_data;
+    bool *on = user_data;
     return_if_fail(on);
 
-    hub->me->passive = *on ? 1 : 0;
+    hub->me->passive = *on;
 }
 
-void hub_set_passive(int on)
+void hub_set_passive(bool on)
 {
     hub_foreach(hub_set_passive_GFunc, &on);
     hub_set_need_myinfo_update(true);

@@ -59,8 +59,8 @@ user_t *user_new(const char *nick, const char *tag,
 
     user->shared_size = shared_size;
     user->hub = hub;
-    user->passive = 0;
-    user->is_operator = 0;
+    user->passive = false;
+    user->is_operator = false;
 
     user->extra_slots = extra_slots_get_for_user(nick);
 

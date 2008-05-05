@@ -230,18 +230,10 @@ char *arg_join(arg_t *args, int first, int last, const char *sep)
 
     for(i = first; i < last; i++)
     {
-#if defined(__OpenBSD__) || defined(_FreeBSD__) || defined(__APPLE__)
         strlcat(e, args->argv[i], s + 1);
-#else
-        strcat(e, args->argv[i]);
-#endif
         if(i+1 < last)
         {
-#if defined(__OpenBSD__) || defined(_FreeBSD__) || defined(__APPLE__)
             strlcat(e, sep, s + 1);
-#else
-            strcat(e, sep);
-#endif
         }
     }
     return e;

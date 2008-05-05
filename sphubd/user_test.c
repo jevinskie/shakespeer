@@ -41,8 +41,8 @@ int main(void)
     fail_unless(user1->description == 0);
     fail_unless(user1->email == 0);
     fail_unless(user1->shared_size == 98734513452LL);
-    fail_unless(user1->is_operator== 0);
-    fail_unless(user1->passive == 0);
+    fail_unless(user1->is_operator== false);
+    fail_unless(user1->passive == false);
     fail_unless(user1->hub == NULL);
     fail_unless(user1->ip == NULL);
 

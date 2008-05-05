@@ -48,7 +48,7 @@ typedef struct hub_search_data hub_search_data_t;
 struct hub_search_data
 {
     hub_t *hub;
-    int passive;
+    bool passive;
     union
     {
         struct
@@ -234,7 +234,7 @@ static int hub_cmd_MyINFO(void *opaque_param, int argc, char **argv)
                strstr(new_user->tag, ",M:A,") != 0 && user->passive)
             {
                 /* reset passive flag */
-                new_user->passive = 0;
+                new_user->passive = false;
             }
 
             /* remove the old user */
@@ -272,7 +272,7 @@ static int hub_cmd_ForceMove(void *opaque_param, int argc, char **argv)
         char *description = xstrdup(hub->me->description);
         char *speed = xstrdup(hub->me->speed);
         char *encoding = xstrdup(hub->encoding);
-        int passive = hub->me->passive;
+        bool passive = hub->me->passive;
         hub->expected_disconnect = true;
         hub_close_connection(hub);
         hub_connect(argv[0], nick, email, description, speed,
@@ -322,7 +322,7 @@ static int hub_cmd_RevConnectToMe(void *opaque_param, int argc, char **argv)
     user_t *user = hub_lookup_user(hub, argv[0]);
     if(user)
     {
-        if(hub->me->passive == 0)
+        if(!hub->me->passive)
         {
             hub_send_command(hub, "$ConnectToMe %s %s:%u|",
                     argv[0], hub->me->ip, global_port);
@@ -332,7 +332,7 @@ static int hub_cmd_RevConnectToMe(void *opaque_param, int argc, char **argv)
             /* Send back a RevConnectToMe to the requesting peer to notify him
              * that we're also passive. Only do this once.
              */
-            if(user->passive == 0)
+            if(!user->passive)
             {
                 g_debug("bouncing back a RevConnectToMe to requesting user [%s]",
                         argv[0]);
@@ -343,7 +343,7 @@ static int hub_cmd_RevConnectToMe(void *opaque_param, int argc, char **argv)
                     argv[0]);
         }
 
-        user->passive = 1;
+        user->passive = true;
         /* FIXME: update UI of the changed passive/active mode ? */
     }
     else
@@ -530,7 +530,7 @@ static int hub_cmd_OpList(void *data, int argc, char **argv)
     {
         if(g_utf8_collate(ops->argv[i], hub->me->nick) == 0)
         {
-            hub->me->is_operator = 1;
+            hub->me->is_operator = true;
             g_info("I am an operator");
             if(!hub->sent_user_commands && !hub->sent_default_user_commands)
                 hub_send_nmdc_default_user_commands(hub);
@@ -542,7 +542,7 @@ static int hub_cmd_OpList(void *data, int argc, char **argv)
         int update_op_status = 0;
         if(user)
         {
-            user->is_operator = 1;
+            user->is_operator = true;
             update_op_status = 1;
         }
         else
@@ -550,7 +550,7 @@ static int hub_cmd_OpList(void *data, int argc, char **argv)
             user = user_new(ops->argv[i], NULL, NULL, NULL, NULL, 0, hub);
             if(user)
             {
-                user->is_operator = 1;
+                user->is_operator = true;
                 LIST_INSERT_HEAD(&hub->users[hub_user_hash(user->nick)],
                         user, link);
             }

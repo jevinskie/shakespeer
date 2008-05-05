@@ -54,7 +54,7 @@ struct hub_connect_data
     char *speed;
     char *resolved_ip;
     int port;
-    int passive;
+    bool passive;
     char *password;
     char *encoding;
 };
@@ -174,9 +174,9 @@ int hub_send_string(hub_t *hub, const char *string);
 int hub_send_message(hub_t *hub, const char *nick, const char *message);
 void hub_search(hub_t *hub, search_request_t *request);
 void hub_close_connection(hub_t *hub);
-int hub_user_is_passive(hub_t *hub, const char *nick);
+bool hub_user_is_passive(hub_t *hub, const char *nick);
 int hub_connect(const char *hubname, const char *nick, const char *email,
-        const char *description, const char *speed, int passive, const char *password,
+        const char *description, const char *speed, bool passive, const char *password,
         const char *encoding);
 int user_is_logged_in_on_hub(const char *nick, hub_t *hub);
 void hub_send_password(hub_t *hub);
@@ -189,7 +189,7 @@ void hub_set_password(hub_t *hub, const char *password);
 void hub_update_user_info(const char *speed, const char *description, const char *email);
 void hub_start_myinfo_updater(void);
 // void hub_all_set_ip_address(const char *ip_address);
-void hub_set_passive(int on);
+void hub_set_passive(bool on);
 void hub_set_idle_timeout(hub_t *hub);
 void hub_send_nmdc_default_user_commands(hub_t *hub);
 void hub_set_encoding(hub_t *hub, const char *encoding);

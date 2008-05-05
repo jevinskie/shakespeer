@@ -23,6 +23,7 @@
 
 #include "sys_queue.h"
 #include <stdint.h>
+#include <stdbool.h>
 
 struct hub;
 
@@ -37,8 +38,8 @@ struct user
     char *description;
     char *email;
     uint64_t shared_size;
-    int is_operator;
-    int passive;
+    bool is_operator;
+    bool passive;
     struct hub *hub;
     char *ip;
     unsigned int extra_slots;
