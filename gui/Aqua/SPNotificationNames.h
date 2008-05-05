@@ -58,3 +58,5 @@ extern NSString *SPNotificationHubDisconnected;
 extern NSString *SPNotificationStartChat;
 extern NSString *SPNotificationEndChat;
 extern NSString *SPNotificationStoredFilelists;
+extern NSString *SPNotificationInitCompletion;
+

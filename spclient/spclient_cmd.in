@@ -54,4 +54,5 @@ c user-command string:hub_address int:type int:context string:description string
 c set-priority string:target_filename uint:priority
 c hub-disconnected string:hub_address
 c stored-filelists string:nicks
+c init-completion int:level
 

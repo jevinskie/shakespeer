@@ -45,9 +45,6 @@ static int spcb_port(sp_t *sp, int port)
             sp_send_set_port(sp, [[NSUserDefaults standardUserDefaults] integerForKey:SPPrefsPort]);
         else
             [[SPApplicationController sharedApplicationController] setPassiveMode];
-        
-        [[SPBookmarkController sharedBookmarkController] autoConnectBookmarks];
-        [[SPMainWindowController sharedMainWindowController] restoreLastHubSession];
     }
     
     return 0;
@@ -441,6 +438,12 @@ static int spcb_stored_filelists(sp_t *sp, const char *nicks)
     return 0;
 }
 
+static int spcb_init_completion(sp_t *sp, int level)
+{
+    sendNotification(SPNotificationInitCompletion, @"level", [NSNumber numberWithInt:level], nil);
+    return 0;
+}
+
 void sp_register_callbacks(sp_t *sp)
 {
     /* setup the callback functions */
@@ -480,6 +483,7 @@ void sp_register_callbacks(sp_t *sp)
     sp->cb_set_priority = spcb_set_priority;
     sp->cb_hub_disconnected = spcb_hub_disconnected;
     sp->cb_stored_filelists = spcb_stored_filelists;
+    sp->cb_init_completion = spcb_init_completion;
 }
 
 void sendNotification(NSString *notificationName, NSString *key1, id arg1, ...)

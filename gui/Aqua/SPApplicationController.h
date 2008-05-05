@@ -40,7 +40,8 @@ void sendNotification(NSString *notificationName, NSString *key1, id arg1, ...);
 
     IBOutlet NSMenu *menuOpenRecent;
     IBOutlet NSMenu *menuFilelists;
-
+    IBOutlet NSWindow *initWindow;
+    IBOutlet NSTextField *initMessage;
     IBOutlet NSMenuItem *menuItemNextSidebarItem;
     IBOutlet NSMenuItem *menuItemPrevSidebarItem;
 

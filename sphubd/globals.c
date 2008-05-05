@@ -1,5 +1,17 @@
 #include "globals.h"
 
+/* set to indicate the level of startup completion:
+ * 0 = just startet, not ready for much
+ *  sends the following commands on connect: server-version, init-completion
+ *  accepts the following commands: log-level, expect-shared-paths
+ * 100 = databases opened, ready for connections, although with zero share
+ *  now accepts all commands
+ * 200 = startup complete and shares scanned, ready to connect to hubs with minshare settings
+ */
+int global_init_completion = 0;
+
+int global_expected_shared_paths = -1;
+
 int global_port = -1;
 void *global_share = 0;
 void *global_search_listener = 0;

@@ -132,6 +132,11 @@ static SPApplicationController *mySharedApplicationController = nil;
                                                  selector:@selector(storedFilelistsNotification:)
                                                      name:SPNotificationStoredFilelists
                                                    object:nil];
+
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(initCompletionNotification:)
+                                                     name:SPNotificationInitCompletion
+                                                   object:nil];
     }
     
     return self;
@@ -223,18 +228,8 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
     CFSocketDisableCallBacks(sphubdSocket, kCFSocketWriteCallBack);
 
     [self setLogLevel:[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsLogLevel]];
-    sp_send_forget_search(sp, 0);
-    sp_send_transfer_stats_interval(sp, 1);
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsAutodetectIPAddress] == NO) {
-        sp_send_set_ip_address(sp, [[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsExternalIPAddress] UTF8String]);
-    }
-
-    [self setRescanShareInterval:[[NSUserDefaults standardUserDefaults] floatForKey:SPPrefsRescanShareInterval] * 3600];
-    [self setFollowHubRedirects:[[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsFollowHubRedirects]];
-    [self setAutoSearchNewSources:[[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsAutoSearchNewSources]];
-    [self setHashingPriority:[[NSUserDefaults standardUserDefaults] integerForKey:SPPrefsHashingPriority]];
-    [self setDownloadFolder:[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsDownloadFolder]];
-    [self setIncompleteFolder:[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsIncompleteFolder]];
+    int num_shared_paths= [[[NSUserDefaults standardUserDefaults] arrayForKey:SPPrefsSharedPaths] count];
+    sp_send_expect_shared_paths(sp, num_shared_paths);
 
     return YES;
 }
@@ -307,27 +302,17 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
     }
     else {
         mainWindowController = [SPMainWindowController sharedMainWindowController];
-        [mainWindowController showWindow:self];
 
-        /* register shared paths with sphubd */
-        NSArray *sharedPaths = [[NSUserDefaults standardUserDefaults] arrayForKey:SPPrefsSharedPaths];
-        NSEnumerator *e = [sharedPaths objectEnumerator];
-        NSString *sharedPath;
-        while ((sharedPath = [e nextObject]) != nil) {
-            sp_send_add_shared_path(sp, [sharedPath UTF8String]);
-        }
+	[initMessage setStringValue:@"Initializing databases..."];
 
         /* add the stored recent hubs to the menu */
         NSArray *recentHubs = [[NSUserDefaults standardUserDefaults] stringArrayForKey:SPPrefsRecentHubs];
         // use the reverse enumerator so that the most recent hub is at the top
-        e = [recentHubs reverseObjectEnumerator];
+        NSEnumerator *e = [recentHubs reverseObjectEnumerator];
         NSString *recentHub;
         while ((recentHub = [e nextObject]) != nil) {
             [self addRecentHub:recentHub];
         }
-
-        [self setSlots:[[NSUserDefaults standardUserDefaults] integerForKey:SPPrefsUploadSlots]
-                perHub:[[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsUploadSlotsPerHub]];
 
         connectedToBackend = YES;
     }
@@ -986,6 +971,51 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 
 #pragma mark -
 #pragma mark Notifications
+
+- (void)initCompletionNotification:(NSNotification *)aNotification
+{
+    int level= [[[aNotification userInfo] objectForKey:@"level"] intValue];
+
+    NSLog(@"got init completion level %i", level);
+    if(level == 100)
+    {
+	[initMessage setStringValue:@"Scanning shared folders..."];
+
+        /* register shared paths with sphubd */
+        NSArray *sharedPaths = [[NSUserDefaults standardUserDefaults] arrayForKey:SPPrefsSharedPaths];
+        NSEnumerator *e = [sharedPaths objectEnumerator];
+        NSString *sharedPath;
+        while ((sharedPath = [e nextObject]) != nil)
+            sp_send_add_shared_path(sp, [sharedPath UTF8String]);
+
+	sp_send_forget_search(sp, 0);
+	sp_send_transfer_stats_interval(sp, 1);
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsAutodetectIPAddress] == NO) {
+	    sp_send_set_ip_address(sp,
+		[[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsExternalIPAddress] UTF8String]);
+	}
+
+        [self setSlots:[[NSUserDefaults standardUserDefaults] integerForKey:SPPrefsUploadSlots]
+                perHub:[[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsUploadSlotsPerHub]];
+
+	[self setRescanShareInterval:[[NSUserDefaults standardUserDefaults] floatForKey:SPPrefsRescanShareInterval] * 3600];
+	[self setFollowHubRedirects:[[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsFollowHubRedirects]];
+	[self setAutoSearchNewSources:[[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsAutoSearchNewSources]];
+	[self setHashingPriority:[[NSUserDefaults standardUserDefaults] integerForKey:SPPrefsHashingPriority]];
+	[self setDownloadFolder:[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsDownloadFolder]];
+	[self setIncompleteFolder:[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsIncompleteFolder]];
+    }
+    else if(level == 200)
+    {
+	/* remove startup window and show main window */
+        [initWindow orderOut:self];
+
+        [mainWindowController showWindow:self];
+
+        [[SPBookmarkController sharedBookmarkController] autoConnectBookmarks];
+        [mainWindowController restoreLastHubSession];
+    }
+}
 
 - (void)serverDiedAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo
 {

@@ -343,10 +343,10 @@ int io_exec_and_connect_unix(const char *filename, const char *program_path,
         int try;
         for(try = 0; try < 40; try++)
         {
-            usleep(500000);
             fd = io_connect_unix(expanded_filename);
             if(fd != -1)
                 break;
+            usleep(500000);
         }
     }
     free(expanded_filename);

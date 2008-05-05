@@ -58,4 +58,5 @@ NSString *SPNotificationHubDisconnected = @"SPNotificationHubDisconnected";
 NSString *SPNotificationStartChat = @"SPNotificationStartChat";
 NSString *SPNotificationEndChat = @"SPNotificationEndChat";
 NSString *SPNotificationStoredFilelists = @"SPNotificationStoredFilelists";
+NSString *SPNotificationInitCompletion = @"SPNotificationInitCompletion";
 

@@ -3,6 +3,8 @@
 
 #include <stdbool.h>
 
+extern int global_init_completion;
+extern int global_expected_shared_paths;
 extern int global_port;
 extern void *global_share;
 extern void *global_search_listener;

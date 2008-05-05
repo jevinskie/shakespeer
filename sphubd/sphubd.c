@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2005 Martin Hedenfalk <martin@bzero.se>
+ * Copyright 2004-2007 Martin Hedenfalk <martin@bzero.se>
  *
  * This file is part of ShakesPeer.
  *
@@ -44,6 +44,8 @@
 #include "log.h"
 #include "extra_slots.h"
 #include "extip.h"
+
+void init(int fd, short why, void *data);
 
 static char *socket_filename = NULL;
 
@@ -365,6 +367,66 @@ static void handle_download_finished_notification(nc_t *nc, const char *channel,
     free(source);
 }
 
+void schedule_init(void)
+{
+    /* schedule initialization (database initialization, etc.) */
+    static struct event init_event;
+    evtimer_set(&init_event, init, NULL);
+    struct timeval tv = {.tv_sec = 0, .tv_usec = 0};
+    evtimer_add(&init_event, &tv);
+}
+
+void init(int fd, short why, void *data)
+{
+    INFO("performing level %i initialization", global_init_completion);
+
+    switch(global_init_completion)
+    {
+    case 0:
+	extip_init();
+	break;
+
+    case 1:
+	extra_slots_init();
+	break;
+
+    case 2:
+	/* FIXME: this is a possibly long operation! */
+	tth_store_init();
+	break;
+
+    case 3:
+	queue_init();
+	break;
+
+    case 4:
+	queue_match_init();
+	queue_auto_search_init();
+	break;
+
+    case 5:
+	/* start hashing daemon */
+	if(hs_start() != 0)
+	    exit(6);
+	break;
+
+    case 6:
+	queue_connect_schedule_trigger(connect_trigger_callback);
+
+	global_init_completion = 100;
+	ui_send_init_completion(NULL, global_init_completion);
+	if(global_expected_shared_paths == 0)
+	{
+	    global_init_completion = 200;
+	    ui_send_init_completion(NULL, global_init_completion);
+	}
+	return;
+    }
+
+    global_init_completion++;
+    schedule_init();
+}
+
 int main(int argc, char **argv)
 {
     /* if non-positive, don't listen for UI connections on a TCP socket */
@@ -458,29 +520,15 @@ int main(int argc, char **argv)
     signal_set(&sigint_event, SIGINT, shutdown_sphubd_event, NULL);
     signal_add(&sigint_event, NULL);
 
-    extip_init();
+    hub_list_init();
+    cc_list_init();
+    ui_list_init();
 
     global_share = share_new();
     return_val_if_fail(global_share, 7);
     share_tth_init_notifications(global_share);
 
-    tth_store_init();
-    extra_slots_init();
-
-    queue_init();
-    queue_match_init();
-    queue_auto_search_init();
-
-    /* start hashing daemon
-     */
-    if(hs_start() != 0)
-    {
-        return 6;
-    }
-
-    hub_list_init();
-    cc_list_init();
-    ui_list_init();
+    schedule_init();
 
     /* create a socket for user interface connections
      */
@@ -527,8 +575,6 @@ int main(int argc, char **argv)
     struct timeval tv = {.tv_sec = 1, .tv_usec = 0};
     evtimer_add(&download_trigger_event, &tv);
 
-    queue_connect_schedule_trigger(connect_trigger_callback);
-
     DEBUG("starting main loop");
     event_dispatch();
 
@@ -550,7 +596,6 @@ int main(int argc, char **argv)
     queue_close();
     extra_slots_close();
 
-    /* be nice to valgrind */
     free(global_working_directory);
     free(argv0_path);
     sp_log_close();

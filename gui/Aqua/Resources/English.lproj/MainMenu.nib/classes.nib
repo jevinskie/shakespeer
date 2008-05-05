@@ -33,6 +33,8 @@
                 currentVersionField = NSTextField; 
                 detailsView = NSTextView; 
                 downloadButton = NSButton; 
+                initMessage = NSTextField; 
+                initWindow = NSWindow; 
                 lastVersionField = NSTextField; 
                 menuFilelists = NSMenu; 
                 menuItemNextSidebarItem = NSMenuItem; 

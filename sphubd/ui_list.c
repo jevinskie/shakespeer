@@ -32,6 +32,7 @@
 #include "share.h"
 #include "notifications.h"
 #include "hub.h"
+#include "globals.h"
 
 LIST_HEAD(, ui) ui_list_head;
 
@@ -94,6 +95,16 @@ static void handle_share_scan_finished_notification(nc_t *nc,
 {
     ui_send_status_message(NULL, NULL, "Finished scanning %s",
             notification->path);
+
+    if(global_init_completion < 200)
+    {
+	static int nshares = 0;
+	if(++nshares >= global_expected_shared_paths)
+	{
+	    global_init_completion = 200;
+	    ui_send_init_completion(NULL, global_init_completion);
+	}
+    }
 }
 
 static void handle_share_file_added_notification(nc_t *nc,

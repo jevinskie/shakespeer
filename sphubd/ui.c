@@ -200,7 +200,6 @@ static void ui_send_state(ui_t *ui)
     DEBUG("sending hub list to file descriptor %d", ui->fd);
     hub_foreach(ui_send_hub_state, ui);
 
-    ui_send_port(ui, global_port);
     ui_send_share_stats_for_root(ui, NULL);
     ui_send_stored_filelists_state(ui);
 }
@@ -349,6 +348,13 @@ static int ui_cb_connect(ui_t *ui, const char *hub_address, const char *nick,
     {
         WARNING("refused to connect to hub, set-port not yet issued");
         ui_send_status_message(ui, NULL, "No port set");
+        return 0;
+    }
+
+    if(global_init_completion < 100)
+    {
+        WARNING("refused connect at init completion level %i", global_init_completion);
+        ui_send_status_message(ui, NULL, "Can't connect yet, backend is initializing...");
         return 0;
     }
 
@@ -650,6 +656,11 @@ static int ui_cb_add_shared_path(ui_t *ui, const char *path)
     {
         ui_send_status_message(NULL, NULL,
                 "Skipping shared path %s (unavailable?)", path);
+	if(--global_expected_shared_paths == 0)
+	{
+	    global_init_completion = 200;
+	    ui_send_init_completion(NULL, global_init_completion);
+	}
     }
 
     free(expanded_path);
@@ -813,11 +824,28 @@ static int ui_cb_set_incomplete_directory(ui_t *ui, const char *incomplete_direc
     return 0;
 }
 
+static int ui_cb_expect_shared_paths(ui_t *ui, int expected_shared_paths)
+{
+	DEBUG("expecting %i shared paths, init level = %i",
+		expected_shared_paths, global_init_completion);
+	global_expected_shared_paths = expected_shared_paths;
+	return 0;
+}
+
 void ui_send_state_event(int fd, short condition, void *data)
 {
     ui_t *ui = data;
     return_if_fail(ui);
-    ui_send_state(ui);
+
+    if(global_init_completion < 100)
+    {
+	/* we're not done with startup yet, try again in a while */
+	DEBUG("delaying sending ui state until init complete");
+	struct timeval tv = {.tv_sec = 0, .tv_usec = 500000};
+	evtimer_add(&ui->send_state_event, &tv);
+    }
+    else
+	ui_send_state(ui);
 }
 
 void ui_accept_connection(int fd, short condition, void *data)
@@ -870,6 +898,7 @@ void ui_accept_connection(int fd, short condition, void *data)
     ui->cb_set_hash_prio = ui_cb_set_hash_prio;
     ui->cb_set_download_directory = ui_cb_set_download_directory;
     ui->cb_set_incomplete_directory = ui_cb_set_incomplete_directory;
+    ui->cb_expect_shared_paths = ui_cb_expect_shared_paths;
 
     /* add the channel to the list of connected uis.  */
     DEBUG("adding new ui on file descriptor %d", afd);
@@ -881,9 +910,11 @@ void ui_accept_connection(int fd, short condition, void *data)
 
     ui_add(ui);
     ui_send_server_version(ui, VERSION);
+    ui_send_init_completion(ui, global_init_completion);
+    ui_send_port(ui, global_port);
 
     evtimer_set(&ui->send_state_event, ui_send_state_event, ui);
-    struct timeval tv = {.tv_sec = 2, .tv_usec = 0};
+    struct timeval tv = {.tv_sec = 0, .tv_usec = 0};
     evtimer_add(&ui->send_state_event, &tv);
 }
 

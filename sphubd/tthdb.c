@@ -212,6 +212,7 @@ static struct tth_store *tth_load(const char *filename)
 void tth_store_init(void)
 {
 	return_if_fail(global_working_directory);
+	return_if_fail(global_tth_store == NULL);
 
 	char *tth_store_filename;
 	asprintf(&tth_store_filename, "%s/tth2.db", global_working_directory);
@@ -222,6 +223,7 @@ void tth_store_init(void)
 static void tth_close_database(struct tth_store *store)
 {
 	INFO("closing TTH database");
+	return_if_fail(store);
 
 	fclose(store->fp);
 	free(store->filename);
@@ -236,6 +238,9 @@ void tth_store_close(void)
 void tth_store_add_inode(struct tth_store *store,
 	 uint64_t inode, time_t mtime, const char *tth)
 {
+	return_if_fail(store);
+	return_if_fail(tth);
+
 	struct tth_inode *ti;
 
 	ti = tth_store_lookup_inode(store, inode);
@@ -263,6 +268,8 @@ void tth_store_add_entry(struct tth_store *store,
 	const char *tth, const char *leafdata_base64,
 	off_t leafdata_offset)
 {
+	return_if_fail(store);
+
 	struct tth_entry *te;
 
 	te = tth_store_lookup(store, tth);
@@ -389,6 +396,8 @@ failed:
 
 struct tth_entry *tth_store_lookup(struct tth_store *store, const char *tth)
 {
+	return_val_if_fail(store, NULL);
+
 	struct tth_entry find;
 	strlcpy(find.tth, tth, sizeof(find.tth));
 	return RB_FIND(tth_entries_head, &store->entries, &find);
@@ -405,6 +414,8 @@ static void tth_entry_free(struct tth_entry *entry)
 
 void tth_store_remove(struct tth_store *store, const char *tth)
 {
+	return_if_fail(store);
+
 	struct tth_entry *entry = tth_store_lookup(store, tth);
 	if(entry)
 	{
@@ -419,7 +430,8 @@ void tth_store_remove(struct tth_store *store, const char *tth)
 	}
 }
 
-struct tth_entry *tth_store_lookup_by_inode(struct tth_store *store, uint64_t inode)
+struct tth_entry *tth_store_lookup_by_inode(struct tth_store *store,
+	uint64_t inode)
 {
 	struct tth_inode *ti = tth_store_lookup_inode(store, inode);
 	if(ti)
@@ -437,6 +449,8 @@ static void tth_inode_free(struct tth_inode *ti)
 
 void tth_store_remove_inode(struct tth_store *store, uint64_t inode)
 {
+	return_if_fail(store);
+
 	struct tth_inode *ti = tth_store_lookup_inode(store, inode);
 	if(ti)
 	{
@@ -451,14 +465,18 @@ void tth_store_remove_inode(struct tth_store *store, uint64_t inode)
 	}
 }
 
-struct tth_inode *tth_store_lookup_inode(struct tth_store *store, uint64_t inode)
+struct tth_inode *tth_store_lookup_inode(struct tth_store *store,
+	uint64_t inode)
 {
+	return_val_if_fail(store, NULL);
+
 	struct tth_inode find;
 	find.inode = inode;
 	return RB_FIND(tth_inodes_head, &store->inodes, &find);
 }
 
-void tth_store_set_active_inode(struct tth_store *store, const char *tth, uint64_t inode)
+void tth_store_set_active_inode(struct tth_store *store,
+	const char *tth, uint64_t inode)
 {
 	return_if_fail(store);
 	return_if_fail(tth);
