@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 Martin Hedenfalk <martin.hedenfalk@gmail.com>
+ * Copyright (c) 2006 Martin Hedenfalk <martin@bzero.se>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,7 @@
 
 #include "args.h"
 #include "quote.h"
+#include "xstr.h"
 
 static void arg_add_token(arg_t *args, const char *token, unsigned int len)
 {

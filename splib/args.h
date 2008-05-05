@@ -1,7 +1,5 @@
-/* $Id: args.h,v 1.5 2006/04/09 12:54:31 mhe Exp $ */
-
 /*
- * Copyright (c) 2006 Martin Hedenfalk <martin.hedenfalk@gmail.com>
+ * Copyright (c) 2006 Martin Hedenfalk <martin@bzero.se>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
