@@ -264,7 +264,7 @@ static int spcb_search_response(sp_t *sp, int id, const char *hub_address, const
             @"tth", tth ? [NSString stringWithUTF8String:tth] : @"",
             @"speed", speed ? [NSString stringWithUTF8String:speed] : @"",
             nil);
-    /* FIXME: free sr */
+    /* TODO: free sr */
     return 0;
 }
 

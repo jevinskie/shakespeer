@@ -739,7 +739,7 @@
                 [[SPApplicationController sharedApplicationController] connectWithAddress:address
                                                                                      nick:nick
                                                                               description:descriptionString
-                                                                                 password:nil /* FIXME: can't we store the password? */
+                                                                                 password:nil /* TODO: can't we store the password? */
                                                                                  encoding:encoding];
             }
         }

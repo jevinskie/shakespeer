@@ -483,7 +483,7 @@
 
     /* try to find a matching hub already in the sidebar */
     SPHubController *hubController = nil;
-    NSArray *hubsArray = [sideBar itemsInSection:@"Hubs"]; /* XXX: oh no! */
+    NSArray *hubsArray = [sideBar itemsInSection:@"Hubs"]; /* TODO: oh no! */
     NSEnumerator *e = [hubsArray objectEnumerator];
     SPHubController *hub;
     while ((hub = [e nextObject]) != nil) {
@@ -842,7 +842,7 @@
     while ([advSearchHubs numberOfItems] > 1) {
         [advSearchHubs removeItemAtIndex:1];
     }
-    NSArray *hubsArray = [sideBar itemsInSection:@"Hubs"]; /* XXX: oh no! */
+    NSArray *hubsArray = [sideBar itemsInSection:@"Hubs"]; /* TODO: oh no! */
     NSMutableArray *hubTitlesArray = [NSMutableArray arrayWithCapacity:[hubsArray count]];
     NSEnumerator *e = [hubsArray objectEnumerator];
     SPHubController *hub;

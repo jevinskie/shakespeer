@@ -204,7 +204,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
     if (remoteSphubdAddress && [remoteSphubdAddress length] > 0) {
         if (sp_connect_remote(sp, [remoteSphubdAddress UTF8String]) != 0) {
             SPLog(@"Failed to connect to remote sphubd");
-            /* FIXME: Must return YES here */
+            /* TODO: Must return YES here */
             return NO;
         }
     }
@@ -224,7 +224,7 @@ else {
         }
     }
 
-    /* FIXME: this is just silly! We should not use any libevent stuff here! */
+    /* TODO: this is just silly! We should not use any libevent stuff here! */
     sp->output = evbuffer_new();
 
     /* Attach the socket to the run loop */

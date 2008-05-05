@@ -574,7 +574,7 @@
     while ((aNick = [e nextObject]) != nil) {
         NSDictionary *sr = [requests objectForKey:aNick];
         sendNotification(SPNotificationStartChat,
-                /* FIXME: we don't have any real own nick here... dunno */
+                /* TODO: we don't have any real own nick here... dunno */
                 @"remote_nick", aNick,
                 @"hubAddress", [sr objectForKey:@"hub"],
                 nil);
