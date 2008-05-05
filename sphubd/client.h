@@ -125,6 +125,7 @@ int cc_send_string(cc_t *cc, const char *string);
 int cc_send_command(cc_t *cc, const char *fmt, ...);
 int cc_send_command_as_is(cc_t *cc, const char *fmt, ...);
 void cc_in_event(struct bufferevent *bufev, void *data);
+void cc_out_event(struct bufferevent *bufev, void *data);
 
 void cc_list_init(void);
 

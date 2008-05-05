@@ -113,6 +113,11 @@ int cc_start_upload(cc_t *cc)
 
     cc->last_transfer_activity = time(0);
 
+    /* Start uploading process by writing the first chunk of data, ie filling
+     * the bufferevent. Otherwise the out-event will not be triggered and we
+     * risk getting into a deadlock. */
+    cc_out_event(cc->bufev, cc);
+
     return 0;
 }
 
