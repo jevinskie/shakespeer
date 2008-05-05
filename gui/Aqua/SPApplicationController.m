@@ -206,8 +206,14 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
             return NO;
         }
     }
-    else {
-        NSString *launchPath = [NSString stringWithFormat:@"%@/sphubd", [[NSBundle mainBundle] resourcePath]];
+else { 
+#ifdef BUILD_PROFILE
+            NSString *executable = @"sphubd";
+#else
+            NSString *executable = @"debug-sphubd.sh";
+#endif
+        NSString *launchPath = [NSString stringWithFormat:@"%@/%@",
+                [[NSBundle mainBundle] resourcePath], executable];
         const char *workDir = "~/Library/Application Support/ShakesPeer";
 
         if (sp_connect(sp, workDir, [launchPath UTF8String]) != 0) {

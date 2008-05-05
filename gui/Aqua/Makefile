@@ -51,6 +51,9 @@ SPApplicationController.o SPClientBridge.o: $(TOP)/version.mk
 OBJS=$(SOURCES:.m=.o)
 
 CFLAGS+=-pipe -fobjc-exceptions -fpascal-strings -fobjc-direct-dispatch -F.
+ifeq ($(BUILD_PROFILE),release)
+CFLAGS += -DBUILD_PROFILE=$(BUILD_PROFILE)
+endif
 
 FRAMEWORKS = -framework Cocoa \
 	     -framework SystemConfiguration\
@@ -98,6 +101,8 @@ app_bundle.stamp: ShakesPeer
 	cp -f Resources/Images/shakespeer.icns $(RES)
 	cp -f ../../sphubd/sphubd $(RES)
 	cp -f ../../sphubd/sphashd $(RES)
+	cp -f Resources/debug-sphubd.sh $(RES)
+	chmod 0755 $(RES)/debug-sphubd.sh
 	strip $(RES)/sphubd
 	strip $(RES)/sphashd
 	cp -f ShakesPeer ShakesPeer.app/Contents/MacOS

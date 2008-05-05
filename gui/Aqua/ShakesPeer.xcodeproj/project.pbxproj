@@ -32,6 +32,7 @@
 		28C7E8280B1DF40400C8DD15 /* np.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 28C7E8270B1DF40300C8DD15 /* np.scpt */; };
 		28D1DFA50A2A023000F9F9EE /* SPKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D1DFA30A2A023000F9F9EE /* SPKeychain.m */; };
 		28F0ACFA0A29E7E100FFEC99 /* MHSysTree.m in Sources */ = {isa = PBXBuildFile; fileRef = 28F0ACF80A29E7E100FFEC99 /* MHSysTree.m */; };
+		9A0DC08F0BBC475200229BA0 /* debug-sphubd.sh in Resources */ = {isa = PBXBuildFile; fileRef = 9A0DC08E0BBC475200229BA0 /* debug-sphubd.sh */; };
 		FC7E1A89097E6ADC0087431A /* action.png in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A55097E6ADC0087431A /* action.png */; };
 		FC7E1A8A097E6ADC0087431A /* AdvancedItem.png in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A56097E6ADC0087431A /* AdvancedItem.png */; };
 		FC7E1A8B097E6ADC0087431A /* bookmarks.png in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A57097E6ADC0087431A /* bookmarks.png */; };
@@ -190,6 +191,7 @@
 		28D1DFA30A2A023000F9F9EE /* SPKeychain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPKeychain.m; sourceTree = "<group>"; usesTabs = 0; };
 		28F0ACF70A29E7E100FFEC99 /* MHSysTree.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MHSysTree.h; sourceTree = "<group>"; };
 		28F0ACF80A29E7E100FFEC99 /* MHSysTree.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = MHSysTree.m; sourceTree = "<group>"; usesTabs = 0; };
+		9A0DC08E0BBC475200229BA0 /* debug-sphubd.sh */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.script.sh; name = "debug-sphubd.sh"; path = "Resources/debug-sphubd.sh"; sourceTree = "<group>"; };
 		FC7E1A23097E6A2E0087431A /* ShakesPeer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShakesPeer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC7E1A26097E6A2F0087431A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = Info.plist; path = Resources/Info.plist; sourceTree = "<group>"; };
 		FC7E1A55097E6ADC0087431A /* action.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = action.png; path = Resources/Images/action.png; sourceTree = "<group>"; };
@@ -434,6 +436,7 @@
 		28C7E8220B1DF3E900C8DD15 /* Scripts */ = {
 			isa = PBXGroup;
 			children = (
+				9A0DC08E0BBC475200229BA0 /* debug-sphubd.sh */,
 				28C7E8270B1DF40300C8DD15 /* np.scpt */,
 			);
 			name = Scripts;
@@ -718,6 +721,7 @@
 				28C74ED40ADBECDF00BACE5C /* PublicHubs.nib in Resources */,
 				28C74ED50ADBECDF00BACE5C /* SearchWindow.nib in Resources */,
 				28C74ED60ADBECDF00BACE5C /* Uploads.nib in Resources */,
+				9A0DC08F0BBC475200229BA0 /* debug-sphubd.sh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -972,6 +976,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
+				OTHER_CFLAGS = "";
+				OTHER_CPLUSPLUSFLAGS = "";
 			};
 			name = Debug;
 		};
@@ -979,6 +985,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = "";
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "";
+				OTHER_CFLAGS = "";
+				OTHER_CPLUSPLUSFLAGS = "";
 			};
 			name = Release;
 		};
@@ -1051,7 +1061,10 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				GCC_PREPROCESSOR_DEFINITIONS = HAVE_CONFIG_H;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					HAVE_CONFIG_H,
+					"BUILD_PROFILE=release",
+				);
 				HEADER_SEARCH_PATHS = (
 					/sw/include,
 					/opt/local/include,
