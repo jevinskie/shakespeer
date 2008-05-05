@@ -37,7 +37,18 @@ int tth_entry_cmp(struct tth_entry *a, struct tth_entry *b)
 
 int tth_inode_cmp(struct tth_inode *a, struct tth_inode *b)
 {
-	return b->inode - a->inode;
+	/* This used to be:
+	 *  return b->inode - a->inode;
+	 * That doesn't work! The return type is int, so the return value
+	 * gets truncated if both a and b is large enough and only differs
+	 * in the higher 32 bits.
+	 */
+
+	if(a->inode < b->inode)
+		return -1;
+	if(a->inode > b->inode)
+		return 1;
+	return 0;
 }
 
 RB_GENERATE(tth_entries_head, tth_entry, link, tth_entry_cmp);
