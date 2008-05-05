@@ -33,7 +33,7 @@ int extra_slots_get_for_user(const char *nick)
 {
     return 0;
 }
-void hub_slots_init(slot_t *slots)
+void hub_update_slots(void)
 {
 }
 

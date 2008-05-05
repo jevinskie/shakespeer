@@ -77,13 +77,6 @@ struct hub_user_command
     char *command;
 };
 
-typedef struct slot slot_t;
-struct slot
-{
-    int total;
-    int used;
-};
-
 typedef struct hub hub_t;
 struct hub
 {
@@ -105,7 +98,6 @@ struct hub
     char *address; /* original address passed from ui */
     bool has_userip;
     bool has_nogetinfo;
-    slot_t slots;
 
     bool extended_protocol;
     bool logged_in;
@@ -167,13 +159,14 @@ void hub_user_command_push(hub_t *hub, int type, int context, const char *descri
 
 /* hub_slots
  */
-void hub_slots_init(slot_t *slots);
-void hub_free_upload_slot(hub_t *hub, const char *nick, slot_state_t slot_state);
-slot_state_t hub_request_upload_slot(hub_t *hub, const char *nick, const char *filename, uint64_t size);
-void hub_all_set_slots(int slots);
-void hub_set_slots_global(int slots);
-int hub_slots_free(hub_t *hub);
-int hub_slots_total(hub_t *hub);
+void hub_free_upload_slot(hub_t *hub, const char *nick,
+	slot_state_t slot_state);
+slot_state_t hub_request_upload_slot(hub_t *hub, const char *nick,
+	const char *filename, uint64_t size);
+void hub_set_slots(int slots, bool per_hub);
+void hub_update_slots(void);
+int hub_slots_free(void);
+int hub_slots_total(void);
 
 /* hub.c
  */

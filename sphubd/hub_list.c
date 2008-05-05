@@ -55,7 +55,6 @@ hub_t *hub_new(void)
     hub_t *hub = calloc(1, sizeof(hub_t));
 
     hub->hubname = strdup("unknown");
-    hub_slots_init(&hub->slots);
     TAILQ_INIT(&hub->messages_head);
     TAILQ_INIT(&hub->user_commands_head);
     hub->encoding = strdup("WINDOWS-1252");
@@ -103,11 +102,13 @@ void hub_free(hub_t *hub)
 void hub_list_add(hub_t *hub)
 {
     LIST_INSERT_HEAD(&hub_list_head, hub, next);
+    hub_update_slots();
 }
 
 void hub_list_remove(hub_t *hub)
 {
     LIST_REMOVE(hub, next);
+    hub_update_slots();
 }
 
 static hub_t *hub_find_by_host_port(const char *hostname, int check_port)
@@ -332,5 +333,45 @@ void hub_user_command_push(hub_t *hub, int type, int context,
 int hub_is_connected(void)
 {
     return LIST_FIRST(&hub_list_head) != NULL;
+}
+
+typedef struct
+{
+    int normal;
+    int registered;
+    int operator;
+} hub_count_t;
+
+static void hub_count_GFunc(hub_t *hub, void *user_data)
+{
+    hub_count_t *c = user_data;
+
+    if(hub->me && hub->me->is_operator)
+        c->operator++;
+    else if(hub->is_registered)
+        c->registered++;
+    else
+        c->normal++;
+}
+
+int hub_count_normal(void)
+{
+    hub_count_t c = {0, 0, 0};
+    hub_foreach(hub_count_GFunc, &c);
+    return c.normal;
+}
+
+int hub_count_registered(void)
+{
+    hub_count_t c = {0, 0, 0};
+    hub_foreach(hub_count_GFunc, &c);
+    return c.registered;
+}
+
+int hub_count_operator(void)
+{
+    hub_count_t c = {0, 0, 0};
+    hub_foreach(hub_count_GFunc, &c);
+    return c.operator;
 }
 

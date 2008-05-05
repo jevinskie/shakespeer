@@ -662,15 +662,7 @@ static int ui_cb_update_user_info(ui_t *ui, const char *speed, const char *descr
 
 static int ui_cb_set_slots(ui_t *ui, unsigned int slots, unsigned int per_hub_flag)
 {
-    if(per_hub_flag)
-    {
-        hub_all_set_slots(slots);
-        hub_set_slots_global(-1); /* disable global slots setting */
-    }
-    else
-    {
-        hub_set_slots_global(slots);
-    }
+    hub_set_slots(slots, per_hub_flag);
     return 0;
 } 
 

@@ -88,7 +88,7 @@ static char *hub_make_tag(hub_t *hub)
             global_id_version,
             hub->me->passive ? 'P' : 'A',
             hub_count_normal(), hub_count_registered(), hub_count_operator(),
-            hub_slots_free(hub));
+            hub_slots_free());
 
     return tag;
 }
@@ -590,50 +590,10 @@ void hub_close_all_connections(void)
     hub_foreach(hub_close_connection_foreach_func, NULL);
 }
 
-typedef struct
+bool hub_user_is_passive(hub_t *hub, const char *nick)
 {
-    int normal;
-    int registered;
-    int operator;
-} hub_count_t;
-
-static void hub_count_GFunc(hub_t *hub, void *user_data)
-{
-    hub_count_t *c = user_data;
-
-    if(hub->me->is_operator)
-        c->operator++;
-    else if(hub->is_registered)
-        c->registered++;
-    else
-        c->normal++;
-}
-
-int hub_count_normal(void)
-{
-    hub_count_t c = {0, 0, 0};
-    hub_foreach(hub_count_GFunc, &c);
-    return c.normal;
-}
-
-int hub_count_registered(void)
-{
-    hub_count_t c = {0, 0, 0};
-    hub_foreach(hub_count_GFunc, &c);
-    return c.registered;
-}
-
-int hub_count_operator(void)
-{
-    hub_count_t c = {0, 0, 0};
-    hub_foreach(hub_count_GFunc, &c);
-    return c.operator;
-}
-
-int hub_user_is_passive(hub_t *hub, const char *nick)
-{
-    return_val_if_fail(hub, 0);
-    return_val_if_fail(nick, 0);
+    return_val_if_fail(hub, false);
+    return_val_if_fail(nick, false);
 
     user_t *user = hub_lookup_user(hub, nick);
     if(user)
