@@ -710,7 +710,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 
 - (IBAction)openSPWebpage:(id)sender
 {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://shakespeer.sf.net/"]];
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://shakespeer.bzero.se/"]];
 }
 
 - (IBAction)openSPForums:(id)sender
@@ -725,7 +725,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 
 - (IBAction)donate:(id)sender
 {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://sourceforge.net/donate/index.php?group_id=106156"]];
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://shakespeer.bzero.se/donate.html"]];
 }
 
 - (IBAction)showConnectView:(id)sender
