@@ -659,12 +659,12 @@ static SPApplicationController *mySharedApplicationController = nil;
 
 - (IBAction)openSPForums:(id)sender
 {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://shakespeer.hedenfalk.se/forum/"]];
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://shakespeer.bzero.se/forum/"]];
 }
 
 - (IBAction)reportBug:(id)sender
 {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://sourceforge.net/tracker/?atid=643392&group_id=106156&func=browse"]];
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://trac.bzero.se/trac/shakespeer/newticket"]];
 }
 
 - (IBAction)donate:(id)sender
