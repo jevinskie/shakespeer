@@ -7,9 +7,9 @@ else
 all-local:
 endif
 
-CFLAGS+=-Ilibtecla/tecla-local-install/include -Iconfuse
-LDFLAGS+=-Llibtecla/tecla-local-install/lib -Lconfuse
-LIBS+=-lconfuse -ltecla -lcurses
+CFLAGS += -Ilibtecla/tecla-local-install/include -Iconfuse
+LDFLAGS += -Lconfuse
+LIBS += -lconfuse libtecla/tecla-local-install/lib/libtecla.a -lcurses
 
 shakespeer_SOURCES = cmd.c ctx-filelist.c ctx-hub.c \
 		     ctx-hublist.c ctx-main.c \
