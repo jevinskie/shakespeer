@@ -30,6 +30,6 @@
 
 - (void)setTypeSearchTableColumn:(NSTableColumn *)tableColumn;
 - (void)clearKeypressBuffer;
-- (void)selectItemInArray:(NSArray *)rootArray byString:(NSString *)searchString;
+- (BOOL)selectItemInArray:(NSArray *)rootArray byString:(NSString *)searchString;
 
 @end

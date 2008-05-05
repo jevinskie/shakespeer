@@ -83,7 +83,10 @@
             [rootItems addObject:[[self dataSource] outlineView:self child:i ofItem:nil]];
         
         // do a recursive search for the given string
-        [self selectItemInArray:rootItems byString:keypressBuffer];
+        if (![self selectItemInArray:rootItems byString:keypressBuffer]) {
+            // no item found, so pass event to the default handler
+            [super keyDown:theEvent];
+        }
         
         // clear the buffer unless the user presses another key within 0.5 seconds
         [bufferTimer invalidate];
@@ -103,8 +106,9 @@
 }
 
 // selects the first matching row in the outlineview, based on the supplied string
-- (void)selectItemInArray:(NSArray *)rootArray byString:(NSString *)searchString
+- (BOOL)selectItemInArray:(NSArray *)rootArray byString:(NSString *)searchString
 {
+    BOOL eventHandled = NO;
     NSEnumerator *allRows = [rootArray objectEnumerator];
     NSDictionary *currentItem;
     while ((currentItem = [allRows nextObject])) {
@@ -122,11 +126,19 @@
                to imitate the behaviour in Finder */
             [self scrollRowToVisible:[self rowForItem:currentItem]];
             [self selectRow:[self rowForItem:currentItem] byExtendingSelection:NO];
+            eventHandled = YES;
             break;
         }
-        if ([self isItemExpanded:currentItem])
-            [self selectItemInArray:[currentItem objectForKey:@"children"] byString:searchString];
+        if ([self isItemExpanded:currentItem]) {
+            if ([self selectItemInArray:[currentItem objectForKey:@"children"] byString:searchString]) {
+                eventHandled = YES;
+                break;
+            }
+        }
+            
     }
+    
+    return eventHandled;
 }
 
 @end
