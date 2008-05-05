@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=@VERSION@
+. ./version.mk
 
 echo "Generating automatic update check plist for version ${VERSION}"
 
@@ -9,7 +9,7 @@ echo "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://w
 echo "<plist version=\"1.0\">" >> sp.plist
 echo "<dict>" >> sp.plist
 echo "<key>downloadLink</key>" >> sp.plist
-echo "<string>http://prdownloads.sourceforge.net/shakespeer/ShakesPeer-${VERSION}.dmg?download</string>" >> sp.plist
+echo "<string>http://prdownloads.sourceforge.net/shakespeer/shakespeer-${VERSION}.dmg?download</string>" >> sp.plist
 echo "<key>features</key>" >> sp.plist
 echo "<array>" >> sp.plist
 
