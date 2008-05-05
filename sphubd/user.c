@@ -36,7 +36,7 @@ user_t *user_new(const char *nick, const char *tag,
         const char *speed, const char *description,
         const char *email, uint64_t shared_size, hub_t *hub)
 {
-    assert(nick);
+    return_val_if_fail(nick, NULL);
 
     user_t *user = calloc(1, sizeof(user_t));
 
@@ -47,10 +47,10 @@ user_t *user_new(const char *nick, const char *tag,
         return NULL;
     }
 
-    user->tag = tag ? strdup(tag) : NULL;
+    user->tag = xstrdup(tag);
 
-    user->speed = speed ? strdup(speed) : NULL;
-    user->description = description ? strdup(description) : NULL;
+    user->speed = xstrdup(speed);
+    user->description = xstrdup(description);
 
     if(email && email[0])
     {
@@ -170,28 +170,29 @@ void user_free(void *data)
 
 void user_set_ip(user_t *user, const char *ip)
 {
+    return_if_fail(user);
     free(user->ip);
-    user->ip = strdup(ip);
+    user->ip = xstrdup(ip);
 }
 
 void user_set_speed(user_t *user, const char *speed)
 {
-    assert(user);
+    return_if_fail(user);
     free(user->speed);
-    user->speed = strdup(speed);
+    user->speed = xstrdup(speed);
 }
 
 void user_set_description(user_t *user, const char *description)
 {
-    assert(user);
+    return_if_fail(user);
     free(user->description);
-    user->description = strdup(description);
+    user->description = xstrdup(description);
 }
 
 void user_set_email(user_t *user, const char *email)
 {
-    assert(user);
+    return_if_fail(user);
     free(user->email);
-    user->email = strdup(email);
+    user->email = xstrdup(email);
 }
 
