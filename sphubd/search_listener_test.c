@@ -26,14 +26,15 @@
 #include "notifications.h"
 #include "unit_test.h"
 
-int hub_default_slots = 3; /* UGLY!!! */
-
 static int got_response = 0;
 
 /* ouch! */
 int extra_slots_get_for_user(const char *nick)
 {
     return 0;
+}
+void hub_slots_init(slot_t *slots)
+{
 }
 
 void handle_search_response_notification(nc_t *nc, const char *channel,

@@ -1,3 +1,8 @@
+New in version 0.9.4:
+
+* Uses ShakesPeer-specific tag
+* Fixed buggy upload slots limit
+
 New in version 0.9.3:
 
 * Fixed overwriting standard hub menu items with custom user-commands

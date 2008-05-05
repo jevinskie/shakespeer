@@ -32,6 +32,7 @@
 #include "ui.h"
 
 #include "extra_slots.h"
+#include "notifications.h"
 #include "dbenv.h"
 
 #define SLOTS_DB_FILENAME "slots.db"
@@ -43,8 +44,7 @@ int extra_slots_init(void)
     g_debug("opening database %s", SLOTS_DB_FILENAME);
 
     /* open slots database */
-    if(open_database(&slots_db, SLOTS_DB_FILENAME, "slots",
-                DB_HASH, 0) != 0)
+    if(open_database(&slots_db, SLOTS_DB_FILENAME, "slots", DB_HASH, 0) != 0)
     {
         return -1;
     }
@@ -125,20 +125,7 @@ int extra_slots_grant(const char *nick, int delta)
         g_warning("failed to add slots: %s", db_strerror(rc));
     }
 
-#ifndef TEST
-    hub_t *hub = hub_find_by_nick(nick);
-    if(hub)
-    {
-        user_t *user = hub_lookup_user(hub, nick);
-        if(user)
-        {
-            user->extra_slots = extra_slots;
-            ui_send_user_update(NULL, hub->address, nick, user->description,
-                    user->tag, user->speed, user->email, user->shared_size,
-                    user->is_operator, user->extra_slots);
-        }
-    }
-#endif
+    nc_send_extra_slot_granted_notification(nc_default(), nick, extra_slots);
 
     return rc;
 }

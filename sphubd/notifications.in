@@ -4,6 +4,8 @@ notification search_response pointer:response
 notification filelist_finished string:hub_address string:nick string:filename bool:auto_matched
 notification download_finished string:filename
 
+notification extra_slot_granted string:nick int:extra_slots
+
 ########## share notifications
 
 notification share_file_added pointer:share pointer:file pointer:mp

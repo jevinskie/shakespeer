@@ -9,13 +9,13 @@ check_PROGRAMS = user_test tthdb_test extra_slots_test \
 		 queue_db_test queue_test queue_directory_test \
 		 queue_auto_search_test queue_connect_test \
 		 share_test share_search_test \
-		 search_listener_test extip_test
+		 search_listener_test extip_test hub_slots_test
 
 TESTS = user_test tthdb_test extra_slots_test \
 	queue_db_test queue_test queue_directory_test \
 	queue_auto_search_test queue_connect_test \
 	share_test share_search_test \
-	search_listener_test extip_test
+	search_listener_test extip_test hub_slots_test
 
 TOP=..
 include ${TOP}/common.mk
@@ -162,6 +162,10 @@ extra_slots_test: extra_slots_test.o dbenv.o globals.o notifications.o
 	${LINK}
 
 user_test: user_test.o user.o
+	${LINK}
+
+hub_slots_test: hub_slots_test.o hub_list.o user.o extra_slots.o \
+		dbenv.o globals.o notifications.o
 	${LINK}
 
 #share_save_test_SOURCES=share_save_test.c share.c share_save.c globals.c

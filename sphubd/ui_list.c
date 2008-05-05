@@ -184,6 +184,27 @@ static void handle_did_remove_share_notification( nc_t *nc,
     }
 }
 
+static void handle_extra_slot_granted_notification(nc_t *nc,
+    const char *channel,
+    nc_extra_slot_granted_t *notification, void *user_data)
+{
+    return_if_fail(notification);
+
+    hub_t *hub = hub_find_by_nick(notification->nick);
+    if(hub)
+    {
+        user_t *user = hub_lookup_user(hub, notification->nick);
+        if(user)
+        {
+            user->extra_slots = notification->extra_slots;
+            ui_send_user_update(NULL, hub->address, notification->nick,
+		    user->description,
+                    user->tag, user->speed, user->email, user->shared_size,
+                    user->is_operator, user->extra_slots);
+        }
+    }
+}
+
 void ui_list_init(void)
 {
     LIST_INIT(&ui_list_head);
@@ -218,6 +239,8 @@ void ui_list_init(void)
             handle_share_file_added_notification, NULL);
     nc_add_did_remove_share_observer(nc_default(),
             handle_did_remove_share_notification, NULL);
+    nc_add_extra_slot_granted_observer(nc_default(),
+	    handle_extra_slot_granted_notification, NULL);
 }
 
 void ui_add(ui_t *ui)

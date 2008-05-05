@@ -55,7 +55,7 @@ hub_t *hub_new(void)
     hub_t *hub = calloc(1, sizeof(hub_t));
 
     hub->hubname = strdup("unknown");
-    hub->slots = hub->open_slots = hub_default_slots;
+    hub_slots_init(&hub->slots);
     TAILQ_INIT(&hub->messages_head);
     TAILQ_INIT(&hub->user_commands_head);
     hub->encoding = strdup("WINDOWS-1252");
