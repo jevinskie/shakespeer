@@ -402,32 +402,36 @@ int io_set_blocking(int fd, int flag)
 char *io_evbuffer_readline(struct evbuffer *buffer)
 {
     char *data = (char *)EVBUFFER_DATA(buffer);
+    char *start;
     size_t len = EVBUFFER_LENGTH(buffer);
     char *line;
-    int i;
+    int i, n;
 
     /* FIXME: '|' as end-of-line character is nmdc-specific */
-    for(i = 0; i < len; i++)
+    for(i = n = 0; data[i] == '|' && i < len; i++)
+        /* skip leading '|'s */ n++;
+    start = data + i;
+    for(; i < len; i++)
     {
         if(data[i] == '|')
             break;
     }
 
     if (i == len)
-        return (NULL);
+        return NULL;
 
-    if((line = malloc(i + 1)) == NULL)
+    if((line = malloc(i - n + 1)) == NULL)
     {
         g_warning("%s: out of memory\n", __func__);
         evbuffer_drain(buffer, i);
         return (NULL);
     }
 
-    memcpy(line, data, i);
-    line[i] = '\0';
+    memcpy(line, start, i - n);
+    line[i - n] = '\0';
 
     evbuffer_drain(buffer, i + 1);
 
-    return (line);
+    return line;
 }
 
