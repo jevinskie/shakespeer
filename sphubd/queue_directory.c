@@ -81,13 +81,14 @@ int queue_resolve_directory(const char *nick,
         const char *target_directory,
         unsigned *nfiles_p)
 {
-    char *filelist_path = find_filelist(global_working_directory, nick);
-
     DEBUG("resolving directory [%s] for nick [%s]", source_directory, nick);
+
+    char *filelist_path = find_filelist(global_working_directory, nick);
 
     if(filelist_path)
     {
         /* parse the filelist and add all files in the directory to the queue */
+	DEBUG("found filelist for [%s] in [%s]", nick, filelist_path);
 
         /* FIXME: might need to do this asynchronously */
         /* FIXME: no need to keep the whole filelist in memory (parse
@@ -122,6 +123,7 @@ int queue_resolve_directory(const char *nick,
     else
     {
         /* get the filelist first so we can see what files to download */
+	DEBUG("filelist for [%s] not available, queueing", nick);
         queue_add_filelist(nick, 1 /* auto-matched */);
         return 1;
     }
@@ -192,6 +194,7 @@ int queue_remove_directory(const char *target_directory)
 #ifdef TEST
 
 #include "unit_test.h"
+#include "bz2.h"
 
 int got_filelist_notification = 0;
 int got_directory_notification = 0;
@@ -263,7 +266,6 @@ void test_create_filelist(void)
     asprintf(&fl_path, "%s/files.xml.bar", global_working_directory);
 
     FILE *fp = fopen(fl_path, "w");
-    free(fl_path);
     fail_unless(fp);
 
     fprintf(fp,
@@ -280,6 +282,18 @@ void test_create_filelist(void)
             "</Directory>\n"
             "</FileListing>\n");
     fail_unless(fclose(fp) == 0);
+
+    char *fl_path_bz2;
+    asprintf(&fl_path_bz2, "%s.bz2", fl_path);
+
+    xerr_t *err = NULL;
+    bz2_encode(fl_path, fl_path_bz2, &err);
+    fail_unless(err == NULL);
+
+    fail_unless(unlink(fl_path) == 0);
+
+    free(fl_path);
+    free(fl_path_bz2);
 }
 
 /* add a directory and make sure we get notifications of added directory + the
