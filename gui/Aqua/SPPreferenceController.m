@@ -176,6 +176,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
             unsigned ntotfiles = [[[aNotification userInfo] objectForKey:@"ntotfiles"] intValue];
             unsigned nduplicates = [[[aNotification userInfo] objectForKey:@"nduplicates"] intValue];
             unsigned nunique = ntotfiles - nduplicates;
+            unsigned percentComplete = (unsigned)(100 * ((double)size / (uniqsize ? uniqsize : 1)));
 
             [self willChangeValueForKey:@"size"];
             [self willChangeValueForKey:@"nfiles"];
@@ -185,8 +186,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 
             [dict setObject:[NSNumber numberWithUnsignedLongLong:size] forKey:@"size"];
             [dict setObject:[NSNumber numberWithInt:nfiles] forKey:@"nfiles"];
-            // [dict setObject:[NSNumber numberWithInt:100 * nfiles / (nunique ? nunique : 1)] forKey:@"percentComplete"];
-            [dict setObject:[NSNumber numberWithInt:(unsigned)(100 * ((double)size / (uniqsize ? uniqsize : 1)))] forKey:@"percentComplete"];
+            [dict setObject:[NSNumber numberWithInt:percentComplete] forKey:@"percentComplete"];
             [dict setObject:[NSNumber numberWithInt:nunique - nfiles] forKey:@"nleft"];
             [dict setObject:[NSNumber numberWithInt:nduplicates] forKey:@"nduplicates"];
 

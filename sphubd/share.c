@@ -611,6 +611,7 @@ void share_get_stats(share_t *share, share_stats_t *stats)
     {
         stats->size += mp->stats.size;
         stats->totsize += mp->stats.totsize;
+        stats->dupsize += mp->stats.dupsize;
         stats->nfiles += mp->stats.nfiles;
         stats->ntotfiles += mp->stats.ntotfiles;
         stats->nduplicates += mp->stats.nduplicates;

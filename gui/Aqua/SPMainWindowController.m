@@ -256,9 +256,10 @@
         unsigned long long totsize = [[[aNotification userInfo] objectForKey:@"totsize"] unsignedLongLongValue];
         unsigned long long dupsize = [[[aNotification userInfo] objectForKey:@"dupsize"] unsignedLongLongValue];
         unsigned long long uniqsize = totsize - dupsize;
+        unsigned percentComplete = (unsigned)(100 * ((double)size / (uniqsize ? uniqsize : 1)));
 
         NSString *msg = [NSString stringWithFormat:@"Sharing %s (%u%% hashed)",
-                         str_size_human(size), (unsigned)(100 * ((double)size / (uniqsize ? uniqsize : 1)))];
+                         str_size_human(size), percentComplete];
 
         [statisticsBar setStringValue:msg];
     }
