@@ -24,6 +24,7 @@ RELEASE_DIR=release-build-$(TAG)
 else
 TAG_OPTION=
 RELEASE_DIR=release-build-HEAD
+VERSION=
 endif
 
 tag-release:
@@ -34,8 +35,10 @@ release:
 	cd $(RELEASE_DIR) && \
 	if test -d $(REPO)/_darcs; then \
 	  cd $(REPO) && \
+	  echo "updating sources..." && \
 	  darcs pull -a -v $(TAG_OPTION) $(REPO_URL); \
 	else \
+	  echo "getting sources..." && \
 	  darcs get --partial -v $(TAG_OPTION) $(REPO_URL) && \
 	  cd $(REPO) ; \
 	fi && $(MAKE) all BUILD_PROFILE=release && $(MAKE) check
