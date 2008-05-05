@@ -11,11 +11,15 @@
 		<key>268</key>
 		<string>345 309 162 49 0 0 1024 746 </string>
 		<key>5</key>
-		<string>184 295 620 443 0 0 1024 746 </string>
+		<string>330 314 620 443 0 0 1280 778 </string>
 	</dict>
 	<key>IBFramework Version</key>
 	<string>446.1</string>
+	<key>IBOpenObjects</key>
+	<array>
+		<integer>5</integer>
+	</array>
 	<key>IBSystem Version</key>
-	<string>8L127</string>
+	<string>8N1150</string>
 </dict>
 </plist>

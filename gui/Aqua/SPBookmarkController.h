@@ -57,6 +57,11 @@
 - (IBAction)connectToSelectedBookmark:(id)sender;
 
 - (void)setBookmarks:(NSArray *)anArray;
+
+// short way to add bookmark
+- (BOOL)addBookmarkWithName:(NSString *)name address:(NSString *)address;
+
+// verbose way
 - (BOOL)addBookmarkWithName:(NSString *)aName
                     address:(NSString *)anAddress
                        nick:(NSString *)aNick

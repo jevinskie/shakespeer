@@ -275,7 +275,7 @@
 		FC7E1AE5097E6B3E0087431A /* SPPreferenceController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SPPreferenceController.m; sourceTree = "<group>"; usesTabs = 0; };
 		FC7E1AE6097E6B3E0087431A /* SPPublicHubsController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SPPublicHubsController.h; sourceTree = "<group>"; };
 		FC7E1AE7097E6B3E0087431A /* SPPublicHubsController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SPPublicHubsController.m; sourceTree = "<group>"; usesTabs = 0; };
-		FC7E1AE8097E6B3E0087431A /* SPQueueController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SPQueueController.h; sourceTree = "<group>"; };
+		FC7E1AE8097E6B3E0087431A /* SPQueueController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SPQueueController.h; sourceTree = "<group>"; usesTabs = 0; };
 		FC7E1AE9097E6B3E0087431A /* SPQueueController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SPQueueController.m; sourceTree = "<group>"; usesTabs = 0; };
 		FC7E1AEA097E6B3E0087431A /* SPSearchWindowController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SPSearchWindowController.h; sourceTree = "<group>"; };
 		FC7E1AEB097E6B3E0087431A /* SPSearchWindowController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SPSearchWindowController.m; sourceTree = "<group>"; usesTabs = 0; };

@@ -30,6 +30,9 @@
 #include "util.h"
 #include "hublist.h"
 
+// data type for drags of public hubs
+NSString *SPPublicHubDataType = @"SPPublicHubDataType";
+
 @implementation SPPublicHubsController
 
 - (id)init
@@ -104,6 +107,21 @@
     
     [[hubTable headerView] setMenu:columnsMenu];
     [hubTable setMenu:contextMenu];
+    
+    // register our private drag type
+    [hubTable registerForDraggedTypes:[NSArray arrayWithObject:SPPublicHubDataType]];
+}
+
+// called when a drag begins inside the table
+- (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard*)pboard 
+{
+    // Archive and copy the dragged rows to the pasteboard.
+    NSArray *draggedItems = [[arrayController arrangedObjects] objectsAtIndexes:rowIndexes];
+    
+    [pboard declareTypes:[NSArray arrayWithObject:SPPublicHubDataType] owner:nil];
+    BOOL success = [pboard setData:[NSKeyedArchiver archivedDataWithRootObject:draggedItems] forType:SPPublicHubDataType];
+
+    return success;
 }
 
 - (void)unbindControllers
@@ -293,12 +311,7 @@
     NSDictionary *dict;
     while ((dict = [e nextObject]) != nil) {
         [[SPBookmarkController sharedBookmarkController] addBookmarkWithName:[[dict valueForKey:@"name"] string]
-                                                                     address:[[dict valueForKey:@"address"] string]
-                                                                        nick:@""
-                                                                    password:@""
-                                                                 description:@""
-                                                                 autoconnect:NO
-                                                                    encoding:nil];
+                                                                     address:[[dict valueForKey:@"address"] string]];
     }
 }
 

@@ -23,6 +23,11 @@
 #import "SPSideBar.h"
 #import "SidebarCell.h"
 
+@interface SPSideBar (Private)
+- (void)itemIsDropActivated:(NSTimer *)timer;
+- (void)cancelDropTimer;
+@end
+
 @implementation SPSideBar
 
 - (void)setDelegate:(id)aDelegate
@@ -137,13 +142,20 @@
 - (void)addItem:(id <SPSideBarItem>)anItem
 {
     if ([(NSObject *)anItem respondsToSelector:@selector(sectionTitle)]) {
-        NSString *sectionTitle = [(id<SPSideBarItemInformalProtocol>)anItem sectionTitle];
+        NSString *sectionTitle = [(NSObject *)anItem sectionTitle];
         if ([self hasSection:sectionTitle] == NO)
             [self addSection:sectionTitle];
         [self addItem:anItem toSection:sectionTitle];
     }
     else {
         [self insertItem:anItem atIndex:[items count]];
+    }
+    
+    if ([(NSObject *)anItem respondsToSelector:@selector(interestingDropTypes)]) {
+      // add this sidebar's supported drop types to the types the sidebar can handle
+      NSArray *supportedDropTypes = [(NSObject *)anItem interestingDropTypes];
+      NSArray *currentlySupportedTypes = [self registeredDraggedTypes];
+      [self registerForDraggedTypes:[supportedDropTypes arrayByAddingObjectsFromArray:currentlySupportedTypes]];
     }
 }
 
@@ -252,6 +264,67 @@
     [anItem release];
 
     [self reloadData];
+}
+
+- (NSDragOperation)tableView:(NSTableView *)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op 
+{
+    // never allow drops between items in the sidebar
+    if (op == NSTableViewDropAbove) {
+        [self cancelDropTimer];
+        return NSDragOperationNone;
+    }
+
+    NSObject<SPSideBarItem> *hoveredItem = [items objectAtIndex:row];
+    
+    // the hovered item doesn't support drag & drop
+    if (![hoveredItem respondsToSelector:@selector(interestingDropTypes)]) {
+        [self cancelDropTimer];
+        return NSDragOperationNone;
+    }
+      
+    NSArray *dropTypesForItem = [hoveredItem interestingDropTypes];
+    NSArray *typesForCurrentDrag = [[info draggingPasteboard] types];
+    
+    // see if any of the dragged types match the supported drop types for this item
+    if (![dropTypesForItem firstObjectCommonWithArray:typesForCurrentDrag]) {
+        [self cancelDropTimer];
+        return NSDragOperationNone;
+    }
+      
+    if (!dropTimer) {
+        // after hovering over this cell for 1 second, the cell will be switched to
+        dropTimer = [[NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(itemIsDropActivated:) userInfo:hoveredItem repeats:NO] retain];
+    }
+    
+    // drop on this item supported!
+    return NSDragOperationEvery;
+}
+
+- (void)cancelDropTimer
+{
+    if (dropTimer) {
+        [dropTimer invalidate];
+        [dropTimer release];
+        dropTimer = nil;
+    }
+}
+
+- (void)draggingExited:(id <NSDraggingInfo>)sender
+{
+    [self cancelDropTimer];
+    
+    [super draggingExited:sender];
+}
+
+// the item has been hovered (with drag & drop) for a specific interval, so let's switch to it
+- (void)itemIsDropActivated:(NSTimer *)timer
+{
+    NSObject<SPSideBarItem> *hoveredItem = [timer userInfo];
+    [timer release];
+    dropTimer = nil;
+    
+    [self displayItem:hoveredItem];
+    [self cancelDropTimer];
 }
 
 /* Called from the close icon in the table */

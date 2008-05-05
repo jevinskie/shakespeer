@@ -26,6 +26,8 @@
 #import "SPUserDefaultKeys.h"
 #import "SPKeychain.h"
 
+extern NSString* SPPublicHubDataType;
+
 @implementation SPBookmarkController
 
 + (SPBookmarkController *)sharedBookmarkController
@@ -83,6 +85,7 @@
     [bookmarkTable setTarget:self];
     [bookmarkTable setDoubleAction:@selector(connectToSelectedBookmark:)];
     [bookmarkTable setMenu:bookmarkMenu];
+    [bookmarkTable registerForDraggedTypes:[NSArray arrayWithObject:SPPublicHubDataType]];
 }
 
 - (void)dealloc
@@ -111,6 +114,11 @@
 - (NSMenu *)menu
 {
     return nil;
+}
+
+- (NSArray *)interestingDropTypes
+{
+  return [NSArray arrayWithObject:SPPublicHubDataType];
 }
 
 #pragma mark -
@@ -149,6 +157,17 @@
         NSDictionary *bm = [selectedObjects objectAtIndex:0];
         [self connectToBookmark:bm];
     }
+}
+
+- (BOOL)addBookmarkWithName:(NSString *)name address:(NSString *)address
+{
+    return [self addBookmarkWithName:name
+                             address:address 
+                                nick:@""
+                            password:@""
+                         description:@""
+                         autoconnect:NO
+                            encoding:nil];
 }
 
 - (BOOL)addBookmarkWithName:(NSString *)aName
@@ -344,6 +363,39 @@
 - (IBAction)newBookmarkCancel:(id)sender
 {
     [NSApp endSheet:newBookmark];
+}
+
+#pragma mark -
+#pragma mark Drag & drop support
+
+- (NSDragOperation)tableView:(NSTableView *)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op 
+{
+    // do not accept drops on other rows, just below/above
+    if (op == NSTableViewDropOn)
+        return NSDragOperationNone;
+
+    return NSDragOperationEvery;
+}
+
+- (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)operation
+{
+    NSPasteboard* pboard = [info draggingPasteboard];
+    NSData *draggingData = [pboard dataForType:SPPublicHubDataType];
+    
+    if (draggingData) {
+        NSArray* hubs = [NSKeyedUnarchiver unarchiveObjectWithData:draggingData];
+        NSEnumerator *e = [hubs objectEnumerator];
+        NSDictionary *currentHub = nil;
+        while ((currentHub = [e nextObject])) {
+            [self addBookmarkWithName:[[currentHub objectForKey:@"name"] string]
+                              address:[[currentHub objectForKey:@"address"] string]];
+        }
+        
+        if (currentHub)
+            return YES;
+    }
+
+    return NO;
 }
 
 #pragma mark -

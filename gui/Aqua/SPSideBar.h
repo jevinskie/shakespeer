@@ -30,13 +30,17 @@
 
 @end
 
-@protocol SPSideBarItemInformalProtocol
+@interface NSObject (SPSideBarItemInformalProtocol)
 
 - (void)unbindControllers;
 - (NSString *)sectionTitle;
 - (BOOL)canClose;
 - (BOOL)isHighlighted;
 - (void)setHighlighted:(BOOL)aFlag;
+
+// return data types for drag & drop for which the sidebar item
+// should be highlighted 
+- (NSArray *)interestingDropTypes;
 
 @end
 
@@ -45,6 +49,9 @@
     IBOutlet NSTabView *tabView;
     id delegate;
     NSMutableArray *items;
+    
+    // only set when there's a target being dragged over right now.
+    NSTimer *dropTimer;
 }
 
 /*!
