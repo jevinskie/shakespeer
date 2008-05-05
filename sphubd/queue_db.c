@@ -805,9 +805,9 @@ int main(void)
     fail_unless(s_next3 == s_cur + 3);
 
     queue_target_t qt;
-    xstrlcpy(qt.filename, "/target/filename.ext", QUEUE_TARGET_MAXPATH);
+    strlcpy(qt.filename, "/target/filename.ext", QUEUE_TARGET_MAXPATH);
     qt.size = 4711ULL;
-    xstrlcpy(qt.tth, "ABCDEFGHIJKLMNOPQRTSUVWXYZ0123456789012", 40);
+    strlcpy(qt.tth, "ABCDEFGHIJKLMNOPQRTSUVWXYZ0123456789012", 40);
     qt.flags = 0;
     qt.priority = 2;
     fail_unless(queue_add_target(&qt) == 0);
@@ -851,8 +851,8 @@ int main(void)
 
     /* add a source */
     queue_source_t qs;
-    xstrlcpy(qs.target_filename, "/target/filename.ext", QUEUE_TARGET_MAXPATH);
-    xstrlcpy(qs.source_filename, "\\source\\filename.ext", QUEUE_TARGET_MAXPATH);
+    strlcpy(qs.target_filename, "/target/filename.ext", QUEUE_TARGET_MAXPATH);
+    strlcpy(qs.source_filename, "\\source\\filename.ext", QUEUE_TARGET_MAXPATH);
     fail_unless(queue_add_source("nicke_nyfiken", &qs) == 0);
 
     pqt = queue_lookup_target_by_nick("nicke_nyfiken");
@@ -861,8 +861,8 @@ int main(void)
 
     /* add another source */
     queue_source_t qs2;
-    xstrlcpy(qs2.target_filename, "/target/filename.ext", QUEUE_TARGET_MAXPATH);
-    xstrlcpy(qs2.source_filename, "\\blah\\filename.ext", QUEUE_TARGET_MAXPATH);
+    strlcpy(qs2.target_filename, "/target/filename.ext", QUEUE_TARGET_MAXPATH);
+    strlcpy(qs2.source_filename, "\\blah\\filename.ext", QUEUE_TARGET_MAXPATH);
     fail_unless(queue_add_source("nils", &qs2) == 0);
 
     pqt = queue_lookup_target_by_nick("nils");
@@ -883,7 +883,7 @@ int main(void)
 
     /* Add a target without a TTH */
     memset(&qt, 0, sizeof(qt));
-    xstrlcpy(qt.filename, "/target/file_w/o_TTH", QUEUE_TARGET_MAXPATH);
+    strlcpy(qt.filename, "/target/file_w/o_TTH", QUEUE_TARGET_MAXPATH);
     qt.size = 4242ULL;
     qt.flags = 0;
     qt.priority = 2;

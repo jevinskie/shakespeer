@@ -81,7 +81,7 @@ char *dstring_free(dstring_t *dstring, int free_data)
 void dstring_append_len(dstring_t *dstring, const char *data, size_t len)
 {
     dstring_expand(dstring, len + 1);
-    xstrlcat(dstring->string, data, dstring->length + len + 1);
+    strlcat(dstring->string, data, dstring->length + len + 1);
     dstring->length += len;
 }
 

@@ -1,7 +1,5 @@
-/* $Id: rx.c,v 1.5 2006/04/09 12:54:31 mhe Exp $ */
-
 /*
- * Copyright (c) 2006 Martin Hedenfalk <martin.hedenfalk@gmail.com>
+ * Copyright (c) 2006 Martin Hedenfalk <martin@bzero.se>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,7 +90,7 @@ rx_subs_t *rx_search_precompiled(const char *string, const void *rx)
             {
                 size_t l = pmatch[i].rm_eo - pmatch[i].rm_so;
                 subs->subs[i - 1] = malloc(l + 1);
-                xstrlcpy(subs->subs[i - 1], string + pmatch[i].rm_so, l + 1);
+                strlcpy(subs->subs[i - 1], string + pmatch[i].rm_so, l + 1);
             }
 
             return subs;

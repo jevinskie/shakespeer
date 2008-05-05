@@ -224,15 +224,15 @@ int queue_add_internal(const char *nick, const char *source_filename,
         memset(&new_qt, 0, sizeof(queue_target_t));
         qt = &new_qt;
 
-        xstrlcpy(qt->filename, target_filename, QUEUE_TARGET_MAXPATH);
+        strlcpy(qt->filename, target_filename, QUEUE_TARGET_MAXPATH);
         qt->size = size;
         if(tth)
-            xstrlcpy(qt->tth, tth, sizeof(qt->tth));
+            strlcpy(qt->tth, tth, sizeof(qt->tth));
         time(&qt->ctime);
         qt->priority = default_priority;
 
         if(target_directory)
-            xstrlcpy(qt->target_directory, target_directory, QUEUE_TARGET_MAXPATH);
+            strlcpy(qt->target_directory, target_directory, QUEUE_TARGET_MAXPATH);
 
         if(queue_add_target(qt) != 0)
         {
@@ -248,8 +248,8 @@ int queue_add_internal(const char *nick, const char *source_filename,
 
     queue_source_t qs;
     memset(&qs, 0, sizeof(queue_source_t));
-    xstrlcpy(qs.target_filename, qt->filename, QUEUE_TARGET_MAXPATH);
-    xstrlcpy(qs.source_filename, source_filename, QUEUE_TARGET_MAXPATH);
+    strlcpy(qs.target_filename, qt->filename, QUEUE_TARGET_MAXPATH);
+    strlcpy(qs.source_filename, source_filename, QUEUE_TARGET_MAXPATH);
 
     if(queue_add_source(nick, &qs) != 0)
     {

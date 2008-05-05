@@ -61,8 +61,8 @@ static void queue_match_filelist_callback(const char *path, const char *tth,
 
         queue_source_t qs;
         memset(&qs, 0, sizeof(qs));
-        xstrlcpy(qs.target_filename, qt->filename, sizeof(qs.target_filename));
-        xstrlcpy(qs.source_filename, path, sizeof(qs.source_filename));
+        strlcpy(qs.target_filename, qt->filename, sizeof(qs.target_filename));
+        strlcpy(qs.source_filename, path, sizeof(qs.source_filename));
 
         if(queue_add_source(udata->nick, &qs) == 0)
         {
@@ -195,8 +195,8 @@ static void queue_handle_search_response_notification(nc_t *nc,
 
         queue_source_t qs;
         memset(&qs, 0, sizeof(qs));
-        xstrlcpy(qs.target_filename, qt->filename, sizeof(qs.target_filename));
-        xstrlcpy(qs.source_filename, resp->filename, sizeof(qs.source_filename));
+        strlcpy(qs.target_filename, qt->filename, sizeof(qs.target_filename));
+        strlcpy(qs.source_filename, resp->filename, sizeof(qs.source_filename));
 
         if(queue_add_source(resp->nick, &qs) == 0)
         {

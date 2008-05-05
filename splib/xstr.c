@@ -52,7 +52,7 @@ char *xstrndup(const char *s, size_t len)
         return NULL;
  
     r = (char *)malloc(len + 1);
-    xstrlcpy(r, s, len + 1);
+    strlcpy(r, s, len + 1);
 
     return r;
 }
@@ -72,14 +72,14 @@ const char *xstrnchr(const char *s, unsigned maxlen, int c)
     return NULL;
 }
 
-#if !defined(__OpenBSD__) && !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__APPLE__)
+#if defined(linux)
 
 /*
  * Copy src to string dst of size siz.  At most siz-1 characters
  * will be copied.  Always NUL terminates (unless siz == 0).
  * Returns strlen(src); if retval >= siz, truncation occurred.
  */
-size_t xstrlcpy(char *dst, const char *src, size_t siz)
+size_t strlcpy(char *dst, const char *src, size_t siz)
 {
         char *d = dst;
         const char *s = src;
@@ -111,7 +111,7 @@ size_t xstrlcpy(char *dst, const char *src, size_t siz)
  * If retval >= siz, truncation occurred.
  */
 size_t
-xstrlcat(char *dst, const char *src, size_t siz)
+strlcat(char *dst, const char *src, size_t siz)
 {
         char *d = dst;
         const char *s = src;
@@ -141,7 +141,7 @@ xstrlcat(char *dst, const char *src, size_t siz)
 /*
  * Find the first occurrence of find in s, ignore case.
  */
-char *xstrcasestr(const char *s, const char *find)
+char *strcasestr(const char *s, const char *find)
 {
         char c, sc;
         size_t len;
@@ -160,7 +160,7 @@ char *xstrcasestr(const char *s, const char *find)
         return ((char *)s);
 }
 
-#endif /* not BSD or Apple */
+#endif /* linux */
 
 
 char *str_trim_end_inplace(char *str, const char *set)

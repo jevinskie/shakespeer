@@ -164,9 +164,9 @@ int queue_add_directory(const char *nick,
 
     queue_directory_t qd;
     memset(&qd, 0, sizeof(qd));
-    xstrlcpy(qd.target_directory, target_directory, QUEUE_TARGET_MAXPATH);
-    xstrlcpy(qd.source_directory, source_directory, QUEUE_TARGET_MAXPATH);
-    xstrlcpy(qd.nick, nick, QUEUE_SOURCE_MAXNICK);
+    strlcpy(qd.target_directory, target_directory, QUEUE_TARGET_MAXPATH);
+    strlcpy(qd.source_directory, source_directory, QUEUE_TARGET_MAXPATH);
+    strlcpy(qd.nick, nick, QUEUE_SOURCE_MAXNICK);
 
     unsigned nfiles = 0;
     int rc = queue_resolve_directory(nick, source_directory, target_directory,

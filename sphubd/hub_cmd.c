@@ -875,7 +875,7 @@ int hub_dispatch_command(hub_t *hub, char *cmdstr)
 
         if(cmdstr_utf8_unescaped[0] == '<')
         {
-            if(xstrcasestr(cmdstr_utf8_unescaped, "banned") != NULL)
+            if(strcasestr(cmdstr_utf8_unescaped, "banned") != NULL)
             {
                 hub->expected_disconnect = true;
             }

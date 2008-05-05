@@ -58,7 +58,7 @@ static int file_matches_search(share_file_t *f, const share_search_t *search)
     for(i = 0; i < search->words->argc; i++)
     {
         /* FIXME: what about UTF-8?  */
-        if(xstrcasestr(f->name, search->words->argv[i]) == NULL)
+        if(strcasestr(f->name, search->words->argv[i]) == NULL)
         {
             return 0;
         }

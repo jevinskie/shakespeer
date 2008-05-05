@@ -27,14 +27,10 @@ int str_has_prefix(const char *s, const char *prefix);
 int str_has_suffix(const char *s, const char *suffix);
 char *str_replace_set(char *string, const char *set, char replacement);
 
-#if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__APPLE__)
-# define xstrlcpy strlcpy
-# define xstrlcat strlcat
-# define xstrcasestr strcasestr
-#else
-size_t xstrlcpy(char *dst, const char *src, size_t size);
-size_t xstrlcat(char *dst, const char *src, size_t size);
-char *xstrcasestr(const char *big, const char *little);
+#if defined(linux)
+size_t strlcpy(char *dst, const char *src, size_t size);
+size_t strlcat(char *dst, const char *src, size_t size);
+char *strcasestr(const char *big, const char *little);
 #endif
 
 #endif

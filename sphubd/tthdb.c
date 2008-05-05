@@ -150,7 +150,7 @@ static int tthdb_put(const char *tth, struct tthdb_data *tthdata, int flags)
         tth_inode_t ti;
         ti.size = tthdata->size;
         ti.mtime = tthdata->mtime;
-        xstrlcpy(ti.tth, tth, sizeof(ti.tth));
+        strlcpy(ti.tth, tth, sizeof(ti.tth));
 
         val.data = &ti;
         val.size = sizeof(tth_inode_t);

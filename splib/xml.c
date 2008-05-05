@@ -193,7 +193,7 @@ static char *xml_get_line(xml_ctx_t *ctx, size_t *chunk_size_ret)
         {
             size_t len = nl - ctx->buf;
             char *retbuf = malloc(len + 1);
-            xstrlcpy(retbuf, ctx->buf, len + 1);
+            strlcpy(retbuf, ctx->buf, len + 1);
 
             while(*nl == '\n' && nl < ctx->buf + ctx->len)
                 ++nl;
@@ -364,7 +364,7 @@ void open_tag(void *data, const char *el, const char **attr)
         fail_unless(attr[0] && attr[1]);
         fail_unless(strcmp(attr[0], "bar") == 0);
 
-        xstrlcpy(bar, attr[1], sizeof(bar));
+        strlcpy(bar, attr[1], sizeof(bar));
 
         /* fail_unless(strcmp(attr[1], "baz") == 0); */
     }

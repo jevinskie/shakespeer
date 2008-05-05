@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 Martin Hedenfalk <martin.hedenfalk@gmail.com>
+ * Copyright (c) 2006 Martin Hedenfalk <martin@bzero.se>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,8 +24,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-/* $Id: cmd_table.c,v 1.2 2006/03/19 06:44:27 mhe Exp $ */
 
 #include <assert.h>
 #include <string.h>
