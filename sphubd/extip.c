@@ -38,7 +38,33 @@
 #include "rx.h"
 #include "notifications.h"
 
-#define EXTERNAL_IP_HOST "shakespeer.bzero.se"
+static struct {
+	const char *host;
+	const char *uri;
+} lookup_hosts[] = {
+	{ "shakespeer.bzero.se", "/ip.shtml" },
+	{ "www.stacken.kth.se", "/~mhe/ip.shtml" },
+	{ "ip.xten.net", "/" }, /* hmm, don't think they'd like this... */
+};
+
+/* data passed to the ip lookup response callback */
+struct lookup_info
+{
+	/* Start and current index into the lookup_hosts array.
+	 * If a request fails, the next host is tried. When all hosts are
+	 * tried (current index is back at start index), we wait a while and
+	 * continue looping until success.
+	 */
+	int start_index;
+	int current_index;
+
+	/* timer set when all hosts failed */
+	struct event ev;
+};
+
+static const int num_lookup_hosts =
+	sizeof(lookup_hosts) / sizeof(lookup_hosts[0]);
+
 #define EXTERNAL_IP_TIMEOUT 10*60 /* looked up IP is valid this many seconds */
 
 static char *external_ip = NULL;
@@ -47,6 +73,7 @@ static time_t external_ip_lookup_time = 0;
 static bool use_static = false; /* true if manually set, disables automatic detection */
 
 static void extip_update_cache(void);
+static void extip_response_handler(struct evhttp_request *req, void *data);
 
 /* Pass ip = NULL to disable static (manual) IP */
 void extip_set_static(const char *ip)
@@ -301,44 +328,130 @@ static char *extip_detect_from_buf(const char *buf)
     return ip;
 }
 
+static void extip_send_lookup_request(struct lookup_info *info)
+{
+	const char *host = lookup_hosts[info->current_index].host;
+	const char *uri = lookup_hosts[info->current_index].uri;
+
+	INFO("sending lookup request to %s", host);
+
+	struct evhttp_request *req =
+		evhttp_request_new(extip_response_handler, info);
+	return_if_fail(req);
+
+	evhttp_add_header(req->output_headers, "Connection", "close");
+	evhttp_add_header(req->output_headers, "Host", host);
+	evhttp_add_header(req->output_headers,
+		"User-Agent", PACKAGE "/" VERSION);
+
+	struct evhttp_connection *evcon = evhttp_connection_new(host, 80);
+	return_if_fail(evcon);
+
+	evhttp_make_request(evcon, req, EVHTTP_REQ_GET, uri);
+}
+
+static void extip_run_update(int fd, short why, void *data)
+{
+	extip_send_lookup_request(data);
+}
+
+/* Set a timer that will send a lookup request.
+ */
+static void extip_schedule_update(struct lookup_info *info)
+{
+	if(event_initialized(&info->ev))
+		evtimer_del(&info->ev);
+	evtimer_set(&info->ev, extip_run_update, info);
+
+	struct timeval tv = {.tv_sec = 30, .tv_usec = 0};
+	evtimer_add(&info->ev, &tv);
+}
+
+/* Called when we get a response or error from evhttp. */
 static void extip_response_handler(struct evhttp_request *req, void *data)
 {
-	DEBUG("got external IP lookup response");
+	return_if_fail(req);
 
-	/* FIXME: is evbuffer data nul-terminated? */
-	char *ip = extip_detect_from_buf((const char *)EVBUFFER_DATA(req->input_buffer));
+	struct lookup_info *info = data;
 
-	if(ip)
+	INFO("got external IP lookup response, code %i", req->response_code);
+	DEBUG("response: [%s]", req->response_code_line);
+
+	char *ip = NULL;
+
+	if(req->response_code == 200)
+	{
+		/* Got a successful response. Parse it. */
+
+		/* FIXME: is evbuffer data nul-terminated? */
+		ip = extip_detect_from_buf(
+			(const char *)EVBUFFER_DATA(req->input_buffer));
+	}
+
+	if(ip == NULL)
+	{
+		/* Either the parsing failed, or we got an error response. */
+
+		INFO("failed to lookup external IP, trying another host");
+
+		/* Try the next host in the list. */
+		info->current_index++;
+		info->current_index %= num_lookup_hosts;
+
+		if(info->current_index == info->start_index)
+		{
+			/* We're back to the first host. All lookup hosts
+			 * have failed. Wait a while until we try again.
+			 */
+			extip_schedule_update(info);
+		}
+		else
+		{
+			/* There is another host to try. Do it directly. */
+			extip_send_lookup_request(info);
+		}
+	}
+	else
 	{
 		free(external_ip);
 		external_ip = ip;
 		external_ip_lookup_time = time(0);
 		nc_send_external_ip_detected_notification(nc_default(), ip);
+
+		/* We're done with the lookup info struct. Free it. */
+		free(info);
 	}
 
+	/* FIXME: shouldn't we, like, free something here? */
 	/* evhttp_request_free(req); */
 }
 
 static void extip_update_cache(void)
 {
-    time_t now = time(0);
+	time_t now = time(0);
 
-    if(external_ip == NULL || external_ip_lookup_time + EXTERNAL_IP_TIMEOUT < now)
-    {
+	if(external_ip &&
+	   external_ip_lookup_time + EXTERNAL_IP_TIMEOUT >= now)
+	{
+		/* cached IP up-to-date */
+		return;
+	}
+
 	if(external_ip)
+	{
 		DEBUG("external IP [%s] has timed out after %i seconds",
 			external_ip, EXTERNAL_IP_TIMEOUT);
+	}
 
 	DEBUG("scheduling external IP lookup request");
-	struct evhttp_request *req = evhttp_request_new(extip_response_handler, NULL);
-	return_if_fail(req);
-	evhttp_add_header(req->output_headers, "Connection", "close");
-	evhttp_add_header(req->output_headers, "User-Agent", PACKAGE "/" VERSION);
-	evhttp_add_header(req->output_headers, "Host", EXTERNAL_IP_HOST);
-	struct evhttp_connection *evcon = evhttp_connection_new(EXTERNAL_IP_HOST, 80);
-	return_if_fail(evcon);
-	evhttp_make_request(evcon, req, EVHTTP_REQ_GET, "/ip.shtml");
-    }
+
+	/* randomly select one lookup host to use
+	 */
+	struct lookup_info *info = calloc(1, sizeof(struct lookup_info));
+	info->start_index = random() % num_lookup_hosts;
+	info->current_index = info->start_index;
+
+	extip_send_lookup_request(info);
 }
 
 #ifdef TEST
