@@ -18,6 +18,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <netdb.h> /* for gethostbyname */
 #include <arpa/inet.h> /* for inet_ntoa */
 
