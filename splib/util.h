@@ -73,6 +73,8 @@ int is_filelist(const char *filename);
 int split_host_port(const char *hostport, char **host, int *port);
 
 int mkpath(const char *path);
+pid_t sp_exec(const char *path, const char *basedir);
+char *get_exec_path(const char *argv0);
 
 #endif
 

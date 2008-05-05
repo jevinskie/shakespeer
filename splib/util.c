@@ -583,3 +583,51 @@ int split_host_port(const char *hostport, char **host, int *port)
     return 0;
 }
 
+pid_t sp_exec(const char *path, const char *basedir)
+{
+	g_info("spawning executable: %s -w %s -d %s",
+		path, basedir, sp_log_get_level());
+	pid_t pid = fork();
+	if(pid == 0)
+	{
+		/* child process */
+
+		char *exp_path = tilde_expand_path(path);
+		assert(exp_path);
+		execl(exp_path, exp_path,
+			"-w", basedir,
+			"-d", sp_log_get_level(),
+			(char *)NULL);
+
+		g_warning("failed to exec %s: %s", exp_path, strerror(errno));
+		exit(1);
+	}
+	else if(pid < 0)
+	{
+		g_warning("failed to fork: %s", strerror(errno));
+	}
+	else
+	{
+		g_info("forked, pid = %i", pid);
+	}
+
+	return pid;
+}
+
+char *get_exec_path(const char *argv0)
+{
+    char *p = strdup(argv0);
+    char *e = strrchr(p, '/');
+    if(e)
+        *e = 0;
+    else
+    {
+        free(p);
+        p = strdup(".");
+    }
+    char *argv0_path = absolute_path(p);
+    free(p);
+
+    return argv0_path;
+}
+

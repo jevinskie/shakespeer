@@ -36,6 +36,7 @@
 #include "io.h"
 #include "util.h"
 #include "log.h"
+#include "xstr.h"
 
 /* hostport assumed to be "host-or-ip[:port]". If no port specified, uses port
  * 411.
@@ -207,11 +208,7 @@ int io_bind_unix_socket(const char *filename)
         return -1;
     }
     addr.sun_family = AF_UNIX;
-#if defined(__OpenBSD__) || defined(_FreeBSD__) || defined(__APPLE__)
     strlcpy(addr.sun_path, filename, sizeof(addr.sun_path));
-#else
-    strcpy(addr.sun_path, filename);
-#endif
     if(bind(fd, (struct sockaddr *)&addr, sizeof(struct sockaddr_un)) != 0)
     {
         g_warning("%s", strerror(errno));
@@ -332,36 +329,8 @@ int io_exec_and_connect_unix(const char *filename, const char *program_path,
     if(fd == -1)
     {
         if(program_path)
-        {
-            /* failed to connect to socket, try to start the program */
-            g_info("spawning executable: %s -w %s -d %s",
-                    program_path, basedir, sp_log_get_level());
-            pid_t pid = fork();
-            if(pid == 0)
-            {
-                /* child process */
+	    sp_exec(program_path, basedir);
 
-                char *expanded_program_path = tilde_expand_path(program_path);
-                assert(expanded_program_path);
-                assert(expanded_filename);
-                execl(expanded_program_path, expanded_program_path,
-                        "-w", basedir,
-                        "-d", sp_log_get_level(), (char *)NULL);
-                g_warning("failed to execute %s: %s",
-                        expanded_program_path, strerror(errno));
-                free(expanded_filename);
-                free(expanded_program_path);
-                exit(1);
-            }
-            else if(pid < 0)
-            {
-                g_warning("failed to fork: %s", strerror(errno));
-            }
-            else
-            {
-                g_info("forked, pid = %i", pid);
-            }
-        }
         int try;
         for(try = 0; try < 40; try++)
         {
