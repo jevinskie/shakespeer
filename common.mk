@@ -43,12 +43,12 @@ endif
 endif
 
 # add -m64 here to compile external libraries with -m64
-EXTERN_CFLAGS=-m64 $(UB_CFLAGS)
-EXTERN_LDFLAGS=-m64
+EXTERN_CFLAGS=$(UB_CFLAGS)
+EXTERN_LDFLAGS=
 
 # add -m64 here to compile non-GUI files with 64 bit support
-HEADLESS_CFLAGS=-m64
-HEADLESS_LDFLAGS=-m64
+HEADLESS_CFLAGS=
+HEADLESS_LDFLAGS=
 
 # Need -lresolv on Linux
 ifeq ($(os),Linux)
