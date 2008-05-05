@@ -449,17 +449,10 @@ int main(int argc, char **argv)
     global_incomplete_directory = tilde_expand_path("~");
     global_download_directory = tilde_expand_path("~");
 
-#if 0
     global_id_generator = strdup("ShakesPeer");
     global_id_tag = strdup("SP");
     global_id_lock = strdup("ShakesPeer");
     global_id_version = strdup(VERSION);
-#else
-    global_id_generator = strdup("DC++");
-    global_id_tag = strdup("++");
-    global_id_lock = strdup("DCPLUSPLUS");
-    global_id_version = strdup("0.691");
-#endif
 
     sp_log_init(global_working_directory, "sphubd");
     sp_log_set_level(debug_level);
