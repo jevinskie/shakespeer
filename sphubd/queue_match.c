@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2006 Martin Hedenfalk <martin@bzero.se>
+ * Copyright 2004-2007 Martin Hedenfalk <martin@bzero.se>
  *
  * This file is part of ShakesPeer.
  *
@@ -56,19 +56,12 @@ static void queue_match_filelist_callback(const char *path, const char *tth,
     queue_target_t *qt = queue_lookup_target_by_tth(tth);
     if(qt && qt->size == size)
     {
-        g_debug("Found matching queue target [%s], adding source '%s'",
+        DEBUG("Found matching queue target [%s], adding source '%s'",
                 qt->filename, udata->nick);
 
-        queue_source_t qs;
-        memset(&qs, 0, sizeof(qs));
-        strlcpy(qs.target_filename, qt->filename, sizeof(qs.target_filename));
-        strlcpy(qs.source_filename, path, sizeof(qs.source_filename));
-
-        if(queue_add_source(udata->nick, &qs) == 0)
-        {
-            nc_send_queue_source_added_notification(nc_default(),
-                    qt->filename, udata->nick, path);
-        }
+        queue_add_source(udata->nick, qt->filename, path);
+	nc_send_queue_source_added_notification(nc_default(),
+		qt->filename, udata->nick, path);
     }
 }
 
@@ -83,7 +76,7 @@ static void queue_match_filelist_event(int fd, short why, void *data)
                 queue_match_filelist_callback, udata);
         if(udata->fl_ctx == NULL)
         {
-            g_warning("failed to read xml filelist for nick [%s]", udata->nick);
+            WARNING("failed to read xml filelist for nick [%s]", udata->nick);
             free(udata->nick);
             free(udata->filelist_path);
             free(udata);
@@ -96,7 +89,7 @@ static void queue_match_filelist_event(int fd, short why, void *data)
         fl_free_dir(udata->fl_ctx->root);
         fl_xml_free_context(udata->fl_ctx);
 
-        g_debug("done matching queue against %s's filelist", udata->nick);
+        DEBUG("done matching queue against %s's filelist", udata->nick);
         free(udata->nick);
         free(udata->filelist_path);
         free(udata);
@@ -125,7 +118,7 @@ static void queue_match_filelist_schedule_event(
 
 void queue_match_filelist(const char *filelist_path, const char *nick)
 {
-    g_debug("matching against %s's filelist [%s]", nick, filelist_path);
+    DEBUG("matching against %s's filelist [%s]", nick, filelist_path);
     
     queue_match_filelist_data_t *udata = calloc(1, sizeof(queue_match_filelist_data_t));
     udata->nick = strdup(nick);
@@ -153,12 +146,12 @@ static void queue_handle_search_response_notification(nc_t *nc,
         return;
     }
 
-    g_debug("matching on TTH '%s', size %llu", resp->tth, resp->size);
+    DEBUG("matching on TTH '%s', size %llu", resp->tth, resp->size);
 
     queue_target_t *qt = queue_lookup_target_by_tth(resp->tth);
     if(qt && qt->size == resp->size)
     {
-        g_debug("Found matching queue target [%s], adding source '%s'",
+        DEBUG("Found matching queue target [%s], adding source '%s'",
                 qt->filename, resp->nick);
 
         if(resp->id == -1 && global_auto_match_filelists)
@@ -177,7 +170,7 @@ static void queue_handle_search_response_notification(nc_t *nc,
             if(existing_filelist)
             {
                 /* great, we already got the filelist, match against it */
-                g_info("auto-matching against filelist from [%s]", resp->nick);
+                INFO("auto-matching against filelist from [%s]", resp->nick);
                 queue_match_filelist(existing_filelist, resp->nick);
                 free(existing_filelist);
             }
@@ -193,16 +186,9 @@ static void queue_handle_search_response_notification(nc_t *nc,
             }
         }
 
-        queue_source_t qs;
-        memset(&qs, 0, sizeof(qs));
-        strlcpy(qs.target_filename, qt->filename, sizeof(qs.target_filename));
-        strlcpy(qs.source_filename, resp->filename, sizeof(qs.source_filename));
-
-        if(queue_add_source(resp->nick, &qs) == 0)
-        {
-            nc_send_queue_source_added_notification(nc_default(),
-                    qt->filename, resp->nick, resp->filename);
-        }
+        queue_add_source(resp->nick, qt->filename, resp->filename); 
+	nc_send_queue_source_added_notification(nc_default(),
+		qt->filename, resp->nick, resp->filename);
     }
 }
 

@@ -24,16 +24,12 @@
 #include <sys/time.h>
 #include <event.h>
 
-#include <db.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
 
 #include "queue.h"
 #include "log.h"
-
-extern DB *queue_filelist_db;
-extern DB *queue_source_db;
 
 struct trigger_entry
 {
@@ -44,6 +40,8 @@ struct trigger_entry
 
 LIST_HEAD(, trigger_entry) trigger_list_head =
     LIST_HEAD_INITIALIZER(trigger_list_head);
+
+extern struct queue_store *q_store;
 
 static int queue_connect_interval = 60;
 
@@ -110,25 +108,13 @@ static void call_connect_callback(queue_connect_callback_t connect_callback,
 void queue_trigger_connect_filelists(queue_connect_callback_t connect_callback,
         void *user_data)
 {
-    return_if_fail(queue_filelist_db);
-
     /* Loop through all (distinct) sources and look for a download (filelist)
      * that needs to be started.
      */
-    DBC *qfc;
-    queue_filelist_db->cursor(queue_filelist_db, NULL, &qfc, 0);
-    return_if_fail(qfc);
-
-    DBT key, val;
-    memset(&key, 0, sizeof(DBT));
-    memset(&val, 0, sizeof(DBT));
-
-    while(qfc->c_get(qfc, &key, &val, DB_NEXT) == 0)
+    struct queue_filelist *qf;
+    TAILQ_FOREACH(qf, &q_store->filelists, link)
     {
-        const char *nick = (const char *)key.data;
-        queue_filelist_t *qf = val.data;
-
-        struct trigger_entry *entry = recently_triggered(nick);
+        struct trigger_entry *entry = recently_triggered(qf->nick);
         if(entry)
         {
             continue;
@@ -146,68 +132,49 @@ void queue_trigger_connect_filelists(queue_connect_callback_t connect_callback,
             continue;
         }
 
-        call_connect_callback(connect_callback, nick, user_data, entry);
+        call_connect_callback(connect_callback, qf->nick, user_data, entry);
     }
-
-    qfc->c_close(qfc);
 }
 
 void queue_trigger_connect_targets(queue_connect_callback_t connect_callback,
         void *user_data)
 {
-    return_if_fail(queue_source_db);
-
     /* Loop through all (distinct) sources and look for a download (target)
      * that needs to be started.
      */
-    DBC *qsc;
-    queue_source_db->cursor(queue_source_db, NULL, &qsc, 0);
-    return_if_fail(qsc);
-
-    DBT key, val;
-    memset(&key, 0, sizeof(DBT));
-    memset(&val, 0, sizeof(DBT));
-
-    u_int32_t flags = DB_NEXT;
-    while(qsc->c_get(qsc, &key, &val, flags) == 0)
+    struct queue_source *qs;
+    TAILQ_FOREACH(qs, &q_store->sources, link)
     {
-        const char *nick = (const char *)key.data;
-        queue_source_t *qs = val.data;
-
-        struct trigger_entry *entry = recently_triggered(nick);
+        struct trigger_entry *entry = recently_triggered(qs->nick);
         if(entry)
         {
-            flags = DB_NEXT_NODUP; /* skip all targets with this nick */
+            /* skip all targets with this nick */
             continue;
         }
 
         queue_target_t *qt = queue_lookup_target(qs->target_filename);
         if(qt == NULL)
         {
-            g_warning("Target [%s] not available!?", qs->target_filename);
-            g_warning("Source = [%s]", qs->source_filename);
-            g_warning("INCONSISTENT QUEUE DATABASE!");
+            WARNING("Target [%s] not available!?", qs->target_filename);
+            WARNING("Source = [%s]", qs->source_filename);
+            WARNING("INCONSISTENT QUEUE DATABASE!");
             continue;
         }
 
         if((qt->flags && QUEUE_TARGET_ACTIVE) == QUEUE_TARGET_ACTIVE)
         {
             /* this target is already active (by another nick) */
-            flags = DB_NEXT;
             continue;
         }
 
         if(qt->priority == 0)
         {
             /* this target is paused */
-            flags = DB_NEXT;
             continue;
         }
 
-        call_connect_callback(connect_callback, nick, user_data, entry);
+        call_connect_callback(connect_callback, qs->nick, user_data, entry);
     }
-
-    qsc->c_close(qsc);
 }
 
 /* This function is called every x seconds to trigger connections.
@@ -260,7 +227,7 @@ void queue_connect_schedule_trigger(queue_connect_callback_t callback_function)
 int triggers = 0;
 static int connect_trigger_callback(const char *nick, void *user_data)
 {
-    g_debug("got connect trigger for nick [%s]", nick);
+    DEBUG("got connect trigger for nick [%s]", nick);
     ++triggers;
     fail_unless(user_data == &triggers);
 
@@ -272,7 +239,7 @@ void test_setup(void)
     global_working_directory = "/tmp/sp-queue_connect-test.d";
     system("/bin/rm -rf /tmp/sp-queue_connect-test.d");
     system("mkdir /tmp/sp-queue_connect-test.d");
-    fail_unless(queue_init() == 0);
+    queue_init();
 }
 
 void test_teardown(void)

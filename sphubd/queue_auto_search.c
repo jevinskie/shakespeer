@@ -19,10 +19,10 @@
  */
 
 #include "sys_queue.h"
+#include <sys/types.h>
 
 #include <stdlib.h>
 #include <string.h>
-#include <db.h>
 #include <event.h>
 
 #include "globals.h"
@@ -32,7 +32,7 @@
 
 #define QUEUE_MAX_RECENT_SEARCHES 30
 
-extern DB *queue_target_db;
+extern struct queue_store *q_store;
 
 /* keep a FIFO queue of the QUEUE_MAX_RECENT_SEARCHES most recent searches */
 struct recent_search_entry
@@ -79,20 +79,12 @@ static char *queue_auto_search_get_tth(void)
 
     int ncandidates = 0;
 
-    /* Select targets for auto-search, ordered by urgency */
-    DBC *qtc;
-    queue_target_db->cursor(queue_target_db, NULL, &qtc, 0);
-
-    DBT key, val;
-    memset(&key, 0, sizeof(DBT));
-    memset(&val, 0, sizeof(DBT));
-
+    /* Select targets for auto-search, ordered by urgency
+     */
     queue_target_t *qt_candidate = NULL;
-
-    while(qtc->c_get(qtc, &key, &val, DB_NEXT) == 0)
+    struct queue_target *qt;
+    TAILQ_FOREACH(qt, &q_store->targets, link)
     {
-        queue_target_t *qt = val.data;
-
         if(qt->tth[0] == 0) /* TTH required */
             continue;
 
@@ -112,30 +104,25 @@ static char *queue_auto_search_get_tth(void)
            qt->priority > qt_candidate->priority ||
            qt->size > qt_candidate->size)
         {
-            free(qt_candidate);
-            qt_candidate = malloc(sizeof(queue_target_t));
-            memcpy(qt_candidate, qt, sizeof(queue_target_t));
+            qt_candidate = qt;
         }
     }
-
-    qtc->c_close(qtc);
 
     char *tth = 0;
 
     if(qt_candidate)
     {
         tth = strdup(qt_candidate->tth);
-        g_debug("found tth [%s]", tth);
+        DEBUG("found tth [%s]", tth);
         struct recent_search_entry *e = calloc(1,
-                sizeof(struct recent_search_entry));
+	    sizeof(struct recent_search_entry));
         e->tth = tth;
         TAILQ_INSERT_TAIL(&recent_searches_head, e, link);
         ++num_recent_searches;
-        free(qt_candidate);
     }
     else
     {
-        g_debug("found no candidates for auto-search (%i possible)",
+        DEBUG("found no candidates for auto-search (%i possible)",
                 ncandidates);
     }
 
@@ -184,11 +171,11 @@ static void queue_auto_search_sources_event_func(int fd, short why, void *data)
                 tth, 0, SHARE_SIZE_NONE, SHARE_TYPE_TTH, -1);
         if(sreq == NULL)
         {
-            g_warning("failed to create search request");
+            WARNING("failed to create search request");
         }
         else
         {
-            g_debug("auto-searching for [%s]", tth);
+            DEBUG("auto-searching for [%s]", tth);
 
             search_listener_add_request(global_search_listener, sreq);
             hub_foreach((void (*)(hub_t *, void *))hub_search, (void *)sreq);
@@ -218,7 +205,7 @@ void test_setup(void)
     system("/bin/rm -rf /tmp/sp-queue_auto_search-test.d");
     system("mkdir /tmp/sp-queue_auto_search-test.d");
 
-    fail_unless(queue_init() == 0);
+    queue_init();
 
     fail_unless(queue_add("foo", "remote/path/to/file.img", 17471142,
                 "file.img", "IP4CTCABTUE6ZHZLFS2OP5W7EMN3LMFS65H7D2Y") == 0);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2004 Martin Hedenfalk <martin@bzero.se>
+ * Copyright 2004-2007 Martin Hedenfalk <martin@bzero.se>
  *
  * This file is part of ShakesPeer.
  *
@@ -25,97 +25,139 @@
 #define QUEUE_TARGET_AUTO_MATCHED 2
 #define QUEUE_DIRECTORY_RESOLVED 4
 
-#define QUEUE_TARGET_MAXPATH 256
-#define QUEUE_SOURCE_MAXNICK 32
-
 #include <stdint.h>
+#include <stdio.h>
 #include <time.h>
 #include <stdbool.h>
 
-#define txn_return_val_if_fail(cond, retval) do {           \
-        if(!(cond)) { g_warning("assert failed: " #cond); \
-	txn->abort(txn); \
-        return (retval); }                                \
-    } while(0)
-
 typedef struct queue_target queue_target_t;
-struct queue_target /* indexed by filename */
+struct queue_target
 {
-    char filename[QUEUE_TARGET_MAXPATH];
-    char target_directory[QUEUE_TARGET_MAXPATH];
-    uint64_t size;
-    char tth[40];
-    unsigned flags;
-    time_t ctime;
-    int priority;
-    uint64_t seq;
+	TAILQ_ENTRY(queue_target) link;
+
+	char *filename; /* target filename in local filesystem */
+	char tth[40];
+
+	char *target_directory; /* relative to download directory */
+	uint64_t size;
+	unsigned flags;
+	time_t ctime;
+	int priority;
+	unsigned seq;
 };
 
 typedef struct queue_source queue_source_t;
-struct queue_source /* indexed by nick */
+struct queue_source
 {
-    char target_filename[QUEUE_TARGET_MAXPATH];
-    char source_filename[QUEUE_TARGET_MAXPATH];
+	TAILQ_ENTRY(queue_source) link;
+
+	char *target_filename;
+	char *nick;
+	char *source_filename;
 };
 
 typedef struct queue_filelist queue_filelist_t;
-struct queue_filelist /* indexed by nick */
+struct queue_filelist
 {
-    unsigned flags;
-    int priority;
+	TAILQ_ENTRY(queue_filelist) link;
+
+	char *nick;
+
+	unsigned flags;
+	int priority;
 };
 
 typedef struct queue_directory queue_directory_t;
-struct queue_directory /* indexed by target_directory */
+struct queue_directory
 {
-    char target_directory[QUEUE_TARGET_MAXPATH];
-    char source_directory[QUEUE_TARGET_MAXPATH];
-    char nick[QUEUE_SOURCE_MAXNICK];
-    unsigned flags;
-    unsigned nfiles;
-    unsigned nleft;
+	TAILQ_ENTRY(queue_directory) link;
+
+	char *target_directory;
+	char *nick;
+
+	char *source_directory;
+	unsigned flags;
+	unsigned nfiles;
+	unsigned nleft;
+};
+
+struct queue_store
+{
+	FILE *fp;
+	unsigned line_number;
+	bool loading;
+	unsigned sequence;
+
+	TAILQ_HEAD(, queue_target) targets;
+	TAILQ_HEAD(, queue_source) sources;
+	TAILQ_HEAD(, queue_filelist) filelists;
+	TAILQ_HEAD(, queue_directory) directories;
 };
 
 typedef struct queue queue_t;
 struct queue
 {
-    char *nick;
-    char *source_filename;
-    char *target_filename;
-    char *tth;
-    uint64_t size;
-    uint64_t offset;
-    bool is_filelist;
-    bool is_directory;
-    bool auto_matched;
+	char *nick;
+	char *source_filename;
+	char *target_filename;
+	char *tth;
+	uint64_t size;
+	uint64_t offset;
+	bool is_filelist;
+	bool is_directory;
+	bool auto_matched;
 };
 
-int queue_init(void);
-int queue_close(void);
+void queue_init(void);
+void queue_close(void);
+
 void queue_free(queue_t *queue);
 
-int queue_add_target(queue_target_t *qt);
-int queue_update_target(queue_target_t *qt);
-int queue_db_remove_target(const char *target_filename);
-int queue_remove_target(const char *target_filename);
 queue_target_t *queue_lookup_target(const char *target_filename);
 queue_target_t *queue_lookup_target_by_tth(const char *tth);
 
-int queue_add_source(const char *nick, queue_source_t *qs);
+struct queue_target *queue_target_add(const char *target_filename,
+	const char *tth,
+	const char *target_directory,
+	uint64_t size,
+	unsigned flags,
+	int priority,
+	unsigned sequence);
+
+struct queue_target *queue_target_duplicate(struct queue_target *qt);
+
+void queue_target_free(struct queue_target *qt);
+void queue_source_free(struct queue_source *qs);
+
+int queue_add_target(queue_target_t *qt);
+int queue_db_remove_target(const char *target_filename);
+int queue_remove_target(const char *target_filename);
+
+void queue_db_print_add_target(FILE *fp, struct queue_target *qt);
+void queue_db_print_add_source(FILE *fp, struct queue_source *qs);
+void queue_db_print_add_filelist(FILE *fp, struct queue_filelist *qf);
+void queue_db_print_add_directory(FILE *fp, struct queue_directory *qd);
+void queue_db_print_set_resolved(FILE *fp, struct queue_directory *qd);
+
+void queue_add_source(const char *nick, const char *target_filename,
+        const char *source_filename);
+
 int queue_remove_sources(const char *target_filename);
 int queue_remove_sources_by_nick(const char *nick);
 
+int queue_add_filelist(const char *nick, bool auto_matched_filelist);
 int queue_db_add_filelist(const char *nick, queue_filelist_t *qf);
 int queue_update_filelist(const char *nick, queue_filelist_t *qf);
 int queue_remove_filelist(const char *nick);
 
-int queue_add_filelist(const char *nick, int auto_matched_filelist);
+void queue_db_add_directory(const char *target_directory,
+        const char *nick, const char *source_directory);
 
-int queue_db_add_directory(const char *target_directory, queue_directory_t *qd);
-int queue_db_update_directory(const char *target_directory, queue_directory_t *qd);
 queue_directory_t *queue_db_lookup_directory(const char *target_directory);
 queue_directory_t *queue_db_lookup_unresolved_directory_by_nick(const char *nick);
 int queue_db_remove_directory(const char *target_directory);
+
+void queue_db_set_resolved(const char *target_directory, unsigned nfiles);
 
 queue_filelist_t *queue_lookup_filelist(const char *nick);
 
@@ -141,7 +183,7 @@ int queue_add_directory(const char *nick,
         const char *source_directory,
         const char *target_directory);
 int queue_remove_nick(const char *nick);
-int queue_set_priority(const char *target_filename, unsigned int priority);
+void queue_set_priority(const char *target_filename, unsigned priority);
 
 /* queue_auto_search.c
  */

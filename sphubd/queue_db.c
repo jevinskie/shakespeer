@@ -1,899 +1,1035 @@
 /*
- * Copyright 2004-2006 Martin Hedenfalk <martin@bzero.se>
+ * Copyright (c) 2007 Martin Hedenfalk <martin@bzero.se>
  *
- * This file is part of ShakesPeer.
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
  *
- * ShakesPeer is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * ShakesPeer is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with ShakesPeer; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <db.h>
+#include "sys_queue.h"
+
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
-#include "xstr.h"
 
+#include "xstr.h"
 #include "globals.h"
 #include "log.h"
 #include "queue.h"
 #include "notifications.h"
-#include "dbenv.h"
 
-#define QUEUE_DB_FILENAME "queue.db"
+#define QUEUE_DB_FILENAME "queue2.db"
 
-DB *queue_target_db = NULL;
-DB *queue_source_db = NULL;
-DB *queue_tth_db = NULL;
-DB *queue_filelist_db = NULL;
-DB *queue_directory_db = NULL;
-DB *queue_directory_nick_db = NULL;
-DB *queue_sequence_db = NULL;
+struct queue_store *q_store = NULL;
 
-static int queue_target_get_tth(DB *sdb, const DBT *pkey,
-        const DBT *pdata, DBT *skey)
+static void queue_db_normalize(void);
+
+static void queue_parse_add_target(char *buf, size_t len)
 {
-    queue_target_t *qt = (queue_target_t *)pdata->data;
+	buf += 3;  /* skip past "+T:" */
+	len -= 3;
 
-    memset(skey, 0, sizeof(DBT));
-    skey->data = (void *)qt->tth;
-    skey->size = qt->tth[0] ? 40 : 0; /* strlen(qt->tth) + 1; */
+	DEBUG("parsing target add [%s]", buf);
 
-    return 0;
+	/* syntax is 'filename:target_dir:size:tth:flags:ctime:prio:seq' */
+
+	/* FIXME: need quoting! */
+
+	char *filename = buf;
+	buf += strcspn(buf, ":");
+	return_if_fail(*buf == ':');
+	*buf++ = 0;
+
+	char *target_directory = buf;
+	buf += strcspn(buf, ":");
+	return_if_fail(*buf == ':');
+	*buf++ = 0;
+	if(*target_directory == 0)
+		target_directory = NULL;
+
+	char *size = buf;
+	buf += strcspn(buf, ":");
+	return_if_fail(*buf == ':');
+	*buf++ = 0;
+	uint64_t s = strtoull(size, NULL, 10);
+
+	char *tth = buf;
+	buf += strcspn(buf, ":");
+	return_if_fail(*buf == ':');
+	*buf++ = 0;
+
+	char *flags = buf;
+	buf += strcspn(buf, ":");
+	return_if_fail(*buf == ':');
+	*buf++ = 0;
+	int f = atoi(flags);
+
+	/* char *ctime = buf; */
+	buf += strcspn(buf, ":");
+	return_if_fail(*buf == ':');
+	*buf++ = 0;
+
+	char *prio = buf;
+	buf += strcspn(buf, ":");
+	return_if_fail(*buf == ':');
+	*buf++ = 0;
+	int p = atoi(prio);
+
+	char *sequence = buf;
+	buf += strcspn(buf, ":");
+	return_if_fail(*buf == 0);
+	unsigned seq = atoi(sequence);
+
+	queue_target_add(filename, tth, target_directory, s, f, p, seq);
 }
 
-static int queue_directory_get_nick(DB *sdb, const DBT *pkey,
-        const DBT *pdata, DBT *skey)
+static void queue_parse_add_source(char *buf, size_t len)
 {
-    queue_directory_t *qt = (queue_directory_t *)pdata->data;
+	buf += 3;  /* skip past "+S:" */
+	len -= 3;
 
-    memset(skey, 0, sizeof(DBT));
-    skey->data = (void *)qt->nick;
-    skey->size = strlen(qt->nick) + 1;
+	/* syntax is 'nick:target_filename:source_filename' */
 
-    return 0;
+	char *nick = buf;
+	char *colon = strchr(buf, ':');
+	return_if_fail(colon);
+	*colon = 0;
+	++colon;
+	return_if_fail(*colon);
+
+	char *target_filename = colon;
+	colon = strchr(target_filename, ':');
+	return_if_fail(colon);
+	*colon = 0;
+	++colon;
+	return_if_fail(*colon);
+
+	char *source_filename = colon;
+
+	queue_add_source(nick, target_filename, source_filename);
 }
 
-/* resets active state for targets */
-static int queue_reset_db(void)
+static void queue_parse_add_filelist(char *buf, size_t len)
 {
-    DB_TXN *txn;
-    return_val_if_fail(db_transaction(&txn) == 0, -1);
+	buf += 3;  /* skip past "+F:" */
+	len -= 3;
 
-    DBC *qtc;
-    queue_target_db->cursor(queue_target_db, txn, &qtc, 0);
-    txn_return_val_if_fail(qtc, -1);
+	/* syntax is 'nick:flags' */
+	char *colon = strchr(buf, ':');
+	return_if_fail(colon);
 
-    DBT key, val;
-    memset(&key, 0, sizeof(DBT));
-    memset(&val, 0, sizeof(DBT));
+	*colon = 0;
+	++colon;
+	return_if_fail(*colon);
 
-    while(qtc->c_get(qtc, &key, &val, DB_NEXT) == 0)
-    {
-        queue_target_t *qt = val.data;
-	if((qt->flags & QUEUE_TARGET_ACTIVE) == QUEUE_TARGET_ACTIVE)
+	int flags = atoi(colon);
+
+	bool auto_matched = (flags & QUEUE_TARGET_AUTO_MATCHED) ==
+		QUEUE_TARGET_AUTO_MATCHED;
+
+	queue_add_filelist(buf, auto_matched);
+}
+
+static void queue_parse_add_directory(char *buf, size_t len)
+{
+	buf += 3;  /* skip past "+D:" */
+	len -= 3;
+
+	/* syntax is 'target_directory:nick:source_directory:nfiles:nleft' */
+
+	char *target_directory = buf;
+	char *colon = strchr(target_directory, ':');
+	return_if_fail(colon);
+	*colon = 0;
+	++colon;
+	return_if_fail(*colon);
+
+	char *nick = colon;
+	colon = strchr(nick, ':');
+	return_if_fail(colon);
+	*colon = 0;
+	++colon;
+	return_if_fail(*colon);
+
+	char *source_directory = colon;
+
+	queue_db_add_directory(target_directory, nick, source_directory);
+}
+
+static void queue_parse_remove_directory(char *buf, size_t len)
+{
+	buf += 3;  /* skip past "-D:" */
+	len -= 3;
+
+	/* syntax is 'target_directory' */
+	queue_remove_directory(buf);
+}
+
+static void queue_parse_set_directory_resolved(char *buf, size_t len)
+{
+	buf += 3;  /* skip past "=R:" */
+	len -= 3;
+
+	/* syntax is 'target_directory:nfiles' */
+
+	char *colon = strchr(buf, ':');
+	return_if_fail(colon);
+	*colon = 0;
+
+	/* FIXME: use strtonum */
+	unsigned nfiles = strtoul(colon + 1, NULL, 10);
+
+	queue_db_set_resolved(buf, nfiles);
+}
+
+static void queue_parse_set_priority(char *buf, size_t len)
+{
+	buf += 3;  /* skip past "=P:" */
+	len -= 3;
+
+	/* syntax is 'target_filename:priority' */
+
+	char *colon = strchr(buf, ':');
+	return_if_fail(colon);
+
+	*colon = 0;
+	++colon;
+	return_if_fail(*colon);
+
+	int priority = atoi(colon);
+
+	queue_set_priority(buf, priority);
+}
+
+static void queue_parse_remove_target(char *buf, size_t len)
+{
+	buf += 3;  /* skip past "-T:" */
+	len -= 3;
+
+	/* syntax is 'target_filename' */
+	queue_remove_target(buf);
+}
+
+static void queue_parse_remove_filelist(char *buf, size_t len)
+{
+	buf += 3;  /* skip past "-F:" */
+	len -= 3;
+
+	/* syntax is 'nick' */
+	queue_remove_filelist(buf);
+}
+
+static void queue_parse_remove_source(char *buf, size_t len)
+{
+	buf += 3;  /* skip past "-S:" */
+	len -= 3;
+
+	/* syntax is 'target_filename:nick' */
+	char *target_filename = buf;
+	char *colon = strchr(target_filename, ':');
+	return_if_fail(colon);
+	*colon = 0;
+	++colon;
+	return_if_fail(*colon);
+
+	queue_remove_source(target_filename, colon);
+}
+
+static void queue_load(void)
+{
+	return_if_fail(q_store);
+	return_if_fail(q_store->fp);
+
+	rewind(q_store->fp);
+	q_store->loading = true;
+
+	int ntargets = 0, nsources = 0, nfilelists = 0, ndirectories = 0;
+	char *buf, *lbuf = NULL;
+	size_t len;
+	while((buf = fgetln(q_store->fp, &len)) != NULL)
 	{
-	    qt->flags &= ~QUEUE_TARGET_ACTIVE;
-	    int rc = qtc->c_put(qtc, &key, &val, DB_CURRENT);
-	    if(rc != 0)
-	    {
-		g_warning("update: %s", db_strerror(rc));
-	    }
+		q_store->line_number++;
+
+		if(buf[len - 1] == '\n')
+			buf[len - 1] = 0;
+		else
+		{
+			/* EOF without EOL, copy and add the NUL */
+			lbuf = malloc(len + 1);
+			assert(lbuf);
+			memcpy(lbuf, buf, len);
+			lbuf[len] = 0;
+			buf = lbuf;
+		}
+
+		DEBUG("read [%s], len %zu", buf, len);
+
+		if(len < 3 || buf[2] != ':')
+			continue;
+
+		if(strncmp(buf, "+T:", 3) == 0)
+		{
+			queue_parse_add_target(buf, len);
+			ntargets++;
+		}
+		else if(strncmp(buf, "-T:", 3) == 0)
+		{
+			queue_parse_remove_target(buf, len);
+			ntargets--;
+		}
+		else if(strncmp(buf, "+S:", 3) == 0)
+		{
+			queue_parse_add_source(buf, len);
+			nsources++;
+		}
+		else if(strncmp(buf, "-S:", 3) == 0)
+		{
+			queue_parse_remove_source(buf, len);
+			nsources--;
+		}
+		else if(strncmp(buf, "+F:", 3) == 0)
+		{
+			queue_parse_add_filelist(buf, len);
+			nfilelists++;
+		}
+		else if(strncmp(buf, "-F:", 3) == 0)
+		{
+			queue_parse_remove_filelist(buf, len);
+			nfilelists--;
+		}
+		else if(strncmp(buf, "+D:", 3) == 0)
+		{
+			queue_parse_add_directory(buf, len);
+			ndirectories++;
+		}
+		else if(strncmp(buf, "-D:", 3) == 0)
+		{
+			queue_parse_remove_directory(buf, len);
+			ndirectories--;
+		}
+		else if(strncmp(buf, "=R:", 3) == 0)
+		{
+			queue_parse_set_directory_resolved(buf, len);
+		}
+		else if(strncmp(buf, "=P:", 3) == 0)
+		{
+			queue_parse_set_priority(buf, len);
+		}
+		else
+		{
+			ERROR("unknown directive on line %u",
+				q_store->line_number);
+		}
 	}
-    }
+	free(lbuf);
 
-    txn_return_val_if_fail(qtc->c_close(qtc) == 0, -1);
-    return_val_if_fail(txn->commit(txn, 0) == 0, -1);
+	INFO("loaded %i targets, %i sources, %i filelists, %i directories (%u lines)",
+		ntargets, nsources, nfilelists, ndirectories, q_store->line_number);
 
-    txn = NULL;
-    return_val_if_fail(db_transaction(&txn) == 0, -1);
-    DBC *qfc;
-    queue_filelist_db->cursor(queue_filelist_db, txn, &qfc, 0);
-    txn_return_val_if_fail(qfc, -1);
+	q_store->loading = false;
+}
 
-    memset(&key, 0, sizeof(DBT));
-    memset(&val, 0, sizeof(DBT));
+static void queue_db_open_logfile(void)
+{
+	return_if_fail(q_store);
 
-    while(qfc->c_get(qfc, &key, &val, DB_NEXT) == 0)
-    {
-        queue_filelist_t *qf = val.data;
-	if((qf->flags & QUEUE_TARGET_ACTIVE) == QUEUE_TARGET_ACTIVE)
+	if(q_store->fp)
+		fclose(q_store->fp);
+
+	DEBUG("opening databases in file %s", QUEUE_DB_FILENAME);
+	char *qlog_filename;
+	asprintf(&qlog_filename, "%s/%s",
+		global_working_directory, QUEUE_DB_FILENAME);
+	q_store->fp = fopen(qlog_filename, "a+");
+	if(q_store->fp == NULL)
+		ERROR("%s: %s", qlog_filename, strerror(errno));
+	free(qlog_filename);
+}
+
+void queue_init(void)
+{
+	INFO("initializing queue");
+
+	q_store = calloc(1, sizeof(struct queue_store));
+	q_store->sequence = 1;
+
+	TAILQ_INIT(&q_store->targets);
+	TAILQ_INIT(&q_store->sources);
+	TAILQ_INIT(&q_store->filelists);
+	TAILQ_INIT(&q_store->directories);
+
+	queue_db_open_logfile();
+
+	return_if_fail(q_store->fp);
+	queue_load();
+
+	/* set the log file line buffered */
+	setvbuf(q_store->fp, NULL, _IOLBF, 0);
+}
+
+void queue_target_free(struct queue_target *qt)
+{
+	if(qt)
 	{
-	    qf->flags &= ~QUEUE_TARGET_ACTIVE;
-	    int rc = qfc->c_put(qfc, &key, &val, DB_CURRENT);
-	    if(rc != 0)
-	    {
-		g_warning("update: %s", db_strerror(rc));
-	    }
+		TAILQ_REMOVE(&q_store->targets, qt, link);
+		free(qt->filename);
+		free(qt->target_directory);
+		free(qt);
 	}
-    }
-
-    txn_return_val_if_fail(qfc->c_close(qfc) == 0, -1);
-    return_val_if_fail(txn->commit(txn, 0) == 0, -1);
-
-    return 0;
 }
 
-static int queue_open_db(void)
+void queue_source_free(struct queue_source *qs)
 {
-    struct
-    {
-	DB **db;
-	const char *name;
-	int flags;
-    } dbs[] = {
-	{&queue_target_db,	"target",	0},
-	{&queue_sequence_db,	"sequence",	0},
-	{&queue_source_db,	"source",	DB_DUPSORT},
-	{&queue_filelist_db,	"filelist",	0},
-	{&queue_directory_db,	"directory",	0},
-	{&queue_tth_db,		"tth_target",	DB_DUPSORT},
-	{&queue_directory_nick_db, "directory_nick", DB_DUPSORT},
-	{NULL, NULL, 0}
-    };
-
-    int i;
-    for(i = 0; dbs[i].db; i++)
-    {
-	if(open_database(dbs[i].db, QUEUE_DB_FILENAME, dbs[i].name,
-		    DB_BTREE, dbs[i].flags) != 0)
-	    return -1;
-	return_val_if_fail(*dbs[i].db, -1);
-    }
-
-    /* open secondary database to queue_target_db, adds index by TTH */
-    int rc = queue_target_db->associate(queue_target_db,
-	    NULL, queue_tth_db, queue_target_get_tth, DB_AUTO_COMMIT);
-    if(rc != 0)
-    {
-	g_warning("tth<->target associate failed: %s", db_strerror(rc));
-	return -1;
-    }
-
-    /* open secondary database to queue_directory_db, adds index by nick */
-    rc = queue_directory_db->associate(queue_directory_db,
-	    NULL, queue_directory_nick_db, queue_directory_get_nick,
-	    DB_AUTO_COMMIT);
-    if(rc != 0)
-    {
-	g_warning("directory<->nick associate failed: %s", db_strerror(rc));
-    	return -1;
-    }
-
-    return 0;
+	if(qs)
+	{
+		TAILQ_REMOVE(&q_store->sources, qs, link);
+		free(qs->target_filename);
+		free(qs->nick);
+		free(qs->source_filename);
+		free(qs);
+	}
 }
 
-int queue_init(void)
+static void queue_filelist_free(struct queue_filelist *qf)
 {
-    g_message("Initializing queue, using: " DB_VERSION_STRING);
-
-    g_debug("opening databases in file %s", QUEUE_DB_FILENAME);
-    int rc = queue_open_db();
-    if(rc == 0)
-    {
-        queue_reset_db();
-    }
-
-    return rc;
+	if(qf)
+	{
+		TAILQ_REMOVE(&q_store->filelists, qf, link);
+		free(qf->nick);
+		free(qf);
+	}
 }
 
-int queue_close(void)
+static void queue_directory_free(struct queue_directory *qd)
 {
-    int rc = 0;
-
-    rc += close_db(&queue_directory_nick_db, "directory_nick");
-    rc += close_db(&queue_tth_db, "tth_target");
-    rc += close_db(&queue_directory_db, "directory");
-    rc += close_db(&queue_filelist_db, "filelist");
-    rc += close_db(&queue_source_db, "source");
-    rc += close_db(&queue_sequence_db, "sequence");
-    rc += close_db(&queue_target_db, "target");
-
-    return rc == 0 ? 0 : -1;
+	if(qd)
+	{
+		TAILQ_REMOVE(&q_store->directories, qd, link);
+		free(qd->target_directory);
+		free(qd->nick);
+		free(qd->source_directory);
+		free(qd);
+	}
 }
 
-static int queue_add_target_overwrite(queue_target_t *qt, int overwrite_flag)
+void queue_close(void)
 {
-    return_val_if_fail(qt, -1);
+	return_if_fail(q_store);
 
-    DBT val;
-    memset(&val, 0, sizeof(DBT));
-    val.data = qt;
-    val.size = sizeof(queue_target_t);
+	INFO("closing queue");
 
-    DBT key;
-    memset(&key, 0, sizeof(DBT));
-    key.data = qt->filename;
-    key.size = strlen(qt->filename) + 1; /* store terminating nul */
+	queue_db_normalize();
 
-    g_debug("filename [%s]", qt->filename);
-    g_debug("tth [%s]", qt->tth);
+	fclose(q_store->fp);
+	q_store->fp = NULL;
 
-    int rc = queue_target_db->put(queue_target_db,
-            NULL, &key, &val, overwrite_flag ? 0 : DB_NOOVERWRITE);
+	struct queue_target *qt;
+	while((qt = TAILQ_FIRST(&q_store->targets)) != NULL)
+		queue_target_free(qt);
 
-    if(rc != 0)
-    {
-        g_warning("failed to add queue target: %s", db_strerror(rc));
-    }
+	struct queue_source *qs;
+	while((qs = TAILQ_FIRST(&q_store->sources)) != NULL)
+		queue_source_free(qs);
 
-    return rc;
-}
+	struct queue_filelist *qf;
+	while((qf = TAILQ_FIRST(&q_store->filelists)) != NULL)
+		queue_filelist_free(qf);
 
-static uint64_t queue_get_target_sequence(void)
-{
-    uint64_t *retp;
-    uint64_t ret;
+	struct queue_directory *qd;
+	while((qd = TAILQ_FIRST(&q_store->directories)) != NULL)
+		queue_directory_free(qd);
 
-    DBT key;
-    memset(&key, 0, sizeof(DBT));
-    key.data = (void *)"target";
-    key.size = 7;
+	free(q_store);
+	q_store = NULL;
 
-    DBT val;
-    memset(&val, 0, sizeof(DBT));
-
-    int rc = queue_sequence_db->get(queue_sequence_db, NULL, &key, &val, 0);
-    if(rc == -1)
-    {
-        g_warning("failed to get queue target sequence: %s", db_strerror(rc));
-        return 0;
-    }
-    else if(rc == 1) /* FIXME: constant? */
-    {
-        return 0;
-    }
-
-    /* FIXME: endian issue */
-    retp = (uint64_t *)val.data;
-    if(retp)
-        ret = *retp + 1;
-    else
-        ret = 1;
-
-    val.data = &ret;
-    val.size = sizeof(uint64_t);
-
-    rc = queue_sequence_db->put(queue_sequence_db, NULL, &key, &val, 0);
-    if(rc != 0)
-        g_warning("sequence failed: %s", db_strerror(rc));
-
-    return ret;
-}
-
-int queue_add_target(queue_target_t *qt)
-{
-    return_val_if_fail(qt, -1);
-
-    if(qt->tth[0])
-    {
-        queue_target_t *qt_tth = queue_lookup_target_by_tth(qt->tth);
-
-        /* This is a target with the same TTH already stored. Reject this
-         * one. The caller should really check this and only add another
-         * source. */
-        return_val_if_fail(qt_tth == NULL, -1);
-    }
-
-    char *eof = qt->filename + strlen(qt->filename);
-    int left = QUEUE_TARGET_MAXPATH - (eof - qt->filename);
-    int n = 0;
-    int rc;
-
-    return_val_if_fail(left > 0, -1);
-
-    qt->seq = queue_get_target_sequence();
-    time(&qt->ctime);
-
-    while(1)
-    {
-        rc = queue_add_target_overwrite(qt, 0);
-        if(rc != DB_KEYEXIST)
-            break;
-        snprintf(eof, left, "-%u", ++n);
-    }
-
-    return rc == 0 ? 0 : -1;
-}
-
-int queue_update_target(queue_target_t *qt)
-{
-    return_val_if_fail(qt, -1);
-
-    int rc = queue_add_target_overwrite(qt, 1);
-    return rc == 0 ? 0 : -1;
-}
-
-int queue_add_source(const char *nick, queue_source_t *qs)
-{
-    return_val_if_fail(nick, -1);
-    return_val_if_fail(qs, -1);
-    return_val_if_fail(queue_source_db, -1);
-
-    DBT val;
-    memset(&val, 0, sizeof(DBT));
-    val.data = qs;
-    val.size = sizeof(queue_source_t);
-
-    DBT key;
-    memset(&key, 0, sizeof(DBT));
-    key.data = (void *)nick;
-    key.size = strlen(nick) + 1; /* store terminating nul */
-
-    g_debug("adding nick [%s], source [%s] for target [%s]",
-            nick, qs->source_filename, qs->target_filename);
-
-    int rc = queue_source_db->put(queue_source_db, NULL, &key, &val, 0);
-
-    if(rc != 0)
-    {
-        g_warning("failed to add source [%s]: %s", nick, db_strerror(rc));
-    }
-
-    return rc;
-}
-
-int queue_db_add_filelist(const char *nick, queue_filelist_t *qf)
-{
-    return_val_if_fail(qf, -1);
-
-    DBT val;
-    memset(&val, 0, sizeof(DBT));
-    val.data = qf;
-    val.size = sizeof(queue_filelist_t);
-
-    DBT key;
-    memset(&key, 0, sizeof(DBT));
-    key.data = (void *)nick;
-    key.size = strlen(nick) + 1; /* store terminating nul */
-
-    g_debug("adding filelist for nick [%s]", nick);
-
-    /* will overwrite any existing filelist for this nick */
-    int rc = queue_filelist_db->put(queue_filelist_db, NULL, &key, &val, 0);
-
-    if(rc != 0)
-    {
-        g_warning("failed to add queue filelist: %s", db_strerror(rc));
-    }
-
-    return rc;
-}
-
-int queue_update_filelist(const char *nick, queue_filelist_t *qf)
-{
-    return queue_db_add_filelist(nick, qf);
-}
-
-int queue_remove_filelist(const char *nick)
-{
-    return_val_if_fail(nick, -1);
-
-    DBT key;
-    memset(&key, 0, sizeof(DBT));
-    key.data = (void *)nick;
-    key.size = strlen(nick) + 1;
-
-    int rc = queue_filelist_db->del(queue_filelist_db, NULL, &key, 0);
-    if(rc != 0)
-    {
-        g_warning("failed to delete filelist for [%s]: %s",
-                nick, db_strerror(rc));
-        return -1;
-    }
-
-    /* notify ui:s */
-    nc_send_filelist_removed_notification(nc_default(), nick);
-
-    return 0;
+	INFO("queue closed");
 }
 
 queue_target_t *queue_lookup_target(const char *target_filename)
 {
-    return_val_if_fail(target_filename, NULL);
+	return_val_if_fail(q_store, NULL);
+	return_val_if_fail(target_filename, NULL);
 
-    DBT key;
-    memset(&key, 0, sizeof(DBT));
-    key.data = (void *)target_filename;
-    key.size = strlen(target_filename) + 1;
+	struct queue_target *qt;
+	TAILQ_FOREACH(qt, &q_store->targets, link)
+	{
+		if(strcmp(qt->filename, target_filename) == 0)
+			return qt;
+	}
 
-    DBT val;
-    memset(&val, 0, sizeof(DBT));
-
-    int rc = queue_target_db->get(queue_target_db, NULL, &key, &val, 0);
-    if(rc == -1)
-    {
-        g_warning("failed to get queue target data: %s", db_strerror(rc));
-        return NULL;
-    }
-    else if(rc == 1) /* FIXME: constant? */
-    {
-        return NULL;
-    }
-
-    return val.data;
+	return NULL;
 }
 
 queue_target_t *queue_lookup_target_by_tth(const char *tth)
 {
-    return_val_if_fail(tth, NULL);
-    return_val_if_fail(queue_tth_db, NULL);
+	return_val_if_fail(q_store, NULL);
+	return_val_if_fail(tth, NULL);
 
-    DBT key;
-    memset(&key, 0, sizeof(DBT));
-    key.data = (void *)tth;
-    key.size = strlen(tth) + 1;
+	struct queue_target *qt;
+	TAILQ_FOREACH(qt, &q_store->targets, link)
+	{
+		if(strcmp(qt->tth, tth) == 0)
+			return qt;
+	}
 
-    DBT val;
-    memset(&val, 0, sizeof(DBT));
-
-    int rc = queue_tth_db->get(queue_tth_db, NULL, &key, &val, 0);
-    if(rc == -1)
-    {
-        g_warning("failed to lookup queue target data by tth: %s",
-                db_strerror(rc));
-        return NULL;
-    }
-    else if(rc == 1) /* FIXME: constant? */
-    {
-        return NULL;
-    }
-
-    return val.data;
+	return NULL;
 }
 
 queue_filelist_t *queue_lookup_filelist(const char *nick)
 {
-    return_val_if_fail(nick, NULL);
+	return_val_if_fail(q_store, NULL);
+	return_val_if_fail(nick, NULL);
 
-    DBT key, val;
-    memset(&key, 0, sizeof(DBT));
-    memset(&val, 0, sizeof(DBT));
+	struct queue_filelist *qf;
+	TAILQ_FOREACH(qf, &q_store->filelists, link)
+	{
+		if(strcmp(qf->nick, nick) == 0)
+			return qf;
+	}
 
-    key.data = (void *)nick;
-    key.size = strlen(nick) + 1;
-
-    int rc = queue_filelist_db->get(queue_filelist_db, NULL, &key, &val, 0);
-    if(rc == -1)
-    {
-        g_warning("failed to lookup queue filelist data for nick [%s]: %s",
-                nick, db_strerror(rc));
-        return NULL;
-    }
-    else if(rc == 1) /* FIXME: constant? */
-    {
-        return NULL;
-    }
-
-    return val.data;
-}
-
-int queue_db_remove_target(const char *target_filename)
-{
-    DBT key;
-    memset(&key, 0, sizeof(DBT));
-    key.data = (void *)target_filename;
-    key.size = strlen(target_filename) + 1;
-
-    int rc = queue_target_db->del(queue_target_db, NULL, &key, 0);
-    if(rc != 0)
-    {
-        g_warning("failed to delete queue target [%s]: %s",
-                target_filename, db_strerror(rc));
-        return -1;
-    }
-
-    /* notify ui:s */
-    nc_send_queue_target_removed_notification(nc_default(), target_filename);
-
-    return 0;
-}
-
-int queue_remove_target(const char *target_filename)
-{
-    return_val_if_fail(target_filename, -1);
-
-    queue_directory_t *qd = NULL;
-    queue_target_t *qt = queue_lookup_target(target_filename);
-    if(qt == NULL)
-    {
-        g_warning("Target [%s] doesn't exist", target_filename);
-    }
-    else if(qt->target_directory[0])
-    {
-        /* this target belongs to a directory download */
-        qd = queue_db_lookup_directory(qt->target_directory);
-        if(qd)
-        {
-            qd->nleft--;
-        }
-        else
-        {
-            g_warning("Target directory [%s] doesn't exist!?",
-                    qt->target_directory);
-        }
-    }
-
-    if(queue_db_remove_target(target_filename) != 0)
-        return -1;
-
-    /* target removed, now remove all its sources */
-    queue_remove_sources(target_filename);
-
-    /* If we're downloading a directory, check if the whole directory is
-     * complete. */
-    if(qd)
-    {
-        g_debug("directory [%s] has %u files left",
-                qt->target_directory, qd->nleft);
-        if(qd->nleft == 0)
-        {
-            queue_db_remove_directory(qt->target_directory);
-        }
-        else
-        {
-            queue_db_update_directory(qt->target_directory, qd);
-        }
-    }
-
-    return 0;
-}
-
-/* This is a possibly expensive operation. */
-int queue_remove_sources(const char *target_filename)
-{
-    return_val_if_fail(target_filename, -1);
-
-    g_debug("removing sources for target [%s]", target_filename);
-
-    DB_TXN *txn;
-    return_val_if_fail(db_transaction(&txn) == 0, -1);
-
-    DBC *qsc;
-    queue_source_db->cursor(queue_source_db, txn, &qsc, 0);
-    txn_return_val_if_fail(qsc, -1);
-
-    DBT key, val;
-    memset(&key, 0, sizeof(DBT));
-    memset(&val, 0, sizeof(DBT));
-
-    while(qsc->c_get(qsc, &key, &val, DB_NEXT) == 0)
-    {
-        queue_source_t *qs = val.data;
-        if(strcmp(target_filename, qs->target_filename) == 0)
-        {
-            g_debug("removing source [%s], target [%s]",
-                    (char *)key.data, qs->target_filename);
-            qsc->c_del(qsc, 0);
-        }
-    }
-
-    txn_return_val_if_fail(qsc->c_close(qsc) == 0, -1);
-    return_val_if_fail(txn->commit(txn, 0) == 0, -1);
-
-    return 0;
-}
-
-int queue_remove_sources_by_nick(const char *nick)
-{
-    return_val_if_fail(nick, -1);
-
-    g_debug("removing sources for nick [%s]", nick);
-
-    DBC *qsc;
-    queue_source_db->cursor(queue_source_db, NULL, &qsc, 0);
-    return_val_if_fail(qsc, -1);
-
-    DBT key, val;
-    memset(&val, 0, sizeof(DBT));
-    memset(&key, 0, sizeof(DBT));
-    key.data = (void *)nick;
-    key.size = strlen(nick) + 1;
-
-    u_int32_t flags = DB_SET;
-    while(qsc->c_get(qsc, &key, &val, flags) == 0)
-    {
-        flags = DB_NEXT;
-
-        if(strcmp(key.data, nick) != 0)
-            break;
-        
-        queue_source_t *qs = val.data;
-        g_debug("removing source [%s], target [%s]", nick, qs->target_filename);
-        qsc->c_del(qsc, 0);
-
-        nc_send_queue_source_removed_notification(nc_default(),
-                qs->target_filename, nick);
-    }
-
-    qsc->c_close(qsc);
-
-    return 0;
-}
-
-queue_target_t *queue_lookup_target_by_nick(const char *nick)
-{
-    DBT key;
-    memset(&key, 0, sizeof(DBT));
-    key.data = (void *)nick;
-    key.size = strlen(nick) + 1;
-
-    DBT val;
-    memset(&val, 0, sizeof(DBT));
-
-    /* This just looks up the _first_ source for nick */
-    int rc = queue_source_db->get(queue_source_db, NULL, &key, &val, 0);
-    if(rc == 0)
-    {
-        queue_source_t *qs = val.data;
-
-        queue_target_t *qt = queue_lookup_target(qs->target_filename);
-        return qt;
-    }
-
-    return NULL;
-}
-
-static int queue_db_put_directory(const char *target_directory,
-        queue_directory_t *qd)
-{
-    return_val_if_fail(target_directory, -1);
-    return_val_if_fail(qd, -1);
-
-    DBT val;
-    memset(&val, 0, sizeof(DBT));
-    val.data = qd;
-    val.size = sizeof(queue_directory_t);
-
-    DBT key;
-    memset(&key, 0, sizeof(DBT));
-    key.data = (void *)target_directory;
-    key.size = strlen(target_directory) + 1; /* store terminating nul */
-
-    int rc = queue_directory_db->put(queue_directory_db,
-            NULL, &key, &val, 0 /*DB_NOOVERWRITE*/);
-
-    if(rc != 0)
-    {
-        g_warning("failed to add queue directory: %s", db_strerror(rc));
-        return -1;
-    }
-
-    return 0;
-}
-
-int queue_db_add_directory(const char *target_directory, queue_directory_t *qd)
-{
-    return_val_if_fail(target_directory, -1);
-    return_val_if_fail(qd, -1);
-
-    g_debug("target_directory [%s]", target_directory);
-    g_debug("source_directory [%s]", qd->source_directory);
-    g_debug("nick [%s]", qd->nick);
-
-    return queue_db_put_directory(target_directory, qd);
-}
-
-int queue_db_update_directory(const char *target_directory,
-        queue_directory_t *qd)
-{
-    return queue_db_put_directory(target_directory, qd);
-}
-
-int queue_db_remove_directory(const char *target_directory)
-{
-    DBT key;
-    memset(&key, 0, sizeof(DBT));
-    key.data = (void *)target_directory;
-    key.size = strlen(target_directory) + 1;
-
-    g_debug("removing directory [%s]", target_directory);
-
-    int rc = queue_directory_db->del(queue_directory_db, NULL, &key, 0);
-    if(rc != 0)
-    {
-        g_warning("failed to delete queue directory [%s]: %s",
-                target_directory, db_strerror(rc));
-        return -1;
-    }
-
-    /* notify ui:s */
-    nc_send_queue_directory_removed_notification(nc_default(),
-            target_directory);
-
-    return 0;
+	return NULL;
 }
 
 queue_directory_t *queue_db_lookup_directory(const char *target_directory)
 {
-    return_val_if_fail(target_directory, NULL);
+	return_val_if_fail(q_store, NULL);
+	return_val_if_fail(target_directory, NULL);
 
-    DBT key;
-    memset(&key, 0, sizeof(DBT));
-    key.data = (void *)target_directory;
-    key.size = strlen(target_directory) + 1;
+	struct queue_directory *qd;
+	TAILQ_FOREACH(qd, &q_store->directories, link)
+	{
+		if(strcmp(qd->target_directory, target_directory) == 0)
+			return qd;
+	}
 
-    DBT val;
-    memset(&val, 0, sizeof(DBT));
+	return NULL;
+}
 
-    int rc = queue_directory_db->get(queue_directory_db, NULL, &key, &val, 0);
-    if(rc == -1)
-    {
-        g_warning("failed to get queue directory data: %s", db_strerror(rc));
-        return NULL;
-    }
-    else if(rc == 1) /* FIXME: constant? */
-    {
-        return NULL;
-    }
+struct queue_target *queue_target_add(const char *target_filename,
+	const char *tth,
+	const char *target_directory,
+	uint64_t size,
+	unsigned flags,
+	int priority,
+	unsigned sequence)
+{
+	/* Make sure the target filename is unique
+	 */
+	char *unique_target_filename = strdup(target_filename);
+	int index = 1;
+	char *base_filename = NULL, *extension = NULL;
 
-    return val.data;
+	struct queue_target *qt = NULL;
+	while(true)
+	{
+		qt = queue_lookup_target(unique_target_filename);
+		if(qt == NULL)
+			break;
+
+		/* If the TTH is the same, the caller is using this
+		 * the wrong way. The caller should only add another
+		 * source.
+		 */
+		if(tth && qt->tth)
+			return_val_if_fail(strcmp(tth, qt->tth) != 0, NULL);
+
+		if(base_filename == NULL)
+		{
+			char *last_dot = strrchr(target_filename, '.');
+			if(last_dot == NULL)
+			{
+				base_filename = strdup(target_filename);
+				extension = strdup("");
+			}
+			else
+			{
+				base_filename = xstrndup(target_filename, last_dot - target_filename);
+				extension = strdup(last_dot + 1);
+			}
+		}
+
+		/* ok, missing or differing TTHs, make target filename unique */
+		free(unique_target_filename);
+		asprintf(&unique_target_filename, "%s-%i.%s", base_filename, index++, extension);
+	}
+
+	free(base_filename);
+	free(extension);
+
+	DEBUG("adding target [%s]", unique_target_filename);
+
+        qt = calloc(1, sizeof(struct queue_target));
+	qt->filename = strdup(unique_target_filename);
+        if(tth)
+            strlcpy(qt->tth, tth, sizeof(qt->tth));
+	qt->target_directory = xstrdup(target_directory);
+        qt->size = size;
+        time(&qt->ctime);
+	qt->flags = flags;
+        qt->priority = priority;
+
+	if(sequence == 0)
+		qt->seq = q_store->sequence++;
+	else
+	{
+		qt->seq = sequence;
+		if(sequence >= q_store->sequence)
+			q_store->sequence = sequence + 1;
+	}
+
+	TAILQ_INSERT_TAIL(&q_store->targets, qt, link);
+
+	if(!q_store->loading)
+		queue_db_print_add_target(q_store->fp, qt);
+
+        /* notify UI:s */
+        nc_send_queue_target_added_notification(nc_default(),
+                qt->filename, qt->size, qt->tth, qt->priority);
+
+	return qt;
+}
+
+void queue_add_source(const char *nick, const char *target_filename,
+	const char *source_filename)
+{
+	return_if_fail(nick);
+	return_if_fail(source_filename);
+	return_if_fail(target_filename);
+
+	/* Lookup the (nick, target_filename) pair.
+	 */
+	struct queue_source *qs = NULL;
+	TAILQ_FOREACH(qs, &q_store->sources, link)
+	{
+		if(strcmp(qs->nick, nick) == 0 &&
+		   strcmp(qs->target_filename, target_filename) == 0)
+		{
+			break;
+		}
+	}
+
+	if(qs == NULL)
+	{
+		qs = calloc(1, sizeof(struct queue_source));
+		qs->nick = strdup(nick);
+		qs->target_filename = strdup(target_filename);
+		qs->source_filename = strdup(source_filename);
+
+		DEBUG("adding nick [%s], source [%s] for target [%s]",
+			nick, source_filename, target_filename);
+
+		TAILQ_INSERT_TAIL(&q_store->sources, qs, link);
+
+		if(!q_store->loading)
+			queue_db_print_add_source(q_store->fp, qs);
+	}
+	else
+	{
+		INFO("already got [%s] as a source for [%s]",
+			nick, qs->target_filename);
+	}
+
+	/* FIXME: what if source_filename has changed? possible? */
+}
+
+int queue_remove_filelist(const char *nick)
+{
+	return_val_if_fail(q_store, -1);
+	return_val_if_fail(nick, -1);
+
+	struct queue_filelist *qf = queue_lookup_filelist(nick);
+	if(qf)
+	{
+		queue_filelist_free(qf);
+
+		if(!q_store->loading)
+			fprintf(q_store->fp, "-F:%s\n", nick);
+
+		/* notify ui:s */
+		nc_send_filelist_removed_notification(nc_default(), nick);
+	}
+	else
+		WARNING("no such filelist: [%s]", nick);
+
+	return 0;
+}
+
+int queue_db_remove_target(const char *target_filename)
+{
+	return_val_if_fail(q_store, -1);
+	return_val_if_fail(target_filename, -1);
+
+	struct queue_target *qt = queue_lookup_target(target_filename);
+	if(qt)
+	{
+		DEBUG("removing target [%s]", qt->filename);
+
+		if(!q_store->loading)
+			fprintf(q_store->fp, "-T:%s\n", target_filename);
+
+		/* notify ui:s */
+		nc_send_queue_target_removed_notification(nc_default(),
+			target_filename);
+
+		queue_target_free(qt);
+	}
+
+	return 0;
+}
+
+int queue_remove_target(const char *target_filename)
+{
+	return_val_if_fail(target_filename, -1);
+
+	queue_directory_t *qd = NULL;
+	queue_target_t *qt = queue_lookup_target(target_filename);
+	if(qt == NULL)
+	{
+		WARNING("Target [%s] doesn't exist", target_filename);
+	}
+	else if(qt->target_directory)
+	{
+		/* this target belongs to a directory download */
+		qd = queue_db_lookup_directory(qt->target_directory);
+		if(qd)
+		{
+			qd->nleft--;
+			/* when replaying the log, this should be updated */
+		}
+		else
+		{
+			WARNING("Target directory [%s] doesn't exist!?",
+				qt->target_directory);
+		}
+	}
+
+	if(queue_db_remove_target(target_filename) != 0)
+		return -1;
+
+	/* target removed, now remove all its sources */
+	queue_remove_sources(target_filename);
+
+	/* If we're downloading a directory, check if the whole directory is
+	 * complete. */
+	if(qd)
+	{
+		DEBUG("directory [%s] has %u files left",
+			qt->target_directory, qd->nleft);
+		if(qd->nleft == 0)
+		{
+			queue_db_remove_directory(qt->target_directory);
+		}
+	}
+
+	return 0;
+}
+
+/* removes all sources for the target filename */
+int queue_remove_sources(const char *target_filename)
+{
+	return_val_if_fail(target_filename, -1);
+
+	DEBUG("removing sources for target [%s]", target_filename);
+
+	struct queue_source *qs, *next;
+	for(qs = TAILQ_FIRST(&q_store->sources); qs; qs = next)
+	{
+		next = TAILQ_NEXT(qs, link);
+		if(strcmp(target_filename, qs->target_filename) == 0)
+		{
+			DEBUG("removing source [%s], target [%s]",
+				qs->nick, qs->target_filename);
+
+			if(!q_store->loading)
+			{
+				fprintf(q_store->fp, "-S:%s:%s\n",
+					qs->target_filename, qs->nick);
+			}
+			queue_source_free(qs);
+		}
+	}
+
+	return 0;
+}
+
+int queue_remove_sources_by_nick(const char *nick)
+{
+	return_val_if_fail(nick, -1);
+
+	DEBUG("removing sources for nick [%s]", nick);
+
+	struct queue_source *qs, *next;
+	for(qs = TAILQ_FIRST(&q_store->sources); qs; qs = next)
+	{
+		next = TAILQ_NEXT(qs, link);
+
+		if(strcmp(qs->nick, nick) != 0)
+			continue;
+
+		DEBUG("removing source [%s], target [%s]",
+			nick, qs->target_filename);
+
+		if(!q_store->loading)
+		{
+			fprintf(q_store->fp, "-S:%s:%s\n",
+				qs->target_filename, nick);
+		}
+
+		nc_send_queue_source_removed_notification(nc_default(),
+			qs->target_filename, nick);
+
+		queue_source_free(qs);
+	}
+
+	return 0;
+}
+
+void queue_db_add_directory(const char *target_directory,
+	const char *nick, const char *source_directory)
+{
+	return_if_fail(target_directory);
+	return_if_fail(nick);
+	return_if_fail(source_directory);
+
+	struct queue_directory *qd = queue_db_lookup_directory(target_directory);
+	if(qd == NULL)
+	{
+		DEBUG("target_directory [%s]", target_directory);
+		DEBUG("source_directory [%s]", source_directory);
+		DEBUG("nick [%s]", nick);
+
+		qd = calloc(1, sizeof(struct queue_directory));
+		qd->target_directory = strdup(target_directory);
+		TAILQ_INSERT_TAIL(&q_store->directories, qd, link);
+	}
+
+	free(qd->nick);
+	free(qd->source_directory);
+	qd->nick = strdup(nick);
+	qd->source_directory = strdup(source_directory);
+
+	if(!q_store->loading)
+		queue_db_print_add_directory(q_store->fp, qd);
+}
+
+int queue_db_remove_directory(const char *target_directory)
+{
+	DEBUG("removing directory [%s]", target_directory);
+
+	struct queue_directory *qd =
+		queue_db_lookup_directory(target_directory);
+	if(qd == NULL)
+		return 0;
+
+	queue_directory_free(qd);
+
+	if(!q_store->loading)
+		fprintf(q_store->fp, "-D:%s\n", target_directory);
+
+	/* notify ui:s */
+	nc_send_queue_directory_removed_notification(nc_default(),
+		target_directory);
+
+	return 0;
 }
 
 queue_directory_t *queue_db_lookup_unresolved_directory_by_nick(const char *nick)
 {
-    return_val_if_fail(nick, NULL);
+	return_val_if_fail(nick, NULL);
 
-    DBC *qdc;
-    queue_directory_nick_db->cursor(queue_directory_nick_db, NULL, &qdc, 0);
-    return_val_if_fail(qdc, NULL);
+	DEBUG("looking for unresolved directories for [%s]", nick);
 
-    DBT key;
-    memset(&key, 0, sizeof(DBT));
-    key.data = (void *)nick;
-    key.size = strlen(nick) + 1;
+	struct queue_directory *qd;
+	TAILQ_FOREACH(qd, &q_store->directories, link)
+	{
+		DEBUG("nick [%s], target [%s], source [%s], flags %i",
+			qd->nick, qd->target_directory,
+			qd->source_directory, qd->flags);
+		if(strcmp(nick, qd->nick) == 0 &&
+			(qd->flags & QUEUE_DIRECTORY_RESOLVED) == 0)
+		{
+			return qd;
+		}
+	}
 
-    DBT val;
-    memset(&val, 0, sizeof(DBT));
-
-    u_int32_t flags = DB_SET;
-    while(qdc->c_get(qdc, &key, &val, flags) == 0)
-    {
-        flags = DB_NEXT;
-
-        if(strcmp(key.data, nick) != 0)
-            break;
-        
-        queue_directory_t *qd = val.data;
-        if(strcmp(nick, qd->nick) == 0 &&
-           (qd->flags & QUEUE_DIRECTORY_RESOLVED) == 0)
-        {
-            qdc->c_close(qdc);
-            return qd;
-        }
-    }
-
-    qdc->c_close(qdc);
-    return NULL;
+	return NULL;
 }
 
-#ifdef TEST
-
-#include "unit_test.h"
-
-int main(void)
+void queue_db_set_resolved(const char *target_directory, unsigned nfiles)
 {
-    sp_log_set_level("debug");
+	DEBUG("setting [%s] as resolved, [%u] files", target_directory, nfiles);
 
-    global_working_directory = "/tmp/sp-queue_db-test.d";
-    system("/bin/rm -rf /tmp/sp-queue_db-test.d");
-    system("mkdir /tmp/sp-queue_db-test.d");
+	return_if_fail(target_directory);
+	queue_directory_t *qd = queue_db_lookup_directory(target_directory);
+	return_if_fail(qd);
 
-    fail_unless(queue_init() == 0);
+	if((qd->flags & QUEUE_DIRECTORY_RESOLVED) == QUEUE_DIRECTORY_RESOLVED)
+	{
+		WARNING("Directory [%s] already resolved!", target_directory);
+	}
+	else
+	{
+		qd->flags |= QUEUE_DIRECTORY_RESOLVED;
+		qd->nfiles = nfiles;
+		qd->nleft = nfiles;
 
-    db_seq_t s_cur = queue_get_target_sequence();
-    db_seq_t s_next1 = queue_get_target_sequence();
-    db_seq_t s_next2 = queue_get_target_sequence();
-    db_seq_t s_next3 = queue_get_target_sequence();
+		DEBUG("Updating directory [%s] with resolved flag",
+			target_directory);
 
-    g_debug("sequence: %lli %lli %lli %lli", s_cur, s_next1, s_next2, s_next3);
-
-    fail_unless(s_next1 == s_cur + 1);
-    fail_unless(s_next2 == s_cur + 2);
-    fail_unless(s_next3 == s_cur + 3);
-
-    queue_target_t qt;
-    strlcpy(qt.filename, "/target/filename.ext", QUEUE_TARGET_MAXPATH);
-    qt.size = 4711ULL;
-    strlcpy(qt.tth, "ABCDEFGHIJKLMNOPQRTSUVWXYZ0123456789012", 40);
-    qt.flags = 0;
-    qt.priority = 2;
-    fail_unless(queue_add_target(&qt) == 0);
-
-    queue_target_t *pqt;
-    fail_unless(queue_lookup_target("/target/unknown.ext") == NULL);
-    pqt = queue_lookup_target("/target/filename.ext");
-    fail_unless(pqt);
-    fail_unless(strcmp(pqt->tth, "ABCDEFGHIJKLMNOPQRTSUVWXYZ0123456789012") == 0);
-    fail_unless(pqt->priority == 2);
-
-    qt.priority = 3;
-    fail_unless(queue_update_target(&qt) == 0);
-
-    pqt = queue_lookup_target("/target/filename.ext");
-    fail_unless(pqt);
-    fail_unless(pqt->priority == 3);
-
-    /* Can't add another target with the same TTH. The same filename is OK,
-     * will be made unique by appending a -version. */
-    fail_unless(queue_add_target(&qt) == -1);
-    pqt = queue_lookup_target("/target/filename.ext-1");
-    fail_unless(pqt == NULL);
-
-    /* Change the TTH and try again. */
-    qt.tth[0] = 'X';
-    fail_unless(queue_add_target(&qt) == 0);
-    /* queue_add_target should modify the filename if not unique */
-    fail_unless(strcmp(qt.filename, "/target/filename.ext-1") == 0);
-    pqt = queue_lookup_target("/target/filename.ext-1");
-    fail_unless(pqt);
-
-    pqt = queue_lookup_target_by_tth("ABCDEFGHIJKLMNOPQRTSUVWXYZ0123456789012");
-    fail_unless(pqt);
-
-    pqt = queue_lookup_target_by_tth("XBCDEFGHIJKLMNOPQRTSUVWXYZ0123456789012");
-    fail_unless(pqt);
-
-    pqt = queue_lookup_target_by_tth("YBCDEFGHIJKLMNOPQRTSUVWXYZ0123456789012");
-    fail_unless(pqt == NULL);
-
-    /* add a source */
-    queue_source_t qs;
-    strlcpy(qs.target_filename, "/target/filename.ext", QUEUE_TARGET_MAXPATH);
-    strlcpy(qs.source_filename, "\\source\\filename.ext", QUEUE_TARGET_MAXPATH);
-    fail_unless(queue_add_source("nicke_nyfiken", &qs) == 0);
-
-    pqt = queue_lookup_target_by_nick("nicke_nyfiken");
-    fail_unless(pqt);
-    fail_unless(strcmp(pqt->filename, "/target/filename.ext") == 0);
-
-    /* add another source */
-    queue_source_t qs2;
-    strlcpy(qs2.target_filename, "/target/filename.ext", QUEUE_TARGET_MAXPATH);
-    strlcpy(qs2.source_filename, "\\blah\\filename.ext", QUEUE_TARGET_MAXPATH);
-    fail_unless(queue_add_source("nils", &qs2) == 0);
-
-    pqt = queue_lookup_target_by_nick("nils");
-    fail_unless(pqt);
-    fail_unless(strcmp(pqt->filename, "/target/filename.ext") == 0);
-
-    fail_unless(queue_remove_sources("/target/filename.ext") == 0);
-    fail_unless(queue_lookup_target_by_nick("nils") == NULL);
-    fail_unless(queue_lookup_target_by_nick("nicke_nyfiken") == NULL);
-
-    queue_filelist_t qf;
-    fail_unless(queue_db_add_filelist("bananen", &qf) == 0);
-
-    fail_unless(queue_remove_target("/target/filename.ext-1") == 0);
-    fail_unless(queue_lookup_target("/target/filename.ext-1") == NULL);
-
-    fail_unless(queue_lookup_filelist("bananen") != NULL);
-
-    /* Add a target without a TTH */
-    memset(&qt, 0, sizeof(qt));
-    strlcpy(qt.filename, "/target/file_w/o_TTH", QUEUE_TARGET_MAXPATH);
-    qt.size = 4242ULL;
-    qt.flags = 0;
-    qt.priority = 2;
-    fail_unless(queue_add_target(&qt) == 0);
-
-    fail_unless(queue_close() == 0);
-    system("/bin/rm -rf /tmp/sp-queue_db-test.d");
-
-    return 0;
+		/* log resolved and number of files in the directory */
+		if(!q_store->loading)
+			queue_db_print_set_resolved(q_store->fp, qd);
+	}
 }
 
-#endif
+struct queue_target *queue_target_duplicate(struct queue_target *qt)
+{
+	return_val_if_fail(qt, NULL);
+
+	struct queue_target *qt_dup = calloc(1, sizeof(struct queue_target));
+	memcpy(qt_dup, qt, sizeof(struct queue_target));
+	qt_dup->filename = xstrdup(qt->filename);
+	qt_dup->target_directory = xstrdup(qt->target_directory);
+
+	return qt_dup;
+}
+
+void queue_db_print_add_target(FILE *fp, struct queue_target *qt)
+{
+	return_if_fail(fp);
+	return_if_fail(qt);
+
+	fprintf(fp,
+		"+T:%s:%s:%llu:%s:%u:%lu:%i:%u\n",
+		qt->filename,
+		qt->target_directory ? qt->target_directory : "",
+		qt->size,
+		qt->tth ? qt->tth : "",
+		qt->flags,
+		(unsigned long)qt->ctime,
+		qt->priority,
+		qt->seq);
+}
+
+void queue_db_print_add_source(FILE *fp, struct queue_source *qs)
+{
+	return_if_fail(fp);
+	return_if_fail(qs);
+	fprintf(fp, "+S:%s:%s:%s\n",
+		qs->nick,
+		qs->target_filename,
+		qs->source_filename);
+}
+
+void queue_db_print_add_filelist(FILE *fp, struct queue_filelist *qf)
+{
+	return_if_fail(fp);
+	return_if_fail(qf);
+	fprintf(fp, "+F:%s:%i\n", qf->nick, qf->flags);
+}
+
+void queue_db_print_add_directory(FILE *fp, struct queue_directory *qd)
+{
+	return_if_fail(fp);
+	return_if_fail(qd);
+	fprintf(fp, "+D:%s:%s:%s\n",
+			qd->target_directory, qd->nick, qd->source_directory);
+}
+
+void queue_db_print_set_resolved(FILE *fp, struct queue_directory *qd)
+{
+	return_if_fail(fp);
+	return_if_fail(qd);
+
+	if((qd->flags & QUEUE_DIRECTORY_RESOLVED) == QUEUE_DIRECTORY_RESOLVED)
+	{
+		fprintf(fp, "=R:%s:%u\n", qd->target_directory, qd->nfiles);
+	}
+}
+
+static int queue_db_save(FILE *fp)
+{
+	return_val_if_fail(fp, -1);
+	return_val_if_fail(q_store, -1);
+	return_val_if_fail(!q_store->loading, -1);
+
+	/* save targets */
+	struct queue_target *qt;
+	TAILQ_FOREACH(qt, &q_store->targets, link)
+	{
+		queue_db_print_add_target(fp, qt);
+	}
+
+	/* save sources */
+	struct queue_source *qs;
+	TAILQ_FOREACH(qs, &q_store->sources, link)
+	{
+		queue_db_print_add_source(fp, qs);
+	}
+
+	/* save filelists */
+	struct queue_filelist *qf;
+	TAILQ_FOREACH(qf, &q_store->filelists, link)
+	{
+		queue_db_print_add_filelist(fp, qf);
+	}
+
+	/* save directories */
+	struct queue_directory *qd;
+	TAILQ_FOREACH(qd, &q_store->directories, link)
+	{
+		queue_db_print_add_directory(fp, qd);
+		queue_db_print_set_resolved(fp, qd);
+	}
+
+	return 0;
+}
+
+static void queue_db_normalize(void)
+{
+	INFO("normalizing queue database");
+
+	char *tmpfile;
+	asprintf(&tmpfile, "%s/%s.tmp",
+		global_working_directory, QUEUE_DB_FILENAME);
+	FILE *tmp_fp = fopen(tmpfile, "w"); /* truncate existing file */
+
+	int rc = queue_db_save(tmp_fp);
+	if(fclose(tmp_fp) == 0)
+	{
+		if(rc != 0)
+		{
+			free(tmpfile);
+			return;
+		}
+
+		char *qlog_filename;
+		asprintf(&qlog_filename, "%s/%s",
+			global_working_directory, QUEUE_DB_FILENAME);
+
+		INFO("atomically replaces queue database");
+
+		if(rename(tmpfile, qlog_filename) != 0) 
+		{
+			ERROR("rename: %s", strerror(errno));
+		}
+		free(qlog_filename);
+
+		queue_db_open_logfile();
+	}
+	else
+		WARNING("failed to close file: %s", strerror(errno));
+	free(tmpfile);
+}
 

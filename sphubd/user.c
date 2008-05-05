@@ -23,7 +23,6 @@
 #include <stdlib.h>
 
 #include "xstr.h"
-#include "queue.h"
 #include "extra_slots.h"
 #include "rx.h"
 #include "log.h"

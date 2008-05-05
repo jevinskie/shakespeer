@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2006 Martin Hedenfalk <martin@bzero.se>
+ * Copyright 2004-2007 Martin Hedenfalk <martin@bzero.se>
  *
  * This file is part of ShakesPeer.
  *
@@ -22,7 +22,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <db.h>
 #include <string.h>
 
 #include "globals.h"
@@ -31,11 +30,8 @@
 #include "log.h"
 #include "notifications.h"
 #include "xstr.h"
-#include "dbenv.h"
 
-extern DB *queue_target_db;
-extern DB *queue_source_db;
-extern DB *queue_directory_db;
+extern struct queue_store *q_store;
 
 /* helper function to walk the filelist tree and add found files to the queue */
 static void queue_resolve_directory_recursively(const char *nick,
@@ -87,7 +83,7 @@ int queue_resolve_directory(const char *nick,
 {
     char *filelist_path = find_filelist(global_working_directory, nick);
 
-    g_debug("resolving directory [%s] for nick [%s]", source_directory, nick);
+    DEBUG("resolving directory [%s] for nick [%s]", source_directory, nick);
 
     if(filelist_path)
     {
@@ -112,29 +108,11 @@ int queue_resolve_directory(const char *nick,
                     *nfiles_p = nfiles;
 
                 /* update the resolved flag for this directory */
-                queue_directory_t *qd = queue_db_lookup_directory(target_directory);
-                if(qd)
-                {
-                    if((qd->flags & QUEUE_DIRECTORY_RESOLVED) == QUEUE_DIRECTORY_RESOLVED)
-                    {
-                        g_warning("Directory [%s] already resolved!",
-                                target_directory);
-                    }
-                    else
-                    {
-                        qd->flags |= QUEUE_DIRECTORY_RESOLVED;
-                        qd->nfiles = nfiles;
-                        qd->nleft = nfiles;
-
-                        g_debug("Updating directory [%s] with resolved flag",
-                                target_directory);
-                        queue_db_update_directory(target_directory, qd);
-                    }
-                }
+		queue_db_set_resolved(target_directory, nfiles);
             }
             else
             {
-                g_message("source directory not found, removing from queue");
+                INFO("source directory not found, removing from queue");
                 queue_remove_directory(target_directory);
             }
         }
@@ -162,34 +140,18 @@ int queue_add_directory(const char *nick,
     while(*target_directory == '/')
         ++target_directory;
 
-    queue_directory_t qd;
-    memset(&qd, 0, sizeof(qd));
-    strlcpy(qd.target_directory, target_directory, QUEUE_TARGET_MAXPATH);
-    strlcpy(qd.source_directory, source_directory, QUEUE_TARGET_MAXPATH);
-    strlcpy(qd.nick, nick, QUEUE_SOURCE_MAXNICK);
+    /* FIXME: duplicate target directories ??? */
+
+    /* Add a directory request so we can keep track of directory download
+     * progress. This also triggers us to re-resolve the directory when a
+     * filelist is downloaded (unless it's directly resolvable below).
+     */
+    queue_db_add_directory(target_directory, nick, source_directory);
+    nc_send_queue_directory_added_notification(nc_default(),
+	target_directory, nick);
 
     unsigned nfiles = 0;
-    int rc = queue_resolve_directory(nick, source_directory, target_directory,
-            &nfiles);
-    if(rc == 1)
-    {
-        /* Directory was not directly resolvable, need to download the
-         * filelist. First add a directory download request to the queue so we
-         * remember what to do with the filelist. */
-    }
-    else if(rc == 0)
-    {
-        qd.flags |= QUEUE_DIRECTORY_RESOLVED;
-        qd.nfiles = nfiles;
-        qd.nleft = nfiles;
-    }
-
-    if(rc != -1)
-    {
-        queue_db_add_directory(target_directory, &qd);
-        nc_send_queue_directory_added_notification(nc_default(),
-                target_directory, nick);
-    }
+    queue_resolve_directory(nick, source_directory, target_directory, &nfiles);
 
     return 0;
 }
@@ -204,43 +166,24 @@ int queue_remove_directory(const char *target_directory)
         ++target_directory;
 
     /* Loop through all targets and look for targets belonging to the
-     * target_directory. This is a possibly expensive operation.
+     * target_directory.
      */
-    DB_TXN *txn = NULL;
-    return_val_if_fail(db_transaction(&txn) == 0, -1);
 
-    DBC *qtc = NULL;
-    queue_target_db->cursor(queue_target_db, txn, &qtc, 0);
-    txn_return_val_if_fail(qtc, -1);
+    DEBUG("removing targets in directory [%s]", target_directory);
 
-    DBT key, val;
-    memset(&key, 0, sizeof(DBT));
-    memset(&val, 0, sizeof(DBT));
-
-    g_debug("removing targets in directory [%s]", target_directory);
-
-    while(qtc->c_get(qtc, &key, &val, DB_NEXT) == 0)
+    struct queue_target *qt, *next;
+    for(qt = TAILQ_FIRST(&q_store->targets); qt; qt = next)
     {
-        queue_target_t *qt = val.data;
+	next = TAILQ_NEXT(qt, link);
 
         if(strcmp(target_directory, qt->target_directory) == 0)
         {
             queue_remove_sources(qt->filename);
-            g_debug("removing target [%s]", qt->filename);
-            if(qtc->c_del(qtc, 0) != 0)
-            {
-                g_warning("failed to remove target [%s]", qt->filename);
-                qtc->c_close(qtc);
-                txn->abort(txn);
-                return -1;
-            }
+            DEBUG("removing target [%s]", qt->filename);
+	    queue_db_remove_target(qt->filename);
         }
     }
 
-    txn_return_val_if_fail(qtc->c_close(qtc) == 0, -1);
-    return_val_if_fail(txn->commit(txn, 0) == 0, -1);
-
-    /* FIXME: shouldn't the directory removal be part of the transaction? */
     queue_db_remove_directory(target_directory);
 
     return 0;
@@ -260,7 +203,7 @@ void handle_filelist_added_notification(nc_t *nc, const char *channel,
 {
     fail_unless(data);
     fail_unless(data->nick);
-    g_debug("added filelist for %s", data->nick);
+    DEBUG("added filelist for %s", data->nick);
     fail_unless(strcmp(data->nick, "bar") == 0);
     got_filelist_notification = 1;
 }
@@ -270,7 +213,7 @@ void handle_queue_directory_added_notification(nc_t *nc, const char *channel,
 {
     fail_unless(data);
     fail_unless(data->target_directory);
-    g_debug("added directory %s", data->target_directory);
+    DEBUG("added directory %s", data->target_directory);
     fail_unless(strcmp(data->target_directory, "target/directory") == 0);
     fail_unless(data->nick);
     fail_unless(strcmp(data->nick, "bar") == 0);
@@ -282,7 +225,7 @@ void handle_queue_directory_removed_notification(nc_t *nc, const char *channel,
 {
     fail_unless(data);
     fail_unless(data->target_directory);
-    g_debug("removed directory %s", data->target_directory);
+    DEBUG("removed directory %s", data->target_directory);
     fail_unless(strcmp(data->target_directory, "target/directory") == 0);
     got_directory_removed_notification = 1;
 }
@@ -292,7 +235,7 @@ void handle_queue_target_removed_notification(nc_t *nc, const char *channel,
 {
     fail_unless(data);
     fail_unless(data->target_filename);
-    g_debug("removed target %s", data->target_filename);
+    DEBUG("removed target %s", data->target_filename);
     /* fail_unless(strcmp(data->target_directory, "target/directory") == 0); */
     ++got_target_removed_notification;
 }
@@ -303,13 +246,13 @@ void test_setup(void)
     system("/bin/rm -rf /tmp/sp-queue_directory-test.d");
     system("mkdir /tmp/sp-queue_directory-test.d");
 
-    fail_unless(queue_init() == 0);
+    queue_init();
 }
 
 void test_teardown(void)
 {
-    fail_unless(queue_close() == 0);
-    system("/bin/rm -rf /tmp/sp-queue_directory-test.d");
+    queue_close();
+    // system("/bin/rm -rf /tmp/sp-queue_directory-test.d");
 }
 
 /* create a sample filelist for the "bar" user */
@@ -350,14 +293,14 @@ void test_add_directory_no_filelist(void)
 
     unlink("/tmp/files.xml.bar");
 
-    g_debug("adding directory");
+    DEBUG("adding directory");
     fail_unless(queue_add_directory("bar",
                 "source\\directory", "target/directory") == 0);
     fail_unless(got_filelist_notification == 1);
     fail_unless(got_directory_notification == 1);
 
     /* now we should download the filelist */
-    g_debug("downloading the filelist");
+    DEBUG("downloading the filelist");
     queue_t *q = queue_get_next_source_for_nick("bar");
     fail_unless(q);
     fail_unless(q->nick);
@@ -371,7 +314,7 @@ void test_add_directory_no_filelist(void)
 
     /* Next queue should be the placeholder directory. This time we have the
      * filelist, so resolving it should be successful. */
-    g_debug("resolving the filelist");
+    DEBUG("resolving the filelist");
     q = queue_get_next_source_for_nick("bar");
     fail_unless(q);
     fail_unless(q->nick);
@@ -387,7 +330,6 @@ void test_add_directory_no_filelist(void)
     fail_unless(queue_resolve_directory(q->nick,
                 q->source_filename, q->target_filename, &nfiles) == 0);
     queue_free(q);
-    /* fail_unless(got_directory_removed_notification == 1); */
     fail_unless(nfiles == 3);
 
     test_teardown();
@@ -416,7 +358,7 @@ void test_add_directory_existing_filelist(void)
     fail_unless(q);
     fail_unless(q->source_filename);
     fail_unless(q->target_filename);
-    g_debug("source_filename = %s", q->source_filename);
+    DEBUG("source_filename = %s", q->source_filename);
     fail_unless(q->tth);
     fail_unless(strncmp(q->tth, "ABAJCAPSGKJMY7IFTZA7XSE2AINPGZ", 30) == 0);
     queue_free(q);
@@ -425,12 +367,12 @@ void test_add_directory_existing_filelist(void)
      */
     queue_target_t *qt = queue_lookup_target("target/directory/subdir/filen3");
     fail_unless(qt);
-    g_debug("target_directory = [%s]", qt->target_directory);
+    DEBUG("target_directory = [%s]", qt->target_directory);
     fail_unless(strcmp(qt->target_directory, "target/directory") == 0);
 
     qt = queue_lookup_target("target/directory/filen");
     fail_unless(qt);
-    g_debug("target_directory = [%s]", qt->target_directory);
+    DEBUG("target_directory = [%s]", qt->target_directory);
     fail_unless(strcmp(qt->target_directory, "target/directory") == 0);
 
     got_directory_removed_notification = 0;
@@ -467,16 +409,41 @@ void test_remove_directory(void)
     fail_unless(queue_add_directory("bar", "source\\directory",
                 "target/directory") == 0);
 
-    /* now we should have a directory to download */
+    /* look it up */
+    struct queue_directory *qd = queue_db_lookup_directory("target/directory");
+    fail_unless(qd);
+    fail_unless(qd->nfiles == 3);
+    fail_unless(qd->nfiles == qd->nleft);
+
+    /* test persistence: close and re-open the queue
+     */
+    queue_close();
+    queue_init();
+
+    /* now we should have 3 targets to download */
     q = queue_get_next_source_for_nick("bar");
     fail_unless(q);
+    fail_unless(!q->is_directory);
+
+    /* look it up again, should still be 3 files left */
+    qd = queue_db_lookup_directory("target/directory");
+    fail_unless(qd);
+    fail_unless(qd->nfiles == 3);
+    fail_unless(qd->nfiles == qd->nleft);
 
     /* and remove the directory */
     fail_unless(queue_remove_directory("target/directory") == 0);
 
+    /* test persistence: close and re-open the queue
+     */
+    queue_close();
+    queue_init();
+
     /* again, nothing in the queue */
     q = queue_get_next_source_for_nick("bar");
     fail_unless(q == NULL);
+
+    fail_unless(queue_db_lookup_directory("target/directory") == NULL);
 
     test_teardown();
     puts("PASSED: remove directory");
@@ -494,9 +461,9 @@ void test_directory_priorities(void)
     fail_unless(queue_add_directory("bar", "source\\directory",
                 "target/directory") == 0);
 
-    fail_unless(queue_set_priority("target/directory/filen", 1) == 0);
-    fail_unless(queue_set_priority("target/directory/filen2", 2) == 0);
-    fail_unless(queue_set_priority("target/directory/subdir/filen3", 4) == 0);
+    queue_set_priority("target/directory/filen", 1);
+    queue_set_priority("target/directory/filen2", 2);
+    queue_set_priority("target/directory/subdir/filen3", 4);
 
     queue_t *q = queue_get_next_source_for_nick("bar");
     fail_unless(q);
