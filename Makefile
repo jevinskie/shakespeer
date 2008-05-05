@@ -12,9 +12,6 @@ clean-local:
 config.mk: configure ${TOP}/support/configure.sub
 	CFLAGS="$(EXTERN_CFLAGS)" sh ./configure
 
-config-osx:
-	cp -f config-osx.mk config.mk
-
 REPO		?= shakespeer
 REPO_URL	?= http://darcs.bzero.se/$(REPO)
 
