@@ -62,6 +62,7 @@ void sendNotification(NSString *notificationName, NSString *key1, id arg1, ...);
 - (IBAction)openSPForums:(id)sender;
 - (IBAction)reportBug:(id)sender;
 - (IBAction)donate:(id)sender;
+- (IBAction)showLogfiles:(id)sender;
 - (IBAction)showConnectView:(id)sender;
 - (IBAction)showPublicHubsView:(id)sender;
 - (IBAction)showBookmarksView:(id)sender;

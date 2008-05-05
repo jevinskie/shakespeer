@@ -21,6 +21,7 @@
                 showBookmarksView = id; 
                 showConnectView = id; 
                 showDownloadsView = id; 
+                showLogfiles = id; 
                 showPreferences = id; 
                 showPublicHubsView = id; 
                 showServerMessages = id; 

@@ -790,6 +790,11 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
     [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://shakespeer.bzero.se/donate.html"]];
 }
 
+- (IBAction)showLogfiles:(id)sender
+{
+    [[NSWorkspace sharedWorkspace] openFile:[@"~/Library/Logs/sphubd.log" stringByExpandingTildeInPath] withApplication:@"Console.app"];
+}
+
 - (IBAction)showConnectView:(id)sender
 {
     [mainWindowController connectShow:sender];
