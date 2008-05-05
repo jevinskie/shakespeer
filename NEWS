@@ -1,11 +1,9 @@
-New in version 0.9.2+CVS:
+New in version 0.9.3:
 
 * Fixed overwriting standard hub menu items with custom user-commands
 * Fixed crash during reconnection
-* Use libevents bufferevent
-* Split shakespeer.db into multiple databases (share.db, queue.db, tth.db)
-* Fixed bug #1323200 (download folder on unconnected external drive)
-* Added basic Keychain support (from Alimony)
+* Split shakespeer.db into multiple databases (queue.db, tth.db)
+* Added Keychain support (from Alimony)
 * Remember transfer drawer state and height (from Alimony)
 * Major speedup in incoming TTH searches
 * Added Growl notification for finished downloads
@@ -15,7 +13,9 @@ New in version 0.9.2+CVS:
 * All tables can now be right-clicked to select visible columns (from Alimony)
 * Added Open and Reveal in Finder menu items in queue view
 * Use unified toolbar instead of metal look
-* New build system (drop autoconf/automake): Universal Binary supported
+* Universal Binary
+* Stability fixes
+* + much more...
 
 New in version 0.9.2:
 
