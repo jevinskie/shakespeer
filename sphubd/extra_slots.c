@@ -134,16 +134,9 @@ static void extra_slots_parse(void)
 			buf = lbuf;
 		}
 
-		DEBUG("parsing [%s]", buf);
-
 		char *nick = q_strsep(&buf, ":");
-		DEBUG("nick = [%s]", nick);
-
 		if(*buf == '\0')
 			goto failed;
-
-		DEBUG("nick = [%s]", nick);
-		DEBUG("buf = [%s]", buf);
 
 		char *endptr;
 		int extra_slots = strtol(buf, &endptr, 10);
