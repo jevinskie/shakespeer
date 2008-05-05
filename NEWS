@@ -2,6 +2,9 @@ New in version 0.9.5:
 
 * Fixed reporting of total slots
 * Fixed crash when hashing files
+* Fixed problem with disappearing queue
+* Fixed quoting issues in queue database
+* Arrow keys now work in filelist browser again
 * Added tab completion of nicks in main chat
 
 New in version 0.9.4:
