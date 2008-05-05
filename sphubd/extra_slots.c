@@ -20,10 +20,10 @@
 
 #define _GNU_SOURCE
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <db.h>
 #include <fcntl.h>
 
 #include "globals.h"
@@ -33,109 +33,222 @@
 
 #include "extra_slots.h"
 #include "notifications.h"
-#include "dbenv.h"
 
-#define SLOTS_DB_FILENAME "slots.db"
+#define SLOTS_DB_FILENAME "slots2.db"
 
-static DB *slots_db = NULL;
+struct extra_slot
+{
+	LIST_ENTRY(extra_slot) link;
+
+	char *nick;
+	char *hub_address;
+	int extra_slots;
+};
+
+static LIST_HEAD(, extra_slot) xs_head = LIST_HEAD_INITIALIZER(extra_slot);
+
+static FILE *xs_fp = NULL;
+static bool xs_loading = false;
+
+static void xs_free(struct extra_slot *xs)
+{
+	if(xs)
+	{
+		LIST_REMOVE(xs, link);
+		free(xs->nick);
+		free(xs);
+	}
+}
+
+struct extra_slot *xs_find(const char *nick)
+{
+	struct extra_slot *xs;
+	LIST_FOREACH(xs, &xs_head, link)
+	{
+		if(strcmp(nick, xs->nick) == 0)
+			return xs;
+	}
+
+	return NULL;
+}
+
+void xs_set(const char *nick, int extra_slots)
+{
+	return_if_fail(nick);
+	return_if_fail(extra_slots >= 0);
+
+	DEBUG("setting %i slots for [%s]", extra_slots, nick);
+
+	struct extra_slot *xs = xs_find(nick);
+
+	if(extra_slots == 0)
+	{
+		xs_free(xs);
+	}
+	else
+	{
+		if(xs == NULL)
+		{
+			xs = calloc(1, sizeof(struct extra_slot));
+			xs->nick = strdup(nick);
+			LIST_INSERT_HEAD(&xs_head, xs, link);
+		}
+
+		xs->extra_slots = extra_slots;
+	}
+
+	if(!xs_loading)
+	{
+		char *esc_nick = malloc(strlen(nick) * 2 + 1);
+		char *ep = esc_nick;
+		const char *np = nick;
+		for(; *np; np++)
+		{
+			if(*np == ':' || *np == '\\')
+				*ep++ = '\\';
+			*ep++ = *np;
+		}
+		*ep = 0;
+		fprintf(xs_fp, "%s:%i\n", esc_nick, extra_slots);
+		free(esc_nick);
+	}
+}
+
+static void extra_slots_parse(void)
+{
+	return_if_fail(xs_fp);
+
+	rewind(xs_fp);
+
+	unsigned line_number = 0;
+	char *buf, *lbuf = NULL;
+	size_t len;
+	while((buf = fgetln(xs_fp, &len)) != NULL)
+	{
+		++line_number;
+
+		if(buf[len - 1] == '\n')
+			buf[len - 1] = 0;
+		else
+		{
+			/* EOF without EOL, copy and add the NUL */
+			lbuf = malloc(len + 1);
+			assert(lbuf);
+			memcpy(lbuf, buf, len);
+			lbuf[len] = 0;
+			buf = lbuf;
+		}
+
+		char *nick = strdup(buf);
+		char *np = nick;
+
+		char *p;
+		for(p = buf; *p; p++)
+		{
+			if(*p == '\\')
+			{
+				if(++p == 0)
+					break;
+			}
+			else if(*p == ':')
+				break;
+			*np++ = *p;
+		}
+		*np = 0;
+
+		DEBUG("p = [%s]", p);
+
+		if(*p != ':')
+			goto failed;
+		*p = 0; /* nul-terminate nick */
+
+		size_t nick_len = p - buf;
+
+		buf += nick_len + 1;
+
+		char *endptr;
+		int extra_slots = strtol(buf, &endptr, 10);
+		if(extra_slots < 0 || endptr == NULL || *endptr != 0)
+			goto failed;
+
+		xs_set(nick, extra_slots);
+
+		free(nick);
+		continue;
+failed:
+		free(nick);
+		WARNING("failed to parse line %u\n", line_number);
+
+	}
+	free(lbuf);
+
+}
 
 int extra_slots_init(void)
 {
-    g_debug("opening database %s", SLOTS_DB_FILENAME);
+	DEBUG("opening database %s", SLOTS_DB_FILENAME);
 
-    /* open slots database */
-    if(open_database(&slots_db, SLOTS_DB_FILENAME, "slots", DB_HASH, 0) != 0)
-    {
-        return -1;
-    }
+	char *fname;
+	asprintf(&fname, "%s/%s", global_working_directory, SLOTS_DB_FILENAME);
+	xs_fp = fopen(fname, "a+");
+	free(fname);
 
-    return 0;
+	if(xs_fp)
+	{
+		xs_loading = true;
+		extra_slots_parse();
+		xs_loading = false;
+	}
+
+	return 0;
 }
 
 int extra_slots_close(void)
 {
-    return close_db(&slots_db, "slots");
+	xs_loading = true; /* disable logging */
+
+	struct extra_slot *xs;
+	while((xs = LIST_FIRST(&xs_head)) != NULL)
+		xs_free(xs);
+
+	fclose(xs_fp);
+	xs_fp = NULL;
+	return 0;
 }
 
 static int extra_slots_lookup(const char *nick)
 {
-    DBT key;
-    memset(&key, 0, sizeof(DBT));
-    key.data = (void *)nick;
-    key.size = strlen(nick) + 1;
-
-    DBT val;
-    memset(&val, 0, sizeof(DBT));
-
-    int rc = slots_db->get(slots_db, NULL, &key, &val, 0);
-    if(rc == 0)
-    {
-        return *(int *)val.data;
-    }
-    else if(rc == DB_NOTFOUND)
-    {
-        return -1;
-    }
-    else
-    {
-        g_warning("failed: %s", db_strerror(rc));
-        return -2;
-    }
+	struct extra_slot *xs = xs_find(nick);
+	return xs ? xs->extra_slots : -1;
 }
 
 int extra_slots_grant(const char *nick, int delta)
 {
-    return_val_if_fail(slots_db, -1);
-    return_val_if_fail(nick, -1);
-    return_val_if_fail(delta != 0, 0);
+	return_val_if_fail(xs_fp, -1);
+	return_val_if_fail(nick, -1);
+	return_val_if_fail(delta != 0, 0);
 
-    int current_extra_slots = extra_slots_lookup(nick);
+	struct extra_slot *xs = xs_find(nick);
 
-    int extra_slots = 0;
-    if(current_extra_slots > 0)
-        extra_slots = current_extra_slots;
+	int extra_slots = 0;
+	if(xs && xs->extra_slots > 0)
+		extra_slots = xs->extra_slots;
 
-    extra_slots += delta;
+	extra_slots += delta;
+	return_val_if_fail(extra_slots >= 0, -1);
 
-    return_val_if_fail(extra_slots >= 0, -1);
+	xs_set(nick, extra_slots);
+	nc_send_extra_slot_granted_notification(nc_default(), nick, extra_slots);
 
-    DBT val;
-    memset(&val, 0, sizeof(DBT));
-    val.data = &extra_slots;
-    val.size = sizeof(unsigned);
-
-    DBT key;
-    memset(&key, 0, sizeof(DBT));
-    key.data = (void *)nick;
-    key.size = strlen(nick) + 1; /* store terminating nul */
-
-    int rc;
-    if(extra_slots == 0)
-    {
-        if(current_extra_slots >= 0)
-            rc = slots_db->del(slots_db, NULL, &key, 0);
-        else
-            rc = 0;
-    }
-    else
-        rc = slots_db->put(slots_db, NULL, &key, &val, 0);
-
-    if(rc != 0)
-    {
-        g_warning("failed to add slots: %s", db_strerror(rc));
-    }
-
-    nc_send_extra_slot_granted_notification(nc_default(), nick, extra_slots);
-
-    return rc;
+	return 0;
 }
 
 unsigned extra_slots_get_for_user(const char *nick)
 {
-    int s = extra_slots_lookup(nick);
-    if(s < 0)
-        s = 0;
-    return s;
+	int s = extra_slots_lookup(nick);
+	if(s < 0)
+		s = 0;
+	return s;
 }
 
 
@@ -160,7 +273,7 @@ int main(void)
     fail_unless(extra_slots_grant("foo4", 3) == 0);
     fail_unless(extra_slots_grant("foo5", 1) == 0);
     fail_unless(extra_slots_grant("foo6", 5) == 0);
-    fail_unless(extra_slots_grant("blabla", 6) == 0);
+    fail_unless(extra_slots_grant("bla:bla", 6) == 0);
     fail_unless(extra_slots_get_for_user("foo") == 2);
     fail_unless(extra_slots_grant("foo", -1) == 0);
     fail_unless(extra_slots_get_for_user("foo") == 1);
@@ -173,18 +286,18 @@ int main(void)
     fail_unless(extra_slots_get_for_user("foo4") == 3);
     fail_unless(extra_slots_get_for_user("foo5") == 1);
     fail_unless(extra_slots_get_for_user("foo6") == 5);
-    fail_unless(extra_slots_get_for_user("blabla") == 6);
+    fail_unless(extra_slots_get_for_user("bla:bla") == 6);
 
     /* setting extra slots to zero will remove the nick from the database */
-    fail_unless(extra_slots_grant("blabla", -6) == 0);
-    fail_unless(extra_slots_lookup("blabla") == -1);
+    fail_unless(extra_slots_grant("bla:bla", -6) == 0);
+    fail_unless(extra_slots_lookup("bla:bla") == -1);
 
     /* can't have negative amount of extra slots */
     fail_unless(extra_slots_grant("gazonk", 1) == 0);
     fail_unless(extra_slots_grant("gazonk", -2) == -1);
     fail_unless(extra_slots_get_for_user("gazonk") == 1);
 
-    g_message("the following should fail");
+    INFO("the following should fail");
     fail_unless(extra_slots_grant("bar", -1) == -1);
 
     extra_slots_close();
