@@ -114,6 +114,11 @@ check-local: $(check_PROGRAMS)
 		fi; \
 	done
 
+tags:
+	ctags $(TOP)/spclient/* $(TOP)/splib/* $(TOP)/sphubd/*
+
+.PHONY: tags
+
 OBJS=$(SOURCES:.c=.o)
 ALLCSOURCES := $(wildcard *.c)
 ALLMSOURCES := $(wildcard *.m)
