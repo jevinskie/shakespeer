@@ -28,7 +28,9 @@
 #include "nmdc.h"
 #include "log.h"
 #include "spclient.h"
+#ifndef VERSION
 #include "../../version.h"
+#endif
 
 #import "SPApplicationController.h"
 #import "SPBookmarkController.h"
