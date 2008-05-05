@@ -670,7 +670,7 @@ int cc_connect(const char *address, hub_t *hub)
         return -1;
     }
 
-    if(io_connect_async(cc_addr, global_port + 1, cc_connect_event, hub, &err) != 0)
+    if(io_connect_async(cc_addr, cc_connect_event, hub, &err) != 0)
     {
         WARNING("failed to connect to client '%s': %s",
                 address, xerr_msg(err));

@@ -120,7 +120,6 @@ static void io_connect_event(int fd, short condition, void *data)
 }
 
 int io_connect_async(struct sockaddr_in *remote_addr,
-	int local_port,
         void (*event_func)(int fd, int error, void *user_data),
         void *user_data,
         xerr_t **err)
@@ -133,28 +132,6 @@ int io_connect_async(struct sockaddr_in *remote_addr,
         WARNING("%s", strerror(errno));
         xerr_set(err, -1, "Can't create socket: %s", strerror(errno));
         return -1;
-    }
-
-    if(local_port > 0)
-    {
-	DEBUG("binding port %i for outgoing connection", local_port);
-
-	/* enable local address reuse */
-	int on = 1;
-	if(setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1)
-	{
-	    WARNING("unable to enable local address reuse (ignored)");
-	}
-
-	struct sockaddr_in local_addr;
-	bzero(&local_addr, sizeof(local_addr));
-	local_addr.sin_family = AF_INET;
-	local_addr.sin_addr.s_addr = INADDR_ANY;
-	local_addr.sin_port = htons(local_port);
-	int rc = bind(fd, (struct sockaddr *)&local_addr, sizeof(local_addr));
-	if(rc != 0)
-	    WARNING("failed to bind local port %i for outgoing connection: %s",
-		local_port, strerror(errno));
     }
 
     INFO("connecting to %s:%d...",
