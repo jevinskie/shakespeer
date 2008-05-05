@@ -717,19 +717,24 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
     [mainWindowController connectShow:sender];
 }
 
-- (IBAction)showQueueView:(id)sender
+- (IBAction)showPublicHubsView:(id)sender
 {
-    [mainWindowController showQueue:self];
+    [mainWindowController openHublist:self];
 }
 
-- (IBAction)showBookmarkView:(id)sender
+- (IBAction)showDownloadsView:(id)sender
+{
+    [mainWindowController openDownloads:self];
+}
+
+- (IBAction)showBookmarksView:(id)sender
 {
     [mainWindowController openBookmarks:self];
 }
 
-- (IBAction)showTransferView:(id)sender
+- (IBAction)showUploadsView:(id)sender
 {
-    [mainWindowController showTransfers:self];
+    [mainWindowController openUploads:self];
 }
 
 - (IBAction)closeCurrentSidebarItem:(id)sender

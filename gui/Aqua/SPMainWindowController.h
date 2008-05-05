@@ -95,11 +95,11 @@
 
 - (IBAction)openHublist:(id)sender;
 - (IBAction)openBookmarks:(id)sender;
-- (IBAction)openTransfers:(id)sender;
-- (IBAction)showTransfers:(id)sender;
+- (IBAction)openUploads:(id)sender;
+- (IBAction)toggleTransferDrawer:(id)sender;
 - (IBAction)toggleColumn:(id)sender;
 - (IBAction)quickSearchExecute:(id)sender;
-- (IBAction)showQueue:(id)sender;
+- (IBAction)openDownloads:(id)sender;
 - (IBAction)acceptPassword:(id)sender;
 - (IBAction)cancelPassword:(id)sender;
 - (IBAction)setSearchType:(id)sender;

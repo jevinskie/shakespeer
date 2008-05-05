@@ -17,12 +17,13 @@
                 reportBug = id; 
                 rescanSharedFolders = id; 
                 showAdvancedSearch = id; 
-                showBookmarkView = id; 
+                showBookmarksView = id; 
                 showConnectView = id; 
+                showDownloadsView = id; 
                 showPreferences = id; 
-                showQueueView = id; 
+                showPublicHubsView = id; 
                 showServerMessages = id; 
-                showTransferView = id; 
+                showUploadsView = id; 
             }; 
             CLASS = SPApplicationController; 
             LANGUAGE = ObjC; 

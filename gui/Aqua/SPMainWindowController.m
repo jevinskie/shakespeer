@@ -76,8 +76,8 @@
 
     [self openHublist:self];
     [self openBookmarks:self];
-    [self showQueue:self];
-    [self openTransfers:self];
+    [self openDownloads:self];
+    [self openUploads:self];
     
     // Show bookmarks at startup
     // TODO: Remember last view instead
@@ -573,7 +573,7 @@
     [sideBar displayItem:bookmarkController];
 }
 
-- (IBAction)openTransfers:(id)sender
+- (IBAction)openUploads:(id)sender
 {
     if(!transferController)
     {
@@ -583,7 +583,7 @@
     [sideBar displayItem:transferController];
 }
 
-- (IBAction)showTransfers:(id)sender
+- (IBAction)toggleTransferDrawer:(id)sender
 {
     [transferDrawer toggle:self];
 }
@@ -617,7 +617,7 @@
     }
 }
 
-- (IBAction)showQueue:(id)sender
+- (IBAction)openDownloads:(id)sender
 {
     if(!queueController)
     {
