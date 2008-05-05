@@ -26,6 +26,7 @@
 #import "FilteringArrayController.h"
 #import "SPUserDefaultKeys.h"
 #import "SPBookmarkController.h"
+#import "SPLog.h"
 
 #include "util.h"
 #include "hublist.h"
@@ -274,7 +275,7 @@ NSString *SPPublicHubDataType = @"SPPublicHubDataType";
 
     [self statusMessage:[NSString stringWithFormat:@"Loading hublist from %@", hublistAddress]];
 
-    NSLog(@"sending request for [%@]", hublistAddress);
+    SPLog(@"sending request for [%@]", hublistAddress);
     NSURLRequest *request = [NSURLRequest requestWithURL:hublistURL];
     NSURLResponse *response = nil;
     NSError *error = nil;
@@ -282,26 +283,24 @@ NSString *SPPublicHubDataType = @"SPPublicHubDataType";
     NSString *hublistPath = nil;
 
     if(error) {
-	NSLog(@"got error: %@", [error localizedDescription]);
+	SPLog(@"got error: %@", [error localizedDescription]);
 	[self statusMessage:[NSString stringWithFormat:@"Failed to load hublist: %@", [error localizedDescription]]];
 	goto done;
     } else if([response expectedContentLength] == 0) {
-	NSLog(@"zero size response");
+	SPLog(@"zero size response");
 	[self statusMessage:@"Failed to load hublist: zero sized file"];
 	goto done;
     }
 
     int code = [(NSHTTPURLResponse *)response statusCode];
+    SPLog(@"http response code %i", code);
     if(code != 200) {
-	NSLog(@"http response code %i", code);
 	[self statusMessage:[NSString stringWithFormat:@"Failed to load hublist: %@",
 	    [NSHTTPURLResponse localizedStringForStatusCode:code]]];
 	goto done;
     }
 
     if(data) {
-	NSLog(@"got the data");
-
 	NSString *prefix = [NSString stringWithFormat:@"%s/PublicHublist", working_directory];
 
 	// remove old files
@@ -315,7 +314,7 @@ NSString *SPPublicHubDataType = @"SPPublicHubDataType";
 	else
 	    hublistPath = [NSString stringWithFormat:@"%@.config.bz2", prefix];
 
-	NSLog(@"saving hublist as %@", hublistPath);
+	SPLog(@"saving hublist as %@", hublistPath);
 
 	[[NSFileManager defaultManager] createFileAtPath:hublistPath contents:data attributes:nil];
     }
@@ -323,10 +322,7 @@ NSString *SPPublicHubDataType = @"SPPublicHubDataType";
     hublist_t *hublist = NULL;
     xerr_t *err = 0;
     if(hublistPath)
-    {
-	NSLog(@"parsing %@", hublistPath);
 	hublist = hl_parse_file([hublistPath UTF8String], &err);
-    }
 
     if (err) {
 	[self statusMessage:[NSString stringWithFormat:@"Failed to load hublist: %s", xerr_msg(err)]];
@@ -334,7 +330,6 @@ NSString *SPPublicHubDataType = @"SPPublicHubDataType";
 	goto done;
     }
 
-    NSLog(@"updating hub list");
     NSValue *wrappedList = [NSValue valueWithPointer:hublist];
     [self performSelectorOnMainThread:@selector(setHubsFromListWrapped:)
 			   withObject:wrappedList
