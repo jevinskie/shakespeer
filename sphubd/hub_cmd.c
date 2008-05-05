@@ -71,7 +71,7 @@ static int hub_search_match_callback(const share_search_t *search,
     hub_t *hub = hsd->hub;
     char *response = 0;
 
-    char *virtual_path = share_local_to_virtual_path(global_share, file->path);
+    char *virtual_path = share_local_to_virtual_path(global_share, file);
 
     DEBUG("sending SR for %s", virtual_path);
 

@@ -41,7 +41,10 @@ void share_create_bloom(share_t *share)
     share_file_t *f;
     RB_FOREACH(f, file_tree, &share->files)
     {
-        bloom_add_filename(share->bloom, f->name);
+	char *filename = strrchr(f->partial_path, '/');
+	if(filename++ == NULL)
+	    filename = f->partial_path;
+        bloom_add_filename(share->bloom, filename);
     }
 
     INFO("bloom filter is %.1f%% filled", bloom_filled_percent(share->bloom));

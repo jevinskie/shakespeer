@@ -72,12 +72,11 @@ static void share_scan_add_file(share_scan_state_t *ctx,
         const char *filepath, struct stat *stbuf)
 {
     share_file_t *f = calloc(1, sizeof(share_file_t));
-    f->path = strdup(filepath);
-    f->name = strrchr(f->path, '/') + 1; /* points into f->path ! */
-    f->type = share_filetype(f->name);
+    f->partial_path = strdup(filepath + strlen(ctx->mp->local_root));
+    f->mp = ctx->mp;
+    f->type = share_filetype(f->partial_path);
     f->size = stbuf->st_size;
     f->inode = SHARE_STAT_TO_INODE(stbuf);
-    f->mtime = stbuf->st_mtime;
 
     /* DEBUG("adding file [%s], inode %llu", f->path, f->inode); */
 
@@ -126,8 +125,8 @@ static void share_scan_add_file(share_scan_state_t *ctx,
 		if(original_file)
 		{
 		    /* ok, keep as duplicate */
-		    DEBUG("Setting inode %llu [%s] as duplicate of inode %llu",
-			    f->inode, f->path, td->active_inode);
+		    DEBUG("Setting inode %llu [%s%s] as duplicate of inode %llu",
+			    f->inode, f->mp->local_root, f->partial_path, td->active_inode);
 		    f->duplicate_inode = td->active_inode;
 
 		    /* update the mount statistics */
@@ -158,7 +157,10 @@ static void share_scan_add_file(share_scan_state_t *ctx,
 	    ctx->mp->stats.size += f->size;
 
 	    /* add it to the bloom filter */
-	    bloom_add_filename(ctx->share->bloom, f->name);
+	    char *filename = strrchr(f->partial_path, '/');
+	    if(filename++ == NULL)
+		filename = f->partial_path;
+	    bloom_add_filename(ctx->share->bloom, filename);
 	}
 	else
 	{

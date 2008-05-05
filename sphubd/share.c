@@ -138,16 +138,13 @@ int share_remove(share_t *share, const char *local_root, bool is_rescan)
 
     nc_send_will_remove_share_notification(nc_default(), local_root);
 
-    size_t len = strlen(local_root);
-
     share_file_t *f;
     share_file_t *next;
     for(f = RB_MIN(file_tree, &share->files); f; f = next)
     {
         next = RB_NEXT(file_tree, &share->files, f);
 
-        if(strncmp(f->path, local_root, len) == 0 &&
-                (f->path[len] == '/' || f->path[len] == 0))
+	if(f->mp == mp)
         {
             RB_REMOVE(file_tree, &share->files, f);
             share_remove_from_inode_table(share, f);
@@ -159,8 +156,7 @@ int share_remove(share_t *share, const char *local_root, bool is_rescan)
     {
         next = RB_NEXT(file_tree, &share->unhashed_files, f);
 
-        if(strncmp(f->path, local_root, len) == 0 &&
-                (f->path[len] == '/' || f->path[len] == 0))
+	if(f->mp == mp)
         {
             RB_REMOVE(file_tree, &share->unhashed_files, f);
             share_remove_from_inode_table(share, f);
@@ -384,9 +380,19 @@ static int share_path_cmp(const char *a, const char *b)
     return rc < 0 ? -1 : 1;
 }
 
+/* sort function used by the red-black tree */
+#include <assert.h> /* FIXME! */
 int share_file_cmp(share_file_t *a, share_file_t *b)
 {
-    return share_path_cmp(a->path, b->path);
+    assert(a->mp); /* FIXME: remove */
+    assert(b->mp);
+
+    if(a->mp < b->mp)
+	return -1;
+    if(a->mp > b->mp)
+	return 1;
+
+    return share_path_cmp(a->partial_path, b->partial_path);
 }
 
 unsigned share_inode_hash(uint64_t inode)
@@ -408,14 +414,20 @@ void share_remove_from_inode_table(share_t *share, share_file_t *file)
 share_file_t *share_lookup_file(share_t *share, const char *local_path)
 {
     share_file_t find;
-    find.path = (char *)local_path;
+    find.mp = share_lookup_local_root(share, local_path);
+    if(find.mp == NULL)
+	return NULL;
+    find.partial_path = (char *)local_path + strlen(find.mp->local_root);
     return RB_FIND(file_tree, &share->files, &find);
 }
 
 share_file_t *share_lookup_unhashed_file(share_t *share, const char *local_path)
 {
     share_file_t find;
-    find.path = (char *)local_path;
+    find.mp = share_lookup_local_root(share, local_path);
+    if(find.mp == NULL)
+	return NULL;
+    find.partial_path = (char *)local_path + strlen(find.mp->local_root);
     return RB_FIND(file_tree, &share->unhashed_files, &find);
 }
 
@@ -493,31 +505,26 @@ char *share_translate_path(share_t *share, const char *virtual_path)
     return npath;
 }
 
-char *share_local_to_virtual_path(share_t *share, const char *local_path)
+char *share_local_to_virtual_path(share_t *share, share_file_t *file)
 {
-    share_mountpoint_t *mp = share_lookup_local_root(share, local_path);
-    if(mp)
-    {
-        local_path += strlen(mp->local_root);
-        if(*local_path == '/')
-            ++local_path;
+    return_val_if_fail(share, NULL);
+    return_val_if_fail(file, NULL);
+    return_val_if_fail(file->mp, NULL);
 
-        char *virtual_path;
-        asprintf(&virtual_path, "%s\\%s", mp->virtual_root, local_path);
-        str_replace_set(virtual_path, "/", '\\');
-        return virtual_path;
-    }
-
-    return NULL;
+    char *virtual_path;
+    asprintf(&virtual_path, "%s%s", file->mp->virtual_root, file->partial_path);
+    str_replace_set(virtual_path, "/", '\\');
+    return virtual_path;
 }
 
 share_file_t *share_file_dup(share_file_t *file)
 {
     return_val_if_fail(file, NULL);
-    return_val_if_fail(file->path, NULL);
+    return_val_if_fail(file->partial_path, NULL);
 
     share_file_t *dup = calloc(1, sizeof(share_file_t));
-    dup->path = xstrdup(file->path);
+    dup->partial_path = strdup(file->partial_path);
+    dup->mp = file->mp;
     dup->type = file->type;
     dup->size = file->size;
     dup->inode = file->inode;
@@ -543,10 +550,10 @@ share_file_list_t *share_next_unhashed(share_t *share, unsigned limit)
             if(unfinished == NULL)
             {
                 unfinished = malloc(sizeof(share_file_list_t));
-                LIST_INIT(unfinished);
+                SLIST_INIT(unfinished);
             }
 
-            LIST_INSERT_HEAD(unfinished, f, link);
+            SLIST_INSERT_HEAD(unfinished, f, link);
             if(--limit == 0)
                 break;
         }
@@ -555,6 +562,18 @@ share_file_list_t *share_next_unhashed(share_t *share, unsigned limit)
     DEBUG("Returning %i files", olimit - limit);
 
     return unfinished;
+}
+
+/* returns the complete local path, should be free'd by caller */
+char *share_complete_path(share_file_t *file)
+{
+    return_val_if_fail(file, NULL);
+    return_val_if_fail(file->mp, NULL);
+
+    /* construct the complete local path */
+    char *local_path;
+    asprintf(&local_path, "%s%s", file->mp->local_root, file->partial_path);
+    return local_path;
 }
 
 /* returned string should be freed by caller */
@@ -569,14 +588,14 @@ char *share_translate_tth(share_t *share, const char *tth)
     if(f == NULL)
         return NULL;
 
-    return xstrdup(f->path);
+    return share_complete_path(f);
 }
 
 void share_file_free(share_file_t *file)
 {
     if(file)
     {
-        free(file->path);
+        free(file->partial_path);
         free(file);
     }
 }

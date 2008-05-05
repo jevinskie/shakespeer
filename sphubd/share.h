@@ -34,6 +34,8 @@
 
 #define SHARE_INODE_BUCKETS 509
 
+typedef struct share_mountpoint share_mountpoint_t;
+
 typedef struct share_search share_search_t;
 struct share_search
 {
@@ -55,15 +57,13 @@ struct share_file
 {
     RB_ENTRY(share_file) entry;
     LIST_ENTRY(share_file) inode_link;
-    LIST_ENTRY(share_file) link;
+    SLIST_ENTRY(share_file) link; /* used by sphashd_client.c */
 
-    char *path;
-    char *name; /* points at path (after last slash) */
+    share_mountpoint_t *mp;
+    char *partial_path; /* sub-path within the mountpoint */
     share_type_t type;
     uint64_t size;
     uint64_t inode;
-    time_t mtime; /* FIXME: don't really need it here */
-
     uint64_t duplicate_inode; /* file is a duplicate of this inode */
 };
 
@@ -98,7 +98,6 @@ struct share_stats
     unsigned nduplicates;
 };
 
-typedef struct share_mountpoint share_mountpoint_t;
 struct share_mountpoint
 {
     LIST_ENTRY(share_mountpoint) link;
@@ -110,7 +109,7 @@ struct share_mountpoint
     int scan_in_progress;
 };
 
-typedef LIST_HEAD(share_file_list, share_file) share_file_list_t;
+typedef SLIST_HEAD(share_file_list, share_file) share_file_list_t;
 
 share_t *share_new(void);
 
@@ -134,7 +133,8 @@ int share_remove(share_t *share, const char *local_root, bool is_rescan);
 share_mountpoint_t *share_add_mountpoint(share_t *share,
         const char *local_root);
 void share_remove_mountpoint(share_t *share, share_mountpoint_t *mp);
-char *share_local_to_virtual_path(share_t *share, const char *local_path);
+char *share_local_to_virtual_path(share_t *share, share_file_t *file);
+char *share_complete_path(share_file_t *file);
 
 int share_scan(share_t *share, share_mountpoint_t *mp);
 

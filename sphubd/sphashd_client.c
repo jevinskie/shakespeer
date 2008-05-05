@@ -69,9 +69,13 @@ static void hs_finish_file(hs_t *hs, const char *filename,
     return_if_fail(hs->unfinished_list);
 
     share_file_t *file = NULL;
-    LIST_FOREACH(file, hs->unfinished_list, link)
+    SLIST_FOREACH(file, hs->unfinished_list, link)
     {
-        if(strcmp(filename, file->path) == 0)
+	char *local_path = share_complete_path(file);
+	int rc = strcmp(filename, local_path);
+	free(local_path);
+
+	if(rc == 0)
             break;
     }
 
@@ -87,10 +91,10 @@ static void hs_finish_file(hs_t *hs, const char *filename,
                     file, hash_base32, leaves_base64, mibs_per_sec);
         }
 
-        LIST_REMOVE(file, link);
+        SLIST_REMOVE(hs->unfinished_list, file, share_file, link);
     }
 
-    if(LIST_FIRST(hs->unfinished_list) == NULL)
+    if(SLIST_FIRST(hs->unfinished_list) == NULL)
     {
         if(hs->paused == 0)
         {
@@ -185,7 +189,7 @@ static void hs_err_event(struct bufferevent *bufev, short why, void *data)
 static void hs_feed_server(hs_t *hs)
 {
     return_if_fail(hs->unfinished_list == NULL ||
-            LIST_FIRST(hs->unfinished_list) == NULL);
+            SLIST_FIRST(hs->unfinished_list) == NULL);
 
     /* get a batch of files from the share database */
     free(hs->unfinished_list);
@@ -206,9 +210,11 @@ static void hs_feed_server(hs_t *hs)
         /* and send them all to the hashing server */
         int num_files = 0;
         share_file_t *file;
-        LIST_FOREACH(file, hs->unfinished_list, link)
+        SLIST_FOREACH(file, hs->unfinished_list, link)
         {
-            hs_send_add(hs, file->path);
+	    char *local_path = share_complete_path(file);
+            hs_send_add(hs, local_path);
+	    free(local_path);
             ++num_files;
         }
         DEBUG("added %i files", num_files);
@@ -239,7 +245,7 @@ void hs_start_hash_feeder(void)
     }
 
     if(global_hash_server->unfinished_list == NULL ||
-       LIST_FIRST(global_hash_server->unfinished_list) == NULL)
+       SLIST_FIRST(global_hash_server->unfinished_list) == NULL)
     {
         hs_feed_server(global_hash_server);
     }
@@ -326,13 +332,11 @@ int hs_stop(void)
 {
     hs_send_abort(global_hash_server);
 
-    share_file_t *file;
-
     if(global_hash_server->unfinished_list)
     {
-        while((file = LIST_FIRST(global_hash_server->unfinished_list)) != NULL)
+        while(SLIST_FIRST(global_hash_server->unfinished_list) != NULL)
         {
-            LIST_REMOVE(file, link);
+            SLIST_REMOVE_HEAD(global_hash_server->unfinished_list, link);
         }
     }
 

@@ -69,12 +69,12 @@ static void handle_tth_available_notification(nc_t *nc,
 {
     share_file_t *file = data->file;
 
-    const char *slash = strrchr(file->path, '/');
-    if(slash++ == 0)
-        slash = file->path;
+    const char *filename = strrchr(file->partial_path, '/');
+    if(filename++ == NULL)
+        filename = file->partial_path;
 
     ui_send_status_message(NULL, NULL, "finished hashing %s (%.2lf MiB/s)",
-            slash, data->mibs_per_sec);
+            filename, data->mibs_per_sec);
 
     hub_set_need_myinfo_update(true);
     ui_schedule_share_stats_update();

@@ -93,7 +93,12 @@ static void share_xml_print_file(FILE *fp, int level, share_file_t *file)
      * with a combining accent). This is required for DC++/Windows to correctly
      * display the filenames.
      */
-    char *utf8_composed_filename = g_utf8_normalize(file->name, -1,
+
+    char *filename = strrchr(file->partial_path, '/');
+    if(filename++ == 0)
+	filename = file->partial_path;
+
+    char *utf8_composed_filename = g_utf8_normalize(filename, -1,
             G_NORMALIZE_DEFAULT_COMPOSE);
     char *escaped_utf8_filename = share_xml_escape(utf8_composed_filename);
     free(utf8_composed_filename);
@@ -192,10 +197,9 @@ static void share_save_file(share_t *share, share_save_context_t *ctx)
     share_mountpoint_t *last_mp = NULL;
     share_file_t *f;
     char *last_p = NULL;
-    size_t root_len = 0;
     RB_FOREACH(f, file_tree, &share->files)
     {
-        if(last_mp == NULL || !str_has_prefix(f->path, last_mp->local_root))
+        if(f->mp != last_mp)
         {
             /* New or changed mountpoint. */
             while(ctx->level--)
@@ -203,23 +207,19 @@ static void share_save_file(share_t *share, share_save_context_t *ctx)
                 if(ctx->directory_end_pfunc)
                     ctx->directory_end_pfunc(ctx->fp, ctx->level, NULL);
             }
-            last_mp = share_lookup_local_root(share, f->path);
-            return_if_fail(last_mp);
+	    last_mp = f->mp;
             ctx->directory_start_pfunc(ctx->fp, 0, last_mp->virtual_root);
             ctx->level = 1;
-            root_len = strlen(last_mp->local_root);
 
             free(last_p);
             last_p = NULL;
         }
 
-        assert(root_len > 0);
-
-        char *tmp = f->path + root_len + 1;
+        char *tmp = f->partial_path + strspn(f->partial_path, "/"); /* skip inital '/' */
         char *last_slash = strrchr(tmp, '/');
         if(last_slash++ == NULL)
             last_slash = tmp;
-        char *p = xstrndup(tmp, last_slash - tmp);
+        char *p = xstrndup(tmp, last_slash - tmp); /* sub-path */
 
         int i;
         int n = 0;

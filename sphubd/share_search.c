@@ -54,11 +54,15 @@ static int file_matches_search(share_file_t *f, const share_search_t *search)
     if(search->type != SHARE_TYPE_ANY && f->type != search->type)
         return 0;
 
+    char *filename = strrchr(f->partial_path, '/');
+    if(filename++ == NULL)
+	filename = f->partial_path;
+
     int i;
     for(i = 0; i < search->words->argc; i++)
     {
         /* FIXME: what about UTF-8?  */
-        if(strcasestr(f->name, search->words->argv[i]) == NULL)
+        if(strcasestr(filename, search->words->argv[i]) == NULL)
         {
             return 0;
         }

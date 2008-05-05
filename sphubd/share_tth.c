@@ -18,6 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,34 +34,40 @@
 
 /***** handling TTHs and leaf data *****/
 
-static void share_insert_file(share_t *share, share_mountpoint_t *mp,
-        share_file_t *file)
+static void share_insert_file(share_t *share, share_file_t *file)
 {
-    if(share_lookup_file(share, file->path) == NULL)
+    char *local_path = share_complete_path(file);
+
+    if(share_lookup_file(share, local_path) == NULL)
     {
-        if(share_lookup_unhashed_file(share, file->path) != NULL)
+        if(share_lookup_unhashed_file(share, local_path) != NULL)
         {
             /* move the file from the unhashed tree to the hashed tree */
             RB_REMOVE(file_tree, &share->unhashed_files, file);
         }
         else
         {
-            WARNING("File [%s] not in unhashed tree!?", file->path);
+            WARNING("File [%s] not in unhashed tree!?", local_path);
         }
 
         RB_INSERT(file_tree, &share->files, file);
     }
     else
     {
-        WARNING("File [%s] already in hashed tree!?", file->path);
+        WARNING("File [%s] already in hashed tree!?", local_path);
     }
 
+    free(local_path);
+
     /* update mountpoint statistics */
-    mp->stats.size += file->size;
-    mp->stats.nfiles++;
+    file->mp->stats.size += file->size;
+    file->mp->stats.nfiles++;
 
     /* add the file to the bloom filter */
-    bloom_add_filename(share->bloom, file->name);
+    char *filename = strrchr(file->partial_path, '/');
+    if(filename++ == NULL)
+	filename = file->partial_path;
+    bloom_add_filename(share->bloom, filename);
 }
 
 void handle_tth_available_notification(nc_t *nc,
@@ -69,7 +78,25 @@ void handle_tth_available_notification(nc_t *nc,
     share_t *share = user_data;
     share_file_t *file = notification->file;
 
-    struct tth_entry *te = tth_store_lookup(global_tth_store, notification->tth);
+    /* Find the modification time of the file, so we can detect changes when we
+     * re-scan this file. FIXME: should probably store the mtime as it is when
+     * _opening_ the file, not afterwards as it is now. If the file is being
+     * modified (without affecting the filesize) while we're hashing it, we
+     * won't detect this modification.
+     */
+    struct stat stbuf;
+    char *local_path = share_complete_path(file);
+    if(stat(local_path, &stbuf) != 0)
+    {
+	WARNING("%s: failed to lookup mtime: %s", local_path, strerror(errno));
+	free(local_path);
+	return;
+    }
+
+    free(local_path);
+
+    struct tth_entry *te = tth_store_lookup(global_tth_store,
+	notification->tth);
 
     if(te == NULL)
     {
@@ -80,21 +107,14 @@ void handle_tth_available_notification(nc_t *nc,
     }
 
     tth_store_add_inode(global_tth_store,
-	file->inode, file->mtime, notification->tth);
-
-    share_mountpoint_t *mp = share_lookup_local_root(share, file->path);
-    if(mp == NULL)
-    {
-        WARNING("Mountpoint disappeared!");
-        return;
-    }
+	file->inode, stbuf.st_mtime, notification->tth);
 
     share->uptodate = false;
 
     if(te == NULL)
     {
 	/* there was no previous conflicting TTH */
-        share_insert_file(share, mp, file);
+        share_insert_file(share, file);
     }
     else
     {
@@ -108,8 +128,8 @@ void handle_tth_available_notification(nc_t *nc,
 	{
 	    /* original shared, keep as duplicate */
 	    file->duplicate_inode = te->active_inode;
-	    mp->stats.nduplicates++;
-	    mp->stats.dupsize += file->size;
+	    file->mp->stats.nduplicates++;
+	    file->mp->stats.dupsize += file->size;
 	}
 	else
 	{
@@ -120,7 +140,7 @@ void handle_tth_available_notification(nc_t *nc,
 		notification->leafdata_base64,
 		0);
 
-	    share_insert_file(share, mp, file);
+	    share_insert_file(share, file);
 	}
     }
 }

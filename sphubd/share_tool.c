@@ -105,7 +105,8 @@ static void shutdown_event(int fd, short why, void *data)
 int search_match_cb(const share_search_t *search,
         share_file_t *file, const char *tth, void *data)
 {
-    printf(CLRON "search match: %s, TTH/%s" CLROFF "\n", file->path, tth);
+    printf(CLRON "search match: %s%s, TTH/%s" CLROFF "\n",
+	file->mp->local_root, file->partial_path, tth);
     /* if(tth) */
         /* printf("TTH:%s\n", tth); */
     return 0;
