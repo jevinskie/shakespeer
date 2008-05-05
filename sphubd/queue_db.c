@@ -28,6 +28,7 @@
 #include "log.h"
 #include "queue.h"
 #include "notifications.h"
+#include "quote.h"
 
 #define QUEUE_DB_FILENAME "queue2.db"
 
@@ -44,51 +45,33 @@ static void queue_parse_add_target(char *buf, size_t len)
 
 	/* syntax is 'filename:target_dir:size:tth:flags:ctime:prio:seq' */
 
-	/* FIXME: need quoting! */
+	char *filename = q_strsep(&buf, ":");
+	return_if_fail(filename && *filename);
 
-	char *filename = buf;
-	buf += strcspn(buf, ":");
-	return_if_fail(*buf == ':');
-	*buf++ = 0;
-
-	char *target_directory = buf;
-	buf += strcspn(buf, ":");
-	return_if_fail(*buf == ':');
-	*buf++ = 0;
-	if(*target_directory == 0)
+	char *target_directory = q_strsep(&buf, ":");
+	if(*target_directory == '\0')
 		target_directory = NULL;
 
-	char *size = buf;
-	buf += strcspn(buf, ":");
-	return_if_fail(*buf == ':');
-	*buf++ = 0;
+	char *size = q_strsep(&buf, ":");
+	return_if_fail(size && *size);
 	uint64_t s = strtoull(size, NULL, 10);
 
-	char *tth = buf;
-	buf += strcspn(buf, ":");
-	return_if_fail(*buf == ':');
-	*buf++ = 0;
+	char *tth = q_strsep(&buf, ":");
+	return_if_fail(tth && *tth);
 
-	char *flags = buf;
-	buf += strcspn(buf, ":");
-	return_if_fail(*buf == ':');
-	*buf++ = 0;
+	char *flags = q_strsep(&buf, ":");
+	return_if_fail(flags && *flags);
 	int f = atoi(flags);
 
-	/* char *ctime = buf; */
-	buf += strcspn(buf, ":");
-	return_if_fail(*buf == ':');
-	*buf++ = 0;
+	char *ctime = q_strsep(&buf, ":");
+	return_if_fail(ctime && *ctime);
 
-	char *prio = buf;
-	buf += strcspn(buf, ":");
-	return_if_fail(*buf == ':');
-	*buf++ = 0;
+	char *prio = q_strsep(&buf, ":");
+	return_if_fail(prio && *prio);
 	int p = atoi(prio);
 
-	char *sequence = buf;
-	buf += strcspn(buf, ":");
-	return_if_fail(*buf == 0);
+	char *sequence = q_strsep(&buf, ":");
+	return_if_fail(sequence && *sequence);
 	unsigned seq = atoi(sequence);
 
 	queue_target_add(filename, tth, target_directory, s, f, p, seq);
@@ -101,21 +84,13 @@ static void queue_parse_add_source(char *buf, size_t len)
 
 	/* syntax is 'nick:target_filename:source_filename' */
 
-	char *nick = buf;
-	char *colon = strchr(buf, ':');
-	return_if_fail(colon);
-	*colon = 0;
-	++colon;
-	return_if_fail(*colon);
+	char *nick = q_strsep(&buf, ":");
+	char *target_filename = q_strsep(&buf, ":");
+	char *source_filename = q_strsep(&buf, ":");
 
-	char *target_filename = colon;
-	colon = strchr(target_filename, ':');
-	return_if_fail(colon);
-	*colon = 0;
-	++colon;
-	return_if_fail(*colon);
-
-	char *source_filename = colon;
+	return_if_fail(*nick);
+	return_if_fail(*target_filename);
+	return_if_fail(*source_filename);
 
 	queue_add_source(nick, target_filename, source_filename);
 }
@@ -126,19 +101,15 @@ static void queue_parse_add_filelist(char *buf, size_t len)
 	len -= 3;
 
 	/* syntax is 'nick:flags' */
-	char *colon = strchr(buf, ':');
-	return_if_fail(colon);
+	char *nick = q_strsep(&buf, ":");
+	return_if_fail(*nick);
 
-	*colon = 0;
-	++colon;
-	return_if_fail(*colon);
-
-	int flags = atoi(colon);
+	int flags = atoi(buf);
 
 	bool auto_matched = (flags & QUEUE_TARGET_AUTO_MATCHED) ==
 		QUEUE_TARGET_AUTO_MATCHED;
 
-	queue_add_filelist(buf, auto_matched);
+	queue_add_filelist(nick, auto_matched);
 }
 
 static void queue_parse_add_directory(char *buf, size_t len)
@@ -146,23 +117,15 @@ static void queue_parse_add_directory(char *buf, size_t len)
 	buf += 3;  /* skip past "+D:" */
 	len -= 3;
 
-	/* syntax is 'target_directory:nick:source_directory:nfiles:nleft' */
+	/* syntax is 'target_directory:nick:source_directory */
 
-	char *target_directory = buf;
-	char *colon = strchr(target_directory, ':');
-	return_if_fail(colon);
-	*colon = 0;
-	++colon;
-	return_if_fail(*colon);
+	char *target_directory = q_strsep(&buf, ":");
+	char *nick = q_strsep(&buf, ":");
+	char *source_directory = q_strsep(&buf, ":");
 
-	char *nick = colon;
-	colon = strchr(nick, ':');
-	return_if_fail(colon);
-	*colon = 0;
-	++colon;
-	return_if_fail(*colon);
-
-	char *source_directory = colon;
+	return_if_fail(*target_directory);
+	return_if_fail(*nick);
+	return_if_fail(*source_directory);
 
 	queue_db_add_directory(target_directory, nick, source_directory);
 }
@@ -183,14 +146,13 @@ static void queue_parse_set_directory_resolved(char *buf, size_t len)
 
 	/* syntax is 'target_directory:nfiles' */
 
-	char *colon = strchr(buf, ':');
-	return_if_fail(colon);
-	*colon = 0;
+	char *target_directory = q_strsep(&buf, ":");
+	return_if_fail(*target_directory);
 
 	/* FIXME: use strtonum */
-	unsigned nfiles = strtoul(colon + 1, NULL, 10);
+	unsigned nfiles = strtoul(buf, NULL, 10);
 
-	queue_db_set_resolved(buf, nfiles);
+	queue_db_set_resolved(target_directory, nfiles);
 }
 
 static void queue_parse_set_priority(char *buf, size_t len)
@@ -200,16 +162,11 @@ static void queue_parse_set_priority(char *buf, size_t len)
 
 	/* syntax is 'target_filename:priority' */
 
-	char *colon = strchr(buf, ':');
-	return_if_fail(colon);
+	char *target_filename = q_strsep(&buf, ":");
+	return_if_fail(*target_filename);
+	int priority = atoi(buf);
 
-	*colon = 0;
-	++colon;
-	return_if_fail(*colon);
-
-	int priority = atoi(colon);
-
-	queue_set_priority(buf, priority);
+	queue_set_priority(target_filename, priority);
 }
 
 static void queue_parse_remove_target(char *buf, size_t len)
@@ -236,14 +193,12 @@ static void queue_parse_remove_source(char *buf, size_t len)
 	len -= 3;
 
 	/* syntax is 'target_filename:nick' */
-	char *target_filename = buf;
-	char *colon = strchr(target_filename, ':');
-	return_if_fail(colon);
-	*colon = 0;
-	++colon;
-	return_if_fail(*colon);
 
-	queue_remove_source(target_filename, colon);
+	char *target_filename = q_strsep(&buf, ":");
+	char *nick = q_strsep(&buf, ":");
+	return_if_fail(*target_filename && *nick);
+
+	queue_remove_source(target_filename, nick);
 }
 
 static void queue_load(void)
@@ -908,41 +863,57 @@ void queue_db_print_add_target(FILE *fp, struct queue_target *qt)
 	return_if_fail(fp);
 	return_if_fail(qt);
 
+	char *tmp1 = str_quote_backslash(qt->filename, ":");
+	char *tmp2 = str_quote_backslash(qt->target_directory, ":");
+
 	fprintf(fp,
 		"+T:%s:%s:%llu:%s:%u:%lu:%i:%u\n",
-		qt->filename,
-		qt->target_directory ? qt->target_directory : "",
+		tmp1,
+		tmp2 ? tmp2 : "",
 		qt->size,
 		qt->tth ? qt->tth : "",
 		qt->flags,
 		(unsigned long)qt->ctime,
 		qt->priority,
 		qt->seq);
+
+	free(tmp1);
+	free(tmp2);
 }
 
 void queue_db_print_add_source(FILE *fp, struct queue_source *qs)
 {
 	return_if_fail(fp);
 	return_if_fail(qs);
-	fprintf(fp, "+S:%s:%s:%s\n",
-		qs->nick,
-		qs->target_filename,
-		qs->source_filename);
+	char *tmp1 = str_quote_backslash(qs->nick, ":");
+	char *tmp2 = str_quote_backslash(qs->target_filename, ":");
+	char *tmp3 = str_quote_backslash(qs->source_filename, ":");
+	fprintf(fp, "+S:%s:%s:%s\n", tmp1, tmp2, tmp3);
+	free(tmp1);
+	free(tmp2);
+	free(tmp3);
 }
 
 void queue_db_print_add_filelist(FILE *fp, struct queue_filelist *qf)
 {
 	return_if_fail(fp);
 	return_if_fail(qf);
-	fprintf(fp, "+F:%s:%i\n", qf->nick, qf->flags);
+	char *tmp = str_quote_backslash(qf->nick, ":");
+	fprintf(fp, "+F:%s:%i\n", tmp, qf->flags);
+	free(tmp);
 }
 
 void queue_db_print_add_directory(FILE *fp, struct queue_directory *qd)
 {
 	return_if_fail(fp);
 	return_if_fail(qd);
-	fprintf(fp, "+D:%s:%s:%s\n",
-			qd->target_directory, qd->nick, qd->source_directory);
+	char *tmp1 = str_quote_backslash(qd->target_directory, ":");
+	char *tmp2 = str_quote_backslash(qd->nick, ":");
+	char *tmp3 = str_quote_backslash(qd->source_directory, ":");
+	fprintf(fp, "+D:%s:%s:%s\n", tmp1, tmp2, tmp3);
+	free(tmp1);
+	free(tmp2);
+	free(tmp3);
 }
 
 void queue_db_print_set_resolved(FILE *fp, struct queue_directory *qd)
@@ -952,7 +923,9 @@ void queue_db_print_set_resolved(FILE *fp, struct queue_directory *qd)
 
 	if((qd->flags & QUEUE_DIRECTORY_RESOLVED) == QUEUE_DIRECTORY_RESOLVED)
 	{
-		fprintf(fp, "=R:%s:%u\n", qd->target_directory, qd->nfiles);
+		char *tmp = str_quote_backslash(qd->target_directory, ":");
+		fprintf(fp, "=R:%s:%u\n", tmp, qd->nfiles);
+		free(tmp);
 	}
 }
 

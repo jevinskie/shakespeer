@@ -426,7 +426,7 @@ void handle_filelist_added_notification(nc_t *nc, const char *channel,
     fail_unless(data);
     fail_unless(data->nick);
     DEBUG("added filelist for %s", data->nick);
-    fail_unless(strcmp(data->nick, "bar") == 0);
+    fail_unless(strcmp(data->nick, "ba:r") == 0);
     got_filelist_notification = 1;
 }
 
@@ -636,16 +636,16 @@ void test_filelist_dups(void)
 {
     test_setup();
 
-    fail_unless(queue_add_filelist("bar", 0) == 0);
+    fail_unless(queue_add_filelist("ba:r", 0) == 0);
     fail_unless(got_filelist_notification == 1);
 
     /* check that we can get the filelist */
-    queue_filelist_t *qf = queue_lookup_filelist("bar");
+    queue_filelist_t *qf = queue_lookup_filelist("ba:r");
     fail_unless(qf);
 
     /* If we add the filelist again, we should not get a duplicate notification */
     got_filelist_notification = 0;
-    fail_unless(queue_add_filelist("bar", 0) == 0);
+    fail_unless(queue_add_filelist("ba:r", 0) == 0);
     fail_unless(got_filelist_notification == 0);
 
     test_teardown();
@@ -662,15 +662,15 @@ void test_persistence(void)
     fail_unless(qt->priority == 3);
 
     queue_set_priority("file.img", 4);
-    queue_add_filelist("bar", 1);
-    queue_add_source("foo2", "file.img", "sourcefile.img");
+    queue_add_filelist("ba:r", 1);
+    queue_add_source("foo:2", "file.img", "sourcefile.img");
 
     /* add a new target... */
-    fail_unless(queue_add("bar", "remote_file_0", 4096, "local_file_0",
+    fail_unless(queue_add("ba:r", "remote_file:0", 4096, "local_file:0",
                 "ZXCVZXCVZXCVZXCVZXCVP5W7EMN3LMFS65H7D2Y") == 0);
 
     /* ...and remove it */
-    fail_unless(queue_remove_target("local_file_0") == 0);
+    fail_unless(queue_remove_target("local_file:0") == 0);
 
     /* close and re-open the queue
      */
@@ -691,13 +691,13 @@ void test_persistence(void)
     queue_free(q);
 
     /* look up the extra source */
-    q = queue_get_next_source_for_nick("foo2");
+    q = queue_get_next_source_for_nick("foo:2");
     fail_unless(q);
     fail_unless(q->target_filename);
     fail_unless(strcmp(q->target_filename, "file.img") == 0);
     queue_free(q);
 
-    struct queue_filelist *qf = queue_lookup_filelist("bar");
+    struct queue_filelist *qf = queue_lookup_filelist("ba:r");
     fail_unless(qf);
     fail_unless((qf->flags & QUEUE_TARGET_AUTO_MATCHED) ==
 	QUEUE_TARGET_AUTO_MATCHED);
@@ -706,9 +706,9 @@ void test_persistence(void)
     qt = queue_lookup_target("local_file_0");
     fail_unless(qt == NULL);
 
-    queue_remove_filelist("bar");
+    queue_remove_filelist("ba:r");
 
-    fail_unless( queue_remove_source("file.img", "foo2") == 0 );
+    fail_unless( queue_remove_source("file.img", "foo:2") == 0 );
 
     /* close and re-open the queue again
      */
@@ -716,11 +716,11 @@ void test_persistence(void)
     queue_init();
 
     /* this filelist should be removed */
-    qf = queue_lookup_filelist("bar");
+    qf = queue_lookup_filelist("ba:r");
     fail_unless(qf == NULL);
 
     /* this source should be removed */
-    q = queue_get_next_source_for_nick("foo2");
+    q = queue_get_next_source_for_nick("foo:2");
     if(q)
 	INFO("got unexpected target [%s]", q->target_filename);
     fail_unless(q == NULL);
