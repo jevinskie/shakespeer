@@ -41,7 +41,7 @@ endif
 
 # Berkeley DB on Linux needs pthread
 # We also need to link with -lresolv
-ifeq ($)os),Linux)
+ifeq ($(os),Linux)
 LIBS+=-lpthread -lresolv
 endif
 
