@@ -50,8 +50,8 @@ gui:
 ? Menu option to download to separate location
   + pre-defined locations (music, movies, etc...)
 * implement user-command commands in filelist view
-* ability to see stats in bottom of main window (#1294025)
-* Filtering improvements, space-separated keywords should be logically ANDed (#1328730)
+* ability to see stats in bottom of main window (#108)
+* Filtering improvements, space-separated keywords should be logically ORed (#133)
 * Filter kick messages from main chat
 * Add menu item to download file and open in TextEdit (Search view, Filelist view)
 * add "stalled" status to transfer items
@@ -61,8 +61,6 @@ graphical glitches (low priority):
 
 * Fix string truncation in filelist view
 * fix jumpy selection in nick table (and search table)
-* add grey metal iTunes-like table header in sidebar
 * progress spinner when refreshing hublist
 * icons in nick table representing active/passive state
 * fix backgrounds in tables with alt. row background
-
