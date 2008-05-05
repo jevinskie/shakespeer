@@ -115,11 +115,18 @@ check-local: $(check_PROGRAMS)
 	done
 
 OBJS=$(SOURCES:.c=.o)
+ALLCSOURCES := $(wildcard *.c)
+ALLMSOURCES := $(wildcard *.m)
 ifeq ($(os),Darwin)
-ALLSOURCES := $(wildcard *.[cm])
+ALLSOURCES := $(ALLCSOURCES) $(ALLMSOURCES)
 else
-ALLSOURCES := $(wildcard *.c)
+ALLSOURCES := $(ALLCSOURCES)
 endif
 
--include $(wildcard *.c:.c=.P) $(wildcard *.m:.m=.P)
+ifneq ($(ALLCSOURCES),)
+-include $(patsubst %.c,$(DEPDIR)/%.P,$(ALLCSOURCES))
+endif
+ifneq ($(ALLMSOURCES),)
+-include $(patsubst %.m,$(DEPDIR)/%.P,$(ALLMSOURCES))
+endif
 
