@@ -56,10 +56,6 @@ echo "+ copying ShakesPeer.app"
 
 echo "+ copying License.txt"
 /bin/cp "$cwd/License.txt" "$root" || die "failed to copy License.txt to disk image"
-echo "+ copying TODO"
-/bin/cp "$cwd/TODO" "$root" || die "failed to copy TODO to disk image"
-echo "+ copying AUTHORS"
-/bin/cp "$cwd/AUTHORS" "$root" || die "failed to copy AUTHORS to disk image"
 
 get_external_dependencies()
 {
