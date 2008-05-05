@@ -58,4 +58,5 @@ clean-local:
 	rm -f libspclient.a ${OBJS} ${BUILT_SOURCES}
 	rm -f ${CLEANFILES}
 	rm -f ${check_PROGRAMS}
+	rm -f *.o
 
