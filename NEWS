@@ -1,8 +1,17 @@
+New in version 0.9.5:
+
+* Fixed reporting of total slots
+* Fixed crash when hashing files
+* Added tab completion of nicks in main chat
+
 New in version 0.9.4:
 
+* New database backend: FILE HASHES ARE LOST
+* Fixes problems with database corruption
+* More controlled startup
 * Uses ShakesPeer-specific tag
 * Fixed buggy upload slots limit
-* New database backend: FILE HASHES ARE LOST
+* Lots more...
 
 New in version 0.9.3:
 
