@@ -482,6 +482,48 @@ void test_remove_directory(void)
     puts("PASSED: remove directory");
 }
 
+/* verify that different priorities works for different targets within a
+ * directory
+ */
+void test_directory_priorities(void)
+{
+    test_setup();
+    test_create_filelist();
+
+    /* add a directory */
+    fail_unless(queue_add_directory("bar", "source\\directory",
+                "target/directory") == 0);
+
+    fail_unless(queue_set_priority("target/directory/filen", 1) == 0);
+    fail_unless(queue_set_priority("target/directory/filen2", 2) == 0);
+    fail_unless(queue_set_priority("target/directory/subdir/filen3", 4) == 0);
+
+    queue_t *q = queue_get_next_source_for_nick("bar");
+    fail_unless(q);
+    fail_unless(q->source_filename);
+    fail_unless(strcmp(q->source_filename, "source\\directory\\subdir\\filen3") == 0);
+    queue_free(q);
+    fail_unless(queue_remove_target("target/directory/subdir/filen3") == 0);
+
+    q = queue_get_next_source_for_nick("bar");
+    fail_unless(q);
+    fail_unless(q->source_filename);
+    fail_unless(strcmp(q->source_filename, "source\\directory\\filen2") == 0);
+    queue_free(q);
+    fail_unless(queue_remove_target("target/directory/filen2") == 0);
+
+    q = queue_get_next_source_for_nick("bar");
+    fail_unless(q);
+    fail_unless(q->source_filename);
+    fail_unless(strcmp(q->source_filename, "source\\directory\\filen") == 0);
+    queue_free(q);
+    fail_unless(queue_remove_target("target/directory/filen") == 0);
+
+    test_teardown();
+
+    puts("PASSED: directory priorities");
+}
+
 int main(void)
 {
     sp_log_set_level("debug");
@@ -498,6 +540,7 @@ int main(void)
     test_add_directory_no_filelist();
     test_add_directory_existing_filelist();
     test_remove_directory();
+    test_directory_priorities();
 
     return 0;
 }

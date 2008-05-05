@@ -429,11 +429,18 @@ int queue_set_priority(const char *target_filename, unsigned int priority)
     queue_target_t *qt = queue_lookup_target(target_filename);
     if(qt)
     {
-        qt->priority = priority;
-        if(queue_update_target(qt) == 0)
+        if(qt->priority != priority)
         {
-            nc_send_queue_priority_changed_notification(nc_default(),
-                    target_filename, priority);
+            qt->priority = priority;
+            if(queue_update_target(qt) == 0)
+            {
+                nc_send_queue_priority_changed_notification(nc_default(),
+                        target_filename, priority);
+            }
+        }
+        else
+        {
+            g_info("target [%s] already has priority %i", target_filename, priority);
         }
     }
 
