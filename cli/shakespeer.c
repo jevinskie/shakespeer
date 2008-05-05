@@ -62,7 +62,7 @@ sp_filelist_t *sp_read_filelist(const char *filename)
 {
     sp_filelist_t *fl = 0;
 
-    fl_dir_t *root = fl_parse(filename);
+    fl_dir_t *root = fl_parse(filename, NULL);
     if(root)
     {
         fl = calloc(1, sizeof(sp_filelist_t));
@@ -316,7 +316,7 @@ static int spcb_filelist_finished(sp_t *sp, const char *hub, const char *nick, c
         free(old_fl);
     }
 
-    fl_dir_t *root = fl_parse(filename);
+    fl_dir_t *root = fl_parse(filename, NULL);
     if(root)
     {
         sp_filelist_t *fl = calloc(1, sizeof(sp_filelist_t));
