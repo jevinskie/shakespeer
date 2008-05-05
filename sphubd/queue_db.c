@@ -795,8 +795,9 @@ int queue_db_remove_directory(const char *target_directory)
 
 	queue_directory_free(qd);
 
+	int rc = 0;
 	if(!q_store->loading)
-		fprintf(q_store->fp, "-D:%s\n", target_directory);
+		rc = fprintf(q_store->fp, "-D:%s\n", target_directory);
 
 	/* notify ui:s */
 	nc_send_queue_directory_removed_notification(nc_default(),
@@ -864,15 +865,16 @@ struct queue_target *queue_target_duplicate(struct queue_target *qt)
 	return qt_dup;
 }
 
-void queue_db_print_add_target(FILE *fp, struct queue_target *qt)
+int
+queue_db_print_add_target(FILE *fp, struct queue_target *qt)
 {
-	return_if_fail(fp);
-	return_if_fail(qt);
+	return_val_if_fail(fp, -1);
+	return_val_if_fail(qt, -1);
 
 	char *tmp1 = str_quote_backslash(qt->filename, ":");
 	char *tmp2 = str_quote_backslash(qt->target_directory, ":");
 
-	fprintf(fp,
+	int rc = fprintf(fp,
 		"+T:%s:%s:%"PRIu64":%s:%u:%lu:%i:%u\n",
 		tmp1,
 		tmp2 ? tmp2 : "",
@@ -885,57 +887,76 @@ void queue_db_print_add_target(FILE *fp, struct queue_target *qt)
 
 	free(tmp1);
 	free(tmp2);
+
+	return rc;
 }
 
-void queue_db_print_add_source(FILE *fp, struct queue_source *qs)
+int
+queue_db_print_add_source(FILE *fp, struct queue_source *qs)
 {
-	return_if_fail(fp);
-	return_if_fail(qs);
+	return_val_if_fail(fp, -1);
+	return_val_if_fail(qs, -1);
+
 	char *tmp1 = str_quote_backslash(qs->nick, ":");
 	char *tmp2 = str_quote_backslash(qs->target_filename, ":");
 	char *tmp3 = str_quote_backslash(qs->source_filename, ":");
-	fprintf(fp, "+S:%s:%s:%s\n", tmp1, tmp2, tmp3);
+	int rc = fprintf(fp, "+S:%s:%s:%s\n", tmp1, tmp2, tmp3);
 	free(tmp1);
 	free(tmp2);
 	free(tmp3);
+
+	return rc;
 }
 
-void queue_db_print_add_filelist(FILE *fp, struct queue_filelist *qf)
+int
+queue_db_print_add_filelist(FILE *fp, struct queue_filelist *qf)
 {
-	return_if_fail(fp);
-	return_if_fail(qf);
+	return_val_if_fail(fp, -1);
+	return_val_if_fail(qf, -1);
+
 	char *tmp = str_quote_backslash(qf->nick, ":");
-	fprintf(fp, "+F:%s:%i\n", tmp, qf->flags);
+	int rc = fprintf(fp, "+F:%s:%i\n", tmp, qf->flags);
 	free(tmp);
+
+	return rc;
 }
 
-void queue_db_print_add_directory(FILE *fp, struct queue_directory *qd)
+int
+queue_db_print_add_directory(FILE *fp, struct queue_directory *qd)
 {
-	return_if_fail(fp);
-	return_if_fail(qd);
+	return_val_if_fail(fp, -1);
+	return_val_if_fail(qd, -1);
+
 	char *tmp1 = str_quote_backslash(qd->target_directory, ":");
 	char *tmp2 = str_quote_backslash(qd->nick, ":");
 	char *tmp3 = str_quote_backslash(qd->source_directory, ":");
-	fprintf(fp, "+D:%s:%s:%s\n", tmp1, tmp2, tmp3);
+	int rc = fprintf(fp, "+D:%s:%s:%s\n", tmp1, tmp2, tmp3);
 	free(tmp1);
 	free(tmp2);
 	free(tmp3);
+
+	return rc;
 }
 
-void queue_db_print_set_resolved(FILE *fp, struct queue_directory *qd)
+int
+queue_db_print_set_resolved(FILE *fp, struct queue_directory *qd)
 {
-	return_if_fail(fp);
-	return_if_fail(qd);
+	return_val_if_fail(fp, -1);
+	return_val_if_fail(qd, -1);
 
+	int rc = 0;
 	if((qd->flags & QUEUE_DIRECTORY_RESOLVED) == QUEUE_DIRECTORY_RESOLVED)
 	{
 		char *tmp = str_quote_backslash(qd->target_directory, ":");
-		fprintf(fp, "=R:%s:%u\n", tmp, qd->nfiles);
+		rc = fprintf(fp, "=R:%s:%u\n", tmp, qd->nfiles);
 		free(tmp);
 	}
+
+	return rc;
 }
 
-static int queue_db_save(FILE *fp)
+static int
+queue_db_save(FILE *fp)
 {
 	return_val_if_fail(fp, -1);
 	return_val_if_fail(q_store, -1);
@@ -945,21 +966,24 @@ static int queue_db_save(FILE *fp)
 	struct queue_target *qt;
 	TAILQ_FOREACH(qt, &q_store->targets, link)
 	{
-		queue_db_print_add_target(fp, qt);
+		if(queue_db_print_add_target(fp, qt) < 0)
+			return -1;
 	}
 
 	/* save sources */
 	struct queue_source *qs;
 	TAILQ_FOREACH(qs, &q_store->sources, link)
 	{
-		queue_db_print_add_source(fp, qs);
+		if(queue_db_print_add_source(fp, qs) < 0)
+			return -1;
 	}
 
 	/* save filelists */
 	struct queue_filelist *qf;
 	TAILQ_FOREACH(qf, &q_store->filelists, link)
 	{
-		queue_db_print_add_filelist(fp, qf);
+		if(queue_db_print_add_filelist(fp, qf) < 0)
+			return -1;
 	}
 
 	/* save directories */
@@ -984,6 +1008,13 @@ static void queue_db_normalize(void)
 	asprintf(&tmpfile, "%s/%s.tmp",
 		global_working_directory, QUEUE_DB_FILENAME);
 	FILE *tmp_fp = fopen(tmpfile, "w"); /* truncate existing file */
+	if(tmp_fp == NULL)
+	{
+		ERROR("failed to open temporary queue database: %s",
+			strerror(errno));
+		free(tmpfile);
+		return;
+	}
 
 	int rc = queue_db_save(tmp_fp);
 	if(fclose(tmp_fp) == 0)

@@ -133,11 +133,11 @@ int queue_add_target(queue_target_t *qt);
 int queue_db_remove_target(const char *target_filename);
 int queue_remove_target(const char *target_filename);
 
-void queue_db_print_add_target(FILE *fp, struct queue_target *qt);
-void queue_db_print_add_source(FILE *fp, struct queue_source *qs);
-void queue_db_print_add_filelist(FILE *fp, struct queue_filelist *qf);
-void queue_db_print_add_directory(FILE *fp, struct queue_directory *qd);
-void queue_db_print_set_resolved(FILE *fp, struct queue_directory *qd);
+int queue_db_print_add_target(FILE *fp, struct queue_target *qt);
+int queue_db_print_add_source(FILE *fp, struct queue_source *qs);
+int queue_db_print_add_filelist(FILE *fp, struct queue_filelist *qf);
+int queue_db_print_add_directory(FILE *fp, struct queue_directory *qd);
+int queue_db_print_set_resolved(FILE *fp, struct queue_directory *qd);
 
 int queue_add_source(const char *nick, const char *target_filename,
         const char *source_filename);
