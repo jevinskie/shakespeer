@@ -25,6 +25,7 @@
 #import "SPSideBar.h"
 #import "FilteringArrayController.h"
 #import "SPUserDefaultKeys.h"
+#import "SPBookmarkController.h"
 
 #include "util.h"
 #include "hublist.h"
@@ -108,6 +109,7 @@
     }
     
     [[hubTable headerView] setMenu:columnsMenu];
+    [hubTable setMenu:contextMenu];
 }
 
 - (void)unbindControllers
@@ -296,6 +298,24 @@
 - (void)tableDidRecieveEnterKey:(id)sender
 {
     [self tableDoubleActionConnect:sender];
+}
+
+- (void)addHubsToBookmarks:(id)sender
+{
+    // add all selected hubs to bookmarks
+    NSArray *items = [arrayController selectedObjects];
+    NSEnumerator *e = [items objectEnumerator];
+    NSDictionary *dict;
+    while((dict = [e nextObject]) != nil)
+    {
+        [[SPBookmarkController sharedBookmarkController] addBookmarkWithName:[[dict valueForKey:@"name"] string]
+                                                                     address:[[dict valueForKey:@"address"] string]
+                                                                        nick:@""
+                                                                    password:@""
+                                                                 description:@""
+                                                                 autoconnect:NO
+                                                                    encoding:nil];
+    }
 }
 
 @end

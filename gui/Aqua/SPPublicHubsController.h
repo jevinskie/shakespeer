@@ -38,6 +38,8 @@
     IBOutlet NSTableView *hubTable;
     IBOutlet NSButton *refreshButton;
     
+    IBOutlet NSMenu *contextMenu;
+    
     IBOutlet NSMenu *columnsMenu;
     IBOutlet NSTableColumn *tcName;
     IBOutlet NSTableColumn *tcDescription;
@@ -58,6 +60,7 @@
 - (NSString *)title;
 - (NSImage *)image;
 - (void)setHubsFromList:(hublist_t *)hublist;
+- (void)addHubsToBookmarks:(id)sender;
 
 - (IBAction)toggleColumn:(id)sender;
 - (IBAction)tableDoubleActionConnect:(id)sender;

@@ -27,6 +27,7 @@
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {
             ACTIONS = {
+                addHubsToBookmarks = id; 
                 connect = id; 
                 refresh = id; 
                 tableDoubleActionConnect = id; 
@@ -37,6 +38,7 @@
             OUTLETS = {
                 arrayController = FilteringArrayController; 
                 columnsMenu = NSMenu; 
+                contextMenu = NSMenu; 
                 hubListView = NSView; 
                 hubTable = NSTableView; 
                 refreshButton = NSButton; 
