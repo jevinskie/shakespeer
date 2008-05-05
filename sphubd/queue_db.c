@@ -797,8 +797,6 @@ int queue_db_remove_directory(const char *target_directory)
 	if(qd == NULL)
 		return 0;
 
-	queue_directory_free(qd);
-
 	int rc = 0;
 	if(!q_store->loading)
 	{
@@ -810,6 +808,8 @@ int queue_db_remove_directory(const char *target_directory)
 	/* notify ui:s */
 	nc_send_queue_directory_removed_notification(nc_default(),
 		target_directory);
+
+	queue_directory_free(qd);
 
 	return 0;
 }

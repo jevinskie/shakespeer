@@ -176,7 +176,8 @@ int queue_remove_directory(const char *target_directory)
     {
 	next = TAILQ_NEXT(qt, link);
 
-        if(strcmp(target_directory, qt->target_directory) == 0)
+        if(qt->target_directory &&
+	   strcmp(target_directory, qt->target_directory) == 0)
         {
             queue_remove_sources(qt->filename);
             DEBUG("removing target [%s]", qt->filename);
