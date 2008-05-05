@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with ShakesPeer; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */                                                                                      
+ */
 
 #ifndef _hub_h_
 #define _hub_h_
@@ -25,6 +25,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <event.h>
+#include <stdbool.h>
 
 #include "user.h"
 
@@ -84,7 +85,7 @@ struct hub
     struct event idle_timeout_event;
     struct bufferevent *bufev;
 
-    int expected_disconnect;
+    bool expected_disconnect;
     struct event reconnect_event;
     int reconnect_attempt;
 
@@ -94,16 +95,16 @@ struct hub
     char *hubip;
     int port; /* remote port of hub */
     char *address; /* original address passed from ui */
-    int has_userip;
-    int has_nogetinfo;
+    bool has_userip;
+    bool has_nogetinfo;
     int slots;
     int open_slots;
     int open_minislots;
 
-    int extended_protocol;
-    int logged_in;
-    int is_registered;
-    int got_lock;
+    bool extended_protocol;
+    bool logged_in;
+    bool is_registered;
+    bool got_lock;
 
     LIST_HEAD(, user) users[HUB_USER_NHASH];
 

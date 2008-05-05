@@ -112,8 +112,8 @@ int main(void)
     fail_unless(cc_request_download(cc) == -1);
 
     /* download a filelist */
-    cc->has_xmlbzlist = TRUE;
-    rc = queue_add_filelist("foo", FALSE);
+    cc->has_xmlbzlist = true;
+    rc = queue_add_filelist("foo", false);
     fail_unless(rc == 0);
     fail_unless(cc_request_download(cc) == 0);
     fail_unless(strcmp(cc->current_queue->target_filename, "/tmp/files.xml.foo.bz2") == 0);

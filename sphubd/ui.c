@@ -344,7 +344,7 @@ static int ui_cb_disconnect(ui_t *ui, const char *hub_address)
     if(hub)
     {
         g_debug("found hub with name '%s'", hub->hubname);
-        hub->expected_disconnect = 1;
+        hub->expected_disconnect = true;
         hub_close_connection(hub);
     }
     return 0;

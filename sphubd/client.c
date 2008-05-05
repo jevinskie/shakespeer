@@ -381,7 +381,7 @@ static void cc_expire_handshake_timer_event_func(int fd, short condition, void *
  * INCOMING_CONNECTION is 1 if the client connection was initiated by
  * another peer (ie, as a response to a $ConnectToMe).
  */
-static void cc_add_channel(int fd, int incoming_connection, hub_t *hub,
+static void cc_add_channel(int fd, bool incoming_connection, hub_t *hub,
         struct sockaddr_in *peer_addr)
 {
     /* Create a new client connection struct */
@@ -401,7 +401,7 @@ static void cc_add_channel(int fd, int incoming_connection, hub_t *hub,
         memcpy(&cc->addr, peer_addr, sizeof(struct sockaddr_in));
     }
 
-    if(cc->incoming_connection == 0)
+    if(cc->incoming_connection == false)
     {
         return_if_fail(hub);
         cc_send_command(cc, "$MyNick %s|", hub->me->nick);
@@ -412,7 +412,8 @@ static void cc_add_channel(int fd, int incoming_connection, hub_t *hub,
 
     /* add a timer to close the connection if handshake takes too long time to
      * complete */
-    evtimer_set(&cc->handshake_timer_event, cc_expire_handshake_timer_event_func, cc);
+    evtimer_set(&cc->handshake_timer_event,
+            cc_expire_handshake_timer_event_func, cc);
     struct timeval tv = {.tv_sec = 90, .tv_usec = 0};
     evtimer_add(&cc->handshake_timer_event, &tv);
 }
@@ -624,7 +625,7 @@ void cc_accept_connection(int fd, short condition, void *data)
         g_warning("getpeername: %s (ignored)", strerror(errno));
     }
 
-    cc_add_channel(afd, 1, NULL, &addr);
+    cc_add_channel(afd, true, NULL, &addr);
 }
 
 static void cc_connect_event(int fd, int error, void *user_data)
@@ -633,7 +634,7 @@ static void cc_connect_event(int fd, int error, void *user_data)
 
     if(error == 0)
     {
-        cc_add_channel(fd, 0, hub, NULL);
+        cc_add_channel(fd, false, hub, NULL);
     }
     else
     {

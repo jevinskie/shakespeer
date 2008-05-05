@@ -202,7 +202,7 @@ static int hub_cmd_Hello(void *data, int argc, char **argv)
         {
             hub_send_string(hub, "$Version 1,0091|");
             hub_get_nicklist(hub);
-            hub->logged_in = 1;
+            hub->logged_in = true;
             hub_send_myinfo(hub);
         }
     }
@@ -273,9 +273,10 @@ static int hub_cmd_ForceMove(void *opaque_param, int argc, char **argv)
         char *speed = xstrdup(hub->me->speed);
         char *encoding = xstrdup(hub->encoding);
         int passive = hub->me->passive;
-        hub->expected_disconnect = 1;
+        hub->expected_disconnect = true;
         hub_close_connection(hub);
-        hub_connect(argv[0], nick, email, description, speed, passive, NULL, encoding);
+        hub_connect(argv[0], nick, email, description, speed,
+                passive, NULL, encoding);
         free(nick);
         free(email);
         free(description);
@@ -284,8 +285,9 @@ static int hub_cmd_ForceMove(void *opaque_param, int argc, char **argv)
     }
     else
     {
-        ui_send_status_message(NULL, hub->address, "Redirected to hub %s", argv[0]);
-        hub->expected_disconnect = 1;
+        ui_send_status_message(NULL, hub->address,
+                "Redirected to hub %s", argv[0]);
+        hub->expected_disconnect = true;
         hub_close_connection(hub);
     }
 
@@ -495,7 +497,7 @@ static int hub_cmd_NickList(void *data, int argc, char **argv)
 
     arg_t *nicks = arg_create(argv[0], "$", 0);
 
-    if(nicks && hub->has_nogetinfo == 0)
+    if(nicks && hub->has_nogetinfo == false)
     {
         int i;
         for(i = 0; i < nicks->argc; i++)
@@ -636,13 +638,13 @@ static int hub_cmd_Supports(void *data, int argc, char **argv)
     for(i = 0; i < argc; i++)
     {
         if(strcmp(argv[i], "NoGetINFO") == 0)
-            hub->has_nogetinfo = 1;
+            hub->has_nogetinfo = true;
         else if(strcmp(argv[i], "NoHello") == 0)
             /* whatever */ ;
         else if(strcmp(argv[i], "UserIP") == 0)
-            hub->has_userip = 1;
+            hub->has_userip = true;
         else if(strcmp(argv[i], "UserIP2") == 0)
-            hub->has_userip = 2;
+            hub->has_userip = true;
         else
             g_info("Hub supports unknown feature %s", argv[i]);
     }
@@ -662,7 +664,7 @@ static int hub_cmd_GetPass(void *data, int argc, char **argv)
     hub_t *hub = data;
     char *passwd = hub->password;
 
-    hub->is_registered = 1;
+    hub->is_registered = true;
 
     if(passwd == 0)
     {
@@ -688,7 +690,7 @@ static int hub_cmd_BadPass(void *data, int argc, char **argv)
     hub_t *hub = data;
 
     g_info("Wrong password");
-    hub->expected_disconnect = 1;
+    hub->expected_disconnect = true;
     hub_close_connection(hub);
     return 0;
 }
@@ -697,8 +699,9 @@ static int hub_cmd_ValidateDenide(void *data, int argc, char **argv)
 {
     hub_t *hub = data;
 
-    ui_send_status_message(NULL, hub ? hub->address : NULL, "The hub didn't accept the nickname");
-    hub->expected_disconnect = 1;
+    ui_send_status_message(NULL, hub ? hub->address : NULL,
+            "The hub didn't accept the nickname");
+    hub->expected_disconnect = true;
     hub_close_connection(hub);
     return -1;
 }
@@ -713,7 +716,7 @@ static int hub_cmd_Lock(hub_t *hub, const char *args)
     }
 
     if(strncmp(args, "EXTENDEDPROTOCOL", 16) == 0)
-        hub->extended_protocol = 1;
+        hub->extended_protocol = true;
 
     if(hub->extended_protocol)
     {
@@ -732,7 +735,7 @@ static int hub_cmd_Lock(hub_t *hub, const char *args)
     free(cmd);
     free(key);
 
-    hub->got_lock = 1;
+    hub->got_lock = true;
     return hub_send_command(hub, "$ValidateNick %s|", hub->me->nick);
 }
 
@@ -874,7 +877,7 @@ int hub_dispatch_command(hub_t *hub, char *cmdstr)
         {
             if(xstrcasestr(cmdstr_utf8_unescaped, "banned") != NULL)
             {
-                hub->expected_disconnect = 1;
+                hub->expected_disconnect = true;
             }
             rc = hub_cmd_ToAll(hub, cmdstr_utf8_unescaped);
         }

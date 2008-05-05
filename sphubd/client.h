@@ -23,6 +23,7 @@
 
 #include <sys/types.h>
 #include <netinet/in.h>
+#include <stdbool.h>
 
 #include "sys_queue.h"
 #include "hub.h"
@@ -71,14 +72,14 @@ struct cc
     char *nick;
     cc_direction_t direction;
     unsigned short challenge;
-    int incoming_connection;
+    bool incoming_connection;
     slot_state_t slot_state;
 
-    int extended_protocol;
-    int has_xmlbzlist;
-    int has_adcget;
-    int has_tthl;
-    int has_tthf;
+    bool extended_protocol;
+    bool has_xmlbzlist;
+    bool has_adcget;
+    bool has_tthl;
+    bool has_tthf;
 
     char upload_buf[4096];
     int upload_buf_offset;

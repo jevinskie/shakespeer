@@ -561,7 +561,7 @@ void hub_close_connection(hub_t *hub)
 
         hub_set_need_myinfo_update(1);
 
-        if(hub->expected_disconnect == 0)
+        if(hub->expected_disconnect == false)
         {
             hub_schedule_reconnect_event(hub);
             return;

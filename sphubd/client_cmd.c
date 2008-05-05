@@ -465,15 +465,15 @@ static int cc_cmd_Supports(void *data, int argc, char **argv)
         if(argv[i])
         {
             if(strcmp(argv[i], "XmlBZList") == 0)
-                cc->has_xmlbzlist = 1;
+                cc->has_xmlbzlist = true;
             else if(strcmp(argv[i], "MiniSlots") == 0)
                 /* whatever */ ;
             else if(strcmp(argv[i], "ADCGet") == 0)
-                cc->has_adcget = 1;
+                cc->has_adcget = true;
             else if(strcmp(argv[i], "TTHL") == 0)
-                cc->has_tthl = 1;
+                cc->has_tthl = true;
             else if(strcmp(argv[i], "TTHF") == 0)
-                cc->has_tthf = 1;
+                cc->has_tthf = true;
             else
                 g_info("Client supports unknown feature %s", argv[i]);
         }
@@ -507,7 +507,7 @@ static int cc_cmd_Lock(void *data, int argc, char **argv)
 
     if(str_has_prefix(argv[0], "EXTENDEDPROTOCOL"))
     {
-        cc->extended_protocol = 1;
+        cc->extended_protocol = true;
         g_debug("Detected extended protocol: %s %s", argv[0], argv[1]);
     }
 
