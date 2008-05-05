@@ -807,60 +807,60 @@
 
 - (void)menuNeedsUpdate:(NSMenu *)sender
 {
-	// update all user commands, before showing the contextmenu.
-	
-	/* erase all previous user commands */
-	int indexOfTTHItem = [contextMenu indexOfItem:menuItemCopyTTH];
-	int j;
-	for(j = [contextMenu numberOfItems]-1; j > indexOfTTHItem; j--)
-		[contextMenu removeItemAtIndex:j];
+    // update all user commands, before showing the contextmenu.
+    
+    /* erase all previous user commands */
+    int indexOfTTHItem = [contextMenu indexOfItem:menuItemCopyTTH];
+    int j;
+    for(j = [contextMenu numberOfItems]-1; j > indexOfTTHItem; j--)
+        [contextMenu removeItemAtIndex:j];
 
-	/* get a unique set of selected hubs */
-	NSIndexSet *selectedIndices = [searchResultTable selectedRowIndexes];
-	NSMutableSet *uniqueHubs = [[NSMutableSet alloc] init];
-	unsigned int i = [selectedIndices firstIndex];
-	while(i != NSNotFound)
-	{
-		NSDictionary *sr = [searchResultTable itemAtRow:i];
-		[uniqueHubs addObject:[sr objectForKey:@"hub"]];
-		i = [selectedIndices indexGreaterThanIndex:i];
-	}
+    /* get a unique set of selected hubs */
+    NSIndexSet *selectedIndices = [searchResultTable selectedRowIndexes];
+    NSMutableSet *uniqueHubs = [[NSMutableSet alloc] init];
+    unsigned int i = [selectedIndices firstIndex];
+    while(i != NSNotFound)
+    {
+        NSDictionary *sr = [searchResultTable itemAtRow:i];
+        [uniqueHubs addObject:[sr objectForKey:@"hub"]];
+        i = [selectedIndices indexGreaterThanIndex:i];
+    }
 
-	if([uniqueHubs count])
-	{
-		/* add a separator before user commands submenus */
-		[contextMenu addItem:[NSMenuItem separatorItem]];
+    if([uniqueHubs count])
+    {
+        /* add a separator before user commands submenus */
+        [contextMenu addItem:[NSMenuItem separatorItem]];
 
-		NSEnumerator *e = [uniqueHubs objectEnumerator];
-		NSString *hub;
-		while((hub = [e nextObject]) != nil)
-		{
-			NSArray *ucArray = [[SPMainWindowController sharedMainWindowController] userCommandsForHub:hub];
-			if([ucArray count])
-			{
-				/* add a submenu for this hubs usercommands */
-				/* [contextMenu addItemWithTitle:hub action:nil keyEquivalent:@""]; */
-				NSMenu *subMenu = [[[NSMenu alloc] initWithTitle:hub] autorelease];
-				NSMenuItem *menuItem = [contextMenu addItemWithTitle:hub
-															  action:nil
-													   keyEquivalent:@""];
-				[menuItem setSubmenu:subMenu];
+        NSEnumerator *e = [uniqueHubs objectEnumerator];
+        NSString *hub;
+        while((hub = [e nextObject]) != nil)
+        {
+            NSArray *ucArray = [[SPMainWindowController sharedMainWindowController] userCommandsForHub:hub];
+            if([ucArray count])
+            {
+                /* add a submenu for this hubs usercommands */
+                /* [contextMenu addItemWithTitle:hub action:nil keyEquivalent:@""]; */
+                NSMenu *subMenu = [[[NSMenu alloc] initWithTitle:hub] autorelease];
+                NSMenuItem *menuItem = [contextMenu addItemWithTitle:hub
+                                                              action:nil
+                                                       keyEquivalent:@""];
+                [menuItem setSubmenu:subMenu];
 
-				NSEnumerator *e2 = [ucArray objectEnumerator];
-				SPUserCommand *uc;
-				while((uc = [e2 nextObject]) != nil)
-				{
-					if(([uc context] & 4) == 4)
-					{
-						[subMenu addUserCommand:uc
-										 action:@selector(executeSearchUserCommand:)
-										 target:self
-								  staticEntries:0];
-					}
-				}
-			}
-		}
-	}
+                NSEnumerator *e2 = [ucArray objectEnumerator];
+                SPUserCommand *uc;
+                while((uc = [e2 nextObject]) != nil)
+                {
+                    if(([uc context] & 4) == 4)
+                    {
+                        [subMenu addUserCommand:uc
+                                         action:@selector(executeSearchUserCommand:)
+                                         target:self
+                                  staticEntries:0];
+                    }
+                }
+            }
+        }
+    }
 }
 
 @end
