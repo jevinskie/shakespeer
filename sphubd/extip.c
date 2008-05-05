@@ -238,6 +238,7 @@ const char *extip_get(int fd, const char *hub_ip)
     if(use_static && static_ip)
     {
         /* if so, use it */
+	INFO("using static IP %s for hub %s", static_ip, hub_ip);
         return static_ip;
     }
 
@@ -246,7 +247,7 @@ const char *extip_get(int fd, const char *hub_ip)
         /* Both we and the hub has a private (RFC1918) address. However, we're
          * not on the same subnet. There's no use trying to use the external
          * public IP, it won't work. */
-        INFO("using private local IP for private hub %s", inet_ntoa(hub_addr));
+        INFO("using private local IP for private hub %s", hub_ip);
         return inet_ntoa(sin.sin_addr);
     }
 
@@ -259,6 +260,7 @@ const char *extip_get(int fd, const char *hub_ip)
             /* Our detected external IP is the same as the local IP. Great, we
              * have a publically visible IP address, no need to detect this
              * again for quite some time. */
+	    INFO("detected use of public IP (ie, no NAT/PAT)");
             external_ip_lookup_time += 24*60*60;
         }
     }
@@ -271,11 +273,13 @@ const char *extip_get(int fd, const char *hub_ip)
         return inet_ntoa(sin.sin_addr);
     }
 
+    INFO("using external IP %s for hub %s", external_ip, hub_ip);
     return external_ip;
 }
 
 void extip_init(void)
 {
+    srandom(time(0) * getpid());
     extip_update_cache();
 }
 
