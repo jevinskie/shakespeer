@@ -124,7 +124,7 @@ int share_search(share_t *share, const share_search_t *search,
             share_file_t *f;
             RB_FOREACH(f, file_tree, &share->files)
             {
-                if(f->duplicate_inode == 0ULL && file_matches_search(f, search))
+                if(file_matches_search(f, search))
                 {
 		    struct tth_inode *ti = tth_store_lookup_inode(global_tth_store, f->inode);
                     int rc = func(search, f, ti ? ti->tth : NULL, user_data);

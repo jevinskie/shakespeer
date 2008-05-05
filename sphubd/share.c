@@ -381,12 +381,8 @@ static int share_path_cmp(const char *a, const char *b)
 }
 
 /* sort function used by the red-black tree */
-#include <assert.h> /* FIXME! */
 int share_file_cmp(share_file_t *a, share_file_t *b)
 {
-    assert(a->mp); /* FIXME: remove */
-    assert(b->mp);
-
     if(a->mp < b->mp)
 	return -1;
     if(a->mp > b->mp)
@@ -539,28 +535,23 @@ share_file_list_t *share_next_unhashed(share_t *share, unsigned limit)
     DEBUG("getting batch of unhashed files...");
 
     int olimit = limit;
-    
     share_file_list_t *unfinished = NULL;
 
     share_file_t *f;
     RB_FOREACH(f, file_tree, &share->unhashed_files)
     {
-        if(f->duplicate_inode == 0ULL)
-        {
-            if(unfinished == NULL)
-            {
-                unfinished = malloc(sizeof(share_file_list_t));
-                SLIST_INIT(unfinished);
-            }
+	if(unfinished == NULL)
+	{
+	    unfinished = malloc(sizeof(share_file_list_t));
+	    SLIST_INIT(unfinished);
+	}
 
-            SLIST_INSERT_HEAD(unfinished, f, link);
-            if(--limit == 0)
-                break;
-        }
+	SLIST_INSERT_HEAD(unfinished, f, link);
+	if(--limit == 0)
+	    break;
     }
 
     DEBUG("Returning %i files", olimit - limit);
-
     return unfinished;
 }
 

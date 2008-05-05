@@ -64,7 +64,6 @@ struct share_file
     share_type_t type;
     uint64_t size;
     uint64_t inode;
-    uint64_t duplicate_inode; /* file is a duplicate of this inode */
 };
 
 typedef struct file_tree file_tree_t;

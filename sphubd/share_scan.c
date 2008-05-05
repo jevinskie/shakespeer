@@ -71,82 +71,124 @@ static int share_skip_file(const char *filename)
 static void share_scan_add_file(share_scan_state_t *ctx,
         const char *filepath, struct stat *stbuf)
 {
-    share_file_t *f = calloc(1, sizeof(share_file_t));
-    f->partial_path = strdup(filepath + strlen(ctx->mp->local_root));
-    f->mp = ctx->mp;
-    f->type = share_filetype(f->partial_path);
-    f->size = stbuf->st_size;
-    f->inode = SHARE_STAT_TO_INODE(stbuf);
-
-    /* DEBUG("adding file [%s], inode %llu", f->path, f->inode); */
+    return_if_fail(filepath);
+    return_if_fail(ctx);
+    return_if_fail(ctx->mp);
+    return_if_fail(ctx->mp->local_root);
 
     /* is it already hashed? */
     bool already_hashed = false;
-    struct tth_inode *ti = tth_store_lookup_inode(global_tth_store, f->inode);
+
+    uint64_t inode = SHARE_STAT_TO_INODE(stbuf);
+    bool is_duplicate = false;
+
+    /* Check if we're already sharing this inode.
+     */
+    share_file_t *collision_file =
+	share_lookup_file_by_inode(ctx->share, inode);
+    if(collision_file)
+    {
+	char *local_path = share_complete_path(collision_file);
+	if(ctx->mp != collision_file->mp)
+	{
+	    WARNING("%llX: collision between [%s] and [%s]",
+		inode, filepath, local_path);
+	}
+	else
+	{
+	    INFO("%llX: collision between [%s] and [%s]",
+		inode, filepath, local_path);
+
+	    if(strcmp(local_path, filepath) == 0)
+	    {
+		WARNING("re-adding the exact same file?");
+		free(local_path);
+		return;
+	    }
+	}
+	free(local_path);
+
+	is_duplicate = true;
+	goto done; /* just update statistics */
+    }
+
+    struct tth_inode *ti = tth_store_lookup_inode(global_tth_store, inode);
 
     if(ti == NULL)
     {
         /* unhashed */
     }
+    else if(ti->mtime != stbuf->st_mtime)
+    {
+	DEBUG("[%s] has an obsolete inode", filepath);
+	DEBUG("removing obsolete inode %llX for TTH %s (modified)",
+	    inode, ti->tth);
+	tth_store_remove_inode(global_tth_store, inode);
+
+	/* don't remove any corresponding TTH:
+	 * it could be used by a duplicate */
+    }
     else
     {
-        /* hashed or duplicate */
-
 	struct tth_entry *td = tth_store_lookup(global_tth_store, ti->tth);
 
-	if(td == NULL || ti->mtime != stbuf->st_mtime)
+	if(td == NULL)
 	{
-	    /* This is either an inode without a TTH, which is useless,
-	     * or an obsolete inode (modified file). */
-	    DEBUG("removing obsolete inode %llu", f->inode);
-	    tth_store_remove_inode(global_tth_store, f->inode);
-#if 0 /* FIXME: should we remove the TTH too? */
-	    if(td)
-		tth_store_remove(global_tth_store, ti->tth);
-#endif
+	    /* This is an inode without a TTH, which is useless */
+	    DEBUG("removing obsolete inode %llX (missing TTH)", inode);
+	    tth_store_remove_inode(global_tth_store, inode);
 	}
-	else
-        {
+	else if(td->active_inode == 0)
+	{
+	    /* TTH is not active, claim this TTH for this inode */
+	    tth_store_set_active_inode(global_tth_store, ti->tth, inode);
+	    already_hashed = true;
+	}
+	else if(td->active_inode != inode)
+	{
 	    already_hashed = true;
 
-            /* DEBUG("Found TTH, inode = %llu", td->inode); */
-	    if(td->active_inode == 0)
+	    /* DEBUG("duplicate TTH for different inodes"); */
+	    /* check if the original is shared */
+	    share_file_t *original_file =
+		share_lookup_file_by_inode(ctx->share, td->active_inode);
+	    if(original_file)
 	    {
-		/* TTH is not active, claim this TTH for this inode */
-		tth_store_set_active_inode(global_tth_store,
-		    ti->tth, f->inode);
+		/* ok, keep as duplicate */
+		INFO("skipping duplicate [%s]", filepath);
+		is_duplicate = true;
 	    }
-            else if(td->active_inode != f->inode)
-            {
-                /* DEBUG("inode collision, duplicate"); */
-		/* check if the original is shared */
-		share_file_t *original_file =
-		    share_lookup_file_by_inode(ctx->share, td->active_inode);
-		if(original_file)
-		{
-		    /* ok, keep as duplicate */
-		    DEBUG("Setting inode %llu [%s%s] as duplicate of inode %llu",
-			    f->inode, f->mp->local_root, f->partial_path, td->active_inode);
-		    f->duplicate_inode = td->active_inode;
-
-		    /* update the mount statistics */
-		    ctx->mp->stats.nduplicates++;
-		    ctx->mp->stats.dupsize += f->size;
-		}
-		else
-		{
-		    /* original not shared, switch with duplicate */
-		    /* (this can only happen if shares has been removed live) */
-		    tth_store_set_active_inode(global_tth_store,
-			    ti->tth, f->inode);
-		}
-            }
-            /* else we found the same file again: rehash (or circular link?) */
-        }
+	    else
+	    {
+		/* original not shared, switch with duplicate */
+		/* (this can only happen if shares has been removed live) */
+		tth_store_set_active_inode(global_tth_store, ti->tth, inode);
+	    }
+	}
+	else
+	{
+	    /* we found the same file again: rehash */
+	    already_hashed = true;
+	}
     }
 
-    if(f->duplicate_inode == 0)
+done:
+
+    if(is_duplicate)
     {
+	/* update mount statistics */
+	ctx->mp->stats.nduplicates++;
+	ctx->mp->stats.dupsize += stbuf->st_size;
+    }
+    else
+    {
+	share_file_t *f = calloc(1, sizeof(share_file_t));
+	f->partial_path = strdup(filepath + strlen(ctx->mp->local_root));
+	f->mp = ctx->mp;
+	f->type = share_filetype(f->partial_path);
+	f->size = stbuf->st_size;
+	f->inode = SHARE_STAT_TO_INODE(stbuf);
+
 	if(already_hashed)
 	{
 	    /* Insert it in the tree. */
@@ -168,16 +210,19 @@ static void share_scan_add_file(share_scan_state_t *ctx,
 	    RB_INSERT(file_tree, &ctx->share->unhashed_files, f);
 	}
 
-	/* add it to the inode hash */
+	/* Add the file to the inode hash.
+	 * We also add unhashed files so we can quickly lookup collisions
+	 * without the need to hash. If we after hashing get a duplicate,
+	 * the file must be removed from the inode hash table.
+	 */
 	share_add_to_inode_table(ctx->share, f);
     }
 
     /* update the mount statistics */
     ctx->mp->stats.ntotfiles++;
-    ctx->mp->stats.totsize += f->size;
+    ctx->mp->stats.totsize += stbuf->st_size;
 
-    nc_send_share_file_added_notification(nc_default(),
-        ctx->share, f, ctx->mp);
+    nc_send_share_file_added_notification(nc_default());
 }
 
 static char *share_scan_absolute_path(const char *dirpath,
@@ -282,9 +327,7 @@ static void share_scan_context(share_scan_state_t *ctx,
                 if(stbuf.st_size == 0)
                     INFO("- skipping zero-sized file '%s'", filepath);
                 else
-                {
                     share_scan_add_file(ctx, filepath, &stbuf);
-                }
             }
             else /* neither directory nor regular file */
             {

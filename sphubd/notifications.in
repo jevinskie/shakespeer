@@ -10,7 +10,7 @@ notification external_ip_detected string:external_ip
 
 ########## share notifications
 
-notification share_file_added pointer:share pointer:file pointer:mp
+notification share_file_added
 notification share_scan_finished string:path
 notification tth_available pointer:file string:tth string:leafdata_base64 double:mibs_per_sec
 notification hashing_complete
