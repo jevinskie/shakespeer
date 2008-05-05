@@ -11,14 +11,15 @@ die()
 
 package="shakespeer"
 version=${1:-snapshot-`date +%Y%m%d`}
-cwd=${2:-.}
+top_dir=${2:-.}
+output_dir=${3:-.}
 
-TMPDMG=$cwd/shakespeer-tmp$$.dmg
+TMPDMG=$top_dir/shakespeer-tmp$$.dmg
 /bin/rm -f $TMPDMG
 
-test -x "$cwd/sphubd/sphubd" || die "No sphubd build found"
+test -x "$top_dir/sphubd/sphubd" || die "No sphubd build found"
 
-APP="$cwd/gui/Aqua/ShakesPeer.app"
+APP="$top_dir/gui/Aqua/ShakesPeer.app"
 test -d "$APP" || die "No ShakesPeer build found in $APP"
 
 VOL="$package-$version"
@@ -55,7 +56,7 @@ echo "+ copying ShakesPeer.app"
 #strip $resources/sphashd || die "failed to strip sphashd"
 
 echo "+ copying License.txt"
-/bin/cp "$cwd/License.txt" "$root" || die "failed to copy License.txt to disk image"
+/bin/cp "$top_dir/License.txt" "$root" || die "failed to copy License.txt to disk image"
 
 get_external_dependencies()
 {
@@ -110,12 +111,12 @@ fix_external_libs "$resources/sphubd"
 fix_external_libs "$resources/sphashd"
 fix_external_libs "$contents/MacOS/ShakesPeer"
 
-rm -f "$cwd/$VOL.dmg"
+rm -f "$output_dir/$VOL.dmg"
 
 # eject
 hdiutil eject $MYDEV
 # compress it and make it read only
-hdiutil convert -format UDZO $TMPDMG -o "$cwd/$VOL.dmg"
+hdiutil convert -format UDZO $TMPDMG -o "$output_dir/$VOL.dmg"
 /bin/rm -f $TMPDMG
-ls -lh "$cwd/$VOL.dmg"
+ls -lh "$output_dir/$VOL.dmg"
 

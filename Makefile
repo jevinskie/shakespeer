@@ -15,8 +15,20 @@ config.mk: configure ${TOP}/support/configure.sub
 config-osx:
 	cp -f config-osx.mk config.mk
 
-dmg: all
-	/bin/sh ${TOP}/support/mkdmg
+release:
+	mkdir -p release-build
+	cd release-build && \
+	if test -d shakespeer/_darcs; then \
+	  cd shakespeer && \
+	  darcs pull -a -v http://darcs.bzero.se/shakespeer && \
+	  make depend ; \
+	else \
+	  darcs get --partial -v http://darcs.bzero.se/shakespeer && \
+	  cd shakespeer ; \
+	fi && pwd && $(MAKE) all BUILD_PROFILE=release
+
+dmg: release
+	cd release-build/shakespeer && /bin/sh support/mkdmg "$(VERSION)" . ../..
 
 dist:
 	darcs dist -d ${PACKAGE}-${VERSION}

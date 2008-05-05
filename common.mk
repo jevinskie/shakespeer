@@ -21,13 +21,17 @@ ifeq (${os},Linux)
 CFLAGS+=-D_FILE_OFFSET_BITS=64
 endif
 
-# Disable for public releases
+# Disable coredumps for public releases
+ifneq ($(BUILD_PROFILE),release)
 CFLAGS+=-DCOREDUMPS_ENABLED=1
+endif
 
 # Build a Universal Binary on Mac OS X
 ifeq (${os},Darwin)
+ifeq ($(BUILD_PROFILE),release)
 UB_CFLAGS=-isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386 -arch ppc
 UB_LDFLAGS=-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386
+endif
 endif
 
 # Berkeley DB on Linux needs pthread
@@ -74,6 +78,7 @@ check: check-local
 check-local: ${check_PROGRAMS}
 	@for test in ${TESTS}; do \
 		chmod 0755 ./$$test && \
+		echo "=====[ running $$test ]=====" && \
 		if ./$$test ; then \
 			echo "PASSED: $$test"; \
 		else \
