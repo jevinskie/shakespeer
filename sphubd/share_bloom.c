@@ -29,14 +29,14 @@
 #include "log.h"
 #include "notifications.h"
 
-void share_create_bloom(share_t *share)
+static void share_create_bloom(share_t *share, unsigned length)
 {
     DEBUG("(re)creating bloom filter");
 
     return_if_fail(share);
 
     bloom_free(share->bloom);
-    share->bloom = bloom_create(32768);
+    share->bloom = bloom_create(length);
 
     share_file_t *f;
     RB_FOREACH(f, file_tree, &share->files)
@@ -56,14 +56,41 @@ static void share_bloom_handle_did_remove_share_notification(
         nc_did_remove_share_t *notification,
         void *user_data)
 {
-    /* Need to re-create the bloom filter after a share has been removed */
-    share_t *share = user_data;
-    share_create_bloom(share);
+	return_if_fail(user_data);
+
+	/* Need to re-create the bloom filter after a share has been removed */
+	DEBUG("re-creating bloom filter after share removal");
+	share_t *share = user_data;
+	return_if_fail(share->bloom);
+	share_create_bloom(share, share->bloom->length);
+}
+
+static void share_bloom_handle_scan_finished(
+        nc_t *nc,
+        const char *channel,
+        nc_share_scan_finished_t *notification,
+        void *user_data)
+{
+	return_if_fail(user_data);
+
+	/* Check that the created bloom filter is not over-filled. */
+	share_t *share = user_data;
+
+	return_if_fail(share->bloom);
+	float fill = bloom_filled_percent(share->bloom);
+
+	if(fill > 70.0)
+	{
+		INFO("bloom filter is %.1f%% filled, increasing filter length", fill);
+		share_create_bloom(share, share->bloom->length * 2);
+	}
 }
 
 void share_bloom_init(share_t *share)
 {
-    nc_add_did_remove_share_observer(nc_default(),
-            share_bloom_handle_did_remove_share_notification, share);
+	nc_add_did_remove_share_observer(nc_default(),
+		share_bloom_handle_did_remove_share_notification, share);
+	nc_add_share_scan_finished_observer(nc_default(),
+		share_bloom_handle_scan_finished, share);
 }
 

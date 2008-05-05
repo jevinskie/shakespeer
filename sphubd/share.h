@@ -151,7 +151,6 @@ void share_rescan(share_t *share);
 
 /* in share_bloom.c */
 void share_bloom_init(share_t *share);
-void share_create_bloom(share_t *share);
 
 /* in share_search.c */
 int share_search(share_t *share, const share_search_t *search,
