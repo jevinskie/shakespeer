@@ -86,6 +86,8 @@ static SPApplicationController *mySharedApplicationController = nil;
             [NSArray array], SPPrefsSharedPaths,
             [NSArray array], SPPrefsRecentHubs,
             [NSArray arrayWithObjects:
+                @"http://www.hublist.org/PublicHubList.xml.bz2",
+                @"http://www.hublist.org/hublists/se.PublicHubList.xml.bz2",
                 @"http://www.dc-resources.com/downloads/hublist.config.bz2",
                 @"http://www.hublist.org/PublicHubList.config.bz2",
                 @"http://www.Freenfo.net/PublicHubList.config.bz2",
@@ -97,7 +99,7 @@ static SPApplicationController *mySharedApplicationController = nil;
                 @"http://www.dchublist.biz/all_hubs.config.bz2",
                 @"http://dcinfo.sytes.net/hungaryhublist.config.bz2",
                 nil], SPPrefsHublists,
-            @"http://www.dc-resources.com/downloads/hublist.config.bz2", SPPrefsHublistURL,
+            @"http://www.hublist.org/PublicHubList.xml.bz2", SPPrefsHublistURL,
             [NSNumber numberWithBool:NO], SPPrefsKeepServerRunning,
             @"Message", SPPrefsLogLevel,
             [NSNumber numberWithBool:YES], SPPrefsAutodetectIPAddress,
@@ -400,7 +402,6 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 
 - (void)applicationWillFinishLaunching:(NSNotification *)aNotification
 {
-    NSLog(@"registering url handler");
     [self registerUrlHandler];
 }
 
