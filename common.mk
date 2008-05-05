@@ -82,7 +82,11 @@ check-local: ${check_PROGRAMS}
 	done
 
 OBJS=${SOURCES:.c=.o}
+ifeq (${os},Darwin)
 ALLSOURCES := $(wildcard *.[cm])
+else
+ALLSOURCES := $(wildcard *.c)
+endif
 
 depend:
 	@echo Generating dependencies in $(shell pwd)...
