@@ -52,11 +52,13 @@ echo "+ copying ShakesPeer.app"
 
 /bin/mkdir -p "$frameworks" || die "failed to create directory Frameworks"
 
-#strip $resources/sphubd || die "failed to strip sphubd"
-#strip $resources/sphashd || die "failed to strip sphashd"
+strip "$resources/sphubd" || die "failed to strip sphubd"
+strip "$resources/sphashd" || die "failed to strip sphashd"
 
 echo "+ copying License.txt"
 /bin/cp "$top_dir/License.txt" "$root" || die "failed to copy License.txt to disk image"
+/bin/cp "$top_dir/sphubd/tth-upgrade" "$root" || die "failed to copy tth-upgrade to disk image"
+strip "$root/tth-upgrade" || die "failed to strip tth-upgrade"
 
 get_external_dependencies()
 {

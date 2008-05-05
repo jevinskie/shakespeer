@@ -38,7 +38,7 @@
 #define TTH_DB_FILENAME "tth.db"
 
 DB *tth_db = NULL;
-static DB *tth_inode_db = NULL;
+DB *tth_inode_db = NULL;
 
 #if DB_VERSION_MAJOR < 4
 # error "Wrong version of Berkeley DB"

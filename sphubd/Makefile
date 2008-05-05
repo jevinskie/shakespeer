@@ -20,8 +20,8 @@ TESTS = user_test tthdb_test extra_slots_test \
 TOP=..
 include ${TOP}/common.mk
 
-bin_PROGRAMS=sphubd sphashd queue_stress_test
-noinst_PROGRAMS=share_tool tthdb_list queue_tool
+bin_PROGRAMS=sphubd sphashd tth-upgrade
+noinst_PROGRAMS=share_tool tthdb_list queue_tool queue_stress_test
 all-local: ${BUILT_SOURCES} ${bin_PROGRAMS}
 
 sphubd_SOURCES=client.c client_cmd.c client_download.c client_upload.c \
@@ -82,9 +82,14 @@ queue_tool: ${queue_tool_OBJS} ${queue_tool_LDADD}
 
 tthdb_list_SOURCES=tthdb_list.c
 tthdb_list_LDADD=tthdb.o dbenv.o globals.o
-
 tthdb_list_OBJS=${tthdb_list_SOURCES:.c=.o}
 tthdb_list: ${tthdb_list_OBJS} ${tthdb_list_LDADD}
+	${LINK}
+
+tth_upgrade_SOURCES=tth-upgrade.c
+tth_upgrade_LDADD=tthdb.o dbenv.o globals.o
+tth_upgrade_OBJS=${tth_upgrade_SOURCES:.c=.o}
+tth-upgrade: ${tth_upgrade_OBJS} ${tth_upgrade_LDADD}
 	${LINK}
 
 notifications.c: notifications.in ${TOP}/support/gen_notification_source.awk 
