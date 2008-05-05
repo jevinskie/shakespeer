@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 Martin Hedenfalk <martin.hedenfalk@gmail.com>
+ * Copyright (c) 2006 Martin Hedenfalk <martin@bzero.se>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,15 +23,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* $Id: iconv_string.c,v 1.1 2006/04/09 12:54:31 mhe Exp $ */
-
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-
 #include <iconv.h>
-
 #include <stdio.h>
+
+#include "log.h"
 
 char *iconv_string_full(const char *string, ssize_t length,
                         const char *src_encoding,
@@ -54,7 +52,10 @@ char *iconv_string_full(const char *string, ssize_t length,
 
     cd = iconv_open(dst_encoding, src_encoding);
     if(cd == (iconv_t)-1)
+    {
+        g_warning("failed to open iconv: src=[%s], dst=[%s]", src_encoding, dst_encoding);
         return NULL;
+    }
 
     size_t dst_length = length * 2; /* just a guess */
     char *dst = malloc(dst_length + 1);
@@ -162,4 +163,12 @@ char *iconv_string_lossy(const char *string, ssize_t length,
             NULL, NULL, '?');
 }
 
+char *iconv_string_escaped(const char *string, ssize_t length,
+                           const char *src_encoding,
+                           const char *dst_encoding)
+{
+    /* FIXME: implement iconv_string_escaped correctly! */
+    return iconv_string_full(string, length, src_encoding, dst_encoding,
+            NULL, NULL, '?');
+}
 

@@ -23,8 +23,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* $Id: iconv_string.h,v 1.1 2006/04/09 12:54:31 mhe Exp $ */
-
 #ifndef _iconv_string_h_
 #define _iconv_string_h_
 
@@ -41,6 +39,10 @@ char *iconv_string(const char *string, ssize_t length,
 char *iconv_string_lossy(const char *string, ssize_t length,
                         const char *src_encoding,
                         const char *dst_encoding);
+
+char *iconv_string_escaped(const char *string, ssize_t length,
+                           const char *src_encoding,
+                           const char *dst_encoding);
 
 #endif
 

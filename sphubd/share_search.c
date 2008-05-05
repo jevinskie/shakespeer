@@ -249,7 +249,7 @@ share_search_t *share_search_parse_nmdc(const char *command,
 
         /* normalize the string (handles different decomposition) */
         char *normalized_utf8_string = g_utf8_normalize(search_string_utf8,
-                -1, G_NORMALIZE_DEFAULT);
+                -1, G_NORMALIZE_DEFAULT_COMPOSE);
         free(search_string_utf8);
 
         /* make independent of case */

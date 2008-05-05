@@ -29,7 +29,7 @@
 
 #include "nfkc.h"
 #include "iconv_string.h"
-
+#include "log.h"
 #include "encoding.h"
 #include "dstring.h"
 
@@ -232,7 +232,7 @@ char *str_utf8_to_legacy(const char *string, const char *legacy_encoding)
      * character with a combining accent). This is required for the following
      * conversion to Windows-1252 legacy_encoding.
      */
-    char *utf8_composed_string = g_utf8_normalize(string, -1, G_NORMALIZE_NFKC);
+    char *utf8_composed_string = g_utf8_normalize(string, -1, G_NORMALIZE_DEFAULT_COMPOSE);
     if(utf8_composed_string == NULL)
     {
         return NULL;
@@ -256,24 +256,21 @@ char *str_utf8_to_escaped_legacy(const char *string,
         return NULL;
     }
 
-    /* Convert the (possibly) decomposed utf-8 string to composed form (eg,
+    /* Convert the (possibly) decomposed UTF-8 string to composed form (eg,
      * &Auml; is converted to a single precomposed character instead of a base
      * character with a combining accent). This is required for the following
-     * conversion to Windows-1252 encoding.
+     * conversion to legacy (Windows-1252) encoding.
      */
-    char *utf8_composed_string = g_utf8_normalize(string, -1, G_NORMALIZE_NFKC);
+    char *utf8_composed_string = g_utf8_normalize(string, -1, G_NORMALIZE_DEFAULT_COMPOSE);
     if(utf8_composed_string == NULL)
     {
+        g_warning("input string not valid UTF-8");
         return NULL;
     }
 
-    char *legacy_string = iconv_string(utf8_composed_string, -1,
+    char *legacy_string = iconv_string_escaped(utf8_composed_string, -1,
             "UTF-8", legacy_encoding);
-#if 0
-    char *encoded_string = g_convert_with_fallback(utf8_composed_string, -1,
-            legacy_encoding, "UTF-8",
-            NULL, NULL, NULL, NULL);
-#endif
+
     free(utf8_composed_string);
 
     return legacy_string;
@@ -295,6 +292,8 @@ char *str_utf8_to_escaped_legacy(const char *string,
 
 int main(void)
 {
+    sp_log_set_level("debug");
+
     /*
      * str_legacy_to_utf8_lossy
      */
@@ -310,6 +309,9 @@ int main(void)
 
     /*
      * str_utf8_to_legacy
+     */
+
+    /* See http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP1252.TXT
      */
 
     /* this is "aring auml ouml" in composed UTF-8  */
@@ -333,6 +335,27 @@ int main(void)
     fail_unless(w);
     fail_unless(strcmp(w, "\xc3\xa5\xc3\xa4\xc3\xb6") == 0);
     free(w);
+
+
+
+
+    const char *user_command = "\xa8\xb0\xba\xa4\xf8";
+    printf("user_command = [%s]\n", user_command);
+    char *c1 = str_legacy_to_utf8(user_command, "WINDOWS-1252");
+    fail_unless(c1);
+    printf("converted string = [%s]\n", c1);
+
+    const char *c1_utf8 = "\xc2\xa8\xc2\xb0\xc2\xba\xc2\xa4\xc3\xb8";
+    fail_unless(strcmp(c1, c1_utf8) == 0);
+
+    char *c2 = str_utf8_to_escaped_legacy(c1_utf8, "WINDOWS-1252");
+    fail_unless(c2);
+    printf("converted string = [%s]\n", c2);
+
+    fail_unless(strcmp(c2, user_command) == 0);
+    
+    free(c1);
+    free(c2);
 
     return 0;
 }
