@@ -69,10 +69,6 @@ NSURL *findURL(NSString *string)
     if (theRange.location == 0 && theRange.length == 7)
         return [NSURL URLWithString:string];
 
-    theRange = [string rangeOfString:@"shakespeer" options:NSCaseInsensitiveSearch];
-    if (theRange.location == 0 && theRange.length == [string length])
-        return [NSURL URLWithString:@"http://shakespeer.sourceforge.net/"];
-
     return nil;
 }
 
