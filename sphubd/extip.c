@@ -383,16 +383,20 @@ int main(void)
     fail_unless(extip_detect_from_buf("no ip address here") == NULL);
 
     struct in_addr local;
-    local.s_addr = INADDR_LOOPBACK;
+    fail_unless(inet_aton("127.0.0.1", &local) == 1);
 
     struct in_addr mask;
     memset(&mask, 0, sizeof(mask));
     get_netmask(&local, &mask);
     printf("mask = %s\n", inet_ntoa(mask));
-    fail_unless(mask.s_addr == 0xFF000000);
+
+    struct in_addr local_mask;
+    fail_unless(inet_aton("255.0.0.0", &local_mask) == 1);
+
+    fail_unless(mask.s_addr == local_mask.s_addr);
 
     struct in_addr remote;
-    remote.s_addr = 0x7f000203; /* 127.0.2.3 */
+    fail_unless(inet_aton("127.0.2.3", &remote) == 1);
 
     ip = (char *)extip_check_local_hub(&local, &remote);
     fail_unless(ip);
