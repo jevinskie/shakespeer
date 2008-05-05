@@ -37,7 +37,7 @@ release:
 	  darcs pull -a -v $(TAG_OPTION) $(REPO_URL); \
 	else \
 	  echo "getting sources..." && \
-	  darcs get --partial -v $(TAG_OPTION) $(REPO_URL) && \
+	  darcs get --partial -v $(TAG_OPTION) $(REPO_URL) $(REPO) && \
 	  cd $(REPO) ; \
 	fi && $(MAKE) all BUILD_PROFILE=release && $(MAKE) check
 
@@ -52,6 +52,11 @@ release-package:
 tag-dmg: tag-release release-package
 
 dmg: release release-package
+
+snapshot:
+	$(MAKE) release REPO_URL="`pwd`"
+snapshot-package: snapshot
+	$(MAKE) release-package REPO_URL="`pwd`"
 
 dist:
 	darcs dist -d $(PACKAGE)-$(DIST_VERSION)
