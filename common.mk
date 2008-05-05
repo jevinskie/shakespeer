@@ -72,7 +72,8 @@ check: check-local
 
 check-local: ${check_PROGRAMS}
 	@for test in ${TESTS}; do \
-		if ./$$test 2>/dev/null; then \
+		chmod 0755 ./$$test && \
+		if ./$$test ; then \
 			echo "PASSED: $$test"; \
 		else \
 			echo "FAILED: $$test"; exit 1; \

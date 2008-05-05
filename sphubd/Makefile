@@ -5,6 +5,18 @@ BUILT_SOURCES = sphashd_cmd.c sphashd_cmd.h \
 		sphashd_client_send.h \
 		notifications.c notifications.h
 
+check_PROGRAMS = user_test tthdb_test extra_slots_test \
+		 queue_db_test queue_test queue_directory_test \
+		 queue_auto_search_test queue_connect_test \
+		 share_test share_search_test \
+		 search_listener_test extip_test
+
+TESTS = user_test tthdb_test extra_slots_test \
+	queue_db_test queue_test queue_directory_test \
+	queue_auto_search_test queue_connect_test \
+	share_test share_search_test \
+	search_listener_test extip_test
+
 TOP=..
 include ${TOP}/common.mk
 
@@ -40,12 +52,6 @@ sphashd_OBJS=${sphashd_SOURCES:.c=.o}
 sphashd: ${sphashd_OBJS} \
 	${TOP}/splib/libsplib.a
 	${LINK}
-
-check_PROGRAMS = user_test tthdb_test extra_slots_test \
-		 queue_db_test queue_test queue_directory_test \
-		 queue_auto_search_test queue_connect_test \
-		 share_test share_search_test \
-		 search_listener_test extip_test
 
 clean-local:
 	rm -f ${BUILT_SOURCES} ${bin_PROGRAMS} ${noinst_PROGRAMS} ${check_PROGRAMS} *.o
@@ -111,12 +117,6 @@ ui_send.c: ${TOP}/spclient/spclient_cmd.in ${TOP}/support/gen_send_source.awk
 	awk -f ${TOP}/support/gen_send_source.awk ${TOP}/spclient/spclient_cmd.in > $@
 ui_send.h: ${TOP}/spclient/spclient_cmd.in ${TOP}/support/gen_send_header.awk 
 	awk -f ${TOP}/support/gen_send_header.awk ${TOP}/spclient/spclient_cmd.in > $@
-
-TESTS = user_test tthdb_test extra_slots_test \
-	queue_db_test queue_test queue_directory_test \
-	queue_auto_search_test queue_connect_test \
-	share_test share_search_test \
-	search_listener_test extip_test
 
 extip_test: extip_test.o ${TOP}/splib/libsplib.a
 	${LINK}

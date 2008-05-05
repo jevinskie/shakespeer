@@ -1,10 +1,3 @@
-TOP=..
-include ${TOP}/common.mk
-
-all-local: libsplib.a
-
-noinst_LIBRARIES = libsplib.a
-
 TESTS = rx_test bloom_test args_test util_test tiger_test tigertree_test \
 	base32_test he3_test he3_post_test.sh notification_center_test \
 	dstring_test dstring_url_test cmd_table_test quote_test xerr_test \
@@ -15,6 +8,13 @@ check_PROGRAMS = rx_test bloom_test args_test util_test tiger_test \
 		 notification_center_test dstring_test dstring_url_test \
 		 cmd_table_test quote_test xerr_test xstr_test nfkc_test \
 		 encoding_test xml_test test_connection_test
+
+TOP=..
+include ${TOP}/common.mk
+
+all-local: libsplib.a
+
+noinst_LIBRARIES = libsplib.a
 
 SOURCES = args.c mkpath.c util.c bz2.c \
 	  bloom.c tiger.c sboxes.c he3.c base32.c log.c \
@@ -44,61 +44,61 @@ distclean: clean
 EXTRA_DIST=gen-unicode-tables.pl he3_post_test.sh 
 
 test_connection_test: test_connection_test.o nfkc.o dstring.o xstr.o 
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+	${LINK}
 
 xml_test: xml_test.o nfkc.o dstring.o xstr.o 
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+	${LINK}
 
 encoding_test: encoding_test.o iconv_string.o dstring.o xstr.o 
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+	${LINK}
 
 nfkc_test: nfkc_test.o dstring.o xstr.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+	${LINK}
 
 xerr_test: xerr_test.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+	${LINK}
 
 xstr_test: xstr_test.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+	${LINK}
 
 rx_test: rx_test.o xstr.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+	${LINK}
 
 dstring_test: dstring_test.o xstr.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+	${LINK}
 
 dstring_url_test: dstring_url_test.o dstring.o xstr.o uhttp.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+	${LINK}
 
 quote_test: quote_test.o dstring.o xstr.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+	${LINK}
 
 args_test: args_test.o quote.o dstring.o xstr.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+	${LINK}
 
 cmd_table_test: cmd_table_test.o args.o quote.o dstring.o xstr.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+	${LINK}
 
 notification_center_test: notification_center_test.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+	${LINK}
 
 bloom_test: bloom_test.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+	${LINK}
 
 util_test: util_test.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+	${LINK}
 
 tiger_test: tiger_test.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+	${LINK}
 
 tigertree_test: tigertree_test.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+	${LINK}
 
 base32_test: base32_test.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+	${LINK}
 
 he3_test: he3_test.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+	${LINK}
 
 he3_post_test.sh:
 	chmod 0755 ${srcdir}/he3_post_test.sh

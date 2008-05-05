@@ -1,6 +1,10 @@
 BUILT_SOURCES=spclient_cmd.c spclient_cmd.h \
 	      spclient_send.c spclient_send.h country_map.c
 
+TESTS=filelist_xml_test filelist_dclst_test \
+      hublist_test ui_connect_test
+check_PROGRAMS=$(TESTS)
+
 TOP=..
 include ${TOP}/common.mk
 
@@ -36,21 +40,17 @@ spclient_send.h: ${TOP}/sphubd/ui_cmd.in ${TOP}/support/gen_send_header.awk
 # dummy rule needed for 'make dist' in certain cases
 list-en1-semic.txt: country_map.c
 
-TESTS=filelist_xml_test filelist_dclst_test \
-      hublist_test ui_connect_test
-check_PROGRAMS=$(TESTS)
+filelist_xml_test: filelist_xml_test.o ${TOP}/splib/libsplib.a
+	${LINK}
 
-filelist_xml_test: filelist_xml_test.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+filelist_dclst_test: filelist_dclst_test.o ${TOP}/splib/libsplib.a
+	${LINK}
 
-filelist_dclst_test: filelist_dclst_test.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+hublist_test: hublist_test.o ${TOP}/splib/libsplib.a
+	${LINK}
 
-hublist_test: hublist_test.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
-
-ui_connect_test: ui_connect_test.o
-	${CC} -o $@ $^ ${LDFLAGS} ${LIBS}
+ui_connect_test: ui_connect_test.o ${TOP}/splib/libsplib.a
+	${LINK}
 
 CLEANFILES=*~ PublicHubList.config PublicHubList.xml
 
