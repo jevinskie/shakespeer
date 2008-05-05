@@ -117,6 +117,8 @@ int id_cmp(struct rb_entry *a, struct rb_entry *b)
     return array;
 }
 
+#if 0
+// is this really useful?
 - (id *)allEntries
 {
     id *array = malloc(sizeof(struct rb_entry) * nitems);
@@ -130,6 +132,7 @@ int id_cmp(struct rb_entry *a, struct rb_entry *b)
 
     return array;
 }
+#endif
 
 - (void)removeAllObjects
 {

@@ -32,6 +32,7 @@
     IBOutlet NSTableView *userTable;
     IBOutlet NSScrollView *userScrollView;
     IBOutlet NSTextField *hubStatisticsField;
+    IBOutlet NSSearchField *nickFilter;
     IBOutlet NSMenu *nickMenu;
 
     IBOutlet NSMenu *columnsMenu;
@@ -48,7 +49,6 @@
     NSString *nick;
     NSString *descriptionString;
     NSMutableArray *users;
-    NSArray *filter;
     NSArray *filteredUsers;
     MHSysTree *usersTree;
     BOOL needUpdating;
@@ -59,6 +59,10 @@
     int numStaticNickMenuEntries;
     unsigned nops;
     uint64_t totsize;
+    
+    // when this is non-null, we're autocompleting nicks. it's enumerating through
+    // an already-filtered list that is built on the first tab press.
+    NSEnumerator *nickAutocompleteEnumerator;
 }
 
 - (IBAction)sendMessage:(id)sender;

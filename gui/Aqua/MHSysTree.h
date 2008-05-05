@@ -56,7 +56,9 @@ RB_PROTOTYPE(id_tree, rb_entry, entry, id_cmp);
 - (struct rb_entry *)lookup:(id)anObject;
 
 - (NSArray *)allObjects;
+#if 0
 - (id *)allEntries;
+#endif
 
 - (void)removeEntry:(struct rb_entry *)anEntry;
 

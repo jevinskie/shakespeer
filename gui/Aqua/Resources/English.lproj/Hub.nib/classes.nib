@@ -33,6 +33,7 @@
                 chatView = NSTextView; 
                 columnsMenu = NSMenu; 
                 hubStatisticsField = NSTextField; 
+                nickFilter = NSSearchField; 
                 nickMenu = NSMenu; 
                 tcDescription = NSTableColumn; 
                 tcEmail = NSTableColumn; 

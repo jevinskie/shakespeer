@@ -40,6 +40,11 @@
 
 #include "util.h"
 
+@interface SPHubController (Private)
+ - (void)filterUsersWithString:(NSString *)filter;
+ - (NSArray *)usersWithFilter:(NSString *)filter startsWithSearchOnly:(BOOL)startsWithSearch stringArray:(BOOL)stringArray;
+@end
+
 @implementation SPHubController
 
 - (id)initWithAddress:(NSString *)anAddress nick:(NSString *)aNick
@@ -147,61 +152,75 @@
     numStaticNickMenuEntries = [nickMenu numberOfItems];
 }
 
-- (void)filterUsers
-{
-    if (filter == nil || [filter count] == 0) {
-        [filteredUsers release];
-        filteredUsers = [users retain];
-        return;
+- (NSArray *)usersWithFilter:(NSString *)filter 
+        startsWithSearchOnly:(BOOL)startsWithSearch /* Search for 'filter' only in beginning of nick? */
+                 stringArray:(BOOL)stringArray /* Return array of SPUsers or only nicks as string? */
+{ 
+    if (filter == nil || [filter isEqualToString:@""]) {
+        return users;
     }
 
+    NSArray *filterCriteria = nil;
+    if (!startsWithSearch) {
+        // for AND-searches, split all substrings up as the search criteria.
+        filterCriteria = [filter componentsSeparatedByString:@" "];
+    }
+    
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:[users count]];
     NSEnumerator *e = [users objectEnumerator];
     SPUser *user;
-    while ((user = [e nextObject]) != nil) {
-        NSEnumerator *f = [filter objectEnumerator];
-        NSString *fs;
+    while ((user = [e nextObject])) {
         BOOL add = YES;
-        while ((fs = [f nextObject]) != nil) {
-            if ([fs length] > 0 &&
-               [[user nick] rangeOfString:fs options:NSCaseInsensitiveSearch].location == NSNotFound) {
+        
+        if (startsWithSearch) {
+            if ([[user nick] rangeOfString:filter options:(NSAnchoredSearch | NSCaseInsensitiveSearch)].location == NSNotFound) {
                 add = NO;
-                break;
+            }
+        } 
+        else {
+            // AND-search 
+            NSEnumerator *f = [filterCriteria objectEnumerator];
+            NSString *criterion;
+            while ((criterion = [f nextObject])) {
+                if ([criterion length] > 0 &&
+                   [[user nick] rangeOfString:criterion options:NSCaseInsensitiveSearch].location == NSNotFound) {
+                    add = NO;
+                    break;
+                }
             }
         }
-        if (add)
-            [array addObject:user];
+        
+        if (add) {
+            // Add either only the nick, or the SPUser, depending on preferred return value.
+            if (stringArray)
+                [array addObject:[user nick]];
+            else
+                [array addObject:user];
+        }
     }
 
-    [filteredUsers release];
-    filteredUsers = [array retain];
+    return array;
+}
+
+- (void)filterUsers
+{
+    [self filterUsersWithString:[nickFilter stringValue]];
+}
+
+- (void)filterUsersWithString:(NSString *)newFilter
+{
+    [filteredUsers autorelease];
+    filteredUsers = [[self usersWithFilter:newFilter startsWithSearchOnly:NO stringArray:NO] retain];
 }
 
 - (void)updateUserTable:(NSTimer *)aTimer
 {
     if (needUpdating) {
-#if 0
-        NSRect visibleRect = [userTable visibleRect];
-        int firstIndex = [userTable rowAtPoint:NSMakePoint(visibleRect.origin.x, visibleRect.origin.y + visibleRect.size.height - 1)];
-        SPUser *topUser = nil;
-        if (firstIndex >= 0 && (unsigned int)firstIndex < [[userArrayController arrangedObjects] count]) {
-            topUser = [[userArrayController arrangedObjects] objectAtIndex:firstIndex];
-        }
-#endif
-
         [users release];
         users = [[usersTree allObjects] retain];
         [self filterUsers];
         [userTable reloadData];
         needUpdating = NO;
-
-#if 0
-        if (topUser) {
-            /* [[userScrollView contentView] scrollToPoint:visibleRect.origin]; */
-            [userTable scrollRowToVisible:[[userArrayController arrangedObjects] indexOfObjectIdenticalTo:topUser]];
-            /* [userTable scrollRowToVisible:firstIndex]; */
-        }
-#endif
 
         [hubStatisticsField setStringValue:[NSString stringWithFormat:@"%lu users, %u ops, %s",
             [users count], nops, str_size_human(totsize)]];
@@ -777,6 +796,64 @@
     [self focusChatInput];
 }
 
+- (BOOL)control:(NSControl*)control textView:(NSTextView*)textView doCommandBySelector:(SEL)commandSelector
+{ 
+    if (control == (NSControl*)chatInput && commandSelector == @selector(insertTab:))
+    {
+        if ([[chatInput stringValue] isEqualToString:@""])
+            // if the input field is empty, move focus
+            return NO;
+    
+        if (!nickAutocompleteEnumerator) {
+            NSArray *usersWithFilter = [self usersWithFilter:[chatInput stringValue] 
+                                        startsWithSearchOnly:YES 
+                                                 stringArray:YES];
+            
+            if ([usersWithFilter count] == 1 && 
+               [[chatInput stringValue] isEqualToString:[usersWithFilter objectAtIndex:0]]) {
+                // Special case: The textfield matches exactly one person, whose name
+                // is already filled in. This will happen on the end of the list of autocomplete nicks. 
+                // Since it's a no-op, don't bother getting the enumerator and replacing the contents
+                // of the textfield (with the same value).
+                ;
+            }
+            else {
+                // Hold on to the filtered list of nicks, so we can continue enumerating later.
+                nickAutocompleteEnumerator = [[usersWithFilter objectEnumerator] retain];
+            }
+        }
+        
+        if (nickAutocompleteEnumerator) {
+            NSString *nextNick = [nickAutocompleteEnumerator nextObject];
+            if (nextNick) {
+                [chatInput setStringValue:nextNick];
+            }
+            else {
+                [nickAutocompleteEnumerator release];
+                nickAutocompleteEnumerator = nil;
+            }
+        }
+        
+        if (!nickAutocompleteEnumerator) {
+            // End of session - no more hits
+            NSBeep();
+        }
+        
+        return YES;
+    }
+
+    return NO;
+}
+
+- (void)controlTextDidChange:(NSNotification *)notification
+{
+    if ([notification object] == chatInput && nickAutocompleteEnumerator) {
+        // user changed text, so clear current autocomplete session
+        [nickAutocompleteEnumerator release];
+        nickAutocompleteEnumerator = nil;
+    }
+}
+
 - (void)focusChatInput
 {
     /* keep the text field the first responder (ie, give it input focus) */
@@ -854,12 +931,7 @@
 - (IBAction)filter:(id)sender
 {
     NSString *filterString = [sender stringValue];
-    [filter release];
-    filter = nil;
-    if ([filterString length] > 0)
-        filter = [[filterString componentsSeparatedByString:@" "] retain];
-
-    [self filterUsers];
+    [self filterUsersWithString:filterString];
     [userTable reloadData];
 }
 
