@@ -64,7 +64,7 @@ share_tool_SOURCES=share_tool.c \
 		   sphashd_client.c sphashd_client_cmd.c sphashd_client_send.c \
 		   globals.c notifications.c
 
-sphubd.o ui.o: ${TOP}/version.mk
+sphubd.o ui.o extip.o: ${TOP}/version.mk
 
 share_tool_OBJS=${share_tool_SOURCES:.c=.o}
 share_tool: ${share_tool_OBJS}
