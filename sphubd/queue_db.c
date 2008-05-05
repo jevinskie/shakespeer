@@ -556,12 +556,13 @@ struct queue_target *queue_target_add(const char *target_filename,
 	return qt;
 }
 
-void queue_add_source(const char *nick, const char *target_filename,
+/* returns 0 if the source was added, else non-zero */
+int queue_add_source(const char *nick, const char *target_filename,
 	const char *source_filename)
 {
-	return_if_fail(nick);
-	return_if_fail(source_filename);
-	return_if_fail(target_filename);
+	return_val_if_fail(nick, -1);
+	return_val_if_fail(source_filename, -1);
+	return_val_if_fail(target_filename, -1);
 
 	/* Lookup the (nick, target_filename) pair.
 	 */
@@ -594,9 +595,12 @@ void queue_add_source(const char *nick, const char *target_filename,
 	{
 		INFO("already got [%s] as a source for [%s]",
 			nick, qs->target_filename);
+		return -1;
 	}
 
 	/* FIXME: what if source_filename has changed? possible? */
+
+	return 0; /* queue source was added */
 }
 
 int queue_remove_filelist(const char *nick)

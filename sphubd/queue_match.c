@@ -163,32 +163,37 @@ static void queue_handle_search_response_notification(nc_t *nc,
              * So check the filelist so we can match against all his files.
              */
 
-            /* FIXME: check for directory download */
+            /* check for directory download */
+	    if(qt->target_directory)
+	    {
+		char *existing_filelist =
+		    find_filelist(global_working_directory, resp->nick);
+		if(existing_filelist)
+		{
+		    /* great, we already got the filelist, match against it */
+		    INFO("auto-matching against filelist from [%s]",
+			resp->nick);
+		    queue_match_filelist(existing_filelist, resp->nick);
+		    free(existing_filelist);
+		}
+		else if(queue_auto_download_filelists)
+		{
+		    /* we have to download it first (matching is done
+		     * automagically) */
 
-            char *existing_filelist = find_filelist(global_working_directory,
-                    resp->nick);
-            if(existing_filelist)
-            {
-                /* great, we already got the filelist, match against it */
-                INFO("auto-matching against filelist from [%s]", resp->nick);
-                queue_match_filelist(existing_filelist, resp->nick);
-                free(existing_filelist);
-            }
-            else if(queue_auto_download_filelists)
-            {
-                /* we have to download it first (matching is done
-                 * automagically) */
-
-                ui_send_status_message(NULL, NULL, 
-                        "queueing filelist from [%s] for auto-matching",
-                        resp->nick);
-                queue_add_filelist(resp->nick, 1 /* auto-matched */);
-            }
+		    ui_send_status_message(NULL, NULL, 
+			    "queueing filelist from [%s] for auto-matching",
+			    resp->nick);
+		    queue_add_filelist(resp->nick, 1 /* auto-matched */);
+		}
+	    }
         }
 
-        queue_add_source(resp->nick, qt->filename, resp->filename); 
-	nc_send_queue_source_added_notification(nc_default(),
+        if(queue_add_source(resp->nick, qt->filename, resp->filename) == 0)
+	{
+	    nc_send_queue_source_added_notification(nc_default(),
 		qt->filename, resp->nick, resp->filename);
+	}
     }
 }
 

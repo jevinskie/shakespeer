@@ -139,7 +139,7 @@ void queue_db_print_add_filelist(FILE *fp, struct queue_filelist *qf);
 void queue_db_print_add_directory(FILE *fp, struct queue_directory *qd);
 void queue_db_print_set_resolved(FILE *fp, struct queue_directory *qd);
 
-void queue_add_source(const char *nick, const char *target_filename,
+int queue_add_source(const char *nick, const char *target_filename,
         const char *source_filename);
 
 int queue_remove_sources(const char *target_filename);
