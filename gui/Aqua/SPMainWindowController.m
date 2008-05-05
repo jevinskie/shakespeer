@@ -893,11 +893,11 @@
 
 - (IBAction)advSearchExecute:(id)sender
 {
-    [NSApp endSheet:advSearchWindow];
-
     NSString *searchString = [advSearchField stringValue];
     if([searchString length] == 0)
         return;
+    
+    [NSApp endSheet:advSearchWindow];
 
     if(sender != advSearchField)
     {
