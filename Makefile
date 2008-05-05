@@ -15,7 +15,8 @@ config.mk: configure ${TOP}/support/configure.sub
 config-osx:
 	cp -f config-osx.mk config.mk
 
-REPO_URL=http://darcs.bzero.se/shakespeer
+REPO		?= shakespeer
+REPO_URL	?= http://darcs.bzero.se/$(REPO)
 
 ifneq ($(TAG),)
 TAG_OPTION=--tag=$(TAG)
@@ -31,21 +32,21 @@ tag-release:
 release:
 	mkdir -p $(RELEASE_DIR)
 	cd $(RELEASE_DIR) && \
-	if test -d shakespeer/_darcs; then \
-	  cd shakespeer && \
+	if test -d $(REPO)/_darcs; then \
+	  cd $(REPO) && \
 	  darcs pull -a -v $(TAG_OPTION) $(REPO_URL); \
 	else \
 	  darcs get --partial -v $(TAG_OPTION) $(REPO_URL) && \
-	  cd shakespeer ; \
+	  cd $(REPO) ; \
 	fi && $(MAKE) all BUILD_PROFILE=release && $(MAKE) check
 
 tag-dmg: tag-release
-	cd $(RELEASE_DIR)/shakespeer && \
-		/bin/sh support/mkdmg "$(VERSION)" . ../..
+	cd $(RELEASE_DIR)/$(REPO) && \
+		/bin/sh support/mkdmg "$(VERSION)" . ../.. $(REPO)
 
 dmg: release
-	cd $(RELEASE_DIR)/shakespeer && \
-		/bin/sh support/mkdmg "$(VERSION)" . ../..
+	cd $(RELEASE_DIR)/$(REPO) && \
+		/bin/sh support/mkdmg "$(VERSION)" . ../.. $(REPO)
 
 dist:
 	darcs dist -d $(PACKAGE)-$(VERSION)
