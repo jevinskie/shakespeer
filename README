@@ -1,6 +1,5 @@
 Dependencies:
 -------------
-* Berkeley DB >= 4.1
 * libevent
 * iconv
 * expat xml library
@@ -11,42 +10,41 @@ you want the CLI.
 
 Any dependency that is not found will be automatically downloaded and built.
 Missing software will first be copied from the parent directory, if they exist
-there. Otherwise they will be downloaded using curl, wget or fetch. If none of
+there. Otherwise they will be downloaded using curl, wget, fetch or ftp. If none of
 those programs exist, you will either have to install one of them or manually
 download the missing files to the parent directory (check the file extern.mk
 file for the urls and versions).
 
 The Aqua GUI will only be built where the XCode tools are installed, the rest
-of the package does not depend on Mac OS X. The core DC++ engine is written in
+of the package does not depend on Mac OS X. The core DC engine is written in
 C and is portable to almost any UNIX. Adding a GTK+ or QT QUI should be
 straightforward.
 
 GNU make is needed, BSD make won't work. If you get error messages when running
 make, try gmake instead. If you don't have the gmake program, you will have to
-install GNU make on your system.
-
-
+install GNU make on your system. Also GCC is required for the automatic
+dependency tracking.
 
 
 To build shakespeer from a source package:
 
 $ tar zxvf shakespeer-<version>.tar.gz
 $ cd shakespeer-<version>
-$ make depend
 $ make
 $ make check  (optional)
 
 
-To build shakespeer from CVS:
+To build shakespeer from the latest sources you need darcs, an alternative
+source code control system available at http://darcs.net/.
 
-$ cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/shakespeer login  
- (just press enter when asked for a password) 
-$ cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/shakespeer co -P shakespeer
- (this creates a subdirectory 'shakespeer' in the current directory)
+$ darcs get --partial http://darcs.bzero.se/shakespeer
 $ cd shakespeer
-$ make depend
 $ make
 $ make check  (optional)
+
+To pull any changes from the official repository into your tree, run:
+$ cd shakespeer
+$ darcs pull
 
 
 Note to Mac OS X 10.4 Tiger users:
