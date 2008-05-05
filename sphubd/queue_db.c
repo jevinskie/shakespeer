@@ -615,7 +615,11 @@ int queue_remove_filelist(const char *nick)
 		queue_filelist_free(qf);
 
 		if(!q_store->loading)
-			fprintf(q_store->fp, "-F:%s\n", nick);
+		{
+			char *tmp = str_quote_backslash(nick, ":");
+			fprintf(q_store->fp, "-F:%s\n", tmp);
+			free(tmp);
+		}
 
 		/* notify ui:s */
 		nc_send_filelist_removed_notification(nc_default(), nick);
@@ -637,7 +641,11 @@ int queue_db_remove_target(const char *target_filename)
 		DEBUG("removing target [%s]", qt->filename);
 
 		if(!q_store->loading)
-			fprintf(q_store->fp, "-T:%s\n", target_filename);
+		{
+			char *tmp = str_quote_backslash(target_filename, ":");
+			fprintf(q_store->fp, "-T:%s\n", tmp);
+			free(tmp);
+		}
 
 		/* notify ui:s */
 		nc_send_queue_target_removed_notification(nc_default(),
@@ -713,10 +721,7 @@ int queue_remove_sources(const char *target_filename)
 				qs->nick, qs->target_filename);
 
 			if(!q_store->loading)
-			{
-				fprintf(q_store->fp, "-S:%s:%s\n",
-					qs->target_filename, qs->nick);
-			}
+				queue_db_print_remove_source(q_store->fp, qs);
 			queue_source_free(qs);
 		}
 	}
@@ -742,10 +747,7 @@ int queue_remove_sources_by_nick(const char *nick)
 			nick, qs->target_filename);
 
 		if(!q_store->loading)
-		{
-			fprintf(q_store->fp, "-S:%s:%s\n",
-				qs->target_filename, nick);
-		}
+			queue_db_print_remove_source(q_store->fp, qs);
 
 		nc_send_queue_source_removed_notification(nc_default(),
 			qs->target_filename, nick);
@@ -797,7 +799,11 @@ int queue_db_remove_directory(const char *target_directory)
 
 	int rc = 0;
 	if(!q_store->loading)
-		rc = fprintf(q_store->fp, "-D:%s\n", target_directory);
+	{
+		char *tmp = str_quote_backslash(target_directory, ":");
+		rc = fprintf(q_store->fp, "-D:%s\n", tmp);
+		free(tmp);
+	}
 
 	/* notify ui:s */
 	nc_send_queue_directory_removed_notification(nc_default(),
@@ -904,6 +910,20 @@ queue_db_print_add_source(FILE *fp, struct queue_source *qs)
 	free(tmp1);
 	free(tmp2);
 	free(tmp3);
+
+	return rc;
+}
+
+int queue_db_print_remove_source(FILE *fp, struct queue_source *qs)
+{
+	return_val_if_fail(fp, -1);
+	return_val_if_fail(qs, -1);
+
+	char *tmp1 = str_quote_backslash(qs->target_filename, ":");
+	char *tmp2 = str_quote_backslash(qs->nick, ":");
+	int rc = fprintf(q_store->fp, "-S:%s:%s\n", tmp1, tmp2);
+	free(tmp1);
+	free(tmp2);
 
 	return rc;
 }

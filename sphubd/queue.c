@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2006 Martin Hedenfalk <martin@bzero.se>
+ * Copyright 2004-2007 Martin Hedenfalk <martin@bzero.se>
  *
  * This file is part of ShakesPeer.
  *
@@ -30,6 +30,7 @@
 #include "xstr.h"
 #include "log.h"
 #include "notifications.h"
+#include "quote.h"
 
 extern struct queue_store *q_store;
 
@@ -280,7 +281,7 @@ int queue_remove_source(const char *target_filename, const char *nick)
             DEBUG("removing source [%s], target [%s]",
                     nick, qs->target_filename);
 	    if(!q_store->loading)
-		fprintf(q_store->fp, "-S:%s:%s\n", target_filename, nick);
+		queue_db_print_remove_source(q_store->fp, qs);
 
             nc_send_queue_source_removed_notification(nc_default(),
                     qs->target_filename, nick);
@@ -359,7 +360,11 @@ void queue_set_priority(const char *target_filename, unsigned priority)
     {
 	qt->priority = priority;
 	if(!q_store->loading)
-	    fprintf(q_store->fp, "=P:%s:%u\n", target_filename, priority);
+	{
+	    char *tmp = str_quote_backslash(target_filename, ":");
+	    fprintf(q_store->fp, "=P:%s:%u\n", tmp, priority);
+	    free(tmp);
+	}
 
 	nc_send_queue_priority_changed_notification(nc_default(),
 	    target_filename, priority);
@@ -661,7 +666,7 @@ void test_persistence(void)
 
     queue_set_priority("file.img", 4);
     queue_add_filelist("ba:r", 1);
-    queue_add_source("foo:2", "file.img", "sourcefile.img");
+    queue_add_source("foo:2", "file.img", "sub\\dir\\sourcefile.img");
 
     /* add a new target... */
     fail_unless(queue_add("ba:r", "remote_file:0", 4096, "local_file:0",
@@ -693,6 +698,9 @@ void test_persistence(void)
     fail_unless(q);
     fail_unless(q->target_filename);
     fail_unless(strcmp(q->target_filename, "file.img") == 0);
+    fail_unless(q->source_filename);
+    DEBUG("source_filename = [%s]", q->source_filename);
+    fail_unless(strcmp(q->source_filename, "sub\\dir\\sourcefile.img") == 0);
     queue_free(q);
 
     struct queue_filelist *qf = queue_lookup_filelist("ba:r");

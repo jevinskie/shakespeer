@@ -135,6 +135,7 @@ int queue_remove_target(const char *target_filename);
 
 int queue_db_print_add_target(FILE *fp, struct queue_target *qt);
 int queue_db_print_add_source(FILE *fp, struct queue_source *qs);
+int queue_db_print_remove_source(FILE *fp, struct queue_source *qs);
 int queue_db_print_add_filelist(FILE *fp, struct queue_filelist *qf);
 int queue_db_print_add_directory(FILE *fp, struct queue_directory *qd);
 int queue_db_print_set_resolved(FILE *fp, struct queue_directory *qd);

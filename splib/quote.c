@@ -33,6 +33,7 @@
  * Quotes <string> using backslashes. <quotechars> is a string with characters
  * that need to be quoted.  Returns a new string (should be freed by the
  * caller). If <quotechars> is NULL, a default set of characters are used.
+ * The quote character itself (backslash) is always quoted.
  */
 char *str_quote_backslash(const char *string, const char *quotechars)
 {
@@ -47,7 +48,7 @@ char *str_quote_backslash(const char *string, const char *quotechars)
     for(p = string; *p; p++)
     {
         char c = *p;
-        if(strchr(quotechars, c) != NULL)
+        if(c == '\\' || strchr(quotechars, c) != NULL)
         {
             dstring_append_char(ds, '\\');
         }
