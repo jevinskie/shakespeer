@@ -20,7 +20,7 @@ TESTS = user_test tthdb_test extra_slots_test \
 TOP=..
 include ${TOP}/common.mk
 
-bin_PROGRAMS=sphubd sphashd
+bin_PROGRAMS=sphubd sphashd queue_stress_test
 noinst_PROGRAMS=share_tool tthdb_list queue_tool
 all-local: ${BUILT_SOURCES} ${bin_PROGRAMS}
 
@@ -50,6 +50,10 @@ sphubd: ${sphubd_OBJS} \
 
 sphashd_OBJS=${sphashd_SOURCES:.c=.o}
 sphashd: ${sphashd_OBJS} \
+	${TOP}/splib/libsplib.a
+	${LINK}
+
+queue_stress_test: queue_stress_test.o queue.o queue_db.o notifications.o dbenv.o globals.o \
 	${TOP}/splib/libsplib.a
 	${LINK}
 
