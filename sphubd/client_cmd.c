@@ -528,64 +528,84 @@ static int cc_cmd_Lock(void *data, int argc, char **argv)
     return 0;
 }
 
-static int cc_cmd_MyNick(void *data, int argc, char **argv)
+static int
+cc_cmd_MyNick(void *data, int argc, char **argv)
 {
-    cc_t *cc = data;
-    char *nick = argv[0];
+	cc_t *cc = data;
+	char *nick = argv[0];
 
-    return_val_if_fail(cc->state == CC_STATE_MYNICK, -1);
+	return_val_if_fail(cc->state == CC_STATE_MYNICK, -1);
 
-    if(strchr(nick, '$'))
-    {
-        INFO("invalid character in nick name (dropping client)");
-        return -1;
-    }
+	if(strchr(nick, '$'))
+	{
+		INFO("invalid character in nick name (dropping client)");
+		return -1;
+	}
 
-    char *utf8_nick = 0;
-    cc->hub = hub_find_encoding_by_nick(nick, &utf8_nick);
-    if(cc->hub == NULL)
-    {
-        INFO("Closing client connection with non-logged in user '%s'", nick);
-        return -1;
-    }
-    return_val_if_fail(utf8_nick, -1);
+	char *utf8_nick = 0;
+	cc->hub = hub_find_encoding_by_nick(nick, &utf8_nick);
+	if(cc->hub == NULL)
+	{
+		INFO("Closing client connection with non-logged in user '%s'",
+			nick);
+		return -1;
+	}
+	return_val_if_fail(utf8_nick, -1);
 
-    DEBUG("set client nick to '%s'", utf8_nick);
-    DEBUG("Set corresponding hub to %s", cc->hub->address);
+	DEBUG("set client nick to '%s'", utf8_nick);
+	DEBUG("Set corresponding hub to %s", cc->hub->address);
 
-    /* upload or download? */
-    if(queue_has_source_for_nick(utf8_nick))
-    {
-        cc->direction = CC_DIR_DOWNLOAD;
-    }
-    else
-    {
-        cc->direction = CC_DIR_UPLOAD;
-    }
+	/* upload or download? */
+	if(queue_has_source_for_nick(utf8_nick))
+	{
+		cc->direction = CC_DIR_DOWNLOAD;
+	}
+	else
+	{
+		cc->direction = CC_DIR_UPLOAD;
+	}
 
-    cc_t *xcc = cc_find_by_nick_and_direction(utf8_nick, cc->direction);
-    cc->nick = utf8_nick;
-    if(xcc)
-    {
-        WARNING("already connected to %s (direction %s), closing connection",
-                utf8_nick, cc_dir2str(cc->direction));
-        return -1;
-    }
+	/* check for already present connection */
+	cc_t *xcc = cc_find_by_nick_and_direction(utf8_nick, cc->direction);
+	cc->nick = utf8_nick;
+	if(xcc)
+	{
+		/* If we're already downloading from this nick, force this
+		 * connection into an upload. The other peer might want to
+		 * download something from us at the same time.
+		 */
+		if(cc->direction == CC_DIR_DOWNLOAD)
+		{
+			DEBUG("already downloading from [%s],"
+				"forcing upload mode", utf8_nick);
+			cc->direction = CC_DIR_UPLOAD;
+		}
+		else
+		{
+			/* ...but only allow one upload connection per peer.
+			 */
+			WARNING("already uploading to %s, closing connection",
+				utf8_nick);
+			return -1;
+		}
+	}
 
-    if(cc->incoming_connection)
-    {
-        cc_send_command(cc, "$MyNick %s|", cc->hub->me->nick);
+	if(cc->incoming_connection)
+	{
+		cc_send_command(cc, "$MyNick %s|", cc->hub->me->nick);
 
-        char *lock_pk = nmdc_makelock_pk(global_id_lock, global_id_version);
-        /* Can't use cc_send_command here, 'cause the lock shouldn't be
-         * converted from utf-8 */
-        cc_send_command_as_is(cc, "$Lock %s|", lock_pk);
-        free(lock_pk);
-    }
+		char *lock_pk = nmdc_makelock_pk(global_id_lock,
+			global_id_version);
 
-    cc->state = CC_STATE_LOCK;
+		/* Can't use cc_send_command here, 'cause the lock
+		 * shouldn't be converted from utf-8 */
+		cc_send_command_as_is(cc, "$Lock %s|", lock_pk);
+		free(lock_pk);
+	}
 
-    return 0;
+	cc->state = CC_STATE_LOCK;
+
+	return 0;
 }
 
 static cmd_t cc_cmds[] = {
