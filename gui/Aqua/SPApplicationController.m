@@ -66,11 +66,14 @@ static SPApplicationController *mySharedApplicationController = nil;
         sp = sp_create(NULL);
         sp_register_callbacks(sp);
 
+	NSString *defaultDownloadFolder = [@"~/Desktop/ShakesPeer Downloads" stringByExpandingTildeInPath];
+	NSString *defaultIncompleteFolder = [@"~/Desktop/ShakesPeer Downloads/Incomplete" stringByExpandingTildeInPath];
+
         NSDictionary *appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
             @"Bookmarks", SPPrefsLastSidebarItem,
             @"IdentityItem", SPPrefsLastPrefPane,
-            [@"~/Desktop/ShakesPeer Downloads" stringByExpandingTildeInPath], SPPrefsDownloadFolder,
-            [@"~/Desktop/ShakesPeer Downloads/Incomplete" stringByExpandingTildeInPath], SPPrefsIncompleteFolder,
+            defaultDownloadFolder, SPPrefsDownloadFolder,
+            defaultIncompleteFolder, SPPrefsIncompleteFolder,
             @"unconfigured-shakespeer-user", SPPrefsNickname,
             @"", SPPrefsEmail,
             @"DSL", SPPrefsSpeed,
@@ -111,6 +114,14 @@ static SPApplicationController *mySharedApplicationController = nil;
 			[NSNumber numberWithBool:YES], SPPrefsSessionRestore,
             nil];
         [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
+
+	if([[NSUserDefaults standardUserDefaults] stringForKey:@"firstRun"] == nil)
+	{
+	    NSLog(@"first run: creating default download folders");
+	    [[NSFileManager defaultManager] createDirectoryAtPath:defaultDownloadFolder attributes:nil];
+	    [[NSFileManager defaultManager] createDirectoryAtPath:defaultIncompleteFolder attributes:nil];
+	    [[NSUserDefaults standardUserDefaults] setObject:@"NO" forKey:@"firstRun"];
+	}
 
         sp_log_set_level([[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsLogLevel] UTF8String]);
 
