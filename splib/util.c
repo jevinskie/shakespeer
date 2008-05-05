@@ -39,6 +39,7 @@
 #include <ctype.h>
 #include <assert.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #include "util.h"
 #include "log.h"
@@ -295,23 +296,45 @@ void set_corelimit(int enabled)
     chdir("/tmp");
 }
 
-int sp_daemonize(void)
+int
+sp_daemonize(void)
 {
-    if(daemon(0, 0) != 0)
-    {
-        WARNING("failed to daemonize: %s", strerror(errno));
-        return -1;
-    }
-    set_corelimit(COREDUMPS_ENABLED); /* enable coredumps */
+	pid_t pid;
 
-    /* block SIGPIPE signal */
-    sigset_t sigset;
-    sigemptyset(&sigset);
-    sigaddset(&sigset, SIGPIPE);
-    if(sigprocmask(SIG_BLOCK, &sigset, NULL) != 0)
-        WARNING("sigprocmask: %s", strerror(errno));
+	pid = fork();
+	if(pid < 0)
+	{
+		WARNING("failed to daemonize: %s", strerror(errno));
+ 		return -1;
+	}
+	if(pid > 0)
+	{
+		/* parent */
+		exit(0);
+	}
 
-    return 0;
+	setsid();
+
+	/* set stdin, stdout and stderr to /dev/null */
+	close(0);
+	close(1);
+	close(2);
+	int fd = open("/dev/null", O_RDWR);
+	dup(fd);
+	dup(fd);
+
+	chdir("/");
+
+	set_corelimit(COREDUMPS_ENABLED); /* enable coredumps */
+
+	/* block SIGPIPE signal */
+	sigset_t sigset;
+	sigemptyset(&sigset);
+	sigaddset(&sigset, SIGPIPE);
+	if(sigprocmask(SIG_BLOCK, &sigset, NULL) != 0)
+		WARNING("sigprocmask: %s", strerror(errno));
+
+	return 0;
 }
 
 pid_t sp_get_pid(const char *workdir, const char *appname)
