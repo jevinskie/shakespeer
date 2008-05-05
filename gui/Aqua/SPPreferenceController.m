@@ -69,27 +69,32 @@ static float ToolbarHeightForWindow(NSWindow *window)
         {
             if([lastPrefsPane isEqualToString:@"identity"])
             {
+                [prefsToolbar setSelectedItemIdentifier:@"IdentityItem"];
                 [[self window] setContentSize:[identityView frame].size];
                 [[self window] setContentView:identityView];
             }
             else if([lastPrefsPane isEqualToString:@"shares"])
             {
+                [prefsToolbar setSelectedItemIdentifier:@"ShareItem"];
                 [[self window] setContentSize:[sharesView frame].size];
                 [[self window] setContentView:sharesView];
             }
             else if([lastPrefsPane isEqualToString:@"network"])
             {
+                [prefsToolbar setSelectedItemIdentifier:@"NetworkItem"];
                 [[self window] setContentSize:[networkView frame].size];
                 [[self window] setContentView:networkView];
             }
             else if([lastPrefsPane isEqualToString:@"advanced"])
             {
+                [prefsToolbar setSelectedItemIdentifier:@"AdvancedItem"];
                 [[self window] setContentSize:[advancedView frame].size];
                 [[self window] setContentView:advancedView];
             }
         }
         else
         {
+            [prefsToolbar setSelectedItemIdentifier:@"IdentityItem"];
             [[self window] setContentSize:[identityView frame].size];
             [[self window] setContentView:identityView];
         }
@@ -178,58 +183,8 @@ static float ToolbarHeightForWindow(NSWindow *window)
     return [[self window] isKeyWindow];
 }
 
-- (void)setTotalShareSize:(uint64_t)aNumber
-{
-    totalShareSize = aNumber;
-}
-
-- (void)shareStatsNotification:(NSNotification *)aNotification
-{
-    NSString *path = [[aNotification userInfo] objectForKey:@"path"];
-
-    if([path isEqualToString:@""])
-    {
-        uint64_t size = [[[aNotification userInfo] objectForKey:@"size"] unsignedLongLongValue];
-        [self setTotalShareSize:size];
-        return;
-    }
-
-    NSEnumerator *e = [sharedPaths objectEnumerator];
-    NSMutableDictionary *dict;
-    while((dict = [e nextObject]) != nil)
-    {
-        if([[dict objectForKey:@"path"] isEqualToString:path])
-        {
-            uint64_t size = [[[aNotification userInfo] objectForKey:@"size"] unsignedLongLongValue];
-            uint64_t totsize = [[[aNotification userInfo] objectForKey:@"totsize"] unsignedLongLongValue];
-            uint64_t dupsize = [[[aNotification userInfo] objectForKey:@"dupsize"] unsignedLongLongValue];
-            uint64_t uniqsize = totsize - dupsize;
-            unsigned nfiles = [[[aNotification userInfo] objectForKey:@"nfiles"] intValue];
-            unsigned ntotfiles = [[[aNotification userInfo] objectForKey:@"ntotfiles"] intValue];
-            unsigned nduplicates = [[[aNotification userInfo] objectForKey:@"nduplicates"] intValue];
-            unsigned nunique = ntotfiles - nduplicates;
-            unsigned percentComplete = (unsigned)(100 * ((double)size / (uniqsize ? uniqsize : 1)));
-
-            [self willChangeValueForKey:@"size"];
-            [self willChangeValueForKey:@"nfiles"];
-            [self willChangeValueForKey:@"percentComplete"];
-            [self willChangeValueForKey:@"nleft"];
-            [self willChangeValueForKey:@"nduplicates"];
-
-            [dict setObject:[NSNumber numberWithUnsignedLongLong:size] forKey:@"size"];
-            [dict setObject:[NSNumber numberWithInt:nfiles] forKey:@"nfiles"];
-            [dict setObject:[NSNumber numberWithInt:percentComplete] forKey:@"percentComplete"];
-            [dict setObject:[NSNumber numberWithInt:nunique - nfiles] forKey:@"nleft"];
-            [dict setObject:[NSNumber numberWithInt:nduplicates] forKey:@"nduplicates"];
-
-            [self didChangeValueForKey:@"nduplicates"];
-            [self didChangeValueForKey:@"nleft"];
-            [self didChangeValueForKey:@"percentComplete"];
-            [self didChangeValueForKey:@"nfiles"];
-            [self didChangeValueForKey:@"size"];
-        }
-    }
-}
+# pragma mark -
+# pragma mark Toolbar and preference panes
 
 - (void)resizeWindowToSize:(NSSize)newSize
 {
@@ -352,6 +307,22 @@ static float ToolbarHeightForWindow(NSWindow *window)
     return nil;
 }
 
+-(NSArray *)toolbarSelectableItemIdentifiers:(NSToolbar *)toolbar
+{
+    if(toolbar == prefsToolbar)
+    {
+        return [NSArray arrayWithObjects:
+            @"IdentityItem",
+            @"ShareItem",
+            @"NetworkItem",
+            @"AdvancedItem",
+            nil];
+    }
+    return nil;
+}
+
+#pragma mark -
+
 - (void)addSharedPathsPath:(NSString *)aPath
 {
     NSMutableDictionary *newPath = [NSMutableDictionary dictionaryWithObjectsAndKeys:aPath, @"path",
@@ -419,6 +390,59 @@ static float ToolbarHeightForWindow(NSWindow *window)
                 [self didChangeValueForKey:@"sharedPaths"];
                 break;
             }
+        }
+    }
+}
+
+- (void)setTotalShareSize:(uint64_t)aNumber
+{
+    totalShareSize = aNumber;
+}
+
+- (void)shareStatsNotification:(NSNotification *)aNotification
+{
+    NSString *path = [[aNotification userInfo] objectForKey:@"path"];
+    
+    if([path isEqualToString:@""])
+    {
+        uint64_t size = [[[aNotification userInfo] objectForKey:@"size"] unsignedLongLongValue];
+        [self setTotalShareSize:size];
+        return;
+    }
+    
+    NSEnumerator *e = [sharedPaths objectEnumerator];
+    NSMutableDictionary *dict;
+    while((dict = [e nextObject]) != nil)
+    {
+        if([[dict objectForKey:@"path"] isEqualToString:path])
+        {
+            uint64_t size = [[[aNotification userInfo] objectForKey:@"size"] unsignedLongLongValue];
+            uint64_t totsize = [[[aNotification userInfo] objectForKey:@"totsize"] unsignedLongLongValue];
+            uint64_t dupsize = [[[aNotification userInfo] objectForKey:@"dupsize"] unsignedLongLongValue];
+            uint64_t uniqsize = totsize - dupsize;
+            unsigned nfiles = [[[aNotification userInfo] objectForKey:@"nfiles"] intValue];
+            unsigned ntotfiles = [[[aNotification userInfo] objectForKey:@"ntotfiles"] intValue];
+            unsigned nduplicates = [[[aNotification userInfo] objectForKey:@"nduplicates"] intValue];
+            unsigned nunique = ntotfiles - nduplicates;
+            unsigned percentComplete = (unsigned)(100 * ((double)size / (uniqsize ? uniqsize : 1)));
+            
+            [self willChangeValueForKey:@"size"];
+            [self willChangeValueForKey:@"nfiles"];
+            [self willChangeValueForKey:@"percentComplete"];
+            [self willChangeValueForKey:@"nleft"];
+            [self willChangeValueForKey:@"nduplicates"];
+            
+            [dict setObject:[NSNumber numberWithUnsignedLongLong:size] forKey:@"size"];
+            [dict setObject:[NSNumber numberWithInt:nfiles] forKey:@"nfiles"];
+            [dict setObject:[NSNumber numberWithInt:percentComplete] forKey:@"percentComplete"];
+            [dict setObject:[NSNumber numberWithInt:nunique - nfiles] forKey:@"nleft"];
+            [dict setObject:[NSNumber numberWithInt:nduplicates] forKey:@"nduplicates"];
+            
+            [self didChangeValueForKey:@"nduplicates"];
+            [self didChangeValueForKey:@"nleft"];
+            [self didChangeValueForKey:@"percentComplete"];
+            [self didChangeValueForKey:@"nfiles"];
+            [self didChangeValueForKey:@"size"];
         }
     }
 }
