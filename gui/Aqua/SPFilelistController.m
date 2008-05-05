@@ -98,8 +98,8 @@
     char *e = dir->path;
     for(; e && *e; e++)
     {
-        if(*e == '\\')
-            *e = '/';
+        if(*e == '/')
+            *e = '\\';
     }
 
     NSString *path = [[NSString alloc] initWithUTF8String:dir->path];
@@ -115,7 +115,7 @@
         [item setObject:[[filename truncatedString:NSLineBreakByTruncatingTail] autorelease] forKey:@"DisplayFilename"];
         [item setObject:[[path truncatedString:NSLineBreakByTruncatingHead] autorelease] forKey:@"DisplayPath"];
 
-        NSString *fullPath = [[NSString alloc] initWithFormat:@"%@/%@", path, filename];
+        NSString *fullPath = [[NSString alloc] initWithFormat:@"%@\\%@", path, filename];
         [item setObject:[[fullPath truncatedString:NSLineBreakByTruncatingHead] autorelease] forKey:@"DisplayFullPath"];
         [fullPath release];
 
