@@ -26,7 +26,7 @@
 {
     NSString *target;
     NSString *filename;
-    NSAttributedString *attributedFilename;
+    NSString *displayName;
     NSString *path;
     NSString *tth;
     NSAttributedString *attributedTTH;
@@ -48,8 +48,13 @@
 	BOOL isWaitingToBeRemoved;
 }
 - (id)initWithTarget:(NSString *)aTarget;
+- (id)initWithTarget:(NSString *)aTarget displayName:(NSString *)aDisplayName;
+
 - (NSString *)filename;
-- (NSAttributedString *)attributedFilename;
+
+// usually the same as filename, unless the name needs to be pretty-printed, like filelists.
+- (NSString *)displayName;
+
 - (NSString *)path;
 - (NSString *)target;
 - (NSString *)tth;

@@ -266,7 +266,7 @@
     SPTransferItem *tr = [self findTransferItemWithTargetFilename:targetFilename];
     if (!tr)
         // this is normal. we got a notification when the user loaded a cached filelist, 
-        // so no file list wasn't in the transfers.
+        // so no file list was in the transfers.
         return;
     
     [self willChangeValueForKey:@"transfers"];

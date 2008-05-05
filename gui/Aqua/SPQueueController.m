@@ -673,7 +673,8 @@
     NSString *identifier = [tableColumn identifier];
     if([identifier isEqualToString:@"filename"])
     {
-        return [qi attributedFilename];
+        NSAttributedString *attributedDisplayName = [[[qi displayName] truncatedString:NSLineBreakByTruncatingMiddle] autorelease];
+        return attributedDisplayName;
     }
     else if([identifier isEqualToString:@"tth"])
     {
@@ -772,7 +773,10 @@
 
 - (void)addFilelistNotification:(NSNotification *)aNotification
 {
-    SPQueueItem *item = [[SPQueueItem alloc] initWithTarget:@"<filelist>"];
+    // set the text in the 'file name' column to something comprehensible ("MrFoo's filelist")
+    NSString *displayname = [NSString stringWithFormat:@"%@'s filelist", [[aNotification userInfo] objectForKey:@"nick"]];
+    
+    SPQueueItem *item = [[SPQueueItem alloc] initWithTarget:@"<filelist>" displayName:displayname];
     [item addSource:@"<filelist>" nick:[[aNotification userInfo] objectForKey:@"nick"]];
     [item setPriority:[[aNotification userInfo] objectForKey:@"priority"]];
     [item setIsFilelist:YES];
@@ -962,7 +966,7 @@
         target = [aTarget retain];
         path = [[[aTarget stringByDeletingLastPathComponent] stringByAbbreviatingWithTildeInPath] retain];
         filename = [[aTarget lastPathComponent] retain];
-        attributedFilename = [filename truncatedString:NSLineBreakByTruncatingMiddle];
+        displayName = [filename retain];
         size = [[NSNumber numberWithUnsignedLongLong:0] retain];
         sources = [[NSMutableDictionary alloc] init];
         [self setPriority:[NSNumber numberWithInt:3]]; /* Normal priority */
@@ -971,11 +975,20 @@
     return self;
 }
 
+- (id)initWithTarget:(NSString *)aTarget displayName:(NSString *)aDisplayName
+{
+    if ((self = [self initWithTarget:aTarget])) {
+        [displayName autorelease];
+        displayName = [aDisplayName copy];
+    }
+    return self;
+}
+
 - (void)dealloc
 {
     [target release];
     [filename release];
-    [attributedFilename release];
+    [displayName release];
     [path release];
     [tth release];
     [attributedTTH release];
@@ -993,9 +1006,9 @@
     return filename;
 }
 
-- (NSAttributedString *)attributedFilename
+- (NSString *)displayName
 {
-    return attributedFilename;
+    return displayName;
 }
 
 - (NSString *)path
