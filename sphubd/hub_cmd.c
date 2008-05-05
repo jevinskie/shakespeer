@@ -615,7 +615,7 @@ static int hub_cmd_UserIP(void *data, int argc, char **argv)
 				if (extip_get_override()) {
 					user_set_ip(hub->me, b->argv[1]);
 				} else {
-					INFO("Ignoring reported IP");
+					INFO("Ignoring reported IP, using %s", hub->me->ip);
 				}
             }
         }

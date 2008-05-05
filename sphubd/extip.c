@@ -271,11 +271,6 @@ const char *extip_get(int fd, const char *hub_ip)
     getsockname(fd, (struct sockaddr *)&sin, &namelen);
     INFO("detected my local IP as %s", inet_ntoa(sin.sin_addr));
 
-    /* Check if the hub is local. If so, return the local address. */
-    const char *ip = extip_check_local_hub(&sin.sin_addr, &hub_addr);
-    if(ip)
-        return ip;
-
     /* Did the user configure an external IP manually? */
     if(use_static && static_ip)
     {
@@ -283,6 +278,11 @@ const char *extip_get(int fd, const char *hub_ip)
 	INFO("using static IP %s for hub %s", static_ip, hub_ip);
         return static_ip;
     }
+	
+    /* Check if the hub is local. If so, return the local address. */
+    const char *ip = extip_check_local_hub(&sin.sin_addr, &hub_addr);
+    if(ip)
+        return ip;
 
     if(addr_is_private(&sin.sin_addr) && addr_is_private(&hub_addr))
     {
