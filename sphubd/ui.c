@@ -483,6 +483,8 @@ static int ui_cb_download_filelist(ui_t *ui, const char *hub_address,
             }
             else
             {
+                ui_send_status_message(ui, hub_address,
+                        "Using cached copy of %s's filelist", nick);
                 ui_send_filelist_finished(NULL, hub_address,
                         nick, existing_filelist);
             }
