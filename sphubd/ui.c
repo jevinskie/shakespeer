@@ -780,13 +780,13 @@ static int ui_cb_grant_slot(ui_t *ui, const char *nick)
 
 static int ui_cb_pause_hashing(ui_t *ui)
 {
-    hs_stop();
+    hs_pause();
     return 0;
 }
 
 static int ui_cb_resume_hashing(ui_t *ui)
 {
-    hs_start_hash_feeder();
+    hs_resume();
     return 0;
 }
 

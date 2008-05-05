@@ -247,9 +247,12 @@ static void hs_handle_share_scan_finished_notification(
         nc_share_scan_finished_t *data,
         void *user_data)
 {
+	return_if_fail(global_hash_server);
+
 	if(global_hash_server->paused)
 	{
-		DEBUG("finished scanning [%s], but hash feeder paused", data->path);
+		DEBUG("finished scanning [%s], but hash feeder paused",
+			data->path);
 	}
 	else
 	{
@@ -264,8 +267,8 @@ static void hs_handle_will_remove_share_notification(
         nc_will_remove_share_t *notification,
         void *user_data)
 {
-	/* If a shared path is being removed, we must stop hashing, since we keep a
-	 * list of share_file_t pointers that might be freed.
+	/* If a shared path is being removed, we must stop hashing, since we
+	 * keep a list of share_file_t pointers that might be freed.
 	 */
 	hs_stop();
 }
@@ -276,6 +279,8 @@ static void hs_handle_did_remove_share_notification(
         nc_did_remove_share_t *notification,
         void *user_data)
 {
+	return_if_fail(global_hash_server);
+
 	/* Once a shared path has been removed, restart hashing other files.
 	 */
 	if(global_hash_server->paused)
@@ -347,9 +352,20 @@ int hs_stop(void)
         }
     }
 
-    global_hash_server->paused = true;
-
     return 0;
+}
+
+void hs_pause(void)
+{
+	INFO("hashing paused");
+	hs_stop();
+	global_hash_server->paused = true;
+}
+
+void hs_resume(void)
+{
+	INFO("hashing resumed");
+	hs_start_hash_feeder();
 }
 
 void hs_shutdown(void)

@@ -12,6 +12,8 @@ void hs_start_hash_feeder(void);
 void hs_shutdown(void);
 int hs_stop(void);
 void hs_set_prio(unsigned int prio);
+void hs_pause(void);
+void hs_resume(void);
 
 #endif
 
