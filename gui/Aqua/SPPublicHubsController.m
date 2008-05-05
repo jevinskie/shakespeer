@@ -241,7 +241,7 @@
     if(hublist == NULL)
     {
         [[SPMainWindowController sharedMainWindowController]
-            statusMessage:[NSString stringWithFormat:@"Failed to load hublist: %s", err->message]
+            statusMessage:[NSString stringWithFormat:@"Failed to load hublist: %s", xerr_msg(err)]
                       hub:nil];
         xerr_free(err);
     }
