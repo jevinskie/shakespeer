@@ -14,6 +14,8 @@ WANT_CLI=yes
 CFLAGS+=-g -O2 -Wall -Werror -DVERSION=\"${VERSION}\" -DPACKAGE=\"${PACKAGE}\"
 CFLAGS+=-I${TOP}/splib -I${TOP}/spclient
 
+os := $(shell uname)
+
 ifeq (${os},Linux)
 # Required for large file support on Linux
 CFLAGS+=-D_FILE_OFFSET_BITS=64
@@ -26,6 +28,12 @@ CFLAGS+=-DCOREDUMPS_ENABLED=1
 ifeq (${os},Darwin)
 UB_CFLAGS=-isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386 -arch ppc
 UB_LDFLAGS=-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386
+endif
+
+# Berkeley DB on Linux needs pthread
+# We also need to link with -lresolv
+ifeq (${os},Linux)
+LIBS+=-lpthread -lresolv
 endif
 
 # search for xcodebuild in path
