@@ -192,13 +192,16 @@ static void tth_parse(struct tth_store *store)
 
 static struct tth_store *tth_load(const char *filename)
 {
+	FILE *fp = fopen(filename, "a+");
+	return_val_if_fail(fp, NULL);
+
 	struct tth_store *store = calloc(1, sizeof(struct tth_store));
 
 	store->filename = strdup(filename);
+	store->fp = fp;
 	RB_INIT(&store->entries);
 	RB_INIT(&store->inodes);
 
-	store->fp = fopen(filename, "a+");
 	rewind(store->fp);
 	INFO("loading TTH store from [%s]", filename);
 	tth_parse(store);
