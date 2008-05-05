@@ -240,6 +240,7 @@
     [nick release];
     [encoding release];
     [descriptionString release];
+    [nickAutocompleteEnumerator release];
     
     [tcNick release];
     [tcShare release];
