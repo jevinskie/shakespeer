@@ -159,7 +159,7 @@ void tiger(word64 *str, word64 length, word64 res[3])
 
   for(i=length; i>=64; i-=64)
     {
-#ifdef __BIG_ENDIAN__
+#if __BIG_ENDIAN__
       for(j=0; j<64; j++)
 	temp[j^7] = ((byte*)str)[j];
       tiger_compress(((word64*)temp), res);
@@ -169,7 +169,7 @@ void tiger(word64 *str, word64 length, word64 res[3])
       str += 8;
     }
 
-#ifdef __BIG_ENDIAN__
+#if __BIG_ENDIAN__
   for(j=0; j<i; j++)
     temp[j^7] = ((byte*)str)[j];
 

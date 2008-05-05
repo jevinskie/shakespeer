@@ -23,6 +23,8 @@
  *
  */
 
+#include "tiger.h"
+
 #if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__)
 # include <sys/types.h>
 # include <sys/endian.h>
@@ -33,7 +35,7 @@
 #elif defined(__linux__)
 # include <endian.h>
 # include <byteswap.h>
-# ifdef __LITTLE_ENDIAN__
+# if __LITTLE_ENDIAN__
 #  define U_INT64_TO_LE(x) (x)
 # else
 #  define U_INT64_TO_LE(x) bswap_64((x))
