@@ -64,6 +64,11 @@
 
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(transferFinishedNotification:)
+                                                     name:SPNotificationDownloadFinished
+                                                   object:nil];
+
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(transferFinishedNotification:)
                                                      name:SPNotificationUploadFinished
                                                    object:nil];
 
@@ -120,7 +125,7 @@
     
     // Don't show downloads in table
     [arrayController setFilterPredicate:
-        [NSPredicate predicateWithFormat:@"state BETWEEN {1, 3}"]];
+        [NSPredicate predicateWithFormat:@"direction == 2"]];
     [arrayController rearrangeObjects];
 }
 
