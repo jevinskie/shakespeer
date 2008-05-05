@@ -21,6 +21,7 @@
 #define _GNU_SOURCE /* needed for asprintf */
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <dirent.h>
 
 #include <assert.h>
@@ -89,6 +90,7 @@ static void ui_send_stored_filelists_state(ui_t *ui)
 {
     DIR *fsdir;
     struct dirent *dp;
+    time_t now = time(0);
 
     fsdir = opendir(global_working_directory);
     if(fsdir == 0)
@@ -108,6 +110,26 @@ static void ui_send_stored_filelists_state(ui_t *ui)
             static const void *rx_xml = NULL;
             static const void *rx_dclst = NULL;
             const void *rx = NULL;
+
+	    /* While we're at it, delete old filelists.
+	     */
+	    struct stat stbuf;
+	    char *path;
+	    asprintf(&path, "%s/%s", global_working_directory, filename);
+	    if(stat(path, &stbuf) == 0)
+	    {
+		/* expire filelist after 24 hours */
+		if(stbuf.st_mtime + 24*3600 < now)
+		{
+		    if(unlink(path) != 0)
+			WARNING(" %s: %s", path, strerror(errno));
+		    free(path);
+		    continue;
+		}
+	    }
+	    else
+		WARNING("%s: %s", path, strerror(errno));
+	    free(path);
 
             if(type == FILELIST_XML && str_has_suffix(filename, ".bz2"))
             {
