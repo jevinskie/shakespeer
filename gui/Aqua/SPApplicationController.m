@@ -41,7 +41,9 @@
 
 #include "nmdc.h"
 #include "log.h"
-#include "../../version.h"
+#ifndef VERSION
+# include "../../version.h"
+#endif
 
 static SPApplicationController *mySharedApplicationController = nil;
 
