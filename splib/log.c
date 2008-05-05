@@ -94,7 +94,7 @@ static void sp_glog_func(int log_level, const char *message)
     time_t now = time(0);
     struct tm *tm = localtime(&now);
     char tmbuf[32];
-    strftime(tmbuf, sizeof(tmbuf), "%Y-%m-%d %H:%M:%S", tm);
+    strftime(tmbuf, sizeof(tmbuf), "%a %e %H:%M:%S", tm);
     if((log_level & (LOG_LEVEL_WARNING | LOG_LEVEL_ERROR | LOG_LEVEL_CRITICAL)) > 0)
     {
         fprintf(fp, "%s ***** %s *****\n", tmbuf, message);
