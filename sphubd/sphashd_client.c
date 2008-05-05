@@ -85,10 +85,10 @@ static void hs_finish_file(hs_t *hs, const char *filename,
     }
     else
     {
+        SLIST_REMOVE(hs->unfinished_list, file, share_file, link);
+
 	nc_send_tth_available_notification(nc_default(),
 	    file, hash_base32, leaves_base64, mibs_per_sec);
-
-        SLIST_REMOVE(hs->unfinished_list, file, share_file, link);
     }
 
     if(SLIST_FIRST(hs->unfinished_list) == NULL && !hs->paused)
