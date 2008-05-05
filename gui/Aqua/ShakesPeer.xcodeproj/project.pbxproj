@@ -596,9 +596,9 @@
 /* End PBXLegacyTarget section */
 
 /* Begin PBXNativeTarget section */
-		FC7E1A22097E6A2E0087431A /* ShakesPeer */ = {
+		FC7E1A22097E6A2E0087431A /* shakepeer */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = FC7E1A27097E6A300087431A /* Build configuration list for PBXNativeTarget "ShakesPeer" */;
+			buildConfigurationList = FC7E1A27097E6A300087431A /* Build configuration list for PBXNativeTarget "shakepeer" */;
 			buildPhases = (
 				28245A310A02D1C6001ABB1C /* ShellScript */,
 				FC7E1A1F097E6A2E0087431A /* Resources */,
@@ -614,7 +614,7 @@
 				2805B8F20A02B4B600F65FBC /* PBXTargetDependency */,
 				2805B8F40A02B4B600F65FBC /* PBXTargetDependency */,
 			);
-			name = ShakesPeer;
+			name = shakepeer;
 			productName = ShakesPeer;
 			productReference = FC7E1A23097E6A2E0087431A /* ShakesPeer.app */;
 			productType = "com.apple.product-type.application";
@@ -630,10 +630,10 @@
 			productRefGroup = FC7E1A24097E6A2E0087431A /* Products */;
 			projectDirPath = "";
 			targets = (
+				FC7E1A22097E6A2E0087431A /* shakepeer */,
 				2805B8E00A02B40700F65FBC /* splib */,
 				2805B8E50A02B45F00F65FBC /* spclient */,
 				2805B8EE0A02B49B00F65FBC /* sphubd */,
-				FC7E1A22097E6A2E0087431A /* ShakesPeer */,
 			);
 		};
 /* End PBXProject section */
@@ -1129,7 +1129,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		FC7E1A27097E6A300087431A /* Build configuration list for PBXNativeTarget "ShakesPeer" */ = {
+		FC7E1A27097E6A300087431A /* Build configuration list for PBXNativeTarget "shakepeer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FC7E1A28097E6A300087431A /* Debug */,
