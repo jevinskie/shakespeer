@@ -66,8 +66,7 @@
     IBOutlet NSTableColumn *tcPath;
     IBOutlet NSTableColumn *tcHub;
 
-    /* The searchFieldMenu is used both by toolbarSearchField and
-     * advSearchField */
+    /* The searchFieldMenu is used both by toolbarSearchField and advSearchField */
     IBOutlet NSMenu *searchFieldMenu;
 
     MenuButton *contextMenuButton;

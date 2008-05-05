@@ -34,10 +34,8 @@
 #import "SPPublicHubsController.h"
 #import "SPTransferController.h"
 #import "SPFinishedTransferController.h"
-
 #import "SPUserDefaultKeys.h"
 #import "SPNotificationNames.h"
-
 #import "MenuButton.h"
 
 #include "util.h"
