@@ -44,7 +44,7 @@ static struct {
 } lookup_hosts[] = {
 	{ "shakespeer.bzero.se", "/ip.shtml" },
 	{ "www.stacken.kth.se", "/~mhe/ip.shtml" },
-	{ "ip.xten.net", "/" }, /* hmm, don't think they'd like this... */
+	{ "backup.bzero.se", "/ip.shtml" },
 };
 
 /* data passed to the ip lookup response callback */
