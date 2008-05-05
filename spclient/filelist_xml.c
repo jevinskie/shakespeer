@@ -149,7 +149,7 @@ static void fl_xml_parse_end_tag(void *user_data, const char *el)
 
 int fl_parse_xml_chunk(fl_xml_ctx_t *ctx)
 {
-    return xml_parse_chunk(ctx->xml);
+    return xml_parse_chunk(ctx->xml, NULL);
 }
 
 fl_xml_ctx_t *fl_xml_prepare_file(const char *filename,

@@ -192,16 +192,16 @@ static void hl_xml_parse_start_element(void *data,
 static hublist_t *hl_parse_file_xml(const char *filename, xerr_t **err)
 {
     assert(filename);
-    printf("hl_parse_file_xml(%s)\n", filename);
+
+    FILE *fp = fopen(filename, "r");
+    return_val_if_fail(fp, NULL);
 
     hublist_t *hlist = calloc(1, sizeof(hublist_t));
     LIST_INIT(hlist);
 
-    FILE *fp = fopen(filename, "r");
-
     xml_ctx_t *ctx = xml_init_fp(fp, hl_xml_parse_start_element, NULL, hlist);
 
-    while(xml_parse_chunk(ctx) == 0)
+    while(xml_parse_chunk(ctx, err) == 0)
     {
         /* do nothing */ ;
     }

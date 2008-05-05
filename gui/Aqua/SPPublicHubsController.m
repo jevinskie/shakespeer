@@ -52,7 +52,7 @@ NSString *SPPublicHubDataType = @"SPPublicHubDataType";
         if (hublist_filename) {
             xerr_t *err = 0;
             hublist_t *hublist = hl_parse_file(hublist_filename, &err);
-            if (hublist == NULL) {
+            if (err) {
                 [[SPMainWindowController sharedMainWindowController]
                     statusMessage:[NSString stringWithFormat:@"Failed to load hublist: %s", xerr_msg(err)]
                               hub:nil];
@@ -238,29 +238,114 @@ NSString *SPPublicHubDataType = @"SPPublicHubDataType";
     [self setHubsFromList:[wrappedPointer pointerValue]];
 }
 
+- (void)setRefreshInProgress:(BOOL)flag
+{
+    refreshInProgress = flag;
+}
+
+- (void)mainThreadStatusMessage:(NSString *)msg
+{
+    [[SPMainWindowController sharedMainWindowController]
+	statusMessage:msg hub:nil];
+}
+
+- (void)statusMessage:(NSString *)msg
+{
+    [self performSelectorOnMainThread:@selector(mainThreadStatusMessage:)
+			   withObject:msg
+			waitUntilDone:YES];
+}
+
 - (void)refreshThread:(id)args
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-    refreshInProgress = YES;
+    [self setRefreshInProgress:YES];
+
     char *working_directory = get_working_directory();
-    xerr_t *err = 0;
-    hublist_t *hublist = hl_parse_url(
-            [[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsHublistURL] UTF8String],
-            working_directory, &err);
-    if (hublist == NULL) {
-        [[SPMainWindowController sharedMainWindowController]
-            statusMessage:[NSString stringWithFormat:@"Failed to load hublist: %s", xerr_msg(err)]
-                      hub:nil];
-        xerr_free(err);
+
+    NSString *hublistAddress = [[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsHublistURL];
+    NSURL *hublistURL = [NSURL URLWithString:hublistAddress];
+
+    if(![[hublistURL scheme] isEqualToString:@"http"]) {
+	[self statusMessage:@"Failed to load hublist: not an http resource"];
+	goto done;
     }
-    free(working_directory);
+
+    [self statusMessage:[NSString stringWithFormat:@"Loading hublist from %@", hublistAddress]];
+
+    NSLog(@"sending request for [%@]", hublistAddress);
+    NSURLRequest *request = [NSURLRequest requestWithURL:hublistURL];
+    NSURLResponse *response = nil;
+    NSError *error = nil;
+    NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+    NSString *hublistPath = nil;
+
+    if(error) {
+	NSLog(@"got error: %@", [error localizedDescription]);
+	[self statusMessage:[NSString stringWithFormat:@"Failed to load hublist: %@", [error localizedDescription]]];
+	goto done;
+    } else if([response expectedContentLength] == 0) {
+	NSLog(@"zero size response");
+	[self statusMessage:@"Failed to load hublist: zero sized file"];
+	goto done;
+    }
+
+    int code = [(NSHTTPURLResponse *)response statusCode];
+    if(code != 200) {
+	NSLog(@"http response code %i", code);
+	[self statusMessage:[NSString stringWithFormat:@"Failed to load hublist: %@",
+	    [NSHTTPURLResponse localizedStringForStatusCode:code]]];
+	goto done;
+    }
+
+    if(data) {
+	NSLog(@"got the data");
+
+	NSString *prefix = [NSString stringWithFormat:@"%s/PublicHublist", working_directory];
+
+	// remove old files
+	[[NSFileManager defaultManager] removeFileAtPath:[NSString stringWithFormat:@"%@.xml", prefix] handler:nil];
+	[[NSFileManager defaultManager] removeFileAtPath:[NSString stringWithFormat:@"%@.xml.bz2", prefix] handler:nil];
+	[[NSFileManager defaultManager] removeFileAtPath:[NSString stringWithFormat:@"%@.config", prefix] handler:nil];
+	[[NSFileManager defaultManager] removeFileAtPath:[NSString stringWithFormat:@"%@.config.bz2", prefix] handler:nil];
+
+	if([[hublistURL path] hasSuffix:@".xml.bz2"])
+	    hublistPath = [NSString stringWithFormat:@"%@.xml.bz2", prefix];
+	else
+	    hublistPath = [NSString stringWithFormat:@"%@.config.bz2", prefix];
+
+	NSLog(@"saving hublist as %@", hublistPath);
+
+	[[NSFileManager defaultManager] createFileAtPath:hublistPath contents:data attributes:nil];
+    }
+
+    hublist_t *hublist = NULL;
+    xerr_t *err = 0;
+    if(hublistPath)
+    {
+	NSLog(@"parsing %@", hublistPath);
+	hublist = hl_parse_file([hublistPath UTF8String], &err);
+    }
+
+    if (err) {
+	[self statusMessage:[NSString stringWithFormat:@"Failed to load hublist: %s", xerr_msg(err)]];
+	xerr_free(err);
+	goto done;
+    }
+
+    NSLog(@"updating hub list");
     NSValue *wrappedList = [NSValue valueWithPointer:hublist];
     [self performSelectorOnMainThread:@selector(setHubsFromListWrapped:)
-                           withObject:wrappedList
-                        waitUntilDone:YES];
+			   withObject:wrappedList
+			waitUntilDone:YES];
     hl_free(hublist);
-    refreshInProgress = NO;
+
+    [self statusMessage:@"Hublist updated"];
+
+done:
+    free(working_directory);
+    [self setRefreshInProgress:NO];
 
     [pool release];
 }
@@ -269,6 +354,10 @@ NSString *SPPublicHubDataType = @"SPPublicHubDataType";
 {
     if (refreshInProgress == NO) {
         [NSThread detachNewThreadSelector:@selector(refreshThread:) toTarget:self withObject:nil];
+    } else {
+	[[SPMainWindowController sharedMainWindowController]
+	    statusMessage:@"Refreshing of the hublist already in progress"
+		      hub:nil];
     }
 }
 

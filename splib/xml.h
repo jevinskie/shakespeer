@@ -30,6 +30,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "xerr.h"
+
 typedef void (*xml_open_func_t)(void *data, const char *el, const char **attr);
 typedef void (*xml_close_func_t)(void *data, const char *el);
 
@@ -54,7 +56,7 @@ xml_ctx_t *xml_init_fp(FILE *fp,
         xml_close_func_t close_func,
         void *user_data);
 
-int xml_parse_chunk(xml_ctx_t *ctx);
+int xml_parse_chunk(xml_ctx_t *ctx, xerr_t **err);
 void xml_ctx_free(xml_ctx_t *ctx);
 
 #endif

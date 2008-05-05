@@ -38,6 +38,7 @@
 #include "nfkc.h"
 #include "log.h"
 #include "xstr.h"
+#include "xerr.h"
 
 #ifdef _LIBICONV_VERSION
 # define ICONV_CONST const
@@ -283,7 +284,7 @@ static char *xml_read_chunk(xml_ctx_t *ctx, size_t *chunk_size_ret)
     return ret;
 }
 
-int xml_parse_chunk(xml_ctx_t *ctx)
+int xml_parse_chunk(xml_ctx_t *ctx, xerr_t **err)
 {
     size_t chunk_size = 0;
     char *chunk = xml_read_chunk(ctx, &chunk_size);
@@ -296,12 +297,12 @@ int xml_parse_chunk(xml_ctx_t *ctx)
     if(XML_Parse(ctx->parser, chunk, chunk_size, chunk_size == 0)
             == XML_STATUS_ERROR)
     {
-        WARNING("Parse error %i at line %i, col %i, offset %u: %s",
-                (int)XML_GetErrorCode(ctx->parser),
+        xerr_set(err, XML_GetErrorCode(ctx->parser),
+		"Parse error at line %i, column %i: %s",
                 (int)XML_GetCurrentLineNumber(ctx->parser),
                 (int)XML_GetCurrentColumnNumber(ctx->parser),
-                (unsigned)XML_GetCurrentByteIndex(ctx->parser),
                 XML_ErrorString(XML_GetErrorCode(ctx->parser)));
+	WARNING("%s", xerr_msg(err ? *err : NULL));
         free(chunk);
         return -1;
     }
@@ -416,13 +417,13 @@ void test_encoding(const char *encoding, const char *bar_value, const char *expe
     fail_unless(ctx);
 
     /* parse 6 lines of input, last line should return EOF  */
-    fail_unless(xml_parse_chunk(ctx) == 0);
-    fail_unless(xml_parse_chunk(ctx) == 0);
-    fail_unless(xml_parse_chunk(ctx) == 0);
-    fail_unless(xml_parse_chunk(ctx) == 0);
-    fail_unless(xml_parse_chunk(ctx) == 0);
-    fail_unless(xml_parse_chunk(ctx) == 0);
-    fail_unless(xml_parse_chunk(ctx) == 1);
+    fail_unless(xml_parse_chunk(ctx, NULL) == 0);
+    fail_unless(xml_parse_chunk(ctx, NULL) == 0);
+    fail_unless(xml_parse_chunk(ctx, NULL) == 0);
+    fail_unless(xml_parse_chunk(ctx, NULL) == 0);
+    fail_unless(xml_parse_chunk(ctx, NULL) == 0);
+    fail_unless(xml_parse_chunk(ctx, NULL) == 0);
+    fail_unless(xml_parse_chunk(ctx, NULL) == 1);
 
     fail_unless(ntags == 3);
     fail_unless(strcmp(bar, expected_bar) == 0);
