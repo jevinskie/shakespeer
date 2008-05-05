@@ -91,12 +91,12 @@ static void share_scan_add_file(share_scan_state_t *ctx,
 	char *local_path = share_complete_path(collision_file);
 	if(ctx->mp != collision_file->mp)
 	{
-	    WARNING("%llX: collision between [%s] and [%s]",
+	    WARNING("%"PRIX64": collision between [%s] and [%s]",
 		inode, filepath, local_path);
 	}
 	else
 	{
-	    INFO("%llX: collision between [%s] and [%s]",
+	    INFO("%"PRIX64": collision between [%s] and [%s]",
 		inode, filepath, local_path);
 
 	    if(strcmp(local_path, filepath) == 0)
@@ -121,7 +121,7 @@ static void share_scan_add_file(share_scan_state_t *ctx,
     else if(ti->mtime != stbuf->st_mtime)
     {
 	DEBUG("[%s] has an obsolete inode", filepath);
-	DEBUG("removing obsolete inode %llX for TTH %s (modified)",
+	DEBUG("removing obsolete inode %"PRIX64" for TTH %s (modified)",
 	    inode, ti->tth);
 	tth_store_remove_inode(global_tth_store, inode);
 
@@ -135,7 +135,7 @@ static void share_scan_add_file(share_scan_state_t *ctx,
 	if(td == NULL)
 	{
 	    /* This is an inode without a TTH, which is useless */
-	    DEBUG("removing obsolete inode %llX (missing TTH)", inode);
+	    DEBUG("removing obsolete inode %"PRIX64" (missing TTH)", inode);
 	    tth_store_remove_inode(global_tth_store, inode);
 	}
 	else if(td->active_inode == 0)

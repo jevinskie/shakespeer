@@ -22,6 +22,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
 #include "tthdb.h"
 #include "base64.h"
@@ -90,7 +91,7 @@ static void tth_parse_add_inode(struct tth_store *store, char *buf, size_t len)
 	unsigned long mtime;
 	char tth[40];
 
-	int rc = sscanf(buf, "%llX:%lX:%s", &inode, &mtime, tth);
+	int rc = sscanf(buf, "%"PRIX64":%lX:%s", &inode, &mtime, tth);
 	if(rc != 3 || inode == 0 || mtime == 0 || tth[39] != 0)
 		WARNING("failed to load inode on line %u", store->line_number);
 	else
@@ -258,7 +259,7 @@ void tth_store_add_inode(struct tth_store *store,
 
 		if(!store->loading)
 		{
-			fprintf(store->fp, "+I:%llX:%lX:%s\n",
+			fprintf(store->fp, "+I:%"PRIX64":%lX:%s\n",
 				inode, (unsigned long)mtime, tth);
 		}
 	}
@@ -458,7 +459,7 @@ void tth_store_remove_inode(struct tth_store *store, uint64_t inode)
 
 		if(!store->loading)
 		{
-			fprintf(store->fp, "-I:%llX\n", inode);
+			fprintf(store->fp, "-I:%"PRIX64"\n", inode);
 		}
 
 		tth_inode_free(ti);
