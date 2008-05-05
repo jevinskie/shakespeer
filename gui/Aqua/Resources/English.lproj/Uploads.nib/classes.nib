@@ -1,0 +1,38 @@
+{
+    IBClasses = (
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = SPTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
+        {
+            ACTIONS = {
+                browseUser = id; 
+                cancelTransfer = id; 
+                privateMessage = id; 
+                removeAllSourcesWithNick = id; 
+                removeQueue = id; 
+                removeSource = id; 
+                toggleColumn = id; 
+            }; 
+            CLASS = SPTransferController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                arrayController = NSArrayController; 
+                columnsMenu = NSMenu; 
+                tcFilename = NSTableColumn; 
+                tcHub = NSTableColumn; 
+                tcPath = NSTableColumn; 
+                tcSize = NSTableColumn; 
+                tcSpeed = NSTableColumn; 
+                tcStatus = NSTableColumn; 
+                tcTimeLeft = NSTableColumn; 
+                tcUser = NSTableColumn; 
+                transferMenu = NSMenu; 
+                transferTable = NSTableView; 
+                transferView = NSView; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {CLASS = SPTransferItem; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = XBorderedView; LANGUAGE = ObjC; SUPERCLASS = NSView; }
+    ); 
+    IBVersion = 1; 
+}
