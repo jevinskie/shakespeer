@@ -324,7 +324,6 @@
     dropTimer = nil;
     
     [self displayItem:hoveredItem];
-    [self cancelDropTimer];
 }
 
 /* Called from the close icon in the table */
