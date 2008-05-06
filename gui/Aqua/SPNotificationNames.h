@@ -50,6 +50,7 @@ extern NSString *SPNotificationSourceRemove;
 extern NSString *SPNotificationQueueAddFilelist;
 extern NSString *SPNotificationTransferAborted;
 extern NSString *SPNotificationShareStats;
+extern NSString *SPNotificationShareDuplicateFound;
 extern NSString *SPNotificationNeedPassword;
 extern NSString *SPNotificationServerDied;
 extern NSString *SPNotificationUserCommand;

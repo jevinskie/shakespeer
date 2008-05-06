@@ -50,6 +50,7 @@ NSString *SPNotificationSourceRemove = @"SPNotificationSourceRemove";
 NSString *SPNotificationQueueAddFilelist = @"SPNotificationQueueAddFilelist";
 NSString *SPNotificationTransferAborted = @"SPNotificationTransferAborted";
 NSString *SPNotificationShareStats = @"SPNotificationShareStats";
+NSString *SPNotificationShareDuplicateFound = @"SPNotificationShareDuplicateFound";
 NSString *SPNotificationNeedPassword = @"SPNotificationNeedPassword";
 NSString *SPNotificationServerDied = @"SPNotificationServerDied";
 NSString *SPNotificationUserCommand = @"SPNotificationUserCommand";
@@ -59,4 +60,3 @@ NSString *SPNotificationStartChat = @"SPNotificationStartChat";
 NSString *SPNotificationEndChat = @"SPNotificationEndChat";
 NSString *SPNotificationStoredFilelists = @"SPNotificationStoredFilelists";
 NSString *SPNotificationInitCompletion = @"SPNotificationInitCompletion";
-

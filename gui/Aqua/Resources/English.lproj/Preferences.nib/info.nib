@@ -3,15 +3,15 @@
 <plist version="1.0">
 <dict>
 	<key>IBFramework Version</key>
-	<string>628</string>
+	<string>649</string>
 	<key>IBLastKnownRelativeProjectPath</key>
-	<string>../../../ShakesPeer.xcodeproj</string>
+	<string>../../ShakesPeer.xcodeproj</string>
 	<key>IBOldestOS</key>
 	<integer>4</integer>
 	<key>IBOpenObjects</key>
 	<array/>
 	<key>IBSystem Version</key>
-	<string>9A559</string>
+	<string>9C7010</string>
 	<key>targetFramework</key>
 	<string>IBCocoaFramework</string>
 </dict>

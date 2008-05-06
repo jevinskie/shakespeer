@@ -49,6 +49,7 @@ c connection-closed string:nick int:direction
 c connect-failed string:hub_address
 c get-password string:hub_address string:nick
 c share-stats string:path uint64:size uint64:totsize uint64:dupsize uint:nfiles uint:ntotfiles uint:nduplicates
+c share-duplicate-found string:path
 c server-version string:version
 c user-command string:hub_address int:type int:context string:description string:command
 c set-priority string:target_filename uint:priority

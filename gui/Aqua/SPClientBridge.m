@@ -66,6 +66,14 @@ static int spcb_share_stats(sp_t *sp, const char *path,
     return 0;
 }
 
+static int spcb_share_duplicate_found(sp_t *sp, const char *path)
+{
+    sendNotification(SPNotificationShareDuplicateFound,
+                     @"path", [NSString stringWithUTF8String:path],
+                     nil);
+    return 0;
+}
+
 static int spcb_transfer_aborted(sp_t *sp, const char *local_filename)
 {
     sendNotification(SPNotificationTransferAborted,
@@ -477,6 +485,7 @@ void sp_register_callbacks(sp_t *sp)
     sp->cb_connection_closed = spcb_connection_closed;
     sp->cb_connect_failed = spcb_connection_failed;
     sp->cb_share_stats = spcb_share_stats;
+    sp->cb_share_duplicate_found = spcb_share_duplicate_found;
     sp->cb_get_password = spcb_get_password;
     sp->cb_server_version = spcb_server_version;
     sp->cb_user_command = spcb_user_command;

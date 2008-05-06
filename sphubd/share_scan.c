@@ -156,6 +156,7 @@ static void share_scan_add_file(share_scan_state_t *ctx,
 	    {
 		/* ok, keep as duplicate */
 		INFO("skipping duplicate [%s]", filepath);
+		nc_send_share_duplicate_found_notification(nc_default(), filepath);
 		is_duplicate = true;
 	    }
 	    else

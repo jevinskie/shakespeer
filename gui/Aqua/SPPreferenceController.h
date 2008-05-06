@@ -38,6 +38,8 @@
     IBOutlet NSTextField *slotsField;
     IBOutlet NSButton *slotsPerHubButton;
     IBOutlet NSTextField *rescanShareField;
+	IBOutlet NSMenu *duplicatePathsMenu;
+	IBOutlet NSTableView *sharedPathsTable;
     
     // Network
     IBOutlet NSView *networkView;
@@ -60,9 +62,22 @@
     BOOL testInProgress;
     BOOL hashingPaused;
 }
+
 + (SPPreferenceController *)sharedPreferences;
 
-- (void)setTotalShareSize:(uint64_t)aNumber;
+- (void)show;
+- (BOOL)isKeyWindow;
+- (void)switchToItem:(id)item;
+
+#pragma mark -
+#pragma mark Notifications
+
+- (void)shareStatsNotification:(NSNotification *)aNotification;
+- (void)shareDuplicateFoundNotification:(NSNotification *)aNotification;
+- (void)revealDuplicateInFinder:(NSMenuItem *)selectedItem;
+
+#pragma mark -
+#pragma mark Interface Actions
 
 - (IBAction)addSharedPath:(id)sender;
 - (IBAction)removeSharedPath:(id)sender;
@@ -84,16 +99,16 @@
 - (IBAction)setHashingPriority:(id)sender;
 - (IBAction)setHublistURL:(id)sender;
 
-- (void)switchToView:(NSView *)view;
-- (void)switchToItem:(id)item;
-- (void)show;
-- (void)close;
-- (BOOL)isKeyWindow;
+#pragma mark -
+
 - (void)addSharedPathsPath:(NSString *)aPath;
+- (void)setTotalShareSize:(uint64_t)aNumber;
 - (void)updateAllSharedPaths;
+- (NSString *)selectFolder;
+- (void)updateTestConnectionResultFromErrors:(NSNumber *)wrappedStatus;
+- (void)testConnectionThread:(id)args;
 - (NSImage *)smallIconForPath:(NSString *)path;
 - (void)updateNameAndIconForDownloadFolder;
 - (void)updateNameAndIconForIncompleteFolder;
 
 @end
-

@@ -60,6 +60,8 @@
 				<string>NSTextField</string>
 				<key>downloadFolderButton</key>
 				<string>NSPopUpButton</string>
+				<key>duplicatePathsMenu</key>
+				<string>NSMenu</string>
 				<key>emailField</key>
 				<string>NSTextField</string>
 				<key>hublistsComboBox</key>
@@ -78,6 +80,8 @@
 				<string>NSTextField</string>
 				<key>sharedPathsController</key>
 				<string>NSArrayController</string>
+				<key>sharedPathsTable</key>
+				<string>NSTableView</string>
 				<key>sharesView</key>
 				<string>NSView</string>
 				<key>slotsField</key>

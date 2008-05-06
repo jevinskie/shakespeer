@@ -85,6 +85,11 @@ static float ToolbarHeightForWindow(NSWindow *window)
                                                      name:SPNotificationShareStats
                                                    object:nil];
         
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(shareDuplicateFoundNotification:)
+                                                     name:SPNotificationShareDuplicateFound
+                                                   object:nil];
+        
         // Load shared paths
         sharedPaths = [[NSMutableArray alloc] init];
         [self setTotalShareSize:0LL];
@@ -121,6 +126,10 @@ static float ToolbarHeightForWindow(NSWindow *window)
     
     // Set name and icon for current incomplete folder
     [self updateNameAndIconForIncompleteFolder];
+    
+    // Add a contextual menu to the share table, for revealing duplicates
+    [sharedPathsTable setTarget:self];
+    [sharedPathsTable setMenu:duplicatePathsMenu];
 }
 
 + (SPPreferenceController *)sharedPreferences
@@ -155,8 +164,8 @@ static float ToolbarHeightForWindow(NSWindow *window)
     return [[self window] isKeyWindow];
 }
 
-# pragma mark -
-# pragma mark Toolbar and preference panes
+#pragma mark -
+#pragma mark Toolbar and preference panes
 
 - (void)resizeWindowToSize:(NSSize)newSize
 {
@@ -255,78 +264,8 @@ static float ToolbarHeightForWindow(NSWindow *window)
     return nil;
 }
 
-# pragma mark -
-
-- (void)addSharedPathsPath:(NSString *)aPath
-{
-    NSMutableDictionary *newPath = [NSMutableDictionary dictionaryWithObjectsAndKeys:aPath, @"path",
-                                                [NSNumber numberWithUnsignedLongLong:0L], @"size",
-                                                             [NSNumber numberWithInt:0], @"nfiles",
-                                                             [NSNumber numberWithInt:0], @"percentComplete",
-                                                             [NSNumber numberWithInt:0], @"nleft",
-                                                             [NSNumber numberWithInt:0], @"nduplicates", nil];
-
-    [self willChangeValueForKey:@"sharedPaths"];
-    [sharedPaths addObject:newPath];
-    [self didChangeValueForKey:@"sharedPaths"];
-}
-
-- (IBAction)addSharedPath:(id)sender
-{
-    NSOpenPanel *op = [NSOpenPanel openPanel];
-
-    [op setCanChooseDirectories:YES];
-    [op setCanChooseFiles:NO];
-    [op setAllowsMultipleSelection:YES];
-
-    if ([op runModalForTypes:nil] == NSOKButton) {
-        NSEnumerator *e = [[op filenames] objectEnumerator];
-        NSString *path;
-
-        while ((path = [e nextObject])) {
-            [[SPApplicationController sharedApplicationController] addSharedPath:path];
-
-            NSArray *tmp = [[NSUserDefaults standardUserDefaults] stringArrayForKey:SPPrefsSharedPaths];
-            [[NSUserDefaults standardUserDefaults] setObject:[tmp arrayByAddingObject:path]
-                                                      forKey:SPPrefsSharedPaths];
-
-            [self addSharedPathsPath:path];
-
-        }
-    }
-}
-
-- (IBAction)removeSharedPath:(id)sender
-{
-    NSArray *selectedPaths = [sharedPathsController selectedObjects];
-    NSEnumerator *enumerator = [selectedPaths objectEnumerator];
-    NSDictionary *record;
-
-    while ((record = [enumerator nextObject])) {
-        [[SPApplicationController sharedApplicationController] removeSharedPath:[record objectForKey:@"path"]];
-
-        NSMutableArray *x = [[[NSMutableArray alloc] init] autorelease];
-        [x setArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:SPPrefsSharedPaths]];
-        [x removeObject:[record objectForKey:@"path"]];
-        [[NSUserDefaults standardUserDefaults] setObject:x forKey:SPPrefsSharedPaths];
-
-        NSEnumerator *e = [sharedPaths objectEnumerator];
-        NSMutableDictionary *dict;
-        while ((dict = [e nextObject]) != nil) {
-            if ([[dict objectForKey:@"path"] isEqualToString:[record objectForKey:@"path"]]) {
-                [self willChangeValueForKey:@"sharedPaths"];
-                [sharedPaths removeObject:dict];
-                [self didChangeValueForKey:@"sharedPaths"];
-                break;
-            }
-        }
-    }
-}
-
-- (void)setTotalShareSize:(uint64_t)aNumber
-{
-    totalShareSize = aNumber;
-}
+#pragma mark -
+#pragma mark Notifications
 
 - (void)shareStatsNotification:(NSNotification *)aNotification
 {
@@ -373,12 +312,97 @@ static float ToolbarHeightForWindow(NSWindow *window)
     }
 }
 
-- (void)updateAllSharedPaths
+- (void)shareDuplicateFoundNotification:(NSNotification *)aNotification
 {
-    NSEnumerator *enumerator = [sharedPaths objectEnumerator];
+    NSString *path = [[aNotification userInfo] valueForKey:@"path"];
+    
+    // only add a new menu item if it doesn't already exist in the menu
+    BOOL alreadyInMenu = NO;
+    NSEnumerator *e = [[duplicatePathsMenu itemArray] objectEnumerator];
+    NSMenuItem *currentItem = nil;
+    
+    while ((currentItem = [e nextObject])) {
+        if ([[currentItem representedObject] isEqualToString:path]) {
+            alreadyInMenu = YES;
+            break;
+        }
+    }
+    
+    if (!alreadyInMenu) {
+        NSMenuItem* newItem = [[NSMenuItem alloc] initWithTitle:[path lastPathComponent]
+                                                     action:@selector(revealDuplicateInFinder:)
+                                              keyEquivalent:@""];
+        [newItem setRepresentedObject:path];
+        [duplicatePathsMenu addItem:newItem];
+        [newItem release];
+    }
+}
+
+- (void)revealDuplicateInFinder:(NSMenuItem *)selectedItem
+{
+    NSString *duplicatePath = [selectedItem representedObject];
+    
+    if ([[NSFileManager defaultManager] fileExistsAtPath:duplicatePath]) {
+        if (![[NSWorkspace sharedWorkspace] selectFile:duplicatePath inFileViewerRootedAtPath:@""])
+            NSLog(@"Couldn't reveal duplicate at %@", duplicatePath);
+    }
+    else {
+        NSLog(@"Couldn't find duplicate at %@", duplicatePath);
+    }
+}
+
+#pragma mark -
+#pragma mark Interface Actions
+
+- (IBAction)addSharedPath:(id)sender
+{
+    NSOpenPanel *op = [NSOpenPanel openPanel];
+    
+    [op setCanChooseDirectories:YES];
+    [op setCanChooseFiles:NO];
+    [op setAllowsMultipleSelection:YES];
+    
+    if ([op runModalForTypes:nil] == NSOKButton) {
+        NSEnumerator *e = [[op filenames] objectEnumerator];
+        NSString *path;
+        
+        while ((path = [e nextObject])) {
+            [[SPApplicationController sharedApplicationController] addSharedPath:path];
+            
+            NSArray *tmp = [[NSUserDefaults standardUserDefaults] stringArrayForKey:SPPrefsSharedPaths];
+            [[NSUserDefaults standardUserDefaults] setObject:[tmp arrayByAddingObject:path]
+                                                      forKey:SPPrefsSharedPaths];
+            
+            [self addSharedPathsPath:path];
+            
+        }
+    }
+}
+
+- (IBAction)removeSharedPath:(id)sender
+{
+    NSArray *selectedPaths = [sharedPathsController selectedObjects];
+    NSEnumerator *enumerator = [selectedPaths objectEnumerator];
     NSDictionary *record;
+    
     while ((record = [enumerator nextObject])) {
-        [[SPApplicationController sharedApplicationController] addSharedPath:[record objectForKey:@"path"]];
+        [[SPApplicationController sharedApplicationController] removeSharedPath:[record objectForKey:@"path"]];
+        
+        NSMutableArray *x = [[[NSMutableArray alloc] init] autorelease];
+        [x setArray:[[NSUserDefaults standardUserDefaults] stringArrayForKey:SPPrefsSharedPaths]];
+        [x removeObject:[record objectForKey:@"path"]];
+        [[NSUserDefaults standardUserDefaults] setObject:x forKey:SPPrefsSharedPaths];
+        
+        NSEnumerator *e = [sharedPaths objectEnumerator];
+        NSMutableDictionary *dict;
+        while ((dict = [e nextObject]) != nil) {
+            if ([[dict objectForKey:@"path"] isEqualToString:[record objectForKey:@"path"]]) {
+                [self willChangeValueForKey:@"sharedPaths"];
+                [sharedPaths removeObject:dict];
+                [self didChangeValueForKey:@"sharedPaths"];
+                break;
+            }
+        }
     }
 }
 
@@ -390,21 +414,6 @@ static float ToolbarHeightForWindow(NSWindow *window)
     while ((record = [enumerator nextObject])) {
         [[SPApplicationController sharedApplicationController] addSharedPath:[record objectForKey:@"path"]];
     }
-}
-
-- (NSString *)selectFolder
-{
-    NSOpenPanel *op = [NSOpenPanel openPanel];
-
-    [op setCanChooseDirectories:YES];
-    [op setCanChooseFiles:NO];
-    [op setAllowsMultipleSelection:NO];
-
-    if ([op runModalForTypes:nil] == NSOKButton) {
-        return [[op filenames] objectAtIndex:0];
-    }
-    
-    return nil;
 }
 
 - (IBAction)selectDownloadFolder:(id)sender
@@ -488,62 +497,19 @@ static float ToolbarHeightForWindow(NSWindow *window)
                                                                      speed:speed];
 }
 
-- (void)updateTestConnectionResultFromErrors:(NSNumber *)wrappedStatus
-{
-    int status = [wrappedStatus intValue];
-
-    [testConnectionProgress stopAnimation:self];
-    if (status == TC_RET_OK) {
-        [testResults setStringValue:@"Both TCP and UDP tested OK"];
-    }
-    else {
-        [testResults setTextColor:[NSColor redColor]];
-        NSString *errmsg = nil;
-        if (status & TC_RET_PRIVPORT) {
-            errmsg = @"Refused to test privileged port";
-        }
-        else if ((status & TC_RET_TCP_FAIL) || (status & TC_RET_UDP_FAIL)) {
-            errmsg = @"TCP and/or UDP port unreachable";
-        }
-        else {
-            errmsg = @"Internal error";
-        }
-        [testResults setStringValue:errmsg];
-    }
-}
-
-- (void)testConnectionThread:(id)args
-{
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-    testInProgress = YES;
-    int port = [portField intValue];
-
-    int status = test_connection(port);
-
-    NSNumber *wrappedStatus = [NSNumber numberWithInt:status];
-
-    [self performSelectorOnMainThread:@selector(updateTestConnectionResultFromErrors:)
-                           withObject:wrappedStatus
-                        waitUntilDone:YES];
-
-    testInProgress = NO;
-    [pool release];
-}
-
 - (IBAction)testConnection:(id)sender
 {
     [self setPort:portField];
     int port = [portField intValue];
-
+    
     [testResults setTextColor:[NSColor blackColor]];
     [testResults setStringValue:[NSString stringWithFormat:@"Testing port %i", port]];
     [testConnectionProgress startAnimation:self];
-
+    
     if (testInProgress == NO) {
         [NSThread detachNewThreadSelector:@selector(testConnectionThread:) toTarget:self withObject:nil];
     }
-
+    
 }
 
 - (IBAction)setSlots:(id)sender
@@ -555,7 +521,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 - (IBAction)setConnectionMode:(id)sender
 {
     int passive = [sender indexOfSelectedItem];
-
+    
     if (passive)
         [[SPApplicationController sharedApplicationController] setPassiveMode];
     else
@@ -601,6 +567,101 @@ static float ToolbarHeightForWindow(NSWindow *window)
     [[SPApplicationController sharedApplicationController] setHashingPriority:[[sender selectedItem] tag]];
 }
 
+- (IBAction)setHublistURL:(id)sender
+{
+    if ([hublistsComboBox indexOfItemWithObjectValue:[sender stringValue]] == NSNotFound) {
+        [hublistsController insertObject:[sender stringValue] atArrangedObjectIndex:0];
+    }
+}
+
+#pragma mark -
+
+- (void)addSharedPathsPath:(NSString *)aPath
+{
+    NSMutableDictionary *newPath = [NSMutableDictionary dictionaryWithObjectsAndKeys:aPath, @"path",
+                                                [NSNumber numberWithUnsignedLongLong:0L], @"size",
+                                                             [NSNumber numberWithInt:0], @"nfiles",
+                                                             [NSNumber numberWithInt:0], @"percentComplete",
+                                                             [NSNumber numberWithInt:0], @"nleft",
+                                                             [NSNumber numberWithInt:0], @"nduplicates", nil];
+
+    [self willChangeValueForKey:@"sharedPaths"];
+    [sharedPaths addObject:newPath];
+    [self didChangeValueForKey:@"sharedPaths"];
+}
+
+- (void)setTotalShareSize:(uint64_t)aNumber
+{
+    totalShareSize = aNumber;
+}
+
+- (void)updateAllSharedPaths
+{
+    NSEnumerator *enumerator = [sharedPaths objectEnumerator];
+    NSDictionary *record;
+    while ((record = [enumerator nextObject])) {
+        [[SPApplicationController sharedApplicationController] addSharedPath:[record objectForKey:@"path"]];
+    }
+}
+
+- (NSString *)selectFolder
+{
+    NSOpenPanel *op = [NSOpenPanel openPanel];
+
+    [op setCanChooseDirectories:YES];
+    [op setCanChooseFiles:NO];
+    [op setAllowsMultipleSelection:NO];
+
+    if ([op runModalForTypes:nil] == NSOKButton) {
+        return [[op filenames] objectAtIndex:0];
+    }
+    
+    return nil;
+}
+
+- (void)updateTestConnectionResultFromErrors:(NSNumber *)wrappedStatus
+{
+    int status = [wrappedStatus intValue];
+
+    [testConnectionProgress stopAnimation:self];
+    if (status == TC_RET_OK) {
+        [testResults setStringValue:@"Both TCP and UDP tested OK"];
+    }
+    else {
+        [testResults setTextColor:[NSColor redColor]];
+        NSString *errmsg = nil;
+        if (status & TC_RET_PRIVPORT) {
+            errmsg = @"Refused to test privileged port";
+        }
+        else if ((status & TC_RET_TCP_FAIL) || (status & TC_RET_UDP_FAIL)) {
+            errmsg = @"TCP and/or UDP port unreachable";
+        }
+        else {
+            errmsg = @"Internal error";
+        }
+        [testResults setStringValue:errmsg];
+    }
+}
+
+- (void)testConnectionThread:(id)args
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+    testInProgress = YES;
+    int port = [portField intValue];
+
+    int status = test_connection(port);
+
+    NSNumber *wrappedStatus = [NSNumber numberWithInt:status];
+
+    [self performSelectorOnMainThread:@selector(updateTestConnectionResultFromErrors:)
+                           withObject:wrappedStatus
+                        waitUntilDone:YES];
+
+    testInProgress = NO;
+    [pool release];
+}
+
 - (NSImage *)smallIconForPath:(NSString *)path
 {
     NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFile:[path stringByExpandingTildeInPath]];
@@ -623,12 +684,4 @@ static float ToolbarHeightForWindow(NSWindow *window)
     [[incompleteFolderButton itemAtIndex:0] setImage:[self smallIconForPath:incompleteFolder]];
 }
 
-- (IBAction)setHublistURL:(id)sender
-{
-    if ([hublistsComboBox indexOfItemWithObjectValue:[sender stringValue]] == NSNotFound) {
-        [hublistsController insertObject:[sender stringValue] atArrangedObjectIndex:0];
-    }
-}
-
 @end
-

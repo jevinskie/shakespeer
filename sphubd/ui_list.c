@@ -114,6 +114,14 @@ static void handle_share_file_added_notification(nc_t *nc,
     ui_schedule_share_stats_update();
 }
 
+
+static void handle_share_duplicate_found_notification(nc_t *nc,
+        const char *channel,
+        nc_share_duplicate_found_t *data, void *user_data)
+{
+    ui_send_share_duplicate_found(NULL, data->path);
+}
+
 static void handle_filelist_added_notification(nc_t *nc,
         const char *channel,
         nc_filelist_added_t *data, void *user_data)
@@ -254,6 +262,8 @@ void ui_list_init(void)
             handle_share_scan_finished_notification, NULL);
     nc_add_share_file_added_observer(nc_default(),
             handle_share_file_added_notification, NULL);
+	nc_add_share_duplicate_found_observer(nc_default(),
+			handle_share_duplicate_found_notification, NULL);
     nc_add_did_remove_share_observer(nc_default(),
             handle_did_remove_share_notification, NULL);
     nc_add_extra_slot_granted_observer(nc_default(),
