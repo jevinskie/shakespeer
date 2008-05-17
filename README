@@ -31,20 +31,20 @@ To build shakespeer from a source package:
 $ tar zxvf shakespeer-<version>.tar.gz
 $ cd shakespeer-<version>
 $ make
-$ make check  (optional)
+$ make check (optional)
 
 
-To build shakespeer from the latest sources you need darcs, an alternative
-source code control system available at http://darcs.net/.
+To build shakespeer from the latest sources you need Subversion, available at http://subversion.tigris.org and also in most package managers, including Fink.
 
-$ darcs get --partial http://darcs.bzero.se/shakespeer
+$ svn checkout http://shakespeer.googlecode.com/svn/trunk shakespeer
 $ cd shakespeer
 $ make
-$ make check  (optional)
+$ make check (optional)
+
 
 To pull any changes from the official repository into your tree, run:
 $ cd shakespeer
-$ darcs pull
+$ svn up
 
 
 Note to Mac OS X 10.4 Tiger users:
@@ -54,4 +54,3 @@ Running Disk Utility to restore permissions resets links used by gcc 4.0 to gcc
 you'll have to run the following command:
   $ sudo gcc_select -force 4.0
 and then recompile.
-
