@@ -33,5 +33,7 @@
 			</array>
 		</dict>
 	</array>
+	<key>SUFeedURL</key> 
+	<string>http://shakespeer.googlecode.com/svn/appcast.xml</string>
 </dict>
 </plist>

@@ -44,16 +44,6 @@ void sendNotification(NSString *notificationName, NSString *key1, id arg1, ...);
     IBOutlet NSTextField *initMessage;
     IBOutlet NSMenuItem *menuItemNextSidebarItem;
     IBOutlet NSMenuItem *menuItemPrevSidebarItem;
-
-    BOOL automaticUpdate;
-    IBOutlet NSWindow *updateWindow;
-    IBOutlet NSTextField *currentVersionField;
-    IBOutlet NSTextField *lastVersionField;
-    IBOutlet NSTextField *releaseDateField;
-    IBOutlet NSTextView *detailsView;
-    IBOutlet NSTextField *updateTitleField;
-    IBOutlet NSButton *downloadButton;
-    IBOutlet NSButton *cancelButton;
 }
 
 - (IBAction)connectToBackendServer:(id)sender;
@@ -71,9 +61,6 @@ void sendNotification(NSString *notificationName, NSString *key1, id arg1, ...);
 - (IBAction)showUploadsView:(id)sender;
 - (IBAction)closeCurrentSidebarItem:(id)sender;
 - (IBAction)showAdvancedSearch:(id)sender;
-- (IBAction)checkForUpdates:(id)sender;
-- (IBAction)downloadUpdate:(id)sender;
-- (IBAction)cancelUpdate:(id)sender;
 - (IBAction)rescanSharedFolders:(id)sender;
 
 - (IBAction)prevSidebarItem:(id)sender;

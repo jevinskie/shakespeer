@@ -60,9 +60,11 @@ endif
 FRAMEWORKS = -framework Cocoa \
 	     -framework SystemConfiguration\
 	     -framework Growl \
-	     -framework Security
+	     -framework Security \
+         -framework Sparkle
 
 ShakesPeer: Growl.framework $(OBJS) \
+			Sparkle.framework $(OBJS) \
 	    $(TOP)/spclient/libspclient.a \
 	    $(TOP)/splib/libsplib.a
 	$(CC) $(OBJS) -o $@ $(CFLAGS) $(UB_CFLAGS) $(LDFLAGS) $(LIBS) \
@@ -109,6 +111,7 @@ app_bundle.stamp: ShakesPeer
 	cp -f ShakesPeer ShakesPeer.app/Contents/MacOS
 	test -d $(FWDIR)/Growl.framework || \
 		cp -RP Growl.framework $(FWDIR)
+	cp -RP Sparkle.framework $(FWDIR)
 
 install:
 

@@ -45,7 +45,6 @@ extern NSString *SPPrefsSessionRestore;
 extern NSString *SPPrefsAutodetectIPAddress;
 extern NSString *SPPrefsExternalIPAddress;
 extern NSString *SPPrefsAllowHubIPOverride;
-extern NSString *SPPrefsAutoCheckUpdates;
 extern NSString *SPPrefsConnectRemotely;
 extern NSString *SPPrefsRemoteSphubdAddress;
 extern NSString *SPPrefsShowSmileyIcons;

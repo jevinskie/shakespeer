@@ -105,7 +105,6 @@ static SPApplicationController *mySharedApplicationController = nil;
             @"Message", SPPrefsLogLevel,
             [NSNumber numberWithBool:YES], SPPrefsAutodetectIPAddress,
             [NSNumber numberWithBool:YES], SPPrefsAllowHubIPOverride,
-            [NSNumber numberWithBool:YES], SPPrefsAutoCheckUpdates,
             [NSNumber numberWithBool:YES], SPPrefsShowSmileyIcons,
             [NSNumber numberWithFloat:1.0], SPPrefsRescanShareInterval,
             [NSNumber numberWithBool:YES], SPPrefsFollowHubRedirects,
@@ -409,16 +408,6 @@ else {
     [SPPreferenceController sharedPreferences];
 
     [self connectToBackendServer:self];
-
-    NSUserDefaults *standardUserDefaults = [NSUserDefaults standardUserDefaults];
-    if ([standardUserDefaults boolForKey:SPPrefsAutoCheckUpdates] == YES) {
-        NSDate *previousDate = [standardUserDefaults objectForKey:SPPrefsDateOfPreviousVersionCheck];
-        NSDate *twoDaysAgo = [NSDate dateWithTimeIntervalSinceNow:-48.0*60.0*60.0];
-        if (previousDate == nil || [previousDate compare:twoDaysAgo] == NSOrderedAscending) {
-            automaticUpdate = YES;
-            [self checkForUpdates:self];
-        }
-    }
 }
 
 - (void)awakeFromNib
@@ -910,136 +899,6 @@ else {
 		// we clear any currently cached list on shutdown.
 		[[NSUserDefaults standardUserDefaults] setObject:[NSArray array] forKey:SPPrefsLastConnectedHubs];
 	}
-}
-
-#pragma mark -
-#pragma mark Automatic updates
-
-- (IBAction)downloadUpdate:(id)sender
-{
-    [NSApp stopModalWithCode:0];
-}
-
-- (IBAction)cancelUpdate:(id)sender
-{
-    [NSApp stopModalWithCode:1];
-}
-
-- (BOOL)isNewerVersion:(NSString *)lastVersion than:(NSString *)currentVersion
-{
-    if ([lastVersion isEqualToString:currentVersion])
-        return FALSE;
-
-    NSArray *lastVersionArray = [lastVersion componentsSeparatedByString:@"."];
-    NSArray *currentVersionArray = [currentVersion componentsSeparatedByString:@"."];
-
-    unsigned int i;
-    int maxc = [lastVersionArray count];
-    if ([currentVersionArray count] > maxc)
-        maxc = [currentVersionArray count];
-
-    for (i = 0; i < maxc; i++) {
-        int l = (i >= [lastVersionArray count]) ?  0 : [[lastVersionArray objectAtIndex:i] intValue];
-        int c = (i >= [currentVersionArray count]) ?  0 : [[currentVersionArray objectAtIndex:i] intValue];
-        if (l > c)
-            return TRUE;
-        else if (c > l)
-            return FALSE;
-    }
-
-    return FALSE;
-}
-
-- (void)compareVersions:(NSDictionary *)versionDict
-{
-    NSString *currentVersion = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
-    NSString *lastVersion = [versionDict objectForKey:@"versionString"];
-    NSDate *releaseDate = [versionDict objectForKey:@"releaseDate"];
-    NSArray *features = [versionDict objectForKey:@"features"];
-    NSString *downloadLink = [versionDict objectForKey:@"downloadLink"];
-
-    NSLog(@"currentVersion = %@, lastVersion = %@", currentVersion, lastVersion);
-
-    BOOL newVersion = [self isNewerVersion:lastVersion than:currentVersion];
-    BOOL displayNotice = !automaticUpdate || newVersion;
-
-    [[NSUserDefaults standardUserDefaults] setObject:[NSDate dateWithTimeIntervalSinceNow:0.0] forKey:SPPrefsDateOfPreviousVersionCheck];
-
-    if (displayNotice) {
-        if (newVersion) {
-            [downloadButton setTitle:@"Download..."];
-            [cancelButton setEnabled:YES];
-            [updateTitleField setStringValue:@"There is a new version of ShakesPeer available."];
-        }
-        else {
-            [downloadButton setTitle:@"OK"];
-            [cancelButton setEnabled:NO];
-            [updateTitleField setStringValue:@"You're running the latest version of ShakesPeer."];
-        }
-
-        [[detailsView textStorage] setAttributedString:[[[NSMutableAttributedString alloc] initWithString:@""] autorelease]];
-        NSEnumerator *e = [features objectEnumerator];
-        NSString *feat;
-        while ((feat = [e nextObject]) != nil) {
-            NSAttributedString *attrString = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"- %@\n", feat]];
-            [[detailsView textStorage] appendAttributedString:[attrString autorelease]];
-        }
-
-        [releaseDateField setStringValue:[releaseDate descriptionWithCalendarFormat:@"%Y-%m-%d" timeZone:nil locale:nil]];
-        [currentVersionField setStringValue:currentVersion];
-        [lastVersionField setStringValue:lastVersion];
-
-        [NSApp beginSheet:updateWindow
-           modalForWindow:[[SPMainWindowController sharedMainWindowController] window]
-            modalDelegate:nil
-           didEndSelector:nil
-              contextInfo:nil];
-
-        int rc = [NSApp runModalForWindow:updateWindow];
-
-        [NSApp endSheet:updateWindow];
-        [updateWindow orderOut:self];
-
-        if (rc == 0 && newVersion) {
-            NSLog(@"download update");
-            [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:downloadLink]];
-        }
-    }
-}
-
-- (void)getVersion:(id)args
-{
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-    NSURL *versionURL = [NSURL URLWithString:@"http://shakespeer.sourceforge.net/sp.plist"];
-    BOOL reachable = NO;
-    SCNetworkConnectionFlags flags;
-    BOOL success = SCNetworkCheckReachabilityByName([[versionURL host] UTF8String], &flags);
-    if (success && (flags & kSCNetworkFlagsReachable) && !(flags & kSCNetworkFlagsConnectionRequired)) {
-        reachable = YES;
-    }
-
-    if (reachable) {
-        NSDictionary *versionDict = [NSDictionary dictionaryWithContentsOfURL:versionURL];
-
-        if (versionDict)   // check for valid/complete dictionary
-        {
-            [self performSelectorOnMainThread:@selector(compareVersions:) withObject:versionDict waitUntilDone:YES];
-        }
-        else {
-            NSLog(@"Failed to get version dictionary");
-        }
-    }
-    else {
-        NSLog(@"host %@ not reachable", [versionURL host]);
-    }
-    automaticUpdate = NO;
-    [pool release];
-}
-
-- (IBAction)checkForUpdates:(id)sender
-{
-    [NSThread detachNewThreadSelector:@selector(getVersion:) toTarget:self withObject:nil];
 }
 
 #pragma mark -

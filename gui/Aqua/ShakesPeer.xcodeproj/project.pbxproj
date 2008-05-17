@@ -32,6 +32,8 @@
 		28C74ED60ADBECDF00BACE5C /* Uploads.nib in Resources */ = {isa = PBXBuildFile; fileRef = 28C74EC90ADBECDF00BACE5C /* Uploads.nib */; };
 		28C7E8280B1DF40400C8DD15 /* np.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 28C7E8270B1DF40300C8DD15 /* np.scpt */; };
 		28D1DFA50A2A023000F9F9EE /* SPKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D1DFA30A2A023000F9F9EE /* SPKeychain.m */; };
+		28D256D10DDF86C2002490D4 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 28D256D00DDF86C2002490D4 /* Sparkle.framework */; };
+		28D256EE0DDF86E5002490D4 /* Sparkle.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 28D256D00DDF86C2002490D4 /* Sparkle.framework */; };
 		28E0863F0D841873006CF70A /* Friends.nib in Resources */ = {isa = PBXBuildFile; fileRef = 28E0863D0D841873006CF70A /* Friends.nib */; };
 		28E086420D8418E0006CF70A /* SPFriendsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28E086400D8418E0006CF70A /* SPFriendsController.m */; };
 		28F0ACFA0A29E7E100FFEC99 /* MHSysTree.m in Sources */ = {isa = PBXBuildFile; fileRef = 28F0ACF80A29E7E100FFEC99 /* MHSysTree.m */; };
@@ -159,6 +161,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				28D256EE0DDF86E5002490D4 /* Sparkle.framework in Copy Frameworks */,
 				FC9FE9400982BA1500264848 /* Growl.framework in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
@@ -194,6 +197,7 @@
 		28C7E8270B1DF40300C8DD15 /* np.scpt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.scpt; name = np.scpt; path = Resources/np.scpt; sourceTree = "<group>"; };
 		28D1DFA20A2A023000F9F9EE /* SPKeychain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPKeychain.h; sourceTree = "<group>"; };
 		28D1DFA30A2A023000F9F9EE /* SPKeychain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPKeychain.m; sourceTree = "<group>"; usesTabs = 0; };
+		28D256D00DDF86C2002490D4 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
 		28E0863E0D841873006CF70A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/Friends.nib; sourceTree = "<group>"; };
 		28E086400D8418E0006CF70A /* SPFriendsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPFriendsController.m; sourceTree = "<group>"; };
 		28E086410D8418E0006CF70A /* SPFriendsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPFriendsController.h; sourceTree = "<group>"; };
@@ -321,6 +325,7 @@
 			files = (
 				FC9FE9310982B9E300264848 /* Growl.framework in Frameworks */,
 				286B19EA0A2A1354001D9687 /* Security.framework in Frameworks */,
+				28D256D10DDF86C2002490D4 /* Sparkle.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -430,6 +435,7 @@
 			children = (
 				286B19E90A2A1354001D9687 /* Security.framework */,
 				FC9FE9300982B9E300264848 /* Growl.framework */,
+				28D256D00DDF86C2002490D4 /* Sparkle.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

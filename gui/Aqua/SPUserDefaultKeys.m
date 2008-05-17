@@ -45,7 +45,6 @@ NSString *SPPrefsSessionRestore = @"sessionRestore";
 NSString *SPPrefsAutodetectIPAddress = @"autodetectIPAddress";
 NSString *SPPrefsExternalIPAddress = @"externalIPAddress";
 NSString *SPPrefsAllowHubIPOverride = @"allowHubIPOverride";
-NSString *SPPrefsAutoCheckUpdates = @"autoCheckUpdates";
 NSString *SPPrefsConnectRemotely = @"connectRemotely";
 NSString *SPPrefsRemoteSphubdAddress = @"remoteSphubdAddress";
 NSString *SPPrefsShowSmileyIcons = @"showSmileyIcons";
