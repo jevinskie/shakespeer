@@ -90,7 +90,7 @@ Sparkle.framework: Sparkle-$(SPARKLE_VERSION).zip
 	mkdir Sparkle && \
 	unzip Sparkle-$(SPARKLE_VERSION).zip -d Sparkle && \
 	cp -RP "Sparkle/Extras/English-Only Framework/Sparkle.framework" . && \
-	rm Sparkle-$(SPARKLE_VERSION).zip
+	rm -rf Sparkle
 
 APP=ShakesPeer.app
 CONTENTS=$(APP)/Contents
