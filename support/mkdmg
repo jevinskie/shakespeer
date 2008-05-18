@@ -12,7 +12,7 @@ die()
 version=${1:-snapshot-`date +%Y%m%d`}
 top_dir=${2:-.}
 output_dir=${3:-.}
-package=${4:-ShakesPeer}
+package=${4:-shakespeer}
 
 TMPDMG=$top_dir/shakespeer-tmp$$.dmg
 /bin/rm -f $TMPDMG
