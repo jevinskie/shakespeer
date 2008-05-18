@@ -65,16 +65,6 @@
         [item setImage:[NSImage imageNamed:@"ToolbarDrawer"]];
         [item setAction:@selector(toggle:)];
     }
-    else if ([itemIdentifier isEqualToString:@"contextMenu"]) {
-        [item setLabel:@"Context Menu"];
-        [item setToolTip:@"Context Menu"];
-        [item setTarget:self];
-        [contextMenuButton setImage:[NSImage imageNamed:@"action"]];
-        [item setView:contextMenuButton];
-        [contextMenuButton setToolbarItem:item];
-        [contextMenuButton setControlSize:NSRegularControlSize];
-        [contextMenuButton setMenu:nil];
-    }
     else if ([itemIdentifier isEqualToString:@"connectButton"]) {
         [item setLabel:@"Connect"];
         [item setToolTip:@"Connect to server"];
@@ -97,7 +87,6 @@
                     @"quickSearchItem",
                     @"advSearchItem",
                     @"toggleDrawer",
-                    @"contextMenu",
                     @"connectButton",
                     nil];
 }
@@ -110,7 +99,6 @@
                     NSToolbarFlexibleSpaceItemIdentifier,
                     @"quickSearchItem",
                     @"advSearchItem",
-                    @"contextMenu",
                     nil];
 }
 

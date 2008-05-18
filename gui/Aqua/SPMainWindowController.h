@@ -74,8 +74,6 @@
     /* The searchFieldMenu is used both by toolbarSearchField and advSearchField */
     IBOutlet NSMenu *searchFieldMenu;
 
-    MenuButton *contextMenuButton;
-
     IBOutlet NSView *toolbarSearchView;
     IBOutlet NSSearchField *toolbarSearchField;
     

@@ -94,8 +94,6 @@
     else
         [self openBookmarks:self];
     
-    contextMenuButton = [[MenuButton alloc] init];
-    
     [self initializeToolbar];
 
     /* initialize and register with Growl */
@@ -215,7 +213,6 @@
     [statusMessageTimer release];
     [privateChats release];
     [hubs release];
-    [contextMenuButton release];
     
     // Free table columns
     [tcUser release];
@@ -816,7 +813,6 @@
 {
     currentSidebarItem = sideBarItem;
     [[self window] setTitle:[NSString stringWithFormat:@"ShakesPeer - %@", [sideBarItem title]]];
-    [contextMenuButton setMenu:[sideBarItem menu]];
     
     // TODO: The following should be the canonical method, and each sidebar item
     // should be responsible for the proper actions (like focusChatInput etc.)
