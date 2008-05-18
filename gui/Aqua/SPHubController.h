@@ -51,7 +51,7 @@
     NSString *descriptionString;
     NSMutableArray *users;
     NSArray *filteredUsers;
-    MHSysTree *usersTree;
+    NSMutableDictionary *usersByNick;
     BOOL needUpdating;
     NSTimer *updateTimer;
     BOOL highlighted;

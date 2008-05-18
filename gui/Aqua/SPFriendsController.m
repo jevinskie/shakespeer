@@ -99,8 +99,10 @@ static SPFriendsController *sharedFriendsController = nil;
 - (void)dealloc
 {
 	[updateTimer invalidate];
+  [updateTimer release];
+  updateTimer = nil;
 
-    [super dealloc];
+  [super dealloc];
 }
 
 #pragma mark -
@@ -183,7 +185,7 @@ static SPFriendsController *sharedFriendsController = nil;
 		if (!didFindFriend)
 			[currentFriend setValue:[NSNumber numberWithBool:NO] forKey:@"isOnline"];
 	}
-
+  
 	[[NSUserDefaults standardUserDefaults] setObject:friends forKey:SPFriends];
 	[friendsController setSortDescriptors:[friendsController sortDescriptors]];
 }
@@ -239,20 +241,23 @@ static SPFriendsController *sharedFriendsController = nil;
 - (void)viewBecameSelected
 {
 	// first, update the table immediately
-	[self updateFriendTable];
+	[self updateFriendTable]; 
 
-	// then update the table every other second
-	updateTimer = [NSTimer scheduledTimerWithTimeInterval:2.0
-												   target:self
-												 selector:@selector(updateFriendTable)
-												 userInfo:nil
-												  repeats:YES];
+  if (!updateTimer)
+    // then update the table every other second
+    updateTimer = [[NSTimer scheduledTimerWithTimeInterval:1.0
+                            target:self
+                          selector:@selector(updateFriendTable)
+                          userInfo:nil
+                           repeats:YES] retain];
 }
 
 // this is called by the main window controller when we are deselected
 - (void)viewBecameDeselected
 {
 	[updateTimer invalidate];
+  [updateTimer release];
+  updateTimer = nil;
 }
 
 #pragma mark -

@@ -52,7 +52,7 @@
 {
     self = [super initWithWindowNibName:@"Hub"];
     if (self) {
-        usersTree = [[MHSysTree alloc] init];
+        usersByNick = [NSMutableDictionary new];
         nops = 0;
         totsize = 0ULL;
         needUpdating = NO;
@@ -100,12 +100,6 @@
                                                  selector:@selector(hubDisconnectedNotification:)
                                                      name:SPNotificationHubDisconnected
                                                    object:nil];
-
-        updateTimer = [NSTimer scheduledTimerWithTimeInterval:1.0
-                                                       target:self
-                                                     selector:@selector(updateUserTable:)
-                                                     userInfo:nil
-                                                      repeats:YES];
     }
 
     return self;
@@ -147,6 +141,12 @@
         else if (tc == tcIcon)
             [[columnsMenu itemWithTag:6] setState:NSOnState];
     }
+    
+    updateTimer = [NSTimer scheduledTimerWithTimeInterval:1.0
+                                                   target:self
+                                                 selector:@selector(updateUserTable:)
+                                                 userInfo:nil
+                                                  repeats:YES];
 
     [[userTable headerView] setMenu:columnsMenu];
 
@@ -200,7 +200,7 @@
         }
     }
 
-    return array;
+    return [array sortedArrayUsingDescriptors:[userTable sortDescriptors]];
 }
 
 - (void)filterUsers
@@ -218,7 +218,7 @@
 {
     if (needUpdating) {
         [users release];
-        users = [[usersTree allObjects] retain];
+        users = [[[usersByNick allValues] sortedArrayUsingDescriptors:[userTable sortDescriptors]] retain];
         [self filterUsers];
         [userTable reloadData];
         needUpdating = NO;
@@ -235,7 +235,7 @@
     
     [users release];
     [filteredUsers release];
-    [usersTree release];
+    [usersByNick release];
     [address release];
     [name release];
     [nick release];
@@ -352,23 +352,7 @@
 
 - (SPUser *)findUserWithNick:(NSString *)aNick
 {
-    SPUser *cmpUser = [SPUser userWithNick:aNick
-                               description:nil
-                                       tag:nil
-                                     speed:nil
-                                     email:nil
-                                      size:nil
-                                isOperator:NO
-                                extraSlots:0];
-    SPUser *user = [usersTree find:cmpUser];
-
-    if (user == nil) {
-        // no regular user found, let's see if there's any op with this nick.
-        [cmpUser setIsOperator:YES];
-        user = [usersTree find:cmpUser];
-    }
-
-    return user;
+    return [usersByNick objectForKey:aNick];
 }
 
 - (void)userLoginNotification:(NSNotification *)aNotification
@@ -386,7 +370,7 @@
                                  isOperator:isOp
                                  extraSlots:[[userinfo objectForKey:@"extraSlots"] unsignedIntValue]];
 
-        [usersTree addObject:user];
+        [usersByNick setObject:user forKey:theNick];
         needUpdating = YES;
 
         totsize += [[userinfo objectForKey:@"size"] unsignedLongLongValue];
@@ -415,11 +399,10 @@
 
             if (oldOperatorFlag != newOperatorFlag) {
                 /* Ouch, operator status changed, which affects sort ordering. */
-                /* Remove and re-insert the entry. */
+                /* Replace the existing object (in case we're handling a copy). */
                 [user retain];
-                [usersTree removeObject:user];
                 [user setIsOperator:newOperatorFlag];
-                [usersTree addObject:user];
+                [usersByNick setObject:user forKey:theNick];
                 [user release];
             }
 
@@ -451,7 +434,7 @@
             if ([user isOperator])
                 nops--;
 
-            [usersTree removeObject:user];
+            [usersByNick removeObjectForKey:theNick];
         }
         needUpdating = YES;
     }
@@ -597,7 +580,7 @@
     if (!disconnected &&
        [address isEqualToString:[[aNotification userInfo] objectForKey:@"hubAddress"]]) {
         disconnected = YES;
-        [usersTree removeAllObjects];
+        [usersByNick removeAllObjects];
         needUpdating = YES;
         nops = 0;
         totsize = 0ULL;
@@ -1056,6 +1039,7 @@ sortDescriptorsDidChange:(NSArray *)oldDescriptors
 {
 	NSArray *newDescriptors = [tableView sortDescriptors];
 	[users sortUsingDescriptors:newDescriptors];
+  [self filterUsers];
 	[tableView reloadData];
 }
 
