@@ -12,7 +12,7 @@ die()
 version=${1:-snapshot-`date +%Y%m%d`}
 top_dir=${2:-.}
 output_dir=${3:-.}
-package=${4:-shakespeer}
+package=${4:-ShakesPeer}
 
 TMPDMG=$top_dir/shakespeer-tmp$$.dmg
 /bin/rm -f $TMPDMG
@@ -22,7 +22,7 @@ test -x "$top_dir/sphubd/sphubd" || die "No sphubd build found"
 APP="$top_dir/gui/Aqua/ShakesPeer.app"
 test -d "$APP" || die "No ShakesPeer build found in $APP"
 
-VOL="$package-$version"
+VOL="$package $version"
 echo "Creating disk image $VOL"
 
 # clean up if we're interrupted
