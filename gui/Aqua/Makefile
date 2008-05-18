@@ -80,6 +80,17 @@ Growl.framework: Growl-$(GROWL_VERSION)-SDK.dmg
 		sed -n 's/^\/dev\/disk.*[[:space:]]*Apple_HFS[[:space:]]*\(.*\)/\1/p'` && \
 	cp -RP "$$p/Frameworks/Growl.framework" . && \
 	hdiutil detach "$$p"
+	
+SPARKLE_VERSION=1.1
+
+Sparkle-$(SPARKLE_VERSION).zip:
+	ftp http://www.andymatuschak.org/files/Sparkle-$(SPARKLE_VERSION).zip
+
+Sparkle.framework: Sparkle-$(SPARKLE_VERSION).zip
+	mkdir Sparkle && \
+	unzip Sparkle-$(SPARKLE_VERSION).zip -d Sparkle && \
+	cp -RP "Sparkle/Extras/English-Only Framework/Sparkle.framework" . && \
+	rm Sparkle-$(SPARKLE_VERSION).zip
 
 APP=ShakesPeer.app
 CONTENTS=$(APP)/Contents
@@ -111,7 +122,8 @@ app_bundle.stamp: ShakesPeer
 	cp -f ShakesPeer ShakesPeer.app/Contents/MacOS
 	test -d $(FWDIR)/Growl.framework || \
 		cp -RP Growl.framework $(FWDIR)
-	cp -RP Sparkle.framework $(FWDIR)
+	test -d $(FWDIR)/Sparkle.framework || \
+		cp -RP Sparkle.framework $(FWDIR)
 
 install:
 
