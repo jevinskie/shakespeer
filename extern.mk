@@ -71,7 +71,7 @@ expat-build-${EXPAT_VER}/stamp: expat-${EXPAT_VER}.tar.gz
 
 ICONV_VER=1.11
 ICONV_URL=http://ftp.gnu.org/pub/gnu/libiconv/libiconv-$(ICONV_VER).tar.gz
-ICONV_MD5=0c99a05e0c3c153bac1c960f78711155
+ICONV_MD5=b77a17e4a5a817100ad4b2613935055e
 libiconv-$(ICONV_VER).tar.gz:
 	$(call download,libiconv,$(ICONV_VER),$(ICONV_URL),$(ICONV_MD5))
 libiconv: libiconv-build-$(ICONV_VER)/stamp
