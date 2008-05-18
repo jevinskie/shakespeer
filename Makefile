@@ -36,8 +36,8 @@ release-package:
 	cd $(RELEASE_DIR)/$(REPO) && \
 		/bin/sh support/mkdmg "$(DIST_VERSION)" . ../.. $(REPO)
 	@echo Creating source tarball...
-	svn export $(RELEASE_DIR)/$(REPO)/trunk $(PACKAGE)-$(DIST_VERSION) && \
-	mv $(RELEASE_DIR)/$(REPO)/$(PACKAGE)-$(DIST_VERSION).tar.gz .
+	svn export --force $(RELEASE_DIR)/$(REPO) $(PACKAGE)-$(DIST_VERSION) && \
+	tar -czf $(PACKAGE)-$(DIST_VERSION).tar.gz $(PACKAGE)-$(DIST_VERSION)
 
 dmg: release release-package
 
@@ -47,8 +47,8 @@ snapshot-package: snapshot
 	$(MAKE) release-package REPO_URL="`pwd`"
 
 dist:
-	svn export $(PACKAGE)-$(DIST_VERSION) && \
-	tar -cvf $(PACKAGE)-$(DIST_VERSION) | gzip > $(PACKAGE)-$(DIST_VERSION).tar.gz
+	svn export --force $(PACKAGE)-$(DIST_VERSION) && \
+	tar -czf $(PACKAGE)-$(DIST_VERSION).tar.gz $(PACKAGE)-$(DIST_VERSION)
 
 version.h: version.mk
 	echo '#ifndef _version_h_' > version.h
