@@ -1,3 +1,16 @@
+New in version 0.9.6:
+
+* You can now have a list of friends
+* Reveal duplicate share entries by control-clicking the shared folder in preferences
+* Use Sparkle for automatic updates
+* Use the previously supplied password when attempting reconnects
+* Don't incorrectly report zero open slots to hubs
+* Don't queue multiple downloads in reverse order
+* Allow simultaneous upload and download with same peer
+* Automatic crash reports
+* Option to disallow hubs from overriding your external ip (thanks to Kevin Ballard)
+* Allow Revconnect (and possibly other clients) to connect to ShakesPeer (thanks to Zintis Petersons)
+
 New in version 0.9.5:
 
 * Fixed reporting of total slots
