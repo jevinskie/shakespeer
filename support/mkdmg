@@ -22,7 +22,7 @@ test -x "$top_dir/sphubd/sphubd" || die "No sphubd build found"
 APP="$top_dir/gui/Aqua/ShakesPeer.app"
 test -d "$APP" || die "No ShakesPeer build found in $APP"
 
-VOL="$package $version"
+VOL="$package-$version"
 echo "Creating disk image $VOL"
 
 # clean up if we're interrupted
