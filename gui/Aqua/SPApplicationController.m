@@ -800,7 +800,7 @@ else {
 
 - (IBAction)reportBug:(id)sender
 {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://trac.bzero.se/trac/shakespeer/newticket"]];
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://code.google.com/p/shakespeer/wiki/GuidelinesForReportingBugs"]];
 }
 
 - (IBAction)donate:(id)sender

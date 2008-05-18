@@ -117,5 +117,6 @@ install:
 
 clean-local:
 	rm -f $(bin_PROGRAMS) $(OBJS)
+	rm -rf ShakesPeer.app
 	$(MAKE) -C Resources clean
 

@@ -13,31 +13,21 @@ config.mk: configure ${TOP}/support/configure.sub
 	CFLAGS="$(EXTERN_CFLAGS)" sh ./configure
 
 REPO		?= shakespeer
-REPO_URL	?= http://darcs.bzero.se/$(REPO)
+REPO_URL	?= http://shakespeer.googlecode.com/svn
 
-ifneq ($(TAG),)
-TAG_OPTION=--tag=$(TAG)
-RELEASE_DIR=release-build-$(TAG)
-DIST_VERSION:=$(VERSION)
-else
-TAG_OPTION=
 RELEASE_DIR=release-build-HEAD
 DIST_VERSION:=snapshot-$(shell date +"%Y%m%d")
-endif
-
-tag-release:
-	$(MAKE) release TAG=$(VERSION)
 
 release:
 	mkdir -p $(RELEASE_DIR)
 	cd $(RELEASE_DIR) && \
-	if test -d $(REPO)/_darcs; then \
+	if test -d $(REPO)/.svn; then \
 	  cd $(REPO) && \
 	  echo "updating sources..." && \
-	  darcs pull -a -v $(TAG_OPTION) $(REPO_URL); \
+	  svn up; \
 	else \
 	  echo "getting sources..." && \
-	  darcs get --partial -v $(TAG_OPTION) $(REPO_URL) $(REPO) && \
+	  svn checkout https://shakespeer.googlecode.com/svn/trunk $(REPO) && \
 	  cd $(REPO) ; \
 	fi && $(MAKE) all BUILD_PROFILE=release && $(MAKE) check
 
@@ -46,10 +36,8 @@ release-package:
 	cd $(RELEASE_DIR)/$(REPO) && \
 		/bin/sh support/mkdmg "$(DIST_VERSION)" . ../.. $(REPO)
 	@echo Creating source tarball...
-	darcs dist --repodir=$(RELEASE_DIR)/$(REPO) -d $(PACKAGE)-$(DIST_VERSION) && \
+	svn export $(RELEASE_DIR)/$(REPO)/trunk $(PACKAGE)-$(DIST_VERSION) && \
 	mv $(RELEASE_DIR)/$(REPO)/$(PACKAGE)-$(DIST_VERSION).tar.gz .
-
-tag-dmg: tag-release release-package
 
 dmg: release release-package
 
@@ -59,7 +47,8 @@ snapshot-package: snapshot
 	$(MAKE) release-package REPO_URL="`pwd`"
 
 dist:
-	darcs dist -d $(PACKAGE)-$(DIST_VERSION)
+	svn export $(PACKAGE)-$(DIST_VERSION) && \
+	tar -cvf $(PACKAGE)-$(DIST_VERSION) | gzip > $(PACKAGE)-$(DIST_VERSION).tar.gz
 
 version.h: version.mk
 	echo '#ifndef _version_h_' > version.h
