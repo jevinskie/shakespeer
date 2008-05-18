@@ -268,11 +268,16 @@ static int cc_cmd_ADCGET(void *data, int argc, char **argv)
 
 /* $UGetBlock <start> <numbytes> <path> */
 /* offset is 0-based */
+/*
+ <start> - starting index of the file 
+ <numbytes> - the number of bytes to get or -1 for unknown (i.e. the whole file) 
+ <filename - the name of the filename to get 
+*/
 static int cc_cmd_UGetBlock(void *data, int argc, char **argv)
 {
     cc_t *cc = data;
 
-    rx_subs_t *subs = rx_search(argv[0], "([0-9]+) ([0-9]+) (.*)");
+    rx_subs_t *subs = rx_search(argv[0], "([0-9]+) (-?[0-9]+) (.*)");
     if(subs == NULL || subs->nsubs != 3)
     {
         INFO("invalid UGetBlock request");
@@ -292,6 +297,10 @@ static int cc_cmd_UGetBlock(void *data, int argc, char **argv)
 
     uint64_t offset = strtoull(subs->subs[0], 0, 10);
     uint64_t bytes_to_transfer = strtoull(subs->subs[1], 0, 10);
+    if(bytes_to_transfer == -1LL)
+    {
+        bytes_to_transfer = 0;
+    }
 
     xerr_t *err = 0;
     int rc = cc_upload_prepare(cc, filename_utf8, offset, bytes_to_transfer, &err);
