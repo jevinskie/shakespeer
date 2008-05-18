@@ -3,6 +3,7 @@ New in version 0.9.6:
 * You can now have a list of friends
 * Reveal duplicate share entries by control-clicking the shared folder in preferences
 * Use Sparkle for automatic updates
+* Fix sorting of user lists in hubs
 * Use the previously supplied password when attempting reconnects
 * Don't incorrectly report zero open slots to hubs
 * Don't queue multiple downloads in reverse order
