@@ -16,11 +16,11 @@ REPO		?= shakespeer
 REPO_URL	?= http://shakespeer.googlecode.com/svn
 
 ifneq ($(TAG),)
-RELEASE_DIR=release-build-$(TAG)
-DIST_VERSION:=$(VERSION)
+  RELEASE_DIR=release-build-$(TAG)
+  DIST_VERSION:=$(VERSION)
 else
-RELEASE_DIR=release-build-HEAD
-DIST_VERSION:=snapshot-$(shell date +"%Y%m%d")
+  RELEASE_DIR=release-build-HEAD
+  DIST_VERSION:=snapshot-$(shell date +"%Y%m%d")
 endif
 
 tag-release:

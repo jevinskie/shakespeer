@@ -6,7 +6,6 @@
 default: all
 
 -include $(TOP)/config.mk
-
 include $(TOP)/version.mk
 include $(TOP)/extern.mk
 
@@ -20,45 +19,45 @@ os := $(shell uname)
 os_ver := $(shell uname -r | cut -c 1)
 
 ifeq ($(os),Linux)
-# Required for asprintf on Linux
-CFLAGS+=-D_GNU_SOURCE
-# Required for large file support on Linux
-CFLAGS+=-D_FILE_OFFSET_BITS=64
+  # Required for asprintf on Linux
+  CFLAGS+=-D_GNU_SOURCE
+  # Required for large file support on Linux
+  CFLAGS+=-D_FILE_OFFSET_BITS=64
 endif
 
 ifeq ($(HAVE_FGETLN),no)
-	CFLAGS += -DMISSING_FGETLN
+  CFLAGS += -DMISSING_FGETLN
 endif
 
 # Disable coredumps for public releases
 ifneq ($(BUILD_PROFILE),release)
-CFLAGS+=-DCOREDUMPS_ENABLED=1
+  CFLAGS+=-DCOREDUMPS_ENABLED=1
 endif
 
 # Build a Universal Binary on Mac OS X
 ifeq ($(os),Darwin)
-ifeq ($(BUILD_PROFILE),release)
-ifeq ($(shell test $(os_ver) -ge 9 && echo yes || echo no),yes)
-UB_CFLAGS=-arch i386 -arch ppc
-UB_LDFLAGS=-arch ppc -arch i386
-else
-UB_CFLAGS=-isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386 -arch ppc
-UB_LDFLAGS=-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386
-endif
-endif
-endif
+  ifeq ($(BUILD_PROFILE),release)
+    # Always build releases against 10.4 Universal SDK
+    SDK_FLAGS = -isysroot /Developer/SDKs/MacOSX10.4u.sdk -mmacosx-version-min=10.4
+    UB_CFLAGS = -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386 -arch ppc
+    UB_LDFLAGS = -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386
 
-# add -m64 here to compile external libraries with -m64
-EXTERN_CFLAGS=$(UB_CFLAGS)
-EXTERN_LDFLAGS=
+    CFLAGS += $(SDK_FLAGS)
+    EXTERN_CFLAGS = $(UB_CFLAGS)
+    EXTERN_CFLAGS += $(SDK_FLAGS)
+    EXTERN_LDFLAGS =
+    EXTERN_LDFLAGS += $(SDK_FLAGS)
 
-# add -m64 here to compile non-GUI files with 64 bit support
-HEADLESS_CFLAGS=
-HEADLESS_LDFLAGS=
+    HEADLESS_CFLAGS =
+    HEADLESS_CFLAGS += $(SDK_FLAGS)
+    HEADLESS_LDFLAGS =
+    HEADLESS_LDFLAGS += $(SDK_FLAGS)
+  endif
+endif
 
 # Need -lresolv on Linux
 ifeq ($(os),Linux)
-LIBS+=-lresolv
+  LIBS+=-lresolv
 endif
 
 # search for xcodebuild in path
@@ -139,15 +138,14 @@ OBJS=$(SOURCES:.c=.o)
 ALLCSOURCES := $(wildcard *.c)
 ALLMSOURCES := $(wildcard *.m)
 ifeq ($(os),Darwin)
-ALLSOURCES := $(ALLCSOURCES) $(ALLMSOURCES)
+  ALLSOURCES := $(ALLCSOURCES) $(ALLMSOURCES)
 else
-ALLSOURCES := $(ALLCSOURCES)
+  ALLSOURCES := $(ALLCSOURCES)
 endif
 
 ifneq ($(ALLCSOURCES),)
--include $(patsubst %.c,$(DEPDIR)/%.P,$(ALLCSOURCES))
+  -include $(patsubst %.c,$(DEPDIR)/%.P,$(ALLCSOURCES))
 endif
 ifneq ($(ALLMSOURCES),)
--include $(patsubst %.m,$(DEPDIR)/%.P,$(ALLMSOURCES))
+  -include $(patsubst %.m,$(DEPDIR)/%.P,$(ALLMSOURCES))
 endif
-
