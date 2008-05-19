@@ -43,17 +43,23 @@ ifeq ($(os),Darwin)
     UB_LDFLAGS = -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386
 
     CFLAGS += $(SDK_FLAGS)
-    EXTERN_CFLAGS = $(UB_CFLAGS)
     EXTERN_CFLAGS += $(SDK_FLAGS)
-    EXTERN_LDFLAGS =
     EXTERN_LDFLAGS += $(SDK_FLAGS)
 
-    HEADLESS_CFLAGS =
+
     HEADLESS_CFLAGS += $(SDK_FLAGS)
-    HEADLESS_LDFLAGS =
+
     HEADLESS_LDFLAGS += $(SDK_FLAGS)
   endif
 endif
+
+# Add -m64 here to compile external libraries with 64-bit support
+EXTERN_CFLAGS = $(UB_CFLAGS)
+EXTERN_LDFLAGS =
+
+# Add -m64 here to compile non-GUI files with 64-bit support
+HEADLESS_CFLAGS =
+HEADLESS_LDFLAGS =
 
 # Need -lresolv on Linux
 ifeq ($(os),Linux)
