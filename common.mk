@@ -34,6 +34,14 @@ ifneq ($(BUILD_PROFILE),release)
   CFLAGS+=-DCOREDUMPS_ENABLED=1
 endif
 
+# Add -m64 here to compile external libraries with 64-bit support
+EXTERN_CFLAGS = $(UB_CFLAGS)
+EXTERN_LDFLAGS =
+
+# Add -m64 here to compile non-GUI files with 64-bit support
+HEADLESS_CFLAGS =
+HEADLESS_LDFLAGS =
+
 # Build a Universal Binary on Mac OS X
 ifeq ($(os),Darwin)
   ifeq ($(BUILD_PROFILE),release)
@@ -45,21 +53,10 @@ ifeq ($(os),Darwin)
     CFLAGS += $(SDK_FLAGS)
     EXTERN_CFLAGS += $(SDK_FLAGS)
     EXTERN_LDFLAGS += $(SDK_FLAGS)
-
-
     HEADLESS_CFLAGS += $(SDK_FLAGS)
-
     HEADLESS_LDFLAGS += $(SDK_FLAGS)
   endif
 endif
-
-# Add -m64 here to compile external libraries with 64-bit support
-EXTERN_CFLAGS = $(UB_CFLAGS)
-EXTERN_LDFLAGS =
-
-# Add -m64 here to compile non-GUI files with 64-bit support
-HEADLESS_CFLAGS =
-HEADLESS_LDFLAGS =
 
 # Need -lresolv on Linux
 ifeq ($(os),Linux)
