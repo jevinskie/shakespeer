@@ -35,7 +35,7 @@ release:
 	  svn up; \
 	else \
 	  echo "getting sources..." && \
-	  svn checkout http://shakespeer.googlecode.com/svn/trunk $(REPO) && \
+	  svn checkout http://shakespeer.googlecode.com/svn/tags/$(TAG) $(REPO) && \
 	  cd $(REPO) ; \
 	fi && $(MAKE) all BUILD_PROFILE=release && $(MAKE) check
 

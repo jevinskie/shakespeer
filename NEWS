@@ -1,3 +1,8 @@
+New in version 0.9.7:
+
+* Make built packages run on 10.4 too, doh! (Thanks to 0.heavy.duty.0)
+* Remove superfluous "context" toolbar button
+
 New in version 0.9.6:
 
 * You can now have a list of friends
