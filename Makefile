@@ -45,7 +45,7 @@ release-package:
 		/bin/sh support/mkdmg "$(DIST_VERSION)" . ../.. $(REPO)
 	@echo Creating source tarball...
 	svn export --force $(RELEASE_DIR)/$(REPO) $(PACKAGE)-$(DIST_VERSION) && \
-	tar -czf $(PACKAGE)-$(DIST_VERSION).tar.gz $(PACKAGE)-$(DIST_VERSION) && \
+	tar cvf - $(PACKAGE)-$(DIST_VERSION) | gzip > $(PACKAGE)-$(DIST_VERSION).tar.gz && \
 	rm -rf $(PACKAGE)-$(DIST_VERSION)
 
 tag-dmg: tag-release release-package
