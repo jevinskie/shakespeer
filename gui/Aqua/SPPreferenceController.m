@@ -625,7 +625,8 @@ static float ToolbarHeightForWindow(NSWindow *window)
 
     [testConnectionProgress stopAnimation:self];
     if (status == TC_RET_OK) {
-        [testResults setStringValue:@"Both TCP and UDP tested OK"];
+        [testResults setTextColor:[NSColor greenColor]];
+        [testResults setStringValue:@"Connection is OK"];
     }
     else {
         [testResults setTextColor:[NSColor redColor]];
