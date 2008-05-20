@@ -32,7 +32,7 @@ static int internal_complete_filelist(WordCompletion *cpl, const char *line,
     len = strlen(partial); /* correction for removed quote characters */
 
     fl_file_t *f;
-    LIST_FOREACH(f, &filelist_cdir->files, link)
+    TAILQ_FOREACH(f, &filelist_cdir->files, link)
     {
         if(f && str_has_prefix(f->name, partial) && (!only_dirs || f->dir))
         {
@@ -59,7 +59,7 @@ static void display_share_dir(fl_dir_t *dir, int only_directories,
         const char *filter)
 {
     fl_file_t *f;
-    LIST_FOREACH(f, &dir->files, link)
+    TAILQ_FOREACH(f, &dir->files, link)
     {
         if(filter == 0 || strstr(f->name, filter))
         {
@@ -103,7 +103,7 @@ int func_filelist_lsdirs(sp_t *sp, arg_t *args)
 static fl_dir_t *find_parent_for(fl_dir_t *dir, fl_dir_t *cdir)
 {
     fl_file_t *file;
-    LIST_FOREACH(file, &dir->files, link)
+    TAILQ_FOREACH(file, &dir->files, link)
     {
         if(file->dir)
         {
@@ -121,7 +121,7 @@ static fl_dir_t *find_parent_for(fl_dir_t *dir, fl_dir_t *cdir)
 static fl_file_t *fl_lookup_file(fl_dir_t *dir, const char *filename)
 {
     fl_file_t *f;
-    LIST_FOREACH(f, &dir->files, link)
+    TAILQ_FOREACH(f, &dir->files, link)
     {
         if(strcmp(filename, f->name) == 0)
             return f;
@@ -192,7 +192,7 @@ static void download_recursive(sp_t *sp, fl_dir_t *dir, const char *root)
     asprintf(&new_root, "%s/%s", root, slash);
 
     fl_file_t *file;
-    LIST_FOREACH(file, &dir->files, link)
+    TAILQ_FOREACH(file, &dir->files, link)
     {
         if(file->dir)
         {
