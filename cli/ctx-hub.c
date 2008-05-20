@@ -103,11 +103,8 @@ int func_hub_sget(sp_t *sp, arg_t *args)
     if(slash++ == 0)
         slash = sr->filename;
 
-    char *local;
-    asprintf(&local, "%s/%s", cfg_getstr(cfg, "download-directory"), slash);
     sp_send_download_file(sp, sr->hub_address, sr->nick, sr->filename,
-            sr->size, local, sr->tth);
-    free(local);
+            sr->size, slash, sr->tth);
 
     return 0;
 }

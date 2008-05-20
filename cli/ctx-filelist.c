@@ -166,17 +166,13 @@ int func_filelist_get(sp_t *sp, arg_t *args)
     }
     else
     {
-        char *target;
         char *source;
 
-        asprintf(&target, "%s/%s",
-                cfg_getstr(cfg, "download-directory"), file->name);
         asprintf(&source, "%s\\%s", filelist_cdir->path, file->name);
         sp_send_download_file(sp, current_filelist->hubaddress,
                 current_filelist->nick,
-                source, file->size, target, file->tth);
+                source, file->size, file->name, file->tth);
         free(source);
-        free(target);
     }
 
     return 0;
