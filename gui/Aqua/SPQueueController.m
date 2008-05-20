@@ -756,20 +756,23 @@
 {
     NSString *targetFilename = [[aNotification userInfo] objectForKey:@"targetFilename"];
 
-    /* assemble the queue item */
-    SPQueueItem *item = [[SPQueueItem alloc] initWithTarget:targetFilename];
-    [item setSize:[[aNotification userInfo] objectForKey:@"size"]];
-    [item setTTH:[[aNotification userInfo] objectForKey:@"tth"]];
-    [item setPriority:[[aNotification userInfo] objectForKey:@"priority"]];
+    SPQueueItem *qi = [self findItemWithTarget:targetFilename];
+    if (qi == nil) {
+        /* assemble the queue item */
+        SPQueueItem *item = [[SPQueueItem alloc] initWithTarget:targetFilename];
+        [item setSize:[[aNotification userInfo] objectForKey:@"size"]];
+        [item setTTH:[[aNotification userInfo] objectForKey:@"tth"]];
+        [item setPriority:[[aNotification userInfo] objectForKey:@"priority"]];
 
-    /* insert it into the hierarchy */
-    NSMutableArray *parentArray = [self findParent:[self extraPathComponents:targetFilename]
-                                           inArray:rootItems
-                                              root:@""];
-    [parentArray addObject:item];
-    [item release];
+        /* insert it into the hierarchy */
+        NSMutableArray *parentArray = [self findParent:[self extraPathComponents:targetFilename]
+                                               inArray:rootItems
+                                                  root:@""];
+        [parentArray addObject:item];
+        [item release];
 
-    [tableView reloadData];
+        [tableView reloadData];
+    }
 }
 
 - (void)addSourceNotification:(NSNotification *)aNotification
