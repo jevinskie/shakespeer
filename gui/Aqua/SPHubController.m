@@ -153,13 +153,12 @@
     numStaticNickMenuEntries = [nickMenu numberOfItems];
 }
 
-- (NSArray *)usersWithFilter:(NSString *)filter 
+- (NSArray *)usersWithFilter:(NSString *)filter /* Substring to search for. */
         startsWithSearchOnly:(BOOL)startsWithSearch /* Search for 'filter' only in beginning of nick? */
-                 stringArray:(BOOL)stringArray /* Return array of SPUsers or only nicks as string? */
+                 stringArray:(BOOL)returnStringArray /* Decides whether to return an array of SPNicks or NSStrings. The array is unsorted. */
 { 
-    if (filter == nil || [filter isEqualToString:@""]) {
+    if ([filter isEqualToString:@""])
         return users;
-    }
 
     NSArray *filterCriteria = nil;
     if (!startsWithSearch) {
@@ -167,7 +166,7 @@
         filterCriteria = [filter componentsSeparatedByString:@" "];
     }
     
-    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[users count]];
+    NSMutableArray *foundUsers = [NSMutableArray arrayWithCapacity:[users count]];
     NSEnumerator *e = [users objectEnumerator];
     SPUser *user;
     while ((user = [e nextObject])) {
@@ -193,14 +192,13 @@
         
         if (add) {
             // Add either only the nick, or the SPUser, depending on preferred return value.
-            if (stringArray)
-                [array addObject:[user nick]];
+            if (returnStringArray)
+                [foundUsers addObject:[user nick]];
             else
-                [array addObject:user];
+                [foundUsers addObject:user];
         }
     }
-
-    return [array sortedArrayUsingDescriptors:[userTable sortDescriptors]];
+    return foundUsers;
 }
 
 - (void)filterUsers
@@ -211,7 +209,10 @@
 - (void)filterUsersWithString:(NSString *)newFilter
 {
     [filteredUsers autorelease];
-    filteredUsers = [[self usersWithFilter:newFilter startsWithSearchOnly:NO stringArray:NO] retain];
+    // get the users matching this filter
+    NSArray *filteredResult = [self usersWithFilter:newFilter startsWithSearchOnly:NO stringArray:NO];
+    // sort this array too, so the userlist table will show them in the proper sort order.
+    filteredUsers = [[filteredResult sortedArrayUsingDescriptors:[userTable sortDescriptors]] retain];
 }
 
 - (void)updateUserTable:(NSTimer *)aTimer
@@ -242,6 +243,7 @@
     [encoding release];
     [descriptionString release];
     [nickAutocompleteEnumerator release];
+    [savedNickStart release];
     
     [tcNick release];
     [tcShare release];
@@ -783,19 +785,25 @@
 
 - (BOOL)control:(NSControl*)control textView:(NSTextView*)textView doCommandBySelector:(SEL)commandSelector
 { 
+    // tab invokes nick autocompletion
     if (control == (NSControl*)chatInput && commandSelector == @selector(insertTab:))
     {
-        if ([[chatInput stringValue] isEqualToString:@""])
+        NSString *inputLine = [chatInput stringValue];
+        if ([inputLine isEqualToString:@""]) {
             // if the input field is empty, move focus
             return NO;
-    
+        }
+
+        NSArray *inputWords = [inputLine componentsSeparatedByString:@" "]; // get all our words
+        NSString *word = (NSString*)[inputWords lastObject]; // get the last word
+        
         if (!nickAutocompleteEnumerator) {
-            NSArray *usersWithFilter = [self usersWithFilter:[chatInput stringValue] 
+            NSArray *usersWithFilter = [self usersWithFilter:word 
                                         startsWithSearchOnly:YES 
                                                  stringArray:YES];
             
             if ([usersWithFilter count] == 1 && 
-               [[chatInput stringValue] isEqualToString:[usersWithFilter objectAtIndex:0]]) {
+                [word isEqualToString:[usersWithFilter objectAtIndex:0]]) {
                 // Special case: The textfield matches exactly one person, whose name
                 // is already filled in. This will happen on the end of the list of autocomplete nicks. 
                 // Since it's a no-op, don't bother getting the enumerator and replacing the contents
@@ -805,13 +813,16 @@
             else {
                 // Hold on to the filtered list of nicks, so we can continue enumerating later.
                 nickAutocompleteEnumerator = [[usersWithFilter objectEnumerator] retain];
+                // save the start of the nick we've typed in
+                savedNickStart = [word retain];
             }
         }
         
         if (nickAutocompleteEnumerator) {
             NSString *nextNick = [nickAutocompleteEnumerator nextObject];
             if (nextNick) {
-                [chatInput setStringValue:nextNick];
+                // now we rebuild the string and set it
+                [chatInput setStringValue:[NSString stringWithFormat:@"%@%@", [inputLine substringToIndex:[inputLine length] - [word length]], nextNick]];
             }
             else {
                 [nickAutocompleteEnumerator release];
@@ -820,13 +831,16 @@
         }
         
         if (!nickAutocompleteEnumerator) {
-            // End of session - no more hits
-            NSBeep();
+            // End of session - no more hits so we wrap around to the saved start of a nick
+            [chatInput setStringValue:[NSString stringWithFormat:@"%@%@", [inputLine substringToIndex:[inputLine length] - [word length]], savedNickStart]];
+            // release the saved nick
+            [savedNickStart release];
+            savedNickStart = nil;
         }
         
         return YES;
     }
-
+    
     return NO;
 }
 

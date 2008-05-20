@@ -64,6 +64,8 @@
     // when this is non-null, we're autocompleting nicks. it's enumerating through
     // an already-filtered list that is built on the first tab press.
     NSEnumerator *nickAutocompleteEnumerator;
+    // this is the saved start of a nick completion
+    NSString *savedNickStart;
 }
 
 - (IBAction)sendMessage:(id)sender;
