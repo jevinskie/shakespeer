@@ -133,8 +133,8 @@ static SPFriendsController *sharedFriendsController = nil;
 - (void)setFriends:(NSArray *)newFriends
 {
     if (newFriends != friends) {
-		[friends release];
-		friends = [[NSMutableArray alloc] initWithArray:newFriends];
+		[friends autorelease];
+		friends = [newFriends mutableCopy;]
 
 		[[NSUserDefaults standardUserDefaults] setObject:friends forKey:SPFriends];
 	}
@@ -371,7 +371,7 @@ static SPFriendsController *sharedFriendsController = nil;
 
 - (void)removeFriendShow:(id)sender
 {
-    NSAlert *alert = [[NSAlert alloc] init];
+    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
 
     [alert addButtonWithTitle:@"OK"];
     [alert addButtonWithTitle:@"Cancel"];

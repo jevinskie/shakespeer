@@ -514,7 +514,7 @@ extern NSString* SPPublicHubDataType;
 
 - (void)removeBookmarkShow:(id)sender
 {
-    NSAlert *alert = [[NSAlert alloc] init];
+    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
     
     [alert addButtonWithTitle:@"OK"];
     [alert addButtonWithTitle:@"Cancel"];
