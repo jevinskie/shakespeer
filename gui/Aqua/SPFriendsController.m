@@ -134,7 +134,7 @@ static SPFriendsController *sharedFriendsController = nil;
 {
     if (newFriends != friends) {
 		[friends autorelease];
-		friends = [newFriends mutableCopy;]
+		friends = [newFriends mutableCopy];
 
 		[[NSUserDefaults standardUserDefaults] setObject:friends forKey:SPFriends];
 	}
