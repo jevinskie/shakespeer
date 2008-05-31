@@ -27,6 +27,7 @@
 #import "SPOutlineView.h"
 #import "SPNotificationNames.h"
 #import "SPUserDefaultKeys.h"
+#import "NSMenu-MassRemovalAdditions.h"
 
 #include "util.h"
 
@@ -202,20 +203,13 @@
 #pragma mark -
 #pragma mark Menu handling
 
-- (void)emptyMenu:(NSMenu *)aMenu
-{
-    int i;
-    for (i = [aMenu numberOfItems]; i > 0; i--)
-        [aMenu removeItemAtIndex:i - 1];
-}
-
 - (BOOL)validateMenuItem:(id)sender
 {
     /* populate menu, and only do it once */
     if (sender == menuItemSearchByTTH) {
-        [self emptyMenu:menuRemoveSource];
-        [self emptyMenu:menuRemoveUserFromQueue];
-        [self emptyMenu:menuBrowseUsersFiles];
+        [menuRemoveSource removeAllItems];
+        [menuRemoveUserFromQueue removeAllItems];
+        [menuBrowseUsersFiles removeAllItems];
 
         /* create unique set of nicks */
         NSMutableSet *nicks = [[NSMutableSet alloc] init];

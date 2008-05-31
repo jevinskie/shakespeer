@@ -18,6 +18,7 @@
 		287851BC0A179F6500A2992F /* plus.png in Resources */ = {isa = PBXBuildFile; fileRef = 287851BB0A179F6500A2992F /* plus.png */; };
 		2894F7410D6308D100D8B355 /* UKCrashReporter.m in Sources */ = {isa = PBXBuildFile; fileRef = 2894F7400D6308D100D8B355 /* UKCrashReporter.m */; };
 		28A36F4D0A10B21600B6EE86 /* shakespeer.icns in Resources */ = {isa = PBXBuildFile; fileRef = 28A36F490A10B1BD00B6EE86 /* shakespeer.icns */; };
+		28C2C1530DF17EDD001AAA51 /* NSMenu-MassRemovalAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 28C2C1520DF17EDD001AAA51 /* NSMenu-MassRemovalAdditions.m */; };
 		28C74ECB0ADBECDF00BACE5C /* Bookmarks.nib in Resources */ = {isa = PBXBuildFile; fileRef = 28C74EB30ADBECDF00BACE5C /* Bookmarks.nib */; };
 		28C74ECC0ADBECDF00BACE5C /* ChatWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = 28C74EB50ADBECDF00BACE5C /* ChatWindow.nib */; };
 		28C74ECD0ADBECDF00BACE5C /* DirectoryListing.nib in Resources */ = {isa = PBXBuildFile; fileRef = 28C74EB70ADBECDF00BACE5C /* DirectoryListing.nib */; };
@@ -182,6 +183,8 @@
 		2894F73F0D6308D100D8B355 /* UKCrashReporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UKCrashReporter.h; sourceTree = "<group>"; };
 		2894F7400D6308D100D8B355 /* UKCrashReporter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UKCrashReporter.m; sourceTree = "<group>"; };
 		28A36F490A10B1BD00B6EE86 /* shakespeer.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = shakespeer.icns; path = Resources/Images/shakespeer.icns; sourceTree = "<group>"; };
+		28C2C1510DF17EDD001AAA51 /* NSMenu-MassRemovalAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMenu-MassRemovalAdditions.h"; sourceTree = "<group>"; };
+		28C2C1520DF17EDD001AAA51 /* NSMenu-MassRemovalAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMenu-MassRemovalAdditions.m"; sourceTree = "<group>"; };
 		28C74EB40ADBECDF00BACE5C /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/Bookmarks.nib; sourceTree = "<group>"; };
 		28C74EB60ADBECDF00BACE5C /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/ChatWindow.nib; sourceTree = "<group>"; };
 		28C74EB80ADBECDF00BACE5C /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = Resources/English.lproj/DirectoryListing.nib; sourceTree = "<group>"; };
@@ -381,6 +384,8 @@
 		280318170ADA8800000CC734 /* Other sources */ = {
 			isa = PBXGroup;
 			children = (
+				28C2C1510DF17EDD001AAA51 /* NSMenu-MassRemovalAdditions.h */,
+				28C2C1520DF17EDD001AAA51 /* NSMenu-MassRemovalAdditions.m */,
 				2894F73F0D6308D100D8B355 /* UKCrashReporter.h */,
 				2894F7400D6308D100D8B355 /* UKCrashReporter.m */,
 				28D1DFA20A2A023000F9F9EE /* SPKeychain.h */,
@@ -807,6 +812,7 @@
 				28D1DFA50A2A023000F9F9EE /* SPKeychain.m in Sources */,
 				2894F7410D6308D100D8B355 /* UKCrashReporter.m in Sources */,
 				28E086420D8418E0006CF70A /* SPFriendsController.m in Sources */,
+				28C2C1530DF17EDD001AAA51 /* NSMenu-MassRemovalAdditions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

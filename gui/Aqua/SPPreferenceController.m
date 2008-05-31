@@ -24,6 +24,7 @@
 #import "SPLog.h"
 #import "SPUserDefaultKeys.h"
 #import "SPNotificationNames.h"
+#import "NSMenu-MassRemovalAdditions.h"
 
 #include "test_connection.h"
 
@@ -49,37 +50,37 @@ static float ToolbarHeightForWindow(NSWindow *window)
 
 - (id)init
 {
-    self = [super initWithWindowNibName:@"Preferences"];
-    if (self) {
+    if ((self = [super initWithWindowNibName:@"Preferences"])) {
         // Define preference labels and identifiers
         prefItems = [[NSDictionary alloc] initWithObjectsAndKeys:
-            @"Identity", @"IdentityItem",
-            @"Share", @"ShareItem",
-            @"Network", @"NetworkItem",
-            @"Advanced", @"AdvancedItem",
-            nil];
+                     @"Identity", @"IdentityItem",
+                     @"Share", @"ShareItem",
+                     @"Network", @"NetworkItem",
+                     @"Advanced", @"AdvancedItem",
+                     nil];
         
         // Define default download locations
         predefinedDownloadLocations = [[NSArray alloc] initWithObjects:
-            @"~/Desktop",
-            @"~/Documents",
-            @"~/Movies",
-            @"~/Music",
-            @"~/Pictures",
-            nil];
+                                       @"~/Desktop",
+                                       @"~/Documents",
+                                       @"~/Movies",
+                                       @"~/Music",
+                                       @"~/Pictures",
+                                       nil];
         
-        /* Setup toolbar */
-        blankView = [[NSView alloc] init];
-        prefsToolbar = [[NSToolbar alloc] initWithIdentifier:@"prefsToolbar"];
-        [prefsToolbar autorelease];
-        [prefsToolbar setDelegate:self];
-        [prefsToolbar setAllowsUserCustomization:NO];
-        [prefsToolbar setAutosavesConfiguration:NO];
-        [[self window] setToolbar:prefsToolbar];
+        // Load shared paths
+        sharedPaths = [[NSMutableArray alloc] init];
+        [self setTotalShareSize:0LL];
         
-        // Load last viewed pane
-        [self switchToItem:[[NSUserDefaults standardUserDefaults] objectForKey:@"lastPrefPane"]];
-
+        duplicatePaths = [[NSMutableSet alloc] init];
+        
+        NSEnumerator *e = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:SPPrefsSharedPaths] objectEnumerator];
+        NSString *path;
+        while ((path = [e nextObject]) != nil) {
+            [self addSharedPathsPath:path];
+        }
+        
+        // Register for notifications. Note that the responding methods can not contain any code that interacts with objects in the nib-file, since they are not loaded yet. Any such code should go in the windowDidLoad method instead.
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(shareStatsNotification:)
                                                      name:SPNotificationShareStats
@@ -89,35 +90,33 @@ static float ToolbarHeightForWindow(NSWindow *window)
                                                  selector:@selector(shareDuplicateFoundNotification:)
                                                      name:SPNotificationShareDuplicateFound
                                                    object:nil];
-        
-        // Load shared paths
-        sharedPaths = [[NSMutableArray alloc] init];
-        [self setTotalShareSize:0LL];
-
-        NSEnumerator *e = [[[NSUserDefaults standardUserDefaults] stringArrayForKey:SPPrefsSharedPaths] objectEnumerator];
-        NSString *path;
-        while ((path = [e nextObject]) != nil) {
-            [self addSharedPathsPath:path];
-        }
-
-        [self setWindowFrameAutosaveName:@"PreferenceWindow"];
     }
     
     return self;
 }
 
-- (void)awakeFromNib
+- (void)windowDidLoad
 {
+    // Setup toolbar
+    blankView = [[NSView alloc] init];
+    prefsToolbar = [[NSToolbar alloc] initWithIdentifier:@"prefsToolbar"];
+    [prefsToolbar autorelease];
+    [prefsToolbar setDelegate:self];
+    [prefsToolbar setAllowsUserCustomization:NO];
+    [prefsToolbar setAutosavesConfiguration:NO];
+    [[self window] setToolbar:prefsToolbar];
+    
+    // Load last viewed pane
+    [self switchToItem:[[NSUserDefaults standardUserDefaults] objectForKey:@"lastPrefPane"]];
+    
     // Localize predefined download location names and add icons
     NSEnumerator *e = [predefinedDownloadLocations objectEnumerator];
     NSString *path;
     while ((path = [e nextObject]) != nil) {
         NSString *name = [path lastPathComponent];
         
-        // Set the icon
+        // Set the icon and name
         [[downloadFolderButton itemWithTitle:name] setImage:[self smallIconForPath:path]];
-        
-        // Set the name
         [[downloadFolderButton itemWithTitle:name] setTitle:[[NSFileManager defaultManager] displayNameAtPath:path]];
     }
     
@@ -130,6 +129,8 @@ static float ToolbarHeightForWindow(NSWindow *window)
     // Add a contextual menu to the share table, for revealing duplicates
     [sharedPathsTable setTarget:self];
     [sharedPathsTable setMenu:duplicatePathsMenu];
+    
+    [self setWindowFrameAutosaveName:@"PreferenceWindow"];
 }
 
 + (SPPreferenceController *)sharedPreferences
@@ -315,27 +316,7 @@ static float ToolbarHeightForWindow(NSWindow *window)
 - (void)shareDuplicateFoundNotification:(NSNotification *)aNotification
 {
     NSString *path = [[aNotification userInfo] valueForKey:@"path"];
-    
-    // only add a new menu item if it doesn't already exist in the menu
-    BOOL alreadyInMenu = NO;
-    NSEnumerator *e = [[duplicatePathsMenu itemArray] objectEnumerator];
-    NSMenuItem *currentItem = nil;
-    
-    while ((currentItem = [e nextObject])) {
-        if ([[currentItem representedObject] isEqualToString:path]) {
-            alreadyInMenu = YES;
-            break;
-        }
-    }
-    
-    if (!alreadyInMenu) {
-        NSMenuItem* newItem = [[NSMenuItem alloc] initWithTitle:[path lastPathComponent]
-                                                     action:@selector(revealDuplicateInFinder:)
-                                              keyEquivalent:@""];
-        [newItem setRepresentedObject:path];
-        [duplicatePathsMenu addItem:newItem];
-        [newItem release];
-    }
+    [duplicatePaths addObject:path];
 }
 
 - (void)revealDuplicateInFinder:(NSMenuItem *)selectedItem
@@ -352,7 +333,31 @@ static float ToolbarHeightForWindow(NSWindow *window)
 }
 
 #pragma mark -
-#pragma mark Interface Actions
+#pragma mark Duplicate menu delegate methods
+
+- (void)menuNeedsUpdate:(NSMenu *)menu
+{
+    if (menu == duplicatePathsMenu) {
+        // Empty the menu, except for "Duplicates" item at top
+        [menu removeAllItemsButFirst];
+        
+        // Populate the menu from our set of duplicate paths
+        NSEnumerator *e = [[duplicatePaths allObjects] objectEnumerator];
+        NSString *currentPath = nil;
+        
+        while ((currentPath = [e nextObject])) {
+            NSMenuItem* newItem = [[NSMenuItem alloc] initWithTitle:[currentPath lastPathComponent]
+                                                             action:@selector(revealDuplicateInFinder:)
+                                                      keyEquivalent:@""];
+            [newItem setRepresentedObject:currentPath];
+            [menu addItem:newItem];
+            [newItem release];
+        }
+    }
+}
+
+#pragma mark -
+#pragma mark Interface actions
 
 - (IBAction)addSharedPath:(id)sender
 {
@@ -597,6 +602,9 @@ static float ToolbarHeightForWindow(NSWindow *window)
 
 - (void)updateAllSharedPaths
 {
+    // Empty the list of duplicates
+    [duplicatePaths removeAllObjects];
+    
     NSEnumerator *enumerator = [sharedPaths objectEnumerator];
     NSDictionary *record;
     while ((record = [enumerator nextObject])) {

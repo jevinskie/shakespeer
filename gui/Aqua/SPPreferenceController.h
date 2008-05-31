@@ -55,6 +55,7 @@
     
     NSArray *predefinedDownloadLocations;
     NSMutableArray *sharedPaths;
+	NSMutableSet *duplicatePaths;
     NSView *blankView;
     NSToolbar *prefsToolbar;
     NSDictionary *prefItems;

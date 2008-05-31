@@ -46,7 +46,8 @@ SOURCES = \
 	URLTextView.m \
 	main.m \
 	UKCrashReporter.m \
-	SPFriendsController.m
+	SPFriendsController.m \
+	NSMenu-MassRemovalAdditions.m
 
 SPApplicationController.o SPClientBridge.o: $(TOP)/version.mk
 
