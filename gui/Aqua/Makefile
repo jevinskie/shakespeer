@@ -77,7 +77,7 @@ Growl-$(GROWL_VERSION)-SDK.dmg:
 	ftp http://growl.info/files/Growl-$(GROWL_VERSION)-SDK.dmg
 
 Growl.framework: Growl-$(GROWL_VERSION)-SDK.dmg
-	p=`hdiutil attach Growl-$(GROWL_VERSION)-SDK.dmg -private | \
+	p=`hdiutil attach Growl-$(GROWL_VERSION)-SDK.dmg | \
 		sed -n 's/^\/dev\/disk.*[[:space:]]*Apple_HFS[[:space:]]*\(.*\)/\1/p'` && \
 	cp -RP "$$p/Frameworks/Growl.framework" . && \
 	hdiutil detach "$$p"
