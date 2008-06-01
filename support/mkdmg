@@ -52,8 +52,11 @@ echo "+ copying ShakesPeer.app"
 
 /bin/mkdir -p "$frameworks" || die "failed to create directory Frameworks"
 
-echo "+ copying License.txt"
-/bin/cp "$top_dir/License.txt" "$root" || die "failed to copy License.txt to disk image"
+echo "+ copying license"
+/bin/cp "$top_dir/License.txt" "$root" || die "failed to copy license to disk image"
+
+echo "+ copying release notes"
+/bin/cp "$top_dir/NEWS" "$root/Release Notes.txt" || die "failed to copy release notes to disk image"
 
 get_external_dependencies()
 {
