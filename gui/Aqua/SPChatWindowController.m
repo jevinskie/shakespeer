@@ -217,10 +217,58 @@
 
 - (IBAction)sendMessage:(id)sender
 {
-    [[SPApplicationController sharedApplicationController] sendPrivateMessage:[sender stringValue]
-                                                                       toNick:nick
-                                                                          hub:hubAddress];
-    [self addChatMessage:[sender stringValue] fromNick:myNick];
+    NSMutableString *message = [[[sender stringValue] mutableCopy] autorelease];
+    
+    if ([message hasPrefix:@"/"] && ![message hasPrefix:@"/me "]) {
+        /* this is a command */
+        NSArray *args = [message componentsSeparatedByString:@" "];
+        NSString *cmd = [args objectAtIndex:0];
+        
+        // COMMAND: /np
+        if ([cmd isEqualToString:@"/np"]) {
+            // Display the current playing track in iTunes
+            NSString *path = [[NSBundle mainBundle] pathForResource:@"np" ofType:@"scpt"];
+            if (path != nil) {
+                // Create the URL for the script
+                NSURL* url = [NSURL fileURLWithPath:path];
+                if (url != nil) {
+                    // Set up an error dict and the script
+                    NSDictionary *errors;
+                    NSAppleScript* appleScript = [[NSAppleScript alloc] initWithContentsOfURL:url error:&errors];
+                    if (appleScript != nil) {
+                        // Run the script
+                        NSAppleEventDescriptor *returnDescriptor = [appleScript executeAndReturnError:&errors];
+                        [appleScript release];
+                        if (returnDescriptor != nil) {
+                            // We got some results
+                            NSString *theTitle = [[returnDescriptor descriptorAtIndex:1] stringValue];
+                            NSString *theArtist = [[returnDescriptor descriptorAtIndex:2] stringValue];
+                            NSString *theMessage;
+                            if (!theTitle || !theArtist)
+                                theMessage = @"/me isn't listening to anything";
+                            else
+                                theMessage = [NSString stringWithFormat:@"/me is listening to %@ by %@", theTitle, theArtist];
+                            [[SPApplicationController sharedApplicationController] sendPrivateMessage:theMessage
+                                                                                               toNick:nick
+                                                                                                  hub:hubAddress];
+                            [self addChatMessage:theMessage fromNick:myNick];
+                        }
+                        else {
+                            // Something went wrong
+                            NSLog(@"Script error: %@", [errors objectForKey: @"NSAppleScriptErrorMessage"]);
+                        } // returnDescriptor
+                    } // appleScript
+                } // url
+            } // path
+        } // np
+    }
+    else {
+        [[SPApplicationController sharedApplicationController] sendPrivateMessage:[sender stringValue]
+                                                                           toNick:nick
+                                                                              hub:hubAddress];
+        [self addChatMessage:[sender stringValue] fromNick:myNick];
+    }
+    
     [sender setStringValue:@""];
     [self focusChatInput];
 }
