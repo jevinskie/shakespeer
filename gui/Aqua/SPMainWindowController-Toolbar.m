@@ -66,8 +66,8 @@
         [item setAction:@selector(toggle:)];
     }
     else if ([itemIdentifier isEqualToString:@"connectButton"]) {
-        [item setLabel:@"Connect"];
-        [item setToolTip:@"Connect to server"];
+        [item setLabel:@"Connect to hub"];
+        [item setToolTip:@"Connect to hub"];
         [item setImage:[NSImage imageNamed:@"ToolbarConnect"]];
         [item setAction:@selector(connectShow:)];
     }

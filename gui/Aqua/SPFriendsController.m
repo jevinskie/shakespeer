@@ -72,13 +72,11 @@ static SPFriendsController *sharedFriendsController = nil;
 }
 
 - (unsigned)retainCount
-
 {
     return UINT_MAX; // denotes an object that cannot be released
 }
 
 - (void)release
-
 {
     // do nothing
 }
@@ -119,11 +117,11 @@ static SPFriendsController *sharedFriendsController = nil;
 
 - (void)dealloc
 {
-	[updateTimer invalidate];
-  [updateTimer release];
-  updateTimer = nil;
-
-  [super dealloc];
+    [updateTimer invalidate];
+    [updateTimer release];
+    updateTimer = nil;
+    
+    [super dealloc];
 }
 
 #pragma mark -

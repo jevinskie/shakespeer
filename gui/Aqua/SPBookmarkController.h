@@ -68,6 +68,7 @@
                 description:(NSString *)aDescription
                 autoconnect:(BOOL)shouldAutoconnect
                    encoding:(NSString *)anEncoding;
+
 - (void)autoConnectBookmarks;
 - (NSString *)passwordForHub:(NSString *)aHubAddress nick:(NSString *)aNick;
 - (NSDictionary *)bookmarkForHub:(NSString *)address;
@@ -91,4 +92,3 @@
 - (void)removeBookmarkSheetDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 @end
-
