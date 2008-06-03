@@ -216,7 +216,6 @@
 - (void)updateUserTable:(NSTimer *)aTimer
 {
     if (needUpdating && isShowing) {
-        NSLog(@"%@ is being updated...", name);
         needUpdating = NO;
         // update filteredUsers and table view, and obey any current filter
         [self filterUsersWithString:[nickFilter stringValue]];
