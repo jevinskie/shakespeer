@@ -39,25 +39,18 @@ static SPFriendsController *sharedFriendsController = nil;
 
 + (SPFriendsController *)sharedFriendsController
 {
-	@synchronized(self) {
-        if (sharedFriendsController == nil) {
-            [[self alloc] init]; // assignment not done here
-        }
+    if (sharedFriendsController == nil) {
+        [[self alloc] init]; // assignment not done here
     }
-
     return sharedFriendsController;
 }
 
 + (id)allocWithZone:(NSZone *)zone
 {
-    @synchronized(self) {
-        if (sharedFriendsController == nil) {
-            sharedFriendsController = [super allocWithZone:zone];
-
-            return sharedFriendsController; // assignment and return on first allocation
-        }
+    if (sharedFriendsController == nil) {
+        sharedFriendsController = [super allocWithZone:zone];
+        return sharedFriendsController; // assignment and return on first allocation
     }
-
     return nil; // on subsequent allocation attempts return nil
 }
 
@@ -145,6 +138,29 @@ static SPFriendsController *sharedFriendsController = nil;
 - (NSMenu *)menu
 {
     return nil;
+}
+
+// this is called by the main window controller when we are selected
+- (void)viewBecameSelected
+{
+    // first, update the table immediately
+    [self updateFriendTable]; 
+
+    if (!updateTimer)
+        // then update the table every other second
+        updateTimer = [[NSTimer scheduledTimerWithTimeInterval:1.0
+                                target:self
+                              selector:@selector(updateFriendTable)
+                              userInfo:nil
+                               repeats:YES] retain];
+}
+
+// this is called by the main window controller when we are deselected
+- (void)viewBecameDeselected
+{
+    [updateTimer invalidate];
+    [updateTimer release];
+    updateTimer = nil;
 }
 
 #pragma mark -
@@ -251,32 +267,6 @@ static SPFriendsController *sharedFriendsController = nil;
 
 	// TODO: Maybe we should be able to browse the share even when the user is offline
 	return [[clickedObject valueForKey:@"isOnline"] boolValue];
-}
-
-#pragma mark -
-#pragma mark Delegate methods
-
-// this is called by the main window controller when we are selected
-- (void)viewBecameSelected
-{
-	// first, update the table immediately
-	[self updateFriendTable]; 
-
-  if (!updateTimer)
-    // then update the table every other second
-    updateTimer = [[NSTimer scheduledTimerWithTimeInterval:1.0
-                            target:self
-                          selector:@selector(updateFriendTable)
-                          userInfo:nil
-                           repeats:YES] retain];
-}
-
-// this is called by the main window controller when we are deselected
-- (void)viewBecameDeselected
-{
-	[updateTimer invalidate];
-  [updateTimer release];
-  updateTimer = nil;
 }
 
 #pragma mark -
