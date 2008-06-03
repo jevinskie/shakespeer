@@ -151,6 +151,7 @@
     [[userTable headerView] setMenu:columnsMenu];
 
     numStaticNickMenuEntries = [nickMenu numberOfItems];
+    [[[chatView enclosingScrollView] verticalScroller] setFloatValue:1.0];
 }
 
 - (NSArray *)usersWithFilter:(NSString *)filter /* Substring to search for. */
@@ -448,9 +449,14 @@
     if ([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsShowSmileyIcons]) {
         [attrString replaceSmilies];
     }
-
+    float oldPosition = [[[chatView enclosingScrollView] verticalScroller] floatValue];
     [[chatView textStorage] appendAttributedString:attrString];
-    [chatView scrollRangeToVisible:NSMakeRange([[chatView textStorage] length], 0)];
+    // If the user has scrolled to the bottom, adjust the scroller so it is once again at the bottom
+    // Otherwise, leave it alone.
+    // (some of us like to read back a bit in the chat :)
+    if (oldPosition == 1.0) {
+        [chatView scrollRangeToVisible:NSMakeRange([[chatView textStorage] length], 0)];
+    }
     [[SPMainWindowController sharedMainWindowController] highlightItem:self];
 }
 
