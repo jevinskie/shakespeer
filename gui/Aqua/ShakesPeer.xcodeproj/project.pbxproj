@@ -1083,7 +1083,6 @@
 					"-lspclient",
 					"-lbz2",
 					"-levent",
-					"-lcurl",
 					"-liconv",
 					"-lexpat",
 				);
@@ -1146,7 +1145,6 @@
 					"-lspclient",
 					"-lbz2",
 					"-levent",
-					"-lcurl",
 					"-liconv",
 					"-lexpat",
 				);
