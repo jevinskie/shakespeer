@@ -89,7 +89,16 @@ static SPFriendsController *sharedFriendsController = nil;
 
 		// load our set of friends from preferences
 		NSArray *defaultFriends = [[NSUserDefaults standardUserDefaults] arrayForKey:SPFriends];
-        [self setFriends:defaultFriends];
+        
+        // we want mutable copies in that array
+        NSMutableArray *mutableFriends = [NSMutableArray array];
+        NSEnumerator *e = [defaultFriends objectEnumerator];
+        id currentFriend = nil;
+        while ((currentFriend = [e nextObject])) {
+            [mutableFriends addObject:[currentFriend mutableCopy]];
+        }
+        
+        [self setFriends:mutableFriends];
 	}
 
 	return self;
