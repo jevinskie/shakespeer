@@ -52,6 +52,8 @@
        isOperator:(BOOL)isOp
        extraSlots:(unsigned)anExtraSlots;
 
++ (id)userWithNick:(NSString *)aNick isOperator:(BOOL)isOp;
+
 - (NSAttributedString *)descriptionString;
 - (NSAttributedString *)tag;
 - (NSAttributedString *)speed;

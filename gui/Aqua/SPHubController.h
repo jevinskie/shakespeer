@@ -49,11 +49,21 @@
     NSString *address;
     NSString *nick;
     NSString *descriptionString;
-    NSMutableArray *users;
-    NSArray *filteredUsers;
-    NSMutableDictionary *usersByNick;
+    
+    // all users on this hub. this tree is automatically sorted by invoking compare:
+    // on all objects that are inserted. in our case it's full of SPUser objects.
+    MHSysTree *usersTree;
+    // a subset of allUsers. the primary datasource for the tableview.
+    // it is updated (from usersTree) on intervals, to batch updates to the table view somewhat.
+    NSMutableArray *filteredUsers;
+    
+    // mechanism used to batch updates of allUsers and the users tableview.
     BOOL needUpdating;
     NSTimer *updateTimer;
+    
+    // is this hub selected? if not, we can skip doing a bunch of work.
+    BOOL isShowing; 
+    
     BOOL highlighted;
     BOOL disconnected;
     NSString *encoding;

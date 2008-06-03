@@ -67,6 +67,18 @@
                               extraSlots:anExtraSlots] autorelease];
 }
 
++ (id)userWithNick:(NSString *)aNick isOperator:(BOOL)isOp
+{
+    return [self userWithNick:aNick
+                 description:nil
+                 tag:nil
+                 speed:nil
+                 email:nil
+                 size:nil
+                 isOperator:isOp
+                 extraSlots:0];
+}
+
 - (void)dealloc
 {
     [nick release];
@@ -185,6 +197,11 @@
     else {
         displayNick = [nick truncatedString:NSLineBreakByTruncatingTail];
     }
+}
+
+- (NSString *)description
+{
+  return [NSString stringWithFormat:@"nick = %@, operator = %@", nick, isOperator ? @"YES" : @"NO"];
 }
 
 @end

@@ -34,7 +34,6 @@
 #import "NSMenu-UserCommandAdditions.h"
 #import "SPGrowlBridge.h"
 #import "SPSideBar.h"
-#import "FilteringArrayController.h"
 
 #import "SPNotificationNames.h"
 #import "SPUserDefaultKeys.h"
@@ -44,6 +43,7 @@
 @interface SPHubController (Private)
  - (void)filterUsersWithString:(NSString *)filter;
  - (NSArray *)usersWithFilter:(NSString *)filter startsWithSearchOnly:(BOOL)startsWithSearch stringArray:(BOOL)stringArray;
+ - (void)ensureUpdated;
 @end
 
 @implementation SPHubController
@@ -52,7 +52,8 @@
 {
     self = [super initWithWindowNibName:@"Hub"];
     if (self) {
-        usersByNick = [NSMutableDictionary new];
+        usersTree = [MHSysTree new];
+        filteredUsers = [NSMutableArray new];
         nops = 0;
         totsize = 0ULL;
         needUpdating = NO;
@@ -107,8 +108,6 @@
 
 - (void)awakeFromNib 
 {
-    /* [userArrayController setSearchKeys:[NSArray arrayWithObjects:@"nick", @"descriptionString", @"tag", @"email", nil]]; */
-
     [userTable setTarget:self];
     [userTable setDoubleAction:@selector(browseUser:)];
 
@@ -158,8 +157,9 @@
         startsWithSearchOnly:(BOOL)startsWithSearch /* Search for 'filter' only in beginning of nick? */
                  stringArray:(BOOL)returnStringArray /* Decides whether to return an array of SPNicks or NSStrings. The array is unsorted. */
 { 
+    NSArray *usersTreeSnapshot = [usersTree allObjects];
     if ([filter isEqualToString:@""])
-        return users;
+        return usersTreeSnapshot;
 
     NSArray *filterCriteria = nil;
     if (!startsWithSearch) {
@@ -167,8 +167,8 @@
         filterCriteria = [filter componentsSeparatedByString:@" "];
     }
     
-    NSMutableArray *foundUsers = [NSMutableArray arrayWithCapacity:[users count]];
-    NSEnumerator *e = [users objectEnumerator];
+    NSMutableArray *foundUsers = [NSMutableArray arrayWithCapacity:[usersTreeSnapshot count]];
+    NSEnumerator *e = [usersTreeSnapshot objectEnumerator];
     SPUser *user;
     while ((user = [e nextObject])) {
         BOOL add = YES;
@@ -202,31 +202,28 @@
     return foundUsers;
 }
 
-- (void)filterUsers
-{
-    [self filterUsersWithString:[nickFilter stringValue]];
-}
-
 - (void)filterUsersWithString:(NSString *)newFilter
 {
-    [filteredUsers autorelease];
-    // get the users matching this filter
-    NSArray *filteredResult = [self usersWithFilter:newFilter startsWithSearchOnly:NO stringArray:NO];
-    // sort this array too, so the userlist table will show them in the proper sort order.
-    filteredUsers = [[filteredResult sortedArrayUsingDescriptors:[userTable sortDescriptors]] retain];
+    [filteredUsers removeAllObjects];
+    [filteredUsers addObjectsFromArray:[self usersWithFilter:newFilter startsWithSearchOnly:NO stringArray:NO]];
+}
+
+- (void)ensureUpdated
+{
+    [self updateUserTable:nil];
 }
 
 - (void)updateUserTable:(NSTimer *)aTimer
 {
-    if (needUpdating) {
-        [users release];
-        users = [[[usersByNick allValues] sortedArrayUsingDescriptors:[userTable sortDescriptors]] retain];
-        [self filterUsers];
-        [userTable reloadData];
+    if (needUpdating && isShowing) {
+        NSLog(@"%@ is being updated...", name);
         needUpdating = NO;
-
+        // update filteredUsers and table view, and obey any current filter
+        [self filterUsersWithString:[nickFilter stringValue]];
+        [userTable reloadData];
+        // update some stats
         [hubStatisticsField setStringValue:[NSString stringWithFormat:@"%lu users, %u ops, %s",
-            [users count], nops, str_size_human(totsize)]];
+            [usersTree count], nops, str_size_human(totsize)]];
     }
 }
 
@@ -235,9 +232,8 @@
     [[SPApplicationController sharedApplicationController] disconnectFromAddress:address];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     
-    [users release];
+    [usersTree release];
     [filteredUsers release];
-    [usersByNick release];
     [address release];
     [name release];
     [nick release];
@@ -301,7 +297,6 @@
 
 - (void)unbindControllers
 {
-    /* [userArrayController unbind:@"contentArray"]; */
     [updateTimer invalidate];
 }
 
@@ -350,12 +345,32 @@
     return nickMenu;
 }
 
+- (void)viewBecameSelected
+{
+    isShowing = YES;
+    [self ensureUpdated];
+}
+
+- (void)viewBecameDeselected
+{
+    isShowing = NO;
+}
+
+
 #pragma mark -
 #pragma mark Sphubd notifications
 
 - (SPUser *)findUserWithNick:(NSString *)aNick
 {
-    return [usersByNick objectForKey:aNick];
+    SPUser *cmpUser = [SPUser userWithNick:aNick isOperator:NO];
+    SPUser *foundUser = [usersTree find:cmpUser];
+    if (!foundUser) {
+        // no user with the above criteria. let's see if there's an op
+        // with the same nick.
+        [cmpUser setIsOperator:YES];
+        foundUser = [usersTree find:cmpUser];
+    }
+    return foundUser;
 }
 
 - (void)userLoginNotification:(NSNotification *)aNotification
@@ -373,7 +388,7 @@
                                  isOperator:isOp
                                  extraSlots:[[userinfo objectForKey:@"extraSlots"] unsignedIntValue]];
 
-        [usersByNick setObject:user forKey:theNick];
+        [usersTree addObject:user];
         needUpdating = YES;
 
         totsize += [[userinfo objectForKey:@"size"] unsignedLongLongValue];
@@ -402,10 +417,11 @@
 
             if (oldOperatorFlag != newOperatorFlag) {
                 /* Ouch, operator status changed, which affects sort ordering. */
-                /* Replace the existing object (in case we're handling a copy). */
+                /* Remove and re-insert the entry. */
                 [user retain];
+                [usersTree removeObject:user];
                 [user setIsOperator:newOperatorFlag];
-                [usersByNick setObject:user forKey:theNick];
+                [usersTree addObject:user];
                 [user release];
             }
 
@@ -437,7 +453,7 @@
             if ([user isOperator])
                 nops--;
 
-            [usersByNick removeObjectForKey:theNick];
+            [usersTree removeObject:user];
         }
         needUpdating = YES;
     }
@@ -588,7 +604,7 @@
     if (!disconnected &&
        [address isEqualToString:[[aNotification userInfo] objectForKey:@"hubAddress"]]) {
         disconnected = YES;
-        [usersByNick removeAllObjects];
+        [usersTree removeAllObjects];
         needUpdating = YES;
         nops = 0;
         totsize = 0ULL;
@@ -942,8 +958,7 @@
 
 - (IBAction)filter:(id)sender
 {
-    NSString *filterString = [sender stringValue];
-    [self filterUsersWithString:filterString];
+    [self filterUsersWithString:[sender stringValue]];
     [userTable reloadData];
 }
 
@@ -1020,6 +1035,13 @@
     return [filteredUsers count];
 }
 
+- (BOOL)tableView:(NSTableView *)aTableView shouldSelectTableColumn:(NSTableColumn *)aTableColumn
+{
+    // never allow column selection, since our data source (MHSysTree) compares users by using
+    // compare: on every object, which doesn't care about our sort descriptors.
+    return NO;
+}
+
 - (id)tableView:(NSTableView *)aTableView
  objectValueForTableColumn:(NSTableColumn *)aTableColumn
             row:(int)rowIndex
@@ -1052,15 +1074,6 @@
     }
 
     return nil;
-}
-
-- (void)tableView:(NSTableView *)tableView
-sortDescriptorsDidChange:(NSArray *)oldDescriptors
-{
-	NSArray *newDescriptors = [tableView sortDescriptors];
-	[users sortUsingDescriptors:newDescriptors];
-  [self filterUsers];
-	[tableView reloadData];
 }
 
 @end

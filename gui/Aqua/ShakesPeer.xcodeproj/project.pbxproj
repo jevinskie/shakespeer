@@ -277,7 +277,7 @@
 		FC7E1AD6097E6B3E0087431A /* SPGrowlBridge.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SPGrowlBridge.h; sourceTree = "<group>"; };
 		FC7E1AD7097E6B3E0087431A /* SPGrowlBridge.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SPGrowlBridge.m; sourceTree = "<group>"; usesTabs = 0; };
 		FC7E1AD8097E6B3E0087431A /* SPHubController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SPHubController.h; sourceTree = "<group>"; };
-		FC7E1AD9097E6B3E0087431A /* SPHubController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SPHubController.m; sourceTree = "<group>"; usesTabs = 0; };
+		FC7E1AD9097E6B3E0087431A /* SPHubController.m */ = {isa = PBXFileReference; fileEncoding = 30; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = SPHubController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		FC7E1ADA097E6B3E0087431A /* SPLog.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SPLog.h; sourceTree = "<group>"; };
 		FC7E1ADB097E6B3E0087431A /* SPLog.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SPLog.m; sourceTree = "<group>"; usesTabs = 0; };
 		FC7E1ADC097E6B3E0087431A /* SPMainWindowController-Toolbar.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = "SPMainWindowController-Toolbar.h"; sourceTree = "<group>"; };
