@@ -95,7 +95,9 @@ static SPFriendsController *sharedFriendsController = nil;
         NSEnumerator *e = [defaultFriends objectEnumerator];
         id currentFriend = nil;
         while ((currentFriend = [e nextObject])) {
-            [mutableFriends addObject:[currentFriend mutableCopy]];
+            NSMutableDictionary *mutableFriend = [currentFriend mutableCopy];
+            [mutableFriends addObject:mutableFriend];
+            [mutableFriend release];
         }
         
         [self setFriends:mutableFriends];
