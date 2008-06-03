@@ -1,3 +1,19 @@
+New in version 0.9.8:
+
+* issue 27: Using the Friends feature could make ShakesPeer not being able to startup on OS X 10.4. 
+* issue 12: Improve nick tab completion in main chat (thanks to voidboi)
+* issue 21: Fix a crash in share duplicate notification
+* Allow /np (now playing) command to work in private chat too
+* issue 35: Improve autoscrolling in main chat (thanks to 'kacarste...@csupomona.edu')
+* issue 19: The userlist was hogging too much CPU
+* issue 20: OPs (operators) were not sorted first in the userlist anymore
+* issue 22: Make hub user commands work again
+* Fix two memory leaks of NSAlert objects
+* Make "port status" message use colors in preferences
+* Improve wording of "Connect" toolbar button
+* [Command-line client] issue 11: Starting CLI when GUI is open creates duplicate entries for downloads in GUI (thanks to adbull)
+* [Command-line client] issue 13: CLI client duplicates download directory in path of downloaded files (thanks to adbull)
+
 New in version 0.9.7:
 
 * Make built packages run on 10.4 too, doh! (Thanks to 0.heavy.duty.0)
