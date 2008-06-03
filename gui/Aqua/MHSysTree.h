@@ -32,9 +32,12 @@ struct rb_entry
     id obj;
 };
 
+/* This is an objective-c wrapper around sys_tree. sys_tree is a red-black tree
+   implementation.  It invokes compare: on all objects you insert into it, to
+   figure out where to sort your objects. */
+
 @interface MHSysTree : NSObject
 {
-    SEL comparator;
     unsigned nitems;
     RB_HEAD(id_tree, rb_entry) root;
 }

@@ -384,14 +384,8 @@
 		280318170ADA8800000CC734 /* Other sources */ = {
 			isa = PBXGroup;
 			children = (
-				28C2C1510DF17EDD001AAA51 /* NSMenu-MassRemovalAdditions.h */,
-				28C2C1520DF17EDD001AAA51 /* NSMenu-MassRemovalAdditions.m */,
-				2894F73F0D6308D100D8B355 /* UKCrashReporter.h */,
-				2894F7400D6308D100D8B355 /* UKCrashReporter.m */,
 				28D1DFA20A2A023000F9F9EE /* SPKeychain.h */,
 				28D1DFA30A2A023000F9F9EE /* SPKeychain.m */,
-				28F0ACF70A29E7E100FFEC99 /* MHSysTree.h */,
-				28F0ACF80A29E7E100FFEC99 /* MHSysTree.m */,
 				FF05422C09CCB9070032DE2D /* SPClientBridge.h */,
 				FF05422D09CCB9070032DE2D /* SPClientBridge.m */,
 				FC834CE509A867EE006F1549 /* SPNotificationNames.h */,
@@ -399,14 +393,6 @@
 				FC834CE709A867EE006F1549 /* SPUserDefaultKeys.h */,
 				FC834CE809A867EE006F1549 /* SPUserDefaultKeys.m */,
 				FC7E1AC1097E6B3E0087431A /* main.m */,
-				FC7E1AC2097E6B3E0087431A /* MenuButton.h */,
-				FC7E1AC3097E6B3E0087431A /* MenuButton.m */,
-				FC7E1AC4097E6B3E0087431A /* NSMenu-UserCommandAdditions.h */,
-				FC7E1AC5097E6B3E0087431A /* NSMenu-UserCommandAdditions.m */,
-				FC7E1AC6097E6B3E0087431A /* NSMutableAttributedString-SmileyAdditions.h */,
-				FC7E1AC7097E6B3E0087431A /* NSMutableAttributedString-SmileyAdditions.m */,
-				FC7E1AC8097E6B3E0087431A /* NSStringExtensions.h */,
-				FC7E1AC9097E6B3E0087431A /* NSStringExtensions.m */,
 				FC7E1ACA097E6B3E0087431A /* SidebarCell.h */,
 				FC7E1ACB097E6B3E0087431A /* SidebarCell.m */,
 				FC7E1AD6097E6B3E0087431A /* SPGrowlBridge.h */,
@@ -427,10 +413,6 @@
 				FC7E1AF5097E6B3E0087431A /* SPUser.m */,
 				FC7E1AF6097E6B3F0087431A /* SPUserCommand.h */,
 				FC7E1AF7097E6B3F0087431A /* SPUserCommand.m */,
-				FC7E1AF8097E6B3F0087431A /* URLMutableAttributedString.h */,
-				FC7E1AF9097E6B3F0087431A /* URLMutableAttributedString.m */,
-				FC7E1AFA097E6B3F0087431A /* URLTextView.h */,
-				FC7E1AFB097E6B3F0087431A /* URLTextView.m */,
 			);
 			name = "Other sources";
 			sourceTree = "<group>";
@@ -580,10 +562,36 @@
 		FC7E1ABC097E6AF10087431A /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				280318170ADA8800000CC734 /* Other sources */,
 				280318150ADA87AA000CC734 /* Controllers */,
+				280318170ADA8800000CC734 /* Other sources */,
+				FF3DB09F0DF5E03400C2284F /* Categories & Reusable Subclasses */,
 			);
 			name = Sources;
+			sourceTree = "<group>";
+		};
+		FF3DB09F0DF5E03400C2284F /* Categories & Reusable Subclasses */ = {
+			isa = PBXGroup;
+			children = (
+				FC7E1AC2097E6B3E0087431A /* MenuButton.h */,
+				FC7E1AC3097E6B3E0087431A /* MenuButton.m */,
+				28F0ACF70A29E7E100FFEC99 /* MHSysTree.h */,
+				28F0ACF80A29E7E100FFEC99 /* MHSysTree.m */,
+				28C2C1510DF17EDD001AAA51 /* NSMenu-MassRemovalAdditions.h */,
+				28C2C1520DF17EDD001AAA51 /* NSMenu-MassRemovalAdditions.m */,
+				FC7E1AC4097E6B3E0087431A /* NSMenu-UserCommandAdditions.h */,
+				FC7E1AC5097E6B3E0087431A /* NSMenu-UserCommandAdditions.m */,
+				FC7E1AC6097E6B3E0087431A /* NSMutableAttributedString-SmileyAdditions.h */,
+				FC7E1AC7097E6B3E0087431A /* NSMutableAttributedString-SmileyAdditions.m */,
+				FC7E1AC8097E6B3E0087431A /* NSStringExtensions.h */,
+				FC7E1AC9097E6B3E0087431A /* NSStringExtensions.m */,
+				2894F73F0D6308D100D8B355 /* UKCrashReporter.h */,
+				2894F7400D6308D100D8B355 /* UKCrashReporter.m */,
+				FC7E1AF8097E6B3F0087431A /* URLMutableAttributedString.h */,
+				FC7E1AF9097E6B3F0087431A /* URLMutableAttributedString.m */,
+				FC7E1AFA097E6B3F0087431A /* URLTextView.h */,
+				FC7E1AFB097E6B3F0087431A /* URLTextView.m */,
+			);
+			name = "Categories & Reusable Subclasses";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
