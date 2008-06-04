@@ -1,2 +1,2 @@
 PACKAGE=shakespeer
-VERSION=0.9.7
+VERSION=0.9.8
