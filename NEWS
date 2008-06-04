@@ -1,18 +1,18 @@
 New in version 0.9.8:
 
-* issue 27: Using the Friends feature could make ShakesPeer not being able to startup on OS X 10.4. 
-* issue 12: Improve nick tab completion in main chat (thanks to voidboi)
-* issue 21: Fix a crash in share duplicate notification
-* Allow /np (now playing) command to work in private chat too
-* issue 35: Improve autoscrolling in main chat (thanks to 'kacarste...@csupomona.edu')
-* issue 19: The userlist was hogging too much CPU
-* issue 20: OPs (operators) were not sorted first in the userlist anymore
+* issue 27: Using the Friends feature could make ShakesPeer not being able to startup on OS X 10.4
 * issue 22: Make hub user commands work again
+* issue 21: Fix a crash in share duplicate notification
+* issue 19: ShakesPeer no longer hogs the CPU when sorting user lists
+* issue 20: Hub operators are now sorted first in user lists again
+* issue 12: Improve nick tab completion in main chat (thanks to voidboi)
+* Allow /np (now playing) command to work in private chats too
+* issue 35: Improve autoscrolling in main chat (thanks to 'kacarste...@csupomona.edu')
 * Fix two minor memory leaks
-* Make "port status" message use colors in preferences
-* Improve wording of "Connect" toolbar button
-* [Command-line client] issue 11: Starting CLI when GUI is open created duplicate entries for downloads in GUI (thanks to adbull)
-* [Command-line client] issue 13: CLI client duplicated download directory in path of downloaded files (thanks to adbull)
+* Make port status message use colors in preferences
+* The toolbar button "Connect" is now called "Connect to hub" for clarity
+* issue 11: [Command-line client] Don't create duplicate entries in downloads when running both the CLI and the GUI (thanks to adbull)
+* issue 13: [Command-line client] Don't duplicate download directory in path of downloaded files (thanks to adbull)
 
 New in version 0.9.7:
 
