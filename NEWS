@@ -11,8 +11,8 @@ New in version 0.9.8:
 * Fix two minor memory leaks
 * Make "port status" message use colors in preferences
 * Improve wording of "Connect" toolbar button
-* [Command-line client] issue 11: Starting CLI when GUI is open creates duplicate entries for downloads in GUI (thanks to adbull)
-* [Command-line client] issue 13: CLI client duplicates download directory in path of downloaded files (thanks to adbull)
+* [Command-line client] issue 11: Starting CLI when GUI is open created duplicate entries for downloads in GUI (thanks to adbull)
+* [Command-line client] issue 13: CLI client duplicated download directory in path of downloaded files (thanks to adbull)
 
 New in version 0.9.7:
 
