@@ -21,7 +21,7 @@
 
 #import "SPOutlineView.h"
 
-@implementation SPOutlineView : NSOutlineView
+@implementation SPOutlineView 
 
 - (void)awakeFromNib
 {
