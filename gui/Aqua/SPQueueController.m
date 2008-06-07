@@ -571,10 +571,9 @@
     while (i != NSNotFound) {
         SPQueueItem *qi = [tableView itemAtRow:i];
 
-        NSString *downloadFolder = [[NSUserDefaults standardUserDefaults]
-            stringForKey:SPPrefsDownloadFolder];
-        NSString *path = [NSString stringWithFormat:@"%@/%@",
-                 downloadFolder, [qi target]];
+        NSString *downloadFolder = 
+          [[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsDownloadFolder] stringByExpandingTildeInPath];
+        NSString *path = [downloadFolder stringByAppendingPathComponent:[qi target]];
         [[NSWorkspace sharedWorkspace] openFile:path];
 
         i = [selectedIndices indexGreaterThanIndex:i];
@@ -588,12 +587,10 @@
     while (i != NSNotFound) {
         SPQueueItem *qi = [tableView itemAtRow:i];
 
-        NSString *downloadFolder = [[NSUserDefaults standardUserDefaults]
-            stringForKey:SPPrefsDownloadFolder];
-        NSString *path = [NSString stringWithFormat:@"%@/%@",
-                 downloadFolder, [qi target]];
-        [[NSWorkspace sharedWorkspace] selectFile:path
-                         inFileViewerRootedAtPath:nil];
+        NSString *downloadFolder = 
+          [[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsDownloadFolder] stringByExpandingTildeInPath];
+        NSString *path = [downloadFolder stringByAppendingPathComponent:[qi target]];
+        [[NSWorkspace sharedWorkspace] selectFile:path inFileViewerRootedAtPath:nil];
 
         i = [selectedIndices indexGreaterThanIndex:i];
     }
