@@ -46,15 +46,14 @@ HEADLESS_LDFLAGS =
 ifeq ($(os),Darwin)
   ifeq ($(BUILD_PROFILE),release)
     # Always build releases against 10.4 Universal SDK
-    SDK_FLAGS = -isysroot /Developer/SDKs/MacOSX10.4u.sdk -mmacosx-version-min=10.4
-    UB_CFLAGS = -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386 -arch ppc
+    UB_CFLAGS = -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386 -arch ppc -mmacosx-version-min=10.4
     UB_LDFLAGS = -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386
 
-    CFLAGS += $(SDK_FLAGS)
-    EXTERN_CFLAGS += $(SDK_FLAGS)
-    EXTERN_LDFLAGS += $(SDK_FLAGS)
-    HEADLESS_CFLAGS += $(SDK_FLAGS)
-    HEADLESS_LDFLAGS += $(SDK_FLAGS)
+    CFLAGS += $(UB_CFLAGS)
+    EXTERN_CFLAGS += $(UB_CFLAGS)
+    EXTERN_LDFLAGS += $(UB_LDFLAGS)
+    HEADLESS_CFLAGS += $(UB_CFLAGS)
+    HEADLESS_LDFLAGS += $(UB_LDFLAGS)
   endif
 endif
 
