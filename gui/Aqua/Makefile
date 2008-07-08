@@ -119,6 +119,7 @@ app_bundle.stamp: ShakesPeer
 	cp -f ../../sphubd/sphubd $(RES)
 	cp -f ../../sphubd/sphashd $(RES)
 	cp -f Resources/debug-sphubd.sh $(RES)
+	cp -f Resources/np.scpt $(RES)
 	chmod 0755 $(RES)/debug-sphubd.sh
 	cp -f ShakesPeer ShakesPeer.app/Contents/MacOS
 	test -d $(FWDIR)/Growl.framework || \
