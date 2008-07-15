@@ -320,33 +320,30 @@
 - (void)userCommandNotification:(NSNotification *)aNotification
 {
     int context = [[[aNotification userInfo] objectForKey:@"context"] intValue];
-    // TODO: what is this commented out context stuff?
-    /* if ((context & 4) == 4) */
-    {
-        NSString *ucHub = [[aNotification userInfo] objectForKey:@"hubAddress"];
-
-        if (userCommands == nil) {
-            userCommands = [[NSMutableDictionary alloc] initWithCapacity:1];
-        }
-
-        NSMutableArray *ucArray = [userCommands objectForKey:ucHub];
-        if (ucArray == nil) {
-            ucArray = [[NSMutableArray alloc] initWithCapacity:1];
-            [userCommands setObject:ucArray forKey:ucHub];
-        }
-
-        int type = [[[aNotification userInfo] objectForKey:@"type"] intValue];
-        NSString *title = [[aNotification userInfo] objectForKey:@"description"];
-        NSString *command = [[aNotification userInfo] objectForKey:@"command"];
-
-        SPUserCommand *uc = [[SPUserCommand alloc] initWithTitle:title
-                                                         command:command
-                                                            type:type
-                                                         context:context
-                                                             hub:ucHub];
-
-        [ucArray addObject:[uc autorelease]];
+    NSString *ucHub = [[aNotification userInfo] objectForKey:@"hubAddress"];
+    
+    if (userCommands == nil) {
+        userCommands = [[NSMutableDictionary alloc] initWithCapacity:1];
     }
+    
+    NSMutableArray *ucArray = [userCommands objectForKey:ucHub];
+    if (ucArray == nil) {
+        ucArray = [[NSMutableArray alloc] initWithCapacity:1];
+        [userCommands setObject:ucArray forKey:ucHub];
+    }
+    
+    int type = [[[aNotification userInfo] objectForKey:@"type"] intValue];
+    NSString *title = [[aNotification userInfo] objectForKey:@"description"];
+    NSString *command = [[aNotification userInfo] objectForKey:@"command"];
+    
+    SPUserCommand *uc = [[SPUserCommand alloc] initWithTitle:title
+                                                     command:command
+                                                        type:type
+                                                     context:context
+                                                         hub:ucHub];
+    
+    [ucArray addObject:[uc autorelease]];
+    [ucArray release];
 }
 
 - (void)endChatNotification:(NSNotification *)aNotification
