@@ -40,7 +40,7 @@
     return self;
 }
 
-- (void) dealloc
+- (void)dealloc
 {
     [clickHoldTimer invalidate];
     [clickHoldTimer autorelease];

@@ -195,10 +195,10 @@
                     NSData *passwordData = [passwordStr dataUsingEncoding:NSUTF8StringEncoding];
                     
                     // change the password
-                    err = SecKeychainItemModifyAttributesAndData(item,
-                                                                 NULL, // attributes
-                                                                 [passwordData length],
-                                                                 [passwordData bytes]);
+                    SecKeychainItemModifyAttributesAndData(item,
+                                                           NULL, // attributes
+                                                           [passwordData length],
+                                                           [passwordData bytes]);
                     
                 }
                 

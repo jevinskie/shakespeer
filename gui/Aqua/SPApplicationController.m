@@ -158,6 +158,11 @@ static SPApplicationController *mySharedApplicationController = nil;
     return self;
 }
 
+- (void)dealloc
+{
+    [super dealloc];
+}
+
 - (void)registerUrlHandler
 {
     [[NSAppleEventManager sharedAppleEventManager]

@@ -224,13 +224,14 @@ extern NSString* SPPublicHubDataType;
         /* deep mutable copy of the bookmarks in user defaults */
         NSEnumerator *e = [anArray objectEnumerator];
         NSDictionary *bm;
-        while ((bm = [e nextObject]) != nil) {
+        while ((bm = [e nextObject])) {
             NSMutableDictionary *mutable_bm = [bm mutableCopy];
             if ([mutable_bm objectForKey:@"encodingIndex"] == nil) {
                 /* set encoding to default if no encoding set */
                 [mutable_bm setObject:[NSNumber numberWithInt:0] forKey:@"encodingIndex"];
             }
             [bookmarks addObject:mutable_bm];
+            [mutable_bm release];
         }
     }
 

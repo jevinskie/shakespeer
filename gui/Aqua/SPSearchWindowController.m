@@ -794,7 +794,8 @@
             }
         }
     }
+    
+    [uniqueHubs release];
 }
 
 @end
-

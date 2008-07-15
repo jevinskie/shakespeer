@@ -34,8 +34,6 @@
     NSImage* _originalImage;
 }
 
-- (void)dealloc;
-
 - (void)mouseDown:(NSEvent *)theEvent;
 - (void)mouseUp:(NSEvent *)theEvent;
 

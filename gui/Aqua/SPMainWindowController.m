@@ -320,6 +320,7 @@
 - (void)userCommandNotification:(NSNotification *)aNotification
 {
     int context = [[[aNotification userInfo] objectForKey:@"context"] intValue];
+    // TODO: what is this commented out context stuff?
     /* if ((context & 4) == 4) */
     {
         NSString *ucHub = [[aNotification userInfo] objectForKey:@"hubAddress"];
