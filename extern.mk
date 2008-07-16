@@ -1,4 +1,3 @@
-
 # 1 = name, 2 = version, 3 = url, 4 = md5
 define download
 	@echo "downloading $(3)..."
@@ -52,9 +51,9 @@ libevent-build-${EVENT_VER}/stamp: libevent-$(EVENT_VER).tar.gz
 	    cp -f .libs/libevent.a $$cwd/libevent-install/lib
 	touch libevent-build-${EVENT_VER}/stamp
 
-EXPAT_VER=2.0.0
+EXPAT_VER=2.0.1
 EXPAT_URL=http://downloads.sourceforge.net/expat/expat-${EXPAT_VER}.tar.gz
-EXPAT_MD5=d945df7f1c0868c5c73cf66ba9596f3f
+EXPAT_MD5=ee8b492592568805593f81f8cdf2a04c
 expat-${EXPAT_VER}.tar.gz:
 	$(call download,expat,${EXPAT_VER},${EXPAT_URL},${EXPAT_MD5})
 expat: expat-build-${EXPAT_VER}/stamp
@@ -69,9 +68,9 @@ expat-build-${EXPAT_VER}/stamp: expat-${EXPAT_VER}.tar.gz
 	    ${MAKE} install
 	touch expat-build-${EXPAT_VER}/stamp
 
-ICONV_VER=1.11
+ICONV_VER=1.12
 ICONV_URL=http://ftp.gnu.org/pub/gnu/libiconv/libiconv-$(ICONV_VER).tar.gz
-ICONV_MD5=b77a17e4a5a817100ad4b2613935055e
+ICONV_MD5=c2be282595751535a618ae0edeb8f648
 libiconv-$(ICONV_VER).tar.gz:
 	$(call download,libiconv,$(ICONV_VER),$(ICONV_URL),$(ICONV_MD5))
 libiconv: libiconv-build-$(ICONV_VER)/stamp
@@ -86,9 +85,9 @@ libiconv-build-$(ICONV_VER)/stamp: libiconv-$(ICONV_VER).tar.gz
 	    $(MAKE) install
 	touch libiconv-build-$(ICONV_VER)/stamp
 
-BZ2_VER=1.0.4
+BZ2_VER=1.0.5
 BZ2_URL=http://www.bzip.org/$(BZ2_VER)/bzip2-$(BZ2_VER).tar.gz
-BZ2_MD5=fc310b254f6ba5fbb5da018f04533688
+BZ2_MD5=3c15a0c8d1d3ee1c46a1634d00617b1a
 bzip2-$(BZ2_VER).tar.gz:
 	$(call download,bzip2,$(BZ2_VER),$(BZ2_URL),$(BZ2_MD5))
 bzip2: bzip2-build-$(BZ2_VER)/stamp
@@ -139,4 +138,3 @@ LIBS=-L${TOP}/spclient -lspclient -L${TOP}/splib -lsplib \
      ${BZ2_LDFLAGS} ${BZ2_LIBS} \
      ${EXPAT_LDFLAGS} ${EXPAT_LIBS} \
      ${LIBEVENT_LDFLAGS} ${LIBEVENT_LIBS}
-
