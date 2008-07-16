@@ -61,9 +61,8 @@
     else if ([itemIdentifier isEqualToString:@"toggleDrawer"]) {
         [item setLabel:@"Toggle transfer drawer"];
         [item setToolTip:@"Toggle transfer drawer"];
-        [item setTarget:transferDrawer];
         [item setImage:[NSImage imageNamed:@"ToolbarDrawer"]];
-        [item setAction:@selector(toggle:)];
+        [item setAction:@selector(toggleTransferDrawer:)];
     }
     else if ([itemIdentifier isEqualToString:@"connectButton"]) {
         [item setLabel:@"Connect to hub"];

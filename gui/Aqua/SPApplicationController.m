@@ -793,6 +793,11 @@ else {
     [[SPPreferenceController sharedPreferences] show];
 }
 
+- (IBAction)toggleDrawer:(id)sender
+{
+    [mainWindowController toggleTransferDrawer:self];
+}
+
 - (IBAction)openSPWebpage:(id)sender
 {
     [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://shakespeer.bzero.se/"]];

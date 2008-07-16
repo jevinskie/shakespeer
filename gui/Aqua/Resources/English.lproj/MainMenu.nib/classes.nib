@@ -49,6 +49,8 @@
 				<string>id</string>
 				<key>showUploadsView</key>
 				<string>id</string>
+				<key>toggleDrawer</key>
+				<string>id</string>
 			</dict>
 			<key>CLASS</key>
 			<string>SPApplicationController</string>

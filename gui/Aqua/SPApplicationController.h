@@ -48,6 +48,7 @@ void sendNotification(NSString *notificationName, NSString *key1, id arg1, ...);
 
 - (IBAction)connectToBackendServer:(id)sender;
 - (IBAction)showPreferences:(id)sender;
+- (IBAction)toggleDrawer:(id)sender;
 - (IBAction)openSPWebpage:(id)sender;
 - (IBAction)openSPForums:(id)sender;
 - (IBAction)reportBug:(id)sender;
@@ -141,4 +142,3 @@ void sendNotification(NSString *notificationName, NSString *key1, id arg1, ...);
 - (void)removeSphubdConnection;
 
 @end
-
