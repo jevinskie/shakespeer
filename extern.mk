@@ -5,7 +5,7 @@ define download
 	@cp ../${1}-${2}.tar.gz . || \
 	cp ../../${1}-${2}.tar.gz . || \
 	cp ../../../${1}-${2}.tar.gz . || \
-	curl ${3} -o ${1}-${2}.tar.gz || \
+	curl ${3} -L -o ${1}-${2}.tar.gz || \
 	wget ${3} || \
 	fetch ${3} || \
 	ftp ${3}
@@ -53,7 +53,7 @@ libevent-build-${EVENT_VER}/stamp: libevent-$(EVENT_VER).tar.gz
 	touch libevent-build-${EVENT_VER}/stamp
 
 EXPAT_VER=2.0.0
-EXPAT_URL=http://switch.dl.sourceforge.net/sourceforge/expat/expat-${EXPAT_VER}.tar.gz
+EXPAT_URL=http://downloads.sourceforge.net/expat/expat-${EXPAT_VER}.tar.gz
 EXPAT_MD5=d945df7f1c0868c5c73cf66ba9596f3f
 expat-${EXPAT_VER}.tar.gz:
 	$(call download,expat,${EXPAT_VER},${EXPAT_URL},${EXPAT_MD5})
