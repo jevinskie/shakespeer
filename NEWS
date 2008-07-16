@@ -1,3 +1,10 @@
+New in version 0.9.9:
+
+* issue 41: Background processes are now universal binaries again
+* issue 28: The /np (now playing in iTunes) command is finally working again
+* issue 26: Fix opening files in Finder from the downloads list
+* Fix some memory leaks
+
 New in version 0.9.8:
 
 * issue 27: Using the Friends feature could make ShakesPeer not being able to startup on OS X 10.4
