@@ -1,3 +1,8 @@
+New in version 0.9.10:
+
+* Fixed a nasty bug in 0.9.9, which caused ShakesPeer to crash
+* You can now press command-T to toggle the transfer drawer
+
 New in version 0.9.9:
 
 * issue 41: Background processes are now universal binaries again
