@@ -71,7 +71,7 @@ ShakesPeer: Growl.framework $(OBJS) \
 	$(CC) $(OBJS) -o $@ $(CFLAGS) $(UB_CFLAGS) $(LDFLAGS) $(LIBS) \
 	$(FRAMEWORKS) -bind_at_load
 
-GROWL_VERSION=1.1.2
+GROWL_VERSION=1.1.4
 
 Growl-$(GROWL_VERSION)-SDK.dmg:
 	ftp http://growl.info/files/Growl-$(GROWL_VERSION)-SDK.dmg
