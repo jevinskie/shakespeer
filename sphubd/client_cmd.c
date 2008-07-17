@@ -556,7 +556,7 @@ cc_cmd_MyNick(void *data, int argc, char **argv)
 
 	if(strchr(nick, '$'))
 	{
-		INFO("invalid character in nick name (dropping client)");
+		INFO("invalid character in nickname (dropping client)");
 		return -1;
 	}
 

@@ -117,23 +117,6 @@ int id_cmp(struct rb_entry *a, struct rb_entry *b)
     return array;
 }
 
-#if 0
-// is this really useful?
-- (id *)allEntries
-{
-    id *array = malloc(sizeof(struct rb_entry) * nitems);
-    unsigned i = 0;
-
-    struct rb_entry *e;
-    RB_FOREACH(e, id_tree, &root) {
-        [e->obj retain];
-        array[i++] = e->obj;
-    }
-
-    return array;
-}
-#endif
-
 - (void)removeAllObjects
 {
     struct rb_entry *e, *next;

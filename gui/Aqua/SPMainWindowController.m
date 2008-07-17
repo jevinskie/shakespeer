@@ -343,7 +343,6 @@
                                                          hub:ucHub];
     
     [ucArray addObject:[uc autorelease]];
-    [ucArray release];
 }
 
 - (void)endChatNotification:(NSNotification *)aNotification
@@ -430,16 +429,9 @@
                                                          selector:@selector(clearStatusMessage:)
                                                          userInfo:nil
                                                           repeats:NO] retain];
-    NSString *message;
-#if 0
-    if ([hubAddress length]) {
-        message = [NSString stringWithFormat:@"%@: %@", hubAddress, aMessage];
-    }
-    else
-#endif
-    {
-        message = [NSString stringWithFormat:@"%@", aMessage];
-    }
+    
+    NSString *message = [NSString stringWithFormat:@"%@", aMessage];
+    
     [statusBar setStringValue:message];
 }
 
@@ -567,22 +559,13 @@
     [NSApp endSheet:connectWindow];
     
     NSString *address = [connectAddress stringValue];
-    NSString *nickname = [connectNickname stringValue];
-    NSString *password = [connectPassword stringValue];
     
-    // check if a nickname was filled in
-    if (!nickname || [nickname length] == 0)
-        nickname = nil;
-    
-    // check if a password was filled in
-    if (!password || [password length] == 0)
-        password = nil;
-    
+    // TODO: This check can be removed once the connectWithAddress method has all these checks
     if (address && [address length]) {
         [[SPApplicationController sharedApplicationController] connectWithAddress:address
-                                                                             nick:nickname
+                                                                             nick:[connectNickname stringValue]
                                                                       description:nil
-                                                                         password:password
+                                                                         password:[connectPassword stringValue]
                                                                          encoding:nil];
     }
 }
@@ -674,28 +657,16 @@
                     type:(int)searchType
               hubAddress:(NSString *)hubAddress
 {
-#if 0
-    if ([currentSidebarItem isKindOfClass:[SPSearchWindowController class]]) {
-        [currentSidebarItem newSearchWithString:searchString
-                                           size:searchSize
-                                sizeRestriction:sizeRestriction
-                                           type:searchType
-                                     hubAddress:hubAddress];
-    }
-    else
-#endif
-    {
-        SPSearchWindowController *searchController = [[SPSearchWindowController alloc]
-            initWithString:searchString
-                      size:searchSize
-           sizeRestriction:sizeRestriction
-                      type:searchType
-                hubAddress:hubAddress];
-
-        [sideBar addItem:searchController];
-        [sideBar displayItem:searchController];
-        [searchController release];
-    }
+    SPSearchWindowController *searchController = [[SPSearchWindowController alloc]
+                                                  initWithString:searchString
+                                                  size:searchSize
+                                                  sizeRestriction:sizeRestriction
+                                                  type:searchType
+                                                  hubAddress:hubAddress];
+    
+    [sideBar addItem:searchController];
+    [sideBar displayItem:searchController];
+    [searchController release];
 }
 
 - (void)updateSearchFieldMenu

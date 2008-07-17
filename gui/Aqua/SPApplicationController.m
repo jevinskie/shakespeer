@@ -48,107 +48,155 @@
 
 #define MAX_RECENT_HUBS 10
 
-static SPApplicationController *mySharedApplicationController = nil;
+@implementation SPApplicationController
+
+#pragma mark Singleton implementation
+
+// TODO: this is the recommended singleton implementation code from Apple:
+// http://developer.apple.com/documentation/Cocoa/Conceptual/CocoaFundamentals/CocoaObjects/chapter_3_section_10.html
+// it should be implemented for all other static sidebar items too
+
+static SPApplicationController *sharedApplicationController = nil;
+
++ (SPApplicationController *)sharedApplicationController
+{
+    if (sharedApplicationController == nil) {
+        [[self alloc] init]; // assignment not done here
+    }
+    return sharedApplicationController;
+}
+
++ (id)allocWithZone:(NSZone *)zone
+{
+    if (sharedApplicationController == nil) {
+        sharedApplicationController = [super allocWithZone:zone];
+        return sharedApplicationController; // assignment and return on first allocation
+    }
+    return nil; // on subsequent allocation attempts return nil
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    return self;
+}
+
+- (id)retain
+{
+    return self;
+}
+
+- (unsigned)retainCount
+{
+    return UINT_MAX; // denotes an object that cannot be released
+}
+
+- (void)release
+{
+    // do nothing
+}
+
+- (id)autorelease
+{
+    return self;
+}
 
 #pragma mark -
-#pragma mark spclient command handlers
-
-@implementation SPApplicationController
 
 - (id)init
 {
     if ((self = [super init])) {
-        mySharedApplicationController = self;
-
         char *working_directory = get_working_directory();
         sp_log_init(working_directory, "shakespeer-aqua");
         free(working_directory);
-
+        
         sp = sp_create(NULL);
         sp_register_callbacks(sp);
-
-	NSString *defaultDownloadFolder = [@"~/Desktop/ShakesPeer Downloads" stringByExpandingTildeInPath];
-	NSString *defaultIncompleteFolder = [@"~/Desktop/ShakesPeer Downloads/Incomplete" stringByExpandingTildeInPath];
-
+        
+        // TODO: Use "Downloads" in home folder on Leopard
+        NSString *defaultDownloadFolder = [@"~/Desktop/ShakesPeer Downloads" stringByExpandingTildeInPath];
+        // TODO: The user shouldn't have to care about "incomplete folder", we should use
+        // a folder in application support instead
+        NSString *defaultIncompleteFolder = [@"~/Desktop/ShakesPeer Downloads/Incomplete" stringByExpandingTildeInPath];
+        
         NSDictionary *appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
-            @"Bookmarks", SPPrefsLastSidebarItem,
-            @"IdentityItem", SPPrefsLastPrefPane,
-            defaultDownloadFolder, SPPrefsDownloadFolder,
-            defaultIncompleteFolder, SPPrefsIncompleteFolder,
-            @"unconfigured-shakespeer-user", SPPrefsNickname,
-            @"", SPPrefsEmail,
-            @"DSL", SPPrefsSpeed,
-            @"", SPPrefsDescription,
-            [NSNumber numberWithInt:11], SPPrefsFontSize,
-            [NSNumber numberWithInt:3], SPPrefsUploadSlots,
-            [NSNumber numberWithBool:YES], SPPrefsUploadSlotsPerHub,
-            [NSNumber numberWithInt:1412], SPPrefsPort,
-            [NSNumber numberWithInt:0], SPPrefsConnectionMode,
-            [NSArray array], SPPrefsSharedPaths,
-            [NSArray array], SPPrefsRecentHubs,
-            [NSArray arrayWithObjects:
-                @"http://www.hublist.org/PublicHubList.xml.bz2",
-                @"http://www.hublist.org/hublists/se.PublicHubList.xml.bz2",
-                @"http://www.dc-resources.com/downloads/hublist.config.bz2",
-                @"http://www.hublist.org/PublicHubList.config.bz2",
-                @"http://www.Freenfo.net/PublicHubList.config.bz2",
-                @"http://www.freeweb.hu/pankeey/dc-hubz/pankeey-dchubz.config.bz2",
-                @"http://wza.digitalbrains.com/DC/hublist.bz2",
-                @"http://dcinfo.sytes.net/publichublist.config.bz2",
-                @"http://dreamland.gotdns.org/PublicHubList.config.bz2",
-                @"http://gb.hublist.org/PublicHubList.config.bz2",
-                @"http://www.dchublist.biz/all_hubs.config.bz2",
-                @"http://dcinfo.sytes.net/hungaryhublist.config.bz2",
-                nil], SPPrefsHublists,
-            @"http://www.hublist.org/PublicHubList.xml.bz2", SPPrefsHublistURL,
-            [NSNumber numberWithBool:NO], SPPrefsKeepServerRunning,
-            @"Message", SPPrefsLogLevel,
-            [NSNumber numberWithBool:YES], SPPrefsAutodetectIPAddress,
-            [NSNumber numberWithBool:YES], SPPrefsAllowHubIPOverride,
-            [NSNumber numberWithBool:YES], SPPrefsShowSmileyIcons,
-            [NSNumber numberWithFloat:1.0], SPPrefsRescanShareInterval,
-            [NSNumber numberWithBool:YES], SPPrefsFollowHubRedirects,
-            [NSNumber numberWithBool:YES], SPPrefsAutoSearchNewSources,
-            [NSNumber numberWithUnsignedInt:2], SPPrefsHashingPriority,
-            [NSNumber numberWithBool:NO], SPPrefsDrawerIsVisible,
-            [NSNumber numberWithInt:100], SPPrefsDrawerHeight,
-            [NSNumber numberWithBool:NO], SPPrefsRequireOpenSlots,
-            [NSNumber numberWithBool:NO], SPPrefsRequireTTH,
-			[NSNumber numberWithBool:YES], SPPrefsSessionRestore,
-            [NSArray array], SPBookmarks,
-            [NSArray array], SPFriends,
-            nil];
+                                     @"Bookmarks", SPPrefsLastSidebarItem,
+                                     @"IdentityItem", SPPrefsLastPrefPane,
+                                     defaultDownloadFolder, SPPrefsDownloadFolder,
+                                     defaultIncompleteFolder, SPPrefsIncompleteFolder,
+                                     @"unconfigured-shakespeer-user", SPPrefsNickname,
+                                     @"", SPPrefsEmail,
+                                     @"DSL", SPPrefsSpeed,
+                                     @"", SPPrefsDescription,
+                                     [NSNumber numberWithInt:11], SPPrefsFontSize,
+                                     [NSNumber numberWithInt:3], SPPrefsUploadSlots,
+                                     [NSNumber numberWithBool:YES], SPPrefsUploadSlotsPerHub,
+                                     [NSNumber numberWithInt:1412], SPPrefsPort,
+                                     [NSNumber numberWithInt:0], SPPrefsConnectionMode,
+                                     [NSArray array], SPPrefsSharedPaths,
+                                     [NSArray array], SPPrefsRecentHubs,
+                                     [NSArray arrayWithObjects:
+                                        @"http://www.hublist.org/PublicHubList.xml.bz2",
+                                        @"http://www.hublist.org/hublists/se.PublicHubList.xml.bz2",
+                                        @"http://www.dc-resources.com/downloads/hublist.config.bz2",
+                                        @"http://www.hublist.org/PublicHubList.config.bz2",
+                                        @"http://www.Freenfo.net/PublicHubList.config.bz2",
+                                        @"http://www.freeweb.hu/pankeey/dc-hubz/pankeey-dchubz.config.bz2",
+                                        @"http://wza.digitalbrains.com/DC/hublist.bz2",
+                                        @"http://dcinfo.sytes.net/publichublist.config.bz2",
+                                        @"http://dreamland.gotdns.org/PublicHubList.config.bz2",
+                                        @"http://gb.hublist.org/PublicHubList.config.bz2",
+                                        @"http://www.dchublist.biz/all_hubs.config.bz2",
+                                        @"http://dcinfo.sytes.net/hungaryhublist.config.bz2",
+                                     nil], SPPrefsHublists,
+                                     @"http://www.hublist.org/PublicHubList.xml.bz2", SPPrefsHublistURL,
+                                     [NSNumber numberWithBool:NO], SPPrefsKeepServerRunning,
+                                     @"Message", SPPrefsLogLevel,
+                                     [NSNumber numberWithBool:YES], SPPrefsAutodetectIPAddress,
+                                     [NSNumber numberWithBool:YES], SPPrefsAllowHubIPOverride,
+                                     [NSNumber numberWithBool:YES], SPPrefsShowSmileyIcons,
+                                     [NSNumber numberWithFloat:1.0], SPPrefsRescanShareInterval,
+                                     [NSNumber numberWithBool:YES], SPPrefsFollowHubRedirects,
+                                     [NSNumber numberWithBool:YES], SPPrefsAutoSearchNewSources,
+                                     [NSNumber numberWithUnsignedInt:2], SPPrefsHashingPriority,
+                                     [NSNumber numberWithBool:NO], SPPrefsDrawerIsVisible,
+                                     [NSNumber numberWithInt:100], SPPrefsDrawerHeight,
+                                     [NSNumber numberWithBool:NO], SPPrefsRequireOpenSlots,
+                                     [NSNumber numberWithBool:NO], SPPrefsRequireTTH,
+                                     [NSNumber numberWithBool:YES], SPPrefsSessionRestore,
+                                     [NSArray array], SPBookmarks,
+                                     [NSArray array], SPFriends,
+                                     nil];
+        
         [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
-
-	if([[NSUserDefaults standardUserDefaults] stringForKey:@"firstRun"] == nil)
-	{
-	    NSLog(@"first run: creating default download folders");
-	    [[NSFileManager defaultManager] createDirectoryAtPath:defaultDownloadFolder attributes:nil];
-	    [[NSFileManager defaultManager] createDirectoryAtPath:defaultIncompleteFolder attributes:nil];
-	    [[NSUserDefaults standardUserDefaults] setObject:@"NO" forKey:@"firstRun"];
-	}
-
+        
+        if ([[NSUserDefaults standardUserDefaults] stringForKey:@"firstRun"] == nil) {
+            NSLog(@"first run: creating default download folders");
+            [[NSFileManager defaultManager] createDirectoryAtPath:defaultDownloadFolder attributes:nil];
+            [[NSFileManager defaultManager] createDirectoryAtPath:defaultIncompleteFolder attributes:nil];
+            [[NSUserDefaults standardUserDefaults] setObject:@"NO" forKey:@"firstRun"];
+        }
+        
         sp_log_set_level([[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsLogLevel] UTF8String]);
-
+        
         [[NSApplication sharedApplication] setDelegate:self];
-
+        
         lastSearchID = 1;
-
+        
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(serverDiedNotification:)
                                                      name:SPNotificationServerDied
                                                    object:nil];
-
+        
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(filelistFinishedNotification:)
                                                      name:SPNotificationFilelistFinished
                                                    object:nil];
-
+        
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(storedFilelistsNotification:)
                                                      name:SPNotificationStoredFilelists
                                                    object:nil];
-
+        
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(initCompletionNotification:)
                                                      name:SPNotificationInitCompletion
@@ -172,8 +220,7 @@ static SPApplicationController *mySharedApplicationController = nil;
              andEventID:kAEGetURL];
 }
 
-- (void)getUrl:(NSAppleEventDescriptor *)event
-withReplyEvent:(NSAppleEventDescriptor *)replyEvent
+- (void)getUrl:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 {
     NSString *urlString = [[event paramDescriptorForKeyword:keyDirectObject] stringValue];
     NSURL *url = [NSURL URLWithString:urlString];
@@ -193,11 +240,6 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
                         password:[url password]
                         encoding:nil];
     }
-}
-
-+ (SPApplicationController *)sharedApplicationController
-{
-    return mySharedApplicationController;
 }
 
 - (BOOL)setupSphubdConnection
@@ -534,6 +576,10 @@ else {
                   password:(NSString *)aPassword
                   encoding:(NSString *)anEncoding
 {
+    // TODO: Since this is (supposed to be) the canonical method for connecting
+    // to hubs, all necessary checks should be done here, i.e. make sure that
+    // all passed variables are sane.
+    
     NSString *nick;
     if (aNick == nil || [aNick length] == 0)
         nick = [[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsNickname];

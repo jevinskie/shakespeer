@@ -223,23 +223,23 @@
 
         if ([nicks count]) {
             NSEnumerator *e = [nicks objectEnumerator];
-            NSString *nickName;
-            while ((nickName = [e nextObject]) != nil) {
+            NSString *nickname = nil;
+            while ((nickname = [e nextObject]) != nil) {
                 id nickMenuItem;
 
-                nickMenuItem = [menuRemoveSource addItemWithTitle:nickName
+                nickMenuItem = [menuRemoveSource addItemWithTitle:nickname
                                                            action:@selector(removeSource:)
                                                     keyEquivalent:@""];
                 [nickMenuItem setTarget:self];
                 [nickMenuItem setEnabled:YES];
 
-                nickMenuItem = [menuRemoveUserFromQueue addItemWithTitle:nickName
+                nickMenuItem = [menuRemoveUserFromQueue addItemWithTitle:nickname
                                                                   action:@selector(removeUserFromQueue:)
                                                            keyEquivalent:@""];
                 [nickMenuItem setTarget:self];
                 [nickMenuItem setEnabled:YES];
 
-                nickMenuItem = [menuBrowseUsersFiles addItemWithTitle:nickName
+                nickMenuItem = [menuBrowseUsersFiles addItemWithTitle:nickname
                                                                action:@selector(browseUsersFiles:)
                                                         keyEquivalent:@""];
                 [nickMenuItem setTarget:self];
@@ -273,14 +273,6 @@
         }
         return hasTTH;
     }
-
-#if 0
-    /* if the tag is set to 4711, only enable if single selection */
-    if ([sender tag] == 4711) {
-        BOOL singleSelection = ([[tableView selectedRowIndexes] count] == 1);
-        return singleSelection;
-    }
-#endif
 
     return YES;
 }

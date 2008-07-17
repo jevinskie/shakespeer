@@ -137,12 +137,11 @@ extern NSString* SPPublicHubDataType;
                                                       account:[bm objectForKey:@"nick"]
                                                         error:&error];
 
-        [[SPApplicationController sharedApplicationController]
-            connectWithAddress:address
-                          nick:[bm objectForKey:@"nick"]
-                   description:[bm objectForKey:@"descriptionString"]
-                      password:thePassword
-                      encoding:encoding];
+        [[SPApplicationController sharedApplicationController] connectWithAddress:address
+                                                                             nick:[bm objectForKey:@"nick"]
+                                                                      description:[bm objectForKey:@"descriptionString"]
+                                                                         password:thePassword
+                                                                         encoding:encoding];
     }
 }
 

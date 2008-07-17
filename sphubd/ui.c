@@ -359,7 +359,7 @@ static int ui_cb_connect(ui_t *ui, const char *hub_address, const char *nick,
     }
 
     /* The commented out code below allows one to connect to the same hub with
-     * different nick names. However, all commands identify hubs only by the
+     * different nicknames. However, all commands identify hubs only by the
      * address. So this feature can only be enabled once hubs are identified by
      * both address and nick, or something else unique.
      */

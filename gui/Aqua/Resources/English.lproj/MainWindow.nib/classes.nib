@@ -1,102 +1,211 @@
-{
-    IBClasses = (
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {
-            CLASS = KFSplitView; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {kfDelegate = id; }; 
-            SUPERCLASS = NSSplitView; 
-        }, 
-        {
-            CLASS = MenuButton; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {menu = NSMenu; }; 
-            SUPERCLASS = NSButton; 
-        }, 
-        {CLASS = NSObject; LANGUAGE = ObjC; }, 
-        {
-            ACTIONS = {
-                acceptPassword = id; 
-                acceptUCParam = id; 
-                advSearchCancel = id; 
-                advSearchExecute = id; 
-                advSearchShow = id; 
-                browseUser = id; 
-                cancelPassword = id; 
-                cancelTransfer = id; 
-                cancelUCParam = id; 
-                connectCancel = id; 
-                connectExecute = id; 
-                connectShow = id; 
-                openBookmarks = id; 
-                openHublist = id; 
-                openTransfers = id; 
-                privateMessage = id; 
-                quickSearchExecute = id; 
-                removeAllSourcesWithNick = id; 
-                removeQueue = id; 
-                removeSource = id; 
-                setSearchType = id; 
-                showQueue = id; 
-                showTransfers = id; 
-                toggleColumn = id; 
-            }; 
-            CLASS = SPMainWindowController; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                UCParamCommandTitle = NSTextField; 
-                UCParamName = NSTextField; 
-                UCParamTextField = NSTextField; 
-                UCParamWindow = NSWindow; 
-                advSearchField = NSSearchField; 
-                advSearchHubs = NSPopUpButton; 
-                advSearchSize = NSTextField; 
-                advSearchSizeSuffix = NSPopUpButton; 
-                advSearchSizeType = NSPopUpButton; 
-                advSearchWindow = NSWindow; 
-                bookmarkController = id; 
-                columnsMenu = NSMenu; 
-                connectAddress = NSTextField; 
-                connectNickname = NSTextField; 
-                connectPassword = NSSecureTextField; 
-                connectWindow = NSWindow; 
-                currentSidebarItem = id; 
-                passwordField = NSTextField; 
-                passwordHubField = NSTextField; 
-                passwordNickField = NSTextField; 
-                passwordWindow = NSWindow; 
-                queueController = id; 
-                searchFieldMenu = NSMenu; 
-                sideBar = SPSideBar; 
-                sidebarSplitView = NSSplitView; 
-                statisticsBar = NSTextField; 
-                statusBar = NSTextField; 
-                tcFilename = NSTableColumn; 
-                tcHub = NSTableColumn; 
-                tcPath = NSTableColumn; 
-                tcSize = NSTableColumn; 
-                tcSpeed = NSTableColumn; 
-                tcStatus = NSTableColumn; 
-                tcTimeLeft = NSTableColumn; 
-                tcUser = NSTableColumn; 
-                toolbarSearchField = NSSearchField; 
-                toolbarSearchView = NSView; 
-                transferArrayController = NSArrayController; 
-                transferDrawer = NSDrawer; 
-                transferDrawerTable = NSTableView; 
-            }; 
-            SUPERCLASS = NSWindowController; 
-        }, 
-        {
-            ACTIONS = {closeSelectedItem = id; }; 
-            CLASS = SPSideBar; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {delegate = id; tabView = NSTabView; }; 
-            SUPERCLASS = NSTableView; 
-        }, 
-        {CLASS = SPTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
-        {CLASS = SPTransferItem; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = XBorderedView; LANGUAGE = ObjC; SUPERCLASS = NSView; }
-    ); 
-    IBVersion = 1; 
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IBClasses</key>
+	<array>
+		<dict>
+			<key>CLASS</key>
+			<string>SPTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSTableView</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>closeSelectedItem</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>SPSideBar</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>delegate</key>
+				<string>id</string>
+				<key>tabView</key>
+				<string>NSTabView</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSTableView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenu</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>FirstResponder</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>acceptPassword</key>
+				<string>id</string>
+				<key>acceptUCParam</key>
+				<string>id</string>
+				<key>advSearchCancel</key>
+				<string>id</string>
+				<key>advSearchExecute</key>
+				<string>id</string>
+				<key>advSearchShow</key>
+				<string>id</string>
+				<key>browseUser</key>
+				<string>id</string>
+				<key>cancelPassword</key>
+				<string>id</string>
+				<key>cancelTransfer</key>
+				<string>id</string>
+				<key>cancelUCParam</key>
+				<string>id</string>
+				<key>connectCancel</key>
+				<string>id</string>
+				<key>connectExecute</key>
+				<string>id</string>
+				<key>connectShow</key>
+				<string>id</string>
+				<key>openBookmarks</key>
+				<string>id</string>
+				<key>openDownloads</key>
+				<string>id</string>
+				<key>openFriends</key>
+				<string>id</string>
+				<key>openHublist</key>
+				<string>id</string>
+				<key>openTransfers</key>
+				<string>id</string>
+				<key>openUploads</key>
+				<string>id</string>
+				<key>privateMessage</key>
+				<string>id</string>
+				<key>quickSearchExecute</key>
+				<string>id</string>
+				<key>removeAllSourcesWithNick</key>
+				<string>id</string>
+				<key>removeQueue</key>
+				<string>id</string>
+				<key>removeSource</key>
+				<string>id</string>
+				<key>setSearchType</key>
+				<string>id</string>
+				<key>showQueue</key>
+				<string>id</string>
+				<key>showTransfers</key>
+				<string>id</string>
+				<key>toggleColumn</key>
+				<string>id</string>
+				<key>toggleTransferDrawer</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>SPMainWindowController</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>UCParamCommandTitle</key>
+				<string>NSTextField</string>
+				<key>UCParamName</key>
+				<string>NSTextField</string>
+				<key>UCParamTextField</key>
+				<string>NSTextField</string>
+				<key>UCParamWindow</key>
+				<string>NSWindow</string>
+				<key>advSearchField</key>
+				<string>NSSearchField</string>
+				<key>advSearchHubs</key>
+				<string>NSPopUpButton</string>
+				<key>advSearchSize</key>
+				<string>NSTextField</string>
+				<key>advSearchSizeSuffix</key>
+				<string>NSPopUpButton</string>
+				<key>advSearchSizeType</key>
+				<string>NSPopUpButton</string>
+				<key>advSearchWindow</key>
+				<string>NSWindow</string>
+				<key>bookmarkController</key>
+				<string>id</string>
+				<key>columnsMenu</key>
+				<string>NSMenu</string>
+				<key>connectAddress</key>
+				<string>NSTextField</string>
+				<key>connectNickname</key>
+				<string>NSTextField</string>
+				<key>connectPassword</key>
+				<string>NSSecureTextField</string>
+				<key>connectWindow</key>
+				<string>NSWindow</string>
+				<key>currentSidebarItem</key>
+				<string>id</string>
+				<key>passwordField</key>
+				<string>NSTextField</string>
+				<key>passwordHubField</key>
+				<string>NSTextField</string>
+				<key>passwordNickField</key>
+				<string>NSTextField</string>
+				<key>passwordWindow</key>
+				<string>NSWindow</string>
+				<key>queueController</key>
+				<string>id</string>
+				<key>searchFieldMenu</key>
+				<string>NSMenu</string>
+				<key>sideBar</key>
+				<string>SPSideBar</string>
+				<key>sidebarSplitView</key>
+				<string>NSSplitView</string>
+				<key>statisticsBar</key>
+				<string>NSTextField</string>
+				<key>statusBar</key>
+				<string>NSTextField</string>
+				<key>tcFilename</key>
+				<string>NSTableColumn</string>
+				<key>tcHub</key>
+				<string>NSTableColumn</string>
+				<key>tcPath</key>
+				<string>NSTableColumn</string>
+				<key>tcSize</key>
+				<string>NSTableColumn</string>
+				<key>tcSpeed</key>
+				<string>NSTableColumn</string>
+				<key>tcStatus</key>
+				<string>NSTableColumn</string>
+				<key>tcTimeLeft</key>
+				<string>NSTableColumn</string>
+				<key>tcUser</key>
+				<string>NSTableColumn</string>
+				<key>toolbarSearchField</key>
+				<string>NSSearchField</string>
+				<key>toolbarSearchView</key>
+				<string>NSView</string>
+				<key>transferArrayController</key>
+				<string>NSArrayController</string>
+				<key>transferDrawer</key>
+				<string>NSDrawer</string>
+				<key>transferDrawerTable</key>
+				<string>NSTableView</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSWindowController</string>
+		</dict>
+	</array>
+	<key>IBVersion</key>
+	<string>1</string>
+</dict>
+</plist>
