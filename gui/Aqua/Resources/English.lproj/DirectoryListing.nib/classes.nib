@@ -1,44 +1,88 @@
-{
-    IBClasses = (
-        {
-            ACTIONS = {search = id; }; 
-            CLASS = FilteringArrayController; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSArrayController; 
-        }, 
-        {
-            ACTIONS = {"" = id; }; 
-            CLASS = FirstResponder; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSObject; 
-        }, 
-        {CLASS = NSLevelIndicator; LANGUAGE = ObjC; SUPERCLASS = NSControl; }, 
-        {CLASS = NSSegmentedControl; LANGUAGE = ObjC; SUPERCLASS = NSControl; }, 
-        {
-            ACTIONS = {
-                downloadSelectedItems = id; 
-                filter = id; 
-                onDoubleClick = id; 
-                refresh = id; 
-                toggleColumn = id; 
-            }; 
-            CLASS = SPFilelistController; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                columnsMenu = NSMenu; 
-                filelist = SPOutlineView; 
-                filelistView = NSView; 
-                filterField = NSSearchField; 
-                flatButton = NSButton; 
-                tcFilename = NSTableColumn; 
-                tcSize = NSTableColumn; 
-                tcTTH = NSTableColumn; 
-            }; 
-            SUPERCLASS = NSObject; 
-        }, 
-        {CLASS = SPOutlineView; LANGUAGE = ObjC; SUPERCLASS = NSOutlineView; }, 
-        {CLASS = SPTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
-        {CLASS = XBorderedView; LANGUAGE = ObjC; SUPERCLASS = NSView; }
-    ); 
-    IBVersion = 1; 
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IBClasses</key>
+	<array>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>copyMagnet</key>
+				<string>id</string>
+				<key>downloadSelectedItems</key>
+				<string>id</string>
+				<key>filter</key>
+				<string>id</string>
+				<key>onDoubleClick</key>
+				<string>id</string>
+				<key>refresh</key>
+				<string>id</string>
+				<key>toggleColumn</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>SPFilelistController</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>columnsMenu</key>
+				<string>NSMenu</string>
+				<key>filelist</key>
+				<string>SPOutlineView</string>
+				<key>filelistView</key>
+				<string>NSView</string>
+				<key>filterField</key>
+				<string>NSSearchField</string>
+				<key>flatButton</key>
+				<string>NSButton</string>
+				<key>tcFilename</key>
+				<string>NSTableColumn</string>
+				<key>tcSize</key>
+				<string>NSTableColumn</string>
+				<key>tcTTH</key>
+				<string>NSTableColumn</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenu</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key></key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>FirstResponder</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>SPOutlineView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSOutlineView</string>
+		</dict>
+	</array>
+	<key>IBVersion</key>
+	<string>1</string>
+</dict>
+</plist>

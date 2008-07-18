@@ -33,6 +33,7 @@
     IBOutlet NSButton *flatButton;
     
     IBOutlet NSMenu *columnsMenu;
+    IBOutlet NSMenuItem *magnetMenu;
     IBOutlet NSTableColumn *tcSize;
     IBOutlet NSTableColumn *tcTTH;
     IBOutlet NSTableColumn *tcFilename;
@@ -57,6 +58,7 @@
 - (void)onDoubleClick:(id)sender;
 - (IBAction)toggleColumn:(id)sender;
 - (IBAction)downloadSelectedItems:(id)sender;
+- (IBAction)copyMagnet:(id)sender;
 - (IBAction)filter:(id)sender;
 - (IBAction)refresh:(id)sender;
 

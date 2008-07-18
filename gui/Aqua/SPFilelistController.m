@@ -346,6 +346,39 @@
     }
 }
 
+- (IBAction)copyMagnet:(id)sender
+{
+    NSIndexSet *selectedIndexes = [filelist selectedRowIndexes];
+    unsigned int i = [selectedIndexes firstIndex];
+    if (i != NSNotFound) {
+        NSDictionary *item = [filelist itemAtRow:i];
+        NSString *hash = [item objectForKey:@"TTH"];
+        NSNumber *size = [item objectForKey:@"Exact Size"];
+        NSString *name = (NSString *)CFURLCreateStringByAddingPercentEscapes(NULL, (CFStringRef)[item objectForKey:@"Filename"], NULL, NULL, kCFStringEncodingUTF8);
+        NSString *contents = [NSString stringWithFormat:@"magnet:?xt=urn:tree:tiger:%@&xl=%@&dn=%@", hash, size, name];
+        [name release];
+        NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+        [pasteboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+        [pasteboard setString:contents forType:NSStringPboardType];  
+    }
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem *)item
+{
+    if (item == magnetMenu)
+    {
+        NSIndexSet *selectedIndexes = [filelist selectedRowIndexes];
+        unsigned int i = [selectedIndexes firstIndex];
+        if (i != NSNotFound) {
+            NSDictionary *row = [filelist itemAtRow:i];
+            NSString *hash = [row objectForKey:@"TTH"];
+            return ([hash length] > 0);
+        }
+        return NO;
+    }
+    return YES;
+}
+
 - (void)onDoubleClick:(id)sender
 {
     NSDictionary *item = [filelist itemAtRow:[filelist selectedRow]];
