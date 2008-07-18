@@ -610,11 +610,7 @@ static int ui_cb_set_transfer_stats_interval(ui_t *ui, unsigned int seconds)
 
 static int ui_cb_rescan_share_interval(ui_t *ui, unsigned int seconds)
 {
-    if(seconds > 0)
-    {
-        set_share_rescan_interval(seconds);
-    }
-
+	set_share_rescan_interval(seconds);
     return 0;
 }
 
