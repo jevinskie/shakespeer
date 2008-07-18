@@ -68,7 +68,12 @@ NSURL *findURL(NSString *string)
     theRange = [string rangeOfString:@"mailto:"];
     if (theRange.location == 0 && theRange.length == 7)
         return [NSURL URLWithString:string];
-
+    
+    // Look for magnet:? at start
+    theRange = [string rangeOfString:@"magnet:?"];
+    if (theRange.location == 0 && theRange.length == 8)
+        return [NSURL URLWithString:string];
+    
     return nil;
 }
 

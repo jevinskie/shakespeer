@@ -32,6 +32,14 @@
 				<string>dchub</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>Magnet Link</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>magnet</string>
+			</array>
+		</dict>
 	</array>
 	<key>SUFeedURL</key> 
 	<string>http://shakespeer.googlecode.com/svn/appcast.xml</string>

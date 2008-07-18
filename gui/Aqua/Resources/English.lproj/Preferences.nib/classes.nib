@@ -21,6 +21,8 @@
 				<string>id</string>
 				<key>setConnectionMode</key>
 				<string>id</string>
+				<key>setDefaultMagnetHandler</key>
+				<string>id</string>
 				<key>setFollowRedirects</key>
 				<string>id</string>
 				<key>setHashingPriority</key>
@@ -72,6 +74,10 @@
 				<string>NSView</string>
 				<key>incompleteFolderButton</key>
 				<string>NSPopUpButton</string>
+				<key>magnetHandlerButton</key>
+				<string>NSPopUpButton</string>
+				<key>magnetHandlerMenu</key>
+				<string>NSMenu</string>
 				<key>networkView</key>
 				<string>NSView</string>
 				<key>portField</key>

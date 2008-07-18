@@ -130,6 +130,45 @@ static float ToolbarHeightForWindow(NSWindow *window)
     [sharedPathsTable setTarget:self];
     [sharedPathsTable setMenu:duplicatePathsMenu];
     
+    // Make a list of all applications that can handle magnet links
+    NSArray *handlers = [(NSArray *)LSCopyAllHandlersForURLScheme(CFSTR("magnet")) autorelease];
+    if (handlers) {
+        [magnetHandlerMenu removeAllItems];
+        
+        // We'll remember the default handler first of all, it can then be
+        // selected immediately when inserted to save us from an additional loop
+        // later. If no default handler is found we'll set ShakesPeer as the default handler.
+        NSString *defaultHandlerId = [(NSString *)LSCopyDefaultHandlerForURLScheme(CFSTR("magnet")) autorelease];
+        if (!defaultHandlerId) {
+            NSString *shakesPeerIdentifier = [[NSBundle mainBundle] bundleIdentifier];
+            LSSetDefaultHandlerForURLScheme(CFSTR("magnet"), (CFStringRef)shakesPeerIdentifier);
+        }
+        
+        NSEnumerator *e = [handlers objectEnumerator];
+        NSString *identifier = nil;
+        while ((identifier = [e nextObject])) {
+            NSString *absolutePath = [[NSWorkspace sharedWorkspace] absolutePathForAppBundleWithIdentifier:identifier];
+            NSString *title = [[NSFileManager defaultManager] displayNameAtPath:absolutePath];
+            
+            NSMenuItem *newItem = [[NSMenuItem alloc] initWithTitle:title
+                                                             action:@selector(setDefaultMagnetHandler:)
+                                                      keyEquivalent:@""];
+            [newItem setImage:[self smallIconForPath:absolutePath]];
+            [newItem setRepresentedObject:identifier];
+            
+            [magnetHandlerMenu addItem:newItem];
+            
+            // Select it if it was the default one
+            if ([identifier isEqualToString:defaultHandlerId])
+                [magnetHandlerButton selectItem:newItem];
+            
+            [newItem release];
+        }
+    }
+    else {
+        NSLog(@"No magnet link handlers found");
+    }
+    
     [self setWindowFrameAutosaveName:@"PreferenceWindow"];
 }
 
@@ -691,6 +730,13 @@ static float ToolbarHeightForWindow(NSWindow *window)
     NSString *incompleteFolder = [[NSUserDefaults standardUserDefaults] objectForKey:SPPrefsIncompleteFolder];
     [[incompleteFolderButton itemAtIndex:0] setTitle:incompleteFolder];
     [[incompleteFolderButton itemAtIndex:0] setImage:[self smallIconForPath:incompleteFolder]];
+}
+
+- (void)setDefaultMagnetHandler:(id)sender
+{
+    NSString *magnetHandlerIdentifier = [sender representedObject];
+    LSSetDefaultHandlerForURLScheme(CFSTR("magnet"), (CFStringRef)magnetHandlerIdentifier);
+    NSLog(@"Setting %@ as default magnet link handler", magnetHandlerIdentifier);
 }
 
 @end

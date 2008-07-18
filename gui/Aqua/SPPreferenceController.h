@@ -52,6 +52,8 @@
     IBOutlet NSView *advancedView;
     IBOutlet NSComboBox *hublistsComboBox;
     IBOutlet NSArrayController *hublistsController;
+    IBOutlet NSMenu *magnetHandlerMenu;
+    IBOutlet NSPopUpButton *magnetHandlerButton;
     
     NSArray *predefinedDownloadLocations;
     NSMutableArray *sharedPaths;
@@ -111,5 +113,6 @@
 - (NSImage *)smallIconForPath:(NSString *)path;
 - (void)updateNameAndIconForDownloadFolder;
 - (void)updateNameAndIconForIncompleteFolder;
+- (void)setDefaultMagnetHandler:(id)sender;
 
 @end

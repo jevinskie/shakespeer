@@ -227,13 +227,41 @@ static SPApplicationController *sharedApplicationController = nil;
     if (url == nil) {
         NSLog(@"Malformed URL: %@", urlString);
     }
+    else if ([[url scheme] isEqualToString:@"magnet"]) {
+        // This is probably a magnet link
+        NSString *afterScheme = [urlString substringFromIndex:8];
+        NSArray *args = [afterScheme componentsSeparatedByString:@"&"];
+        
+        NSEnumerator *e = [args objectEnumerator];
+        NSString *arg = nil;
+        while ((arg = [e nextObject])) {
+            NSArray *components = [arg componentsSeparatedByString:@"="];
+            if ([components count] == 2) {
+                NSString *key = [components objectAtIndex:0];
+                NSString *value = [components objectAtIndex:1];
+                
+                if ([key hasPrefix:@"xt"]) {
+                    // We've found the TTH, now let's check that it's a TTH magnet
+                    if ([value hasPrefix:@"urn:tree:tiger:"]) {
+                        // It's definitely a TTH magnet.  Lets run a search for the TTH.
+                        NSString *tth = [value substringFromIndex:15];
+                        [mainWindowController performSearchFor:tth
+                                                          size:nil
+                                               sizeRestriction:SHARE_SIZE_NONE
+                                                          type:1
+                                                    hubAddress:nil];
+                    }
+                }
+            }
+        }
+    }
     else {
         NSString *address = nil;
         if ([url port])
             address = [NSString stringWithFormat:@"%@:%@", [url host], [url port]];
         else
             address = [url host];
-
+        
         [self connectWithAddress:address
                             nick:[url user]
                      description:nil
