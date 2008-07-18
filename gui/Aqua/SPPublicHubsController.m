@@ -55,8 +55,7 @@ NSString *SPPublicHubDataType = @"SPPublicHubDataType";
             hublist_t *hublist = hl_parse_file(hublist_filename, &err);
             if (err) {
                 [[SPMainWindowController sharedMainWindowController]
-                    statusMessage:[NSString stringWithFormat:@"Failed to load hublist: %s", xerr_msg(err)]
-                              hub:nil];
+                 setStatusMessage:[NSString stringWithFormat:@"Failed to load hublist: %s", xerr_msg(err)]];
                 xerr_free(err);
             }
             [self setHubsFromList:hublist];
@@ -229,8 +228,7 @@ NSString *SPPublicHubDataType = @"SPPublicHubDataType";
 
 - (void)mainThreadStatusMessage:(NSString *)msg
 {
-    [[SPMainWindowController sharedMainWindowController]
-	statusMessage:msg hub:nil];
+    [[SPMainWindowController sharedMainWindowController] setStatusMessage:msg];
 }
 
 - (void)statusMessage:(NSString *)msg
@@ -330,13 +328,10 @@ done:
 
 - (IBAction)refresh:(id)sender
 {
-    if (refreshInProgress == NO) {
+    if (refreshInProgress == NO)
         [NSThread detachNewThreadSelector:@selector(refreshThread:) toTarget:self withObject:nil];
-    } else {
-	[[SPMainWindowController sharedMainWindowController]
-	    statusMessage:@"Refreshing of the hublist already in progress"
-		      hub:nil];
-    }
+    else
+        [[SPMainWindowController sharedMainWindowController] statusMessage:@"Refreshing of the hublist already in progress"];
 }
 
 - (IBAction)toggleColumn:(id)sender

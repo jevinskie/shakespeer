@@ -419,7 +419,7 @@
     [[SPApplicationController sharedApplicationController] disconnectFromAddress:passwordHub];
 }
 
-- (void)statusMessage:(NSString *)aMessage hub:(NSString *)hubAddress
+- (void)setStatusMessage:(NSString *)message
 {
     [statusMessageTimer invalidate];
     [statusMessageTimer release];
@@ -430,15 +430,12 @@
                                                          userInfo:nil
                                                           repeats:NO] retain];
     
-    NSString *message = [NSString stringWithFormat:@"%@", aMessage];
-    
     [statusBar setStringValue:message];
 }
 
 - (void)statusMessageNotification:(NSNotification *)aNotification
 {
-    [self statusMessage:[[aNotification userInfo] objectForKey:@"message"]
-                    hub:[[aNotification userInfo] objectForKey:@"hubAddress"]];
+    [self setStatusMessage:[[aNotification userInfo] objectForKey:@"message"]];
 }
 
 - (void)filelistFinishedNotification:(NSNotification *)aNotification
@@ -979,4 +976,3 @@
 }
 
 @end
-

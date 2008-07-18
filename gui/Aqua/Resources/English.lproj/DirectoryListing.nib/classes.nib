@@ -36,6 +36,8 @@
 				<string>NSSearchField</string>
 				<key>flatButton</key>
 				<string>NSButton</string>
+				<key>magnetMenu</key>
+				<string>NSMenuItem</string>
 				<key>tcFilename</key>
 				<string>NSTableColumn</string>
 				<key>tcSize</key>

@@ -146,7 +146,7 @@
 
 - (void)closeCurrentSidebarItem;
 - (void)highlightItem:(id)anItem;
-- (void)statusMessage:(NSString *)aMessage hub:(NSString *)hubAddress;
+- (void)setStatusMessage:(NSString *)message;
 
 - (void)performSearchFor:(NSString *)searchString
                     size:(NSString *)searchSize

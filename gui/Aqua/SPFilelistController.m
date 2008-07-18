@@ -51,8 +51,7 @@
         root = fl_parse([aPath UTF8String], &err);
         if (root == NULL) {
 	    [[SPMainWindowController sharedMainWindowController]
-		statusMessage:[NSString stringWithFormat:@"Failed to load %@'s filelist: %s", aNick, xerr_msg(err)]
-			  hub:nil];
+         setStatusMessage:[NSString stringWithFormat:@"Failed to load %@'s filelist: %s", aNick, xerr_msg(err)]];
 	    xerr_free(err);
         }
         else {
@@ -359,7 +358,10 @@
         [name release];
         NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
         [pasteboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-        [pasteboard setString:contents forType:NSStringPboardType];  
+        [pasteboard setString:contents forType:NSStringPboardType];
+        
+        [[SPMainWindowController sharedMainWindowController]
+         setStatusMessage:[NSString stringWithFormat:@"Copied magnet link to clipboard"]];
     }
 }
 
