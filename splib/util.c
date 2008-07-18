@@ -85,7 +85,7 @@ char *str_size_human(uint64_t size)
     }
     else /* terabinary */
     {
-        snprintf(s, MAX_HUMAN_LEN, "%.1f TiB",
+        snprintf(s, MAX_HUMAN_LEN, "%.2f TiB",
                 (double)size/((uint64_t)1024*1024*1024*1024));
     }
 
