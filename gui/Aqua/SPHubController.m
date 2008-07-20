@@ -511,17 +511,36 @@
         if ([aNick isEqualToString:nick]) {
             textColor = [NSColor blueColor];
         }
+        
+        // See if the author of this message is a friend.
+        // If so, color the friend's name in purple.
         else {
-            textColor = [NSColor redColor];
+            BOOL isFriend = NO;
+            NSArray *friends = [[NSUserDefaults standardUserDefaults] arrayForKey:SPFriends];
+            NSEnumerator *e = [friends objectEnumerator];
+            NSMutableDictionary *friend = nil;
+            while ((friend = [e nextObject])) {
+                NSString *friendName = [friend objectForKey:@"name"];
+                if ([friendName isEqualToString:aNick]) {
+                    isFriend = YES;
+                    break;
+                }
+            }
+            
+            if (isFriend) {
+                textColor = [NSColor purpleColor];
+            }
+            else {
+                textColor = [NSColor redColor];
+            
+                if ([aMessage rangeOfString:nick options:NSCaseInsensitiveSearch].location != NSNotFound) {
+                    /* our nick was mentioned in chat */
+                    [[SPGrowlBridge sharedGrowlBridge] notifyWithName:SP_GROWL_NICK_IN_MAINCHAT 
+                                                          description:[NSString stringWithFormat:@"%@: %@", aNick, aMessage]];
 
-            if ([aMessage rangeOfString:nick options:NSCaseInsensitiveSearch].location != NSNotFound) {
-                /* our nick was mentioned in chat */
-                [[SPGrowlBridge sharedGrowlBridge] notifyWithName:SP_GROWL_NICK_IN_MAINCHAT
-                                                      description:[NSString stringWithFormat:@"%@: %@", aNick, aMessage]];
-
+                }
             }
         }
-
         unsigned int dateLength = [dateString length] + 3;
         if (meMessage) {
             [attrmsg addAttribute:NSForegroundColorAttributeName

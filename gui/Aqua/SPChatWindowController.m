@@ -142,9 +142,27 @@
     NSColor *textColor;
     if ([theNick isEqualToString:myNick])
         textColor = [NSColor blueColor];
-    else
-        textColor = [NSColor redColor];
-
+    
+    // See if the author of this message is a friend.
+    // If so, color the friend's name in purple.
+    else {
+        BOOL isFriend = NO;
+        NSArray *friends = [[NSUserDefaults standardUserDefaults] arrayForKey:SPFriends];
+        NSEnumerator *e = [friends objectEnumerator];
+        NSMutableDictionary *friend = nil;
+        while ((friend = [e nextObject])) {
+            NSString *friendName = [friend objectForKey:@"name"];
+            if ([friendName isEqualToString:theNick]) {
+                isFriend = YES;
+                break;
+            }
+        }
+        
+        if (isFriend) 
+            textColor = [NSColor purpleColor];
+        else
+            textColor = [NSColor redColor];
+    }
     if (meMessage) {
         unsigned int dateLength = [dateString length] + 3;
         [attrmsg addAttribute:NSForegroundColorAttributeName
