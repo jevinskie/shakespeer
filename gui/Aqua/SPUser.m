@@ -115,7 +115,7 @@
     return isOperator;
 }
 
-- (BOOL)compare:(SPUser *)aUser
+- (NSComparisonResult)compare:(SPUser *)aUser
 {
     int op_diff = ([aUser isOperator] ? 1 : 0) - (isOperator ? 1 : 0);
 

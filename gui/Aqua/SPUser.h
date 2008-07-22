@@ -63,7 +63,7 @@
 - (uint64_t)size;
 - (unsigned)extraSlots;
 - (BOOL)isOperator;
-- (BOOL)compare:(SPUser *)aUser;
+- (NSComparisonResult)compare:(SPUser *)aUser;
 
 - (void)updateDisplayNick;
 - (void)setDescription:(NSString *)aDescription;
