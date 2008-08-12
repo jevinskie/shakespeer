@@ -117,6 +117,10 @@
 		FC9FE9310982B9E300264848 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC9FE9300982B9E300264848 /* Growl.framework */; };
 		FC9FE9400982BA1500264848 /* Growl.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = FC9FE9300982B9E300264848 /* Growl.framework */; };
 		FF05422F09CCB9070032DE2D /* SPClientBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = FF05422D09CCB9070032DE2D /* SPClientBridge.m */; };
+		FF1585620E4E07BF001C9A25 /* TCMPortMapper.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = FF1585610E4E07BF001C9A25 /* TCMPortMapper.framework */; };
+		FFB855680E4FB67000E11C53 /* TCMPortMapper.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF1585610E4E07BF001C9A25 /* TCMPortMapper.framework */; };
+		FFB855CC0E504E9100E11C53 /* SPNetworkPortController.m in Resources */ = {isa = PBXBuildFile; fileRef = FFB855CB0E504E9100E11C53 /* SPNetworkPortController.m */; };
+		FFB8562F0E505A5F00E11C53 /* SPNetworkPortController.m in Sources */ = {isa = PBXBuildFile; fileRef = FFB855CB0E504E9100E11C53 /* SPNetworkPortController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -161,6 +165,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				FF1585620E4E07BF001C9A25 /* TCMPortMapper.framework in Copy Frameworks */,
 				28D256EE0DDF86E5002490D4 /* Sparkle.framework in Copy Frameworks */,
 				FC9FE9400982BA1500264848 /* Growl.framework in Copy Frameworks */,
 			);
@@ -317,6 +322,9 @@
 		FC9FE9300982B9E300264848 /* Growl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Growl.framework; sourceTree = "<group>"; };
 		FF05422C09CCB9070032DE2D /* SPClientBridge.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SPClientBridge.h; sourceTree = "<group>"; };
 		FF05422D09CCB9070032DE2D /* SPClientBridge.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SPClientBridge.m; sourceTree = "<group>"; usesTabs = 0; };
+		FF1585610E4E07BF001C9A25 /* TCMPortMapper.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = TCMPortMapper.framework; sourceTree = "<group>"; };
+		FFB855CA0E504E9100E11C53 /* SPNetworkPortController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPNetworkPortController.h; sourceTree = "<group>"; };
+		FFB855CB0E504E9100E11C53 /* SPNetworkPortController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPNetworkPortController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -324,6 +332,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FFB855680E4FB67000E11C53 /* TCMPortMapper.framework in Frameworks */,
 				FC9FE9310982B9E300264848 /* Growl.framework in Frameworks */,
 				286B19EA0A2A1354001D9687 /* Security.framework in Frameworks */,
 				28D256D10DDF86C2002490D4 /* Sparkle.framework in Frameworks */,
@@ -360,6 +369,8 @@
 				28E086400D8418E0006CF70A /* SPFriendsController.m */,
 				FC7E1AD8097E6B3E0087431A /* SPHubController.h */,
 				FC7E1AD9097E6B3E0087431A /* SPHubController.m */,
+				FFB855CA0E504E9100E11C53 /* SPNetworkPortController.h */,
+				FFB855CB0E504E9100E11C53 /* SPNetworkPortController.m */,
 				FC7E1ADC097E6B3E0087431A /* SPMainWindowController-Toolbar.h */,
 				FC7E1ADD097E6B3E0087431A /* SPMainWindowController-Toolbar.m */,
 				FC7E1ADE097E6B3E0087431A /* SPMainWindowController.h */,
@@ -417,6 +428,7 @@
 		2805B9270A02BDA000F65FBC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FF1585610E4E07BF001C9A25 /* TCMPortMapper.framework */,
 				286B19E90A2A1354001D9687 /* Security.framework */,
 				FC9FE9300982B9E300264848 /* Growl.framework */,
 				28D256D00DDF86C2002490D4 /* Sparkle.framework */,
@@ -753,6 +765,7 @@
 				28C74ED60ADBECDF00BACE5C /* Uploads.nib in Resources */,
 				9A0DC08F0BBC475200229BA0 /* debug-sphubd.sh in Resources */,
 				28E0863F0D841873006CF70A /* Friends.nib in Resources */,
+				FFB855CC0E504E9100E11C53 /* SPNetworkPortController.m in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -793,6 +806,7 @@
 				FC7E1B0B097E6B3F0087431A /* SPGrowlBridge.m in Sources */,
 				FC7E1B0C097E6B3F0087431A /* SPHubController.m in Sources */,
 				FC7E1B0D097E6B3F0087431A /* SPLog.m in Sources */,
+				FFB8562F0E505A5F00E11C53 /* SPNetworkPortController.m in Sources */,
 				FC7E1B0E097E6B3F0087431A /* SPMainWindowController-Toolbar.m in Sources */,
 				FC7E1B0F097E6B3F0087431A /* SPMainWindowController.m in Sources */,
 				FC7E1B10097E6B3F0087431A /* SPMessagePanel.m in Sources */,

@@ -34,6 +34,7 @@ NSString *SPPrefsFontSize = @"fontSize";
 NSString *SPPrefsUploadSlots = @"uploadSlots";
 NSString *SPPrefsUploadSlotsPerHub = @"uploadSlotsPerHub";
 NSString *SPPrefsPort = @"port";
+NSString *SPPrefsAutomaticPortForwarding = @"automaticPortForwarding";
 NSString *SPPrefsSharedPaths = @"sharedPaths";
 NSString *SPPrefsRecentHubs = @"recentHubs";
 NSString *SPPrefsHublists = @"hublists";

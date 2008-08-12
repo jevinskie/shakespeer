@@ -28,6 +28,7 @@
 #import <SystemConfiguration/SCNetwork.h>
 
 #import "SPApplicationController.h"
+#import "SPNetworkPortController.h"
 #import "SPTransformers.h"
 #import "SPPreferenceController.h"
 #import "SPBookmarkController.h"
@@ -153,6 +154,7 @@ static SPApplicationController *sharedApplicationController = nil;
                                      @"Message", SPPrefsLogLevel,
                                      [NSNumber numberWithBool:YES], SPPrefsAutodetectIPAddress,
                                      [NSNumber numberWithBool:YES], SPPrefsAllowHubIPOverride,
+                                     [NSNumber numberWithBool:NO], SPPrefsAutomaticPortForwarding,
                                      [NSNumber numberWithBool:YES], SPPrefsShowSmileyIcons,
                                      [NSNumber numberWithFloat:1.0], SPPrefsRescanShareInterval,
                                      [NSNumber numberWithBool:YES], SPPrefsFollowHubRedirects,
@@ -463,30 +465,10 @@ else {
     }
 }
 
-- (void)loadGUInibs
-{
-    /* create the server messages panel, but don't show it
-     * this is needed, 'cause it must subscribe to statusMessage notifications */
-    [SPMessagePanel sharedMessagePanel];
-
-    /* [menuItemRecentHubs setEnabled:NO]; */
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(versionResultReceived:)
-                                                 name:@"DTCVMResultNotification"
-                                               object:nil];
-    
-    registerSPTransformers();
-
-    /* Allocate the preference controller, but don't show it. This is needed
-     * because sphubd will send messages that the prefs controller is listening
-     * to. */
-    [SPPreferenceController sharedPreferences];
-
-    [self connectToBackendServer:self];
-}
-
 - (void)awakeFromNib
 {
+    // XXX: can these live in the main window's awakeFromNib instead?
+    
     /* set Command-Down Arrow to select next sidebar item */
     unichar down = NSDownArrowFunctionKey;
     [menuItemNextSidebarItem setKeyEquivalent:[NSString stringWithCharacters:&down length:1]];
@@ -496,8 +478,9 @@ else {
     unichar up = NSUpArrowFunctionKey;
     [menuItemPrevSidebarItem setKeyEquivalent:[NSString stringWithCharacters:&up length:1]];
     [menuItemPrevSidebarItem setKeyEquivalentModifierMask:NSCommandKeyMask];
-
-    [self performSelectorOnMainThread:@selector(loadGUInibs) withObject:nil waitUntilDone:NO];
+    
+    // start the serial (ordered) startup (we'll setup the sphubd connection, ports, and other things)
+    sendNotification(SPNotificationInitCompletion, @"level", [NSNumber numberWithInt:25], nil);
 }
  
  - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
@@ -971,6 +954,8 @@ else {
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification
 {
+    [[SPNetworkPortController sharedInstance] shutdown];
+    
     SPLog(@"shutting down application");
     if ([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsKeepServerRunning] == NO) {
         /* read in pid from pidfile */
@@ -990,12 +975,46 @@ else {
 
 - (void)initCompletionNotification:(NSNotification *)aNotification
 {
-    int level= [[[aNotification userInfo] objectForKey:@"level"] intValue];
+    int level = [[[aNotification userInfo] objectForKey:@"level"] intValue];
 
     NSLog(@"got init completion level %i", level);
-    if(level == 100)
+    if (level == 25)
     {
-	[initMessage setStringValue:@"Scanning shared folders..."];
+        [initMessage setStringValue:@"Setting up port configuration..."];
+        
+        // setup port forwarding stuff, if it is on in prefs.
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsAutomaticPortForwarding])
+            [[SPNetworkPortController sharedInstance] startup];
+        
+        // advance to the next level...
+        sendNotification(SPNotificationInitCompletion, @"level", [NSNumber numberWithInt:50], nil);
+    }
+    else if (level == 50)
+    {
+        [initMessage setStringValue:@"Connecting to backend server..."];
+        
+        /* create the server messages panel, but don't show it
+         * this is needed, 'cause it must subscribe to statusMessage notifications */
+        [SPMessagePanel sharedMessagePanel];
+
+        /* [menuItemRecentHubs setEnabled:NO]; */
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(versionResultReceived:)
+                                                     name:@"DTCVMResultNotification"
+                                                   object:nil];
+    
+        registerSPTransformers();
+
+        /* Allocate the preference controller, but don't show it. This is needed
+         * because sphubd will send messages that the prefs controller is listening
+         * to. */
+        [SPPreferenceController sharedPreferences];
+
+        [self connectToBackendServer:self];
+    }
+    else if(level == 100)
+    {
+        [initMessage setStringValue:@"Scanning shared folders..."];
 
         /* register shared paths with sphubd */
         NSArray *sharedPaths = [[NSUserDefaults standardUserDefaults] arrayForKey:SPPrefsSharedPaths];
@@ -1004,27 +1023,27 @@ else {
         while ((sharedPath = [e nextObject]) != nil)
             sp_send_add_shared_path(sp, [sharedPath UTF8String]);
 
-	sp_send_forget_search(sp, 0);
-	sp_send_transfer_stats_interval(sp, 1);
-	if ([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsAutodetectIPAddress] == NO) {
-	    sp_send_set_ip_address(sp,
-		[[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsExternalIPAddress] UTF8String]);
-	}
-    sp_send_set_allow_hub_ip_override(sp, [[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsAllowHubIPOverride]);
+        sp_send_forget_search(sp, 0);
+        sp_send_transfer_stats_interval(sp, 1);
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsAutodetectIPAddress] == NO) {
+            sp_send_set_ip_address(sp,
+                [[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsExternalIPAddress] UTF8String]);
+        }
+        sp_send_set_allow_hub_ip_override(sp, [[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsAllowHubIPOverride]);
 
         [self setSlots:[[NSUserDefaults standardUserDefaults] integerForKey:SPPrefsUploadSlots]
                 perHub:[[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsUploadSlotsPerHub]];
 
-	[self setRescanShareInterval:[[NSUserDefaults standardUserDefaults] floatForKey:SPPrefsRescanShareInterval] * 3600];
-	[self setFollowHubRedirects:[[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsFollowHubRedirects]];
-	[self setAutoSearchNewSources:[[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsAutoSearchNewSources]];
-	[self setHashingPriority:[[NSUserDefaults standardUserDefaults] integerForKey:SPPrefsHashingPriority]];
-	[self setDownloadFolder:[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsDownloadFolder]];
-	[self setIncompleteFolder:[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsIncompleteFolder]];
+        [self setRescanShareInterval:[[NSUserDefaults standardUserDefaults] floatForKey:SPPrefsRescanShareInterval] * 3600];
+        [self setFollowHubRedirects:[[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsFollowHubRedirects]];
+        [self setAutoSearchNewSources:[[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsAutoSearchNewSources]];
+        [self setHashingPriority:[[NSUserDefaults standardUserDefaults] integerForKey:SPPrefsHashingPriority]];
+        [self setDownloadFolder:[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsDownloadFolder]];
+        [self setIncompleteFolder:[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsIncompleteFolder]];
     }
     else if(level == 200)
     {
-	/* remove startup window and show main window */
+        /* remove startup window and show main window */
         [initWindow orderOut:self];
 
         [mainWindowController showWindow:self];

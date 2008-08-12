@@ -19,6 +19,8 @@
 				<string>id</string>
 				<key>setAutoSearchNewSources</key>
 				<string>id</string>
+				<key>setAutomaticPortForwarding</key>
+				<string>id</string>
 				<key>setConnectionMode</key>
 				<string>id</string>
 				<key>setDefaultMagnetHandler</key>

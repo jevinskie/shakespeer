@@ -28,6 +28,7 @@ SOURCES = \
 	SPMainWindowController-Toolbar.m \
 	SPMainWindowController.m \
 	SPMessagePanel.m \
+	SPNetworkPortController.m \
 	SPNotificationNames.m \
 	SPOutlineView.m \
 	SPPreferenceController.m \
@@ -61,10 +62,12 @@ endif
 FRAMEWORKS = -framework Cocoa \
 	     -framework SystemConfiguration\
 	     -framework Growl \
+	     -framework TCMPortMapper \
 	     -framework Security \
          -framework Sparkle
 
-ShakesPeer: Growl.framework $(OBJS) \
+ShakesPeer: TCMPortMapper.framework $(OBJS) \
+			Growl.framework $(OBJS) \
 			Sparkle.framework $(OBJS) \
 	    $(TOP)/spclient/libspclient.a \
 	    $(TOP)/splib/libsplib.a
@@ -81,7 +84,19 @@ Growl.framework: Growl-$(GROWL_VERSION)-SDK.dmg
 		sed -n 's/^\/dev\/disk.*[[:space:]]*Apple_HFS[[:space:]]*\(.*\)/\1/p'` && \
 	cp -RP "$$p/Frameworks/Growl.framework" . && \
 	hdiutil detach "$$p"
-	
+
+PORTMAP_VERSION=1.0-r5
+
+TCMPortMapper-$(PORTMAP_VERSION).zip:
+	curl http://tcmportmapper.googlecode.com/files/TCMPortMapper-$(PORTMAP_VERSION).zip \
+		>TCMPortMapper-$(PORTMAP_VERSION).zip
+
+TCMPortMapper.framework: TCMPortMapper-$(PORTMAP_VERSION).zip
+	mkdir TCMPortMapper && \
+	unzip TCMPortMapper-$(PORTMAP_VERSION).zip -d TCMPortMapper && \
+	cp -RP TCMPortMapper/TCMPortMapper.framework . && \
+	rm -rf TCMPortMapper
+
 SPARKLE_VERSION=1.1
 
 Sparkle-$(SPARKLE_VERSION).zip:
@@ -126,6 +141,8 @@ app_bundle.stamp: ShakesPeer
 		cp -RP Growl.framework $(FWDIR)
 	test -d $(FWDIR)/Sparkle.framework || \
 		cp -RP Sparkle.framework $(FWDIR)
+	test -d $(FWDIR)/TCMPortMapper.framework || \
+		cp -RP TCMPortMapper.framework $(FWDIR)
 
 install:
 

@@ -21,6 +21,7 @@
 
 #import "SPPreferenceController.h"
 #import "SPApplicationController.h"
+#import "SPNetworkPortController.h"
 #import "SPLog.h"
 #import "SPUserDefaultKeys.h"
 #import "SPNotificationNames.h"
@@ -514,7 +515,10 @@ static float ToolbarHeightForWindow(NSWindow *window)
 
 - (IBAction)setPort:(id)sender
 {
+    BOOL autoPortForwarding = [[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsAutomaticPortForwarding];
     [[SPApplicationController sharedApplicationController] setPort:[sender intValue]];
+    if (autoPortForwarding)
+        [[SPNetworkPortController sharedInstance] changePort:[sender intValue]];
 }
 
 - (IBAction)setIPAddress:(id)sender
@@ -523,6 +527,15 @@ static float ToolbarHeightForWindow(NSWindow *window)
         [[SPApplicationController sharedApplicationController] setIPAddress:[IPAddressField stringValue]];
     else
         [[SPApplicationController sharedApplicationController] setIPAddress:@""];
+}
+
+- (IBAction)setAutomaticPortForwarding:(id)sender
+{
+    BOOL autoPortForwarding = [[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsAutomaticPortForwarding];
+    if (!autoPortForwarding)
+        [[SPNetworkPortController sharedInstance] shutdown];
+    else
+        [[SPNetworkPortController sharedInstance] startup];
 }
 
 - (IBAction)setAllowHubIPOverride:(id)sender

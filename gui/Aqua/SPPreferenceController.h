@@ -38,8 +38,8 @@
     IBOutlet NSTextField *slotsField;
     IBOutlet NSButton *slotsPerHubButton;
     IBOutlet NSTextField *rescanShareField;
-	IBOutlet NSMenu *duplicatePathsMenu;
-	IBOutlet NSTableView *sharedPathsTable;
+    IBOutlet NSMenu *duplicatePathsMenu;
+    IBOutlet NSTableView *sharedPathsTable;
     
     // Network
     IBOutlet NSView *networkView;
@@ -57,7 +57,7 @@
     
     NSArray *predefinedDownloadLocations;
     NSMutableArray *sharedPaths;
-	NSMutableSet *duplicatePaths;
+    NSMutableSet *duplicatePaths;
     NSView *blankView;
     NSToolbar *prefsToolbar;
     NSDictionary *prefItems;
@@ -89,6 +89,7 @@
 - (IBAction)selectIncompleteFolder:(id)sender;
 - (IBAction)setPort:(id)sender;
 - (IBAction)setIPAddress:(id)sender;
+- (IBAction)setAutomaticPortForwarding:(id)sender;
 - (IBAction)setAllowHubIPOverride:(id)sender;
 - (IBAction)updateUserInfo:(id)sender;
 - (IBAction)testConnection:(id)sender;

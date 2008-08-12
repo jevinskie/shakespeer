@@ -34,6 +34,7 @@ extern NSString *SPPrefsFontSize;
 extern NSString *SPPrefsUploadSlots;
 extern NSString *SPPrefsUploadSlotsPerHub;
 extern NSString *SPPrefsPort;
+extern NSString *SPPrefsAutomaticPortForwarding;
 extern NSString *SPPrefsSharedPaths;
 extern NSString *SPPrefsRecentHubs;
 extern NSString *SPPrefsHublists;
