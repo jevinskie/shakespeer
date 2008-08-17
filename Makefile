@@ -15,18 +15,22 @@ config.mk: configure ${TOP}/support/configure.sub
 REPO		?= shakespeer
 REPO_URL	?= http://shakespeer.googlecode.com/svn
 
-ifneq ($(TAG),)
-  RELEASE_DIR=release-build-$(TAG)
-  DIST_VERSION:=$(VERSION)
+# default "tag" is the trunk
+TAG ?= trunk
+
+RELEASE_DIR=release-build-$(TAG)
+ifneq ($(TAG),trunk)
+  SVN_PATH=tags/$(TAG)
+  DIST_VERSION=$(TAG)
 else
-  RELEASE_DIR=release-build-HEAD
+  SVN_PATH=trunk
   DIST_VERSION:=snapshot-$(shell date +"%Y%m%d")
 endif
 
-tag-release:
+current-release:
 	$(MAKE) release TAG=$(VERSION)
 
-release:
+release-build:
 	mkdir -p $(RELEASE_DIR)
 	cd $(RELEASE_DIR) && \
 	if test -d $(REPO)/.svn; then \
@@ -35,9 +39,9 @@ release:
 	  svn up; \
 	else \
 	  echo "getting sources..." && \
-	  svn checkout http://shakespeer.googlecode.com/svn/tags/$(TAG) $(REPO) && \
+	  svn checkout http://shakespeer.googlecode.com/svn/$(SVN_PATH) $(REPO) && \
 	  cd $(REPO) ; \
-	fi && $(MAKE) all BUILD_PROFILE=release && $(MAKE) check
+	fi && $(MAKE) all BUILD_PROFILE=release && $(MAKE) check BUILD_PROFILE=release 
 
 release-package:
 	@echo Creating disk image...
@@ -48,15 +52,9 @@ release-package:
 	tar cvf - $(PACKAGE)-$(DIST_VERSION) | gzip > $(PACKAGE)-$(DIST_VERSION).tar.gz && \
 	rm -rf $(PACKAGE)-$(DIST_VERSION)
 
-tag-dmg: tag-release release-package
+current-dmg: current-release release-package
 
-dmg: release release-package
-
-snapshot:
-	$(MAKE) release REPO_URL="`pwd`"
-	
-snapshot-package: snapshot
-	$(MAKE) release-package REPO_URL="`pwd`"
+release: release-build release-package
 
 dist:
 	svn export --force $(PACKAGE)-$(DIST_VERSION) && \
@@ -68,3 +66,16 @@ version.h: version.mk
 	echo '#define _version_h_' >> version.h
 	sed -n 's/\([^=]*\)=\(.*\)/#define \1 "\2"/p' version.mk >> version.h
 	echo '#endif' >> version.h
+
+cli:
+	$(MAKE) WANT_CLI=yes
+.PHONY: cli
+
+help:
+	@echo "Availalable make targets:"
+	@echo "make - builds the local tree"
+	@echo "make release - builds a snapshot release (dmg and source tar.gz) from trunk"
+	@echo "make release TAG=X.X.X - builds a release from the specified tag"
+	@echo "make current-release - builds a release from the current tag from version.mk"
+	@echo "make cli - builds CLI in the local tree"
+
