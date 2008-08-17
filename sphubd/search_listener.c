@@ -381,7 +381,6 @@ int search_listener_handle_response(search_listener_t *sl, const char *buf)
      * ID. The list is traversed backwards, so if there are multiple
      * matches, the last search is used. */
     int search_id = 0;
-    int found_search_id = 0;
     struct search_request *sreq;
     TAILQ_FOREACH_REVERSE(sreq, &sl->search_request_head,
             search_request_list, link)
@@ -391,7 +390,6 @@ int search_listener_handle_response(search_listener_t *sl, const char *buf)
         {
             DEBUG("Found search ID %i", sreq->id);
             search_id = sreq->id;
-            found_search_id = 1;
             break;
         }
     }
@@ -452,6 +450,7 @@ search_request_t *search_listener_create_search_request(const char *words,
         free(words_unescaped);
         char *p_casefold = g_utf8_casefold(words_utf8_composed, -1);
         free(words_utf8_composed);
+        return_val_if_fail(p_casefold, NULL);
         str_replace_set(p_casefold, " ", '$');
         char *p = p_casefold;
         while(p && *p == '$') /* skip any initial $'s */

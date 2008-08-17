@@ -706,8 +706,11 @@ static int hub_cmd_ValidateDenide(void *data, int argc, char **argv)
 
     ui_send_status_message(NULL, hub ? hub->address : NULL,
             "The hub didn't accept the nickname");
-    hub->expected_disconnect = true;
-    hub_close_connection(hub);
+    if(hub)
+    {
+        hub->expected_disconnect = true;
+        hub_close_connection(hub);
+    }
     return -1;
 }
 

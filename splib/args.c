@@ -128,7 +128,6 @@ int arg_find_token_length(const char *token)
     static const char *blank = " \t\n";
     static const char *blank_or_quote = " \t\n'\"\\";
     size_t total_len = 0;
-    char quote = 0;
 
     while(*token)
     {
@@ -147,13 +146,11 @@ int arg_find_token_length(const char *token)
         }
         else if(*token == '\'')
         {
-            quote = '\'';
             len = strcspn(token + 1, "\'"); /* find next ' */
             len += 2;
         }
         else if(*token == '\"')
         {
-            quote = '\"';
             len = strcspn(token + 1, "\""); /* find next " */
             len += 2;
         }

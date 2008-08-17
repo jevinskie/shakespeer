@@ -128,7 +128,7 @@ char *data_to_hex(const char *data, unsigned int len)
     }
 
     *e++ = '\n';
-    *e++ = 0;
+    *e = 0;
 
     return strHexData;
 }

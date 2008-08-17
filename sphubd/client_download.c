@@ -360,7 +360,7 @@ int cc_start_download(cc_t *cc)
     char *local_dir = strdup(target);
     char *e = strrchr(local_dir, '/');
     assert(e);
-    *++e = 0;
+    *e = 0;
     DEBUG("mkpath(%s)", local_dir);
     mkpath(local_dir);
 

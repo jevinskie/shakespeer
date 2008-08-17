@@ -270,7 +270,7 @@ int uhttp_read_response_headers(uhttp_t *uhttp)
     sp = strchr(uhttp->headers[0], ' ');
     if(sp)
     {
-        strncpy(tmp, ++sp, 3);
+        strncpy(tmp, sp, 3);
         tmp[3] = 0;
         return atoi(tmp);
     }

@@ -82,7 +82,6 @@ static void tth_parse_add_tth(struct tth_store *store,
 static void tth_parse_add_inode(struct tth_store *store, char *buf, size_t len)
 {
 	buf += 3; /* skip past "+I:" */
-	len -= 3;
 
 	/* syntax of buf is 'inode:mtime:tth' */
 	/* numeric values are stored in hex */
@@ -101,7 +100,6 @@ static void tth_parse_add_inode(struct tth_store *store, char *buf, size_t len)
 static void tth_parse_remove_tth(struct tth_store *store, char *buf, size_t len)
 {
 	buf += 3; /* skip past "-T:" */
-	len -= 3;
 
 	tth_store_remove(store, buf);
 }
@@ -109,7 +107,6 @@ static void tth_parse_remove_tth(struct tth_store *store, char *buf, size_t len)
 static void tth_parse_remove_inode(struct tth_store *store, char *buf, size_t len)
 {
 	buf += 3; /* skip past "-I:" */
-	len -= 3;
 
 	char *endptr = NULL;
 	uint64_t inode = strtoull(buf, &endptr, 16);

@@ -42,7 +42,6 @@ static void
 queue_parse_add_target(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "+T:" */
-	len -= 3;
 
 	DEBUG("parsing target add [%s]", buf);
 
@@ -84,7 +83,6 @@ static void
 queue_parse_add_source(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "+S:" */
-	len -= 3;
 
 	/* syntax is 'nick:target_filename:source_filename' */
 
@@ -103,7 +101,6 @@ static void
 queue_parse_add_filelist(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "+F:" */
-	len -= 3;
 
 	/* syntax is 'nick:flags' */
 	char *nick = q_strsep(&buf, ":");
@@ -121,7 +118,6 @@ static void
 queue_parse_add_directory(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "+D:" */
-	len -= 3;
 
 	/* syntax is 'target_directory:nick:source_directory */
 
@@ -140,7 +136,6 @@ static void
 queue_parse_remove_directory(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "-D:" */
-	len -= 3;
 
 	/* syntax is 'target_directory' */
 	queue_remove_directory(buf);
@@ -150,7 +145,6 @@ static void
 queue_parse_set_directory_resolved(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "=R:" */
-	len -= 3;
 
 	/* syntax is 'target_directory:nfiles' */
 
@@ -167,7 +161,6 @@ static void
 queue_parse_set_priority(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "=P:" */
-	len -= 3;
 
 	/* syntax is 'target_filename:priority' */
 
@@ -182,7 +175,6 @@ static void
 queue_parse_remove_target(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "-T:" */
-	len -= 3;
 
 	/* syntax is 'target_filename' */
 	queue_remove_target(buf);
@@ -192,7 +184,6 @@ static void
 queue_parse_remove_filelist(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "-F:" */
-	len -= 3;
 
 	/* syntax is 'nick' */
 	queue_remove_filelist(buf);
@@ -202,7 +193,6 @@ static void
 queue_parse_remove_source(char *buf, size_t len)
 {
 	buf += 3;  /* skip past "-S:" */
-	len -= 3;
 
 	/* syntax is 'target_filename:nick' */
 
@@ -830,11 +820,10 @@ queue_db_remove_directory(const char *target_directory)
 	if(qd == NULL)
 		return 0;
 
-	int rc = 0;
 	if(!q_store->loading)
 	{
 		char *tmp = str_quote_backslash(target_directory, ":");
-		rc = fprintf(q_store->fp, "-D:%s\n", tmp);
+		fprintf(q_store->fp, "-D:%s\n", tmp);
 		free(tmp);
 	}
 
