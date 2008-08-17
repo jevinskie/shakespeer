@@ -66,8 +66,8 @@ FRAMEWORKS = -framework Cocoa \
 	     -framework Security \
          -framework Sparkle
 
-ShakesPeer: TCMPortMapper.framework $(OBJS) \
-			Growl.framework $(OBJS) \
+ShakesPeer: TCMPortMapper.framework \
+			Growl.framework \
 			Sparkle.framework $(OBJS) \
 	    $(TOP)/spclient/libspclient.a \
 	    $(TOP)/splib/libsplib.a
