@@ -252,7 +252,6 @@ int uhttp_write_chunk(uhttp_t *uhttp, void *data, unsigned int length)
 int uhttp_read_response_headers(uhttp_t *uhttp)
 {
     char tmp[1024];
-    char *sp;
 
     uhttp_free_headers(uhttp);
 
@@ -267,13 +266,10 @@ int uhttp_read_response_headers(uhttp_t *uhttp)
     if(uhttp->nheaders == 0)
         return -1;
 
-    sp = strchr(uhttp->headers[0], ' ');
-    if(sp)
-    {
-        strncpy(tmp, sp, 3);
-        tmp[3] = 0;
-        return atoi(tmp);
-    }
+    /* Return HTTP status code. */
+    int status = -1;
+    if(sscanf(uhttp->headers[0], "http/%*i.%*i %i", &status) == 1)
+	return status;
 
     return -1;
 }
