@@ -94,6 +94,7 @@ TCMPortMapper-$(PORTMAP_VERSION).zip:
 TCMPortMapper.framework: TCMPortMapper-$(PORTMAP_VERSION).zip
 	mkdir TCMPortMapper && \
 	unzip TCMPortMapper-$(PORTMAP_VERSION).zip -d TCMPortMapper && \
+	rm "TCMPortMapper/TCMPortMapper.framework/Resources/OUItoCompany.plist" && \
 	cp -RP TCMPortMapper/TCMPortMapper.framework . && \
 	rm -rf TCMPortMapper
 

@@ -24,7 +24,10 @@
 @class TCMPortMapping;
 @interface SPNetworkPortController : NSObject 
 {
-  TCMPortMapping *lastPortMapping;
+  // we could combine these into one object, but the framework has a bug (1.0-r4) 
+  // where it won't remove both the TCP and the UDP port mapping on shutdown if we do.
+  TCMPortMapping *lastUDPPortMapping;
+  TCMPortMapping *lastTCPPortMapping;
 }
 
 + (SPNetworkPortController *)sharedInstance;

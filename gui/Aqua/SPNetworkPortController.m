@@ -38,23 +38,21 @@ static SPNetworkPortController *sharedPortController = nil;
 }
 
 - (void)startup
-{
-  TCMPortMapper *pm = [TCMPortMapper sharedInstance];
-                                               
+{                               
   [self changePort:[[NSUserDefaults standardUserDefaults] integerForKey:SPPrefsPort]];
   
-  [pm start];
+  [[TCMPortMapper sharedInstance] start];
 }
 
 - (void)shutdown
 {
   TCMPortMapper *pm = [TCMPortMapper sharedInstance];
   
-  if (lastPortMapping) {
-    // XXX: is this needed/good, or should there only be a stopBlocking call?
-    [pm removePortMapping:lastPortMapping];
-    [lastPortMapping autorelease];
-    lastPortMapping = nil;
+  if (lastTCPPortMapping) {
+    [lastUDPPortMapping release];
+    lastUDPPortMapping = nil;
+    [lastTCPPortMapping release];
+    lastTCPPortMapping = nil;
   }
   
   if ([pm isRunning])
@@ -65,26 +63,39 @@ static SPNetworkPortController *sharedPortController = nil;
 {
   // avoid "changing" port to the current port (which should never happen, really); this
   // seems to confuse the TCMPortMapping framework
-  if (lastPortMapping && port == [lastPortMapping localPort])
+  if (lastTCPPortMapping && port == [lastTCPPortMapping localPort])
     return;
     
   TCMPortMapper *pm = [TCMPortMapper sharedInstance];
   
-  if (lastPortMapping) {
-    // remove the previous port mapping
-    [pm removePortMapping:lastPortMapping];
-    [lastPortMapping autorelease];
-    lastPortMapping = nil;
+  if (lastTCPPortMapping) {
+    // remove the previous port mappings
+    [pm removePortMapping:lastUDPPortMapping];
+    [lastUDPPortMapping autorelease];
+    lastUDPPortMapping = nil;
+    
+    [pm removePortMapping:lastTCPPortMapping];
+    [lastTCPPortMapping autorelease];
+    lastTCPPortMapping = nil;
   }
   
-  TCMPortMapping *newMapping = 
+  TCMPortMapping *newTCPMapping = 
     [TCMPortMapping portMappingWithLocalPort:port 
                          desiredExternalPort:port 
-                           transportProtocol:TCMPortMappingTransportProtocolBoth // both TCP and UDP
+                           transportProtocol:TCMPortMappingTransportProtocolTCP
+                                    userInfo:nil];
+                                    
+  TCMPortMapping *newUDPMapping = 
+    [TCMPortMapping portMappingWithLocalPort:port 
+                         desiredExternalPort:port 
+                           transportProtocol:TCMPortMappingTransportProtocolUDP
                                     userInfo:nil];
 
-  [pm addPortMapping:newMapping];
-  lastPortMapping = [newMapping retain];
+  [pm addPortMapping:newUDPMapping];
+  [pm addPortMapping:newTCPMapping];
+  
+  lastUDPPortMapping = [newUDPMapping retain];
+  lastTCPPortMapping = [newTCPMapping retain];
 }
 
 
