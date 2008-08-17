@@ -88,7 +88,9 @@ static void handle_tth_available_notification(nc_t *nc,
 
     if(te == NULL)
     {
-	/* there was no previous conflicting TTH */
+	/* there was no previous conflicting TTH, claim this TTH */
+	tth_store_set_active_inode(global_tth_store,
+		notification->tth, file->inode);
     }
     else
     {
