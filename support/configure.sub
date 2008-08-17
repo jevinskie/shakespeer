@@ -145,7 +145,9 @@ search_libs()
 			if check_lib $func $libflag $libs; then
 				out HAS_${lib_uc}=yes
 				out ${lib_uc}_LDFLAGS=$libflag
+				LDFLAGS="$LDFLAGS $libflag"
 				out ${lib_uc}_LIBS=$libs
+				LIBS="$LIBS $libs"
 				msg yes
 				return 0
 			fi
@@ -286,7 +288,7 @@ check_bdb_version_path()
 
 	if test -n "$libdir"; then
 		LDFLAGS="$old_LDFLAGS -L$libdir"
-		checking for Berkeley DB, lib in  $libdir, headers in $incdir...
+		checking for Berkeley DB, lib in $libdir, headers in $incdir...
 	else
 		checking for Berkeley DB...
 	fi
