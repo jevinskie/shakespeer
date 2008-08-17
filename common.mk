@@ -10,7 +10,7 @@ include $(TOP)/version.mk
 include $(TOP)/extern.mk
 
 # set to yes if you want to build the command line interface
-WANT_CLI=no
+WANT_CLI ?= no
 
 CFLAGS+=-g -O3 -Wall -Werror -DVERSION=\"$(VERSION)\" -DPACKAGE=\"$(PACKAGE)\"
 CFLAGS+=-I$(TOP)/splib -I${TOP}/spclient
@@ -47,7 +47,7 @@ ifeq ($(os),Darwin)
   ifeq ($(BUILD_PROFILE),release)
     # Always build releases against 10.4 Universal SDK
     UB_CFLAGS = -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386 -arch ppc -mmacosx-version-min=10.4
-    UB_LDFLAGS = -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386
+    UB_LDFLAGS = -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386 -mmacosx-version-min=10.4
 
     CFLAGS += $(UB_CFLAGS)
     EXTERN_CFLAGS += $(UB_CFLAGS)
