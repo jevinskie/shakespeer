@@ -38,8 +38,6 @@
     IBOutlet NSWindow *editFriendSheet;
     IBOutlet NSTextField *editFriendNameField;
     IBOutlet NSTextField *editFriendCommentsField;
-
-	NSTimer *updateTimer;
 }
 
 + (SPFriendsController *)sharedFriendsController;
@@ -47,6 +45,10 @@
 - (void)setFriends:(NSArray *)newFriends;
 - (void)addFriendWithName:(NSString *)name comments:(NSString *)comments;
 - (void)updateFriendTable;
+
+- (void)userUpdateNotification:(NSNotification *)aNotification;
+- (void)userLogoutNotification:(NSNotification *)aNotification;
+- (void)applicationWillTerminate;
 
 - (IBAction)browseUser:(id)sender;
 - (IBAction)sendPrivateMessage:(id)sender;

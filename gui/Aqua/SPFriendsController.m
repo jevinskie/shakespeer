@@ -93,7 +93,7 @@ static SPFriendsController *sharedFriendsController = nil;
         // we want mutable copies in that array
         NSMutableArray *mutableFriends = [NSMutableArray array];
         NSEnumerator *e = [defaultFriends objectEnumerator];
-        id currentFriend = nil;
+        NSMutableDictionary *currentFriend = nil;
         while ((currentFriend = [e nextObject])) {
             NSMutableDictionary *mutableFriend = [currentFriend mutableCopy];
             [mutableFriends addObject:mutableFriend];
@@ -101,9 +101,36 @@ static SPFriendsController *sharedFriendsController = nil;
         }
         
         [self setFriends:mutableFriends];
-	}
+        // Register event handlers for user logins and logouts.
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(userUpdateNotification:)
+                                                     name:SPNotificationUserUpdate
+                                                   object:nil];
 
-	return self;
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(userUpdateNotification:)
+                                                     name:SPNotificationUserLogin
+                                                   object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(userLogoutNotification:)
+                                                     name:SPNotificationUserLogout
+                                                   object:nil];
+
+        // When disconnecting from a hub, sphubd doesn't send a logout notification for users on that hub.
+        // Observe for the SPNotificationHubDisconnected instead, and do the old update style on the remaining hubs.
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(updateFriendTable)
+                                                     name:SPNotificationHubDisconnected
+                                                   object:nil];
+
+        [[NSNotificationCenter defaultCenter] addObserver:self 
+                                                 selector:@selector(applicationWillTerminate) 
+                                                     name:NSApplicationWillTerminateNotification 
+                                                   object:nil];
+    }
+
+    return self;
 }
 
 - (void)awakeFromNib
@@ -117,15 +144,6 @@ static SPFriendsController *sharedFriendsController = nil;
 																		   ascending:NO
 																			selector:@selector(compare:)] autorelease];
 	[friendsController setSortDescriptors:[NSArray arrayWithObject:defaultSortDescriptor]];
-}
-
-- (void)dealloc
-{
-    [updateTimer invalidate];
-    [updateTimer release];
-    updateTimer = nil;
-    
-    [super dealloc];
 }
 
 #pragma mark -
@@ -151,30 +169,59 @@ static SPFriendsController *sharedFriendsController = nil;
     return nil;
 }
 
-// this is called by the main window controller when we are selected
-- (void)viewBecameSelected
-{
-    // first, update the table immediately
-    [self updateFriendTable]; 
+#pragma mark - 
 
-    if (!updateTimer)
-        // then update the table every other second
-        updateTimer = [[NSTimer scheduledTimerWithTimeInterval:1.0
-                                target:self
-                              selector:@selector(updateFriendTable)
-                              userInfo:nil
-                               repeats:YES] retain];
+- (void)userUpdateNotification:(NSNotification *)aNotification
+{
+    NSEnumerator *friendEnumerator = [friends objectEnumerator];
+    NSDictionary *userinfo = [aNotification userInfo];
+    NSString *nick = [userinfo objectForKey:@"nick"];
+    NSMutableDictionary *currentFriend = nil;
+    while ((currentFriend = [friendEnumerator nextObject])) {
+        if ([nick isEqualToString:[currentFriend objectForKey:@"name"]]) {
+            [currentFriend setValue:[NSNumber numberWithBool:YES] forKey:@"isOnline"];
+            [currentFriend setValue:[NSDate date] forKey:@"lastSeen"];
+            
+            // Get values for hub address and the name by which we're associated with this user.
+            // (the name is used when sending a private message)
+            NSString *address = [userinfo objectForKey:@"hubAddress"];
+            NSString *myNick = [[[SPMainWindowController sharedMainWindowController] hubWithAddress:address] nick];
+            
+            [currentFriend setValue:[userinfo objectForKey:@"size"] forKey:@"shareSize"];
+            [currentFriend setValue:address forKey:@"hub"];
+            [currentFriend setValue:myNick forKey:@"myName"];
+            break;
+        }
+    }
+    [[NSUserDefaults standardUserDefaults] setObject:friends forKey:SPFriends];
+    [friendsController rearrangeObjects];
 }
 
-// this is called by the main window controller when we are deselected
-- (void)viewBecameDeselected
+- (void)userLogoutNotification:(NSNotification *)aNotification
 {
-    [updateTimer invalidate];
-    [updateTimer release];
-    updateTimer = nil;
+    NSEnumerator *friendEnumerator = [friends objectEnumerator];
+    NSDictionary *userinfo = [aNotification userInfo];
+    NSString *nick = [userinfo objectForKey:@"nick"];
+    NSMutableDictionary *currentFriend = nil;
+    while ((currentFriend = [friendEnumerator nextObject])) {
+        if ([nick isEqualToString:[currentFriend objectForKey:@"name"]]) {
+            [currentFriend setValue:[NSNumber numberWithBool:NO] forKey:@"isOnline"];
+            break;
+        }
+    }
+    [[NSUserDefaults standardUserDefaults] setObject:friends forKey:SPFriends];
+    [friendsController rearrangeObjects];
 }
 
-#pragma mark -
+- (void)applicationWillTerminate
+{
+    // set all friends to offline, since there aren't any hub disconnection notifications to go by.
+    NSEnumerator *friendEnumerator = [friends objectEnumerator];
+    NSMutableDictionary *currentFriend = nil;
+    while ((currentFriend = [friendEnumerator nextObject])) 
+        [currentFriend setObject:[NSNumber numberWithBool:NO] forKey:@"isOnline"];
+    [[NSUserDefaults standardUserDefaults] setObject:friends forKey:SPFriends];
+}
 
 - (void)setFriends:(NSArray *)newFriends
 {
@@ -201,6 +248,9 @@ static SPFriendsController *sharedFriendsController = nil;
     [self setFriends:[friends arrayByAddingObject:newFriend]];
 
     [[NSUserDefaults standardUserDefaults] setObject:friends forKey:SPFriends];
+    // We may not see a login or logout notification for this user, so manually update the table 
+    // after adding.
+    [self updateFriendTable];
 }
 
 - (void)updateFriendTable
@@ -208,11 +258,11 @@ static SPFriendsController *sharedFriendsController = nil;
 	// let's see if any friends are online
 	NSDictionary *connectedHubs = [[SPMainWindowController sharedMainWindowController] connectedHubs];
 	NSEnumerator *friendEnumerator = [friends objectEnumerator];
-	id currentFriend = nil;
+	NSMutableDictionary *currentFriend = nil;
 	while ((currentFriend = [friendEnumerator nextObject])) {
 		BOOL didFindFriend = NO;
 		NSEnumerator *hubEnumerator = [connectedHubs objectEnumerator];
-		id currentHub = nil;
+		SPHubController *currentHub = nil;
 		while ((currentHub = [hubEnumerator nextObject])) {
 			SPUser *foundUser = [currentHub findUserWithNick:[currentFriend objectForKey:@"name"]];
 			if (foundUser) {
@@ -231,9 +281,8 @@ static SPFriendsController *sharedFriendsController = nil;
 		if (!didFindFriend)
 			[currentFriend setValue:[NSNumber numberWithBool:NO] forKey:@"isOnline"];
 	}
-  
 	[[NSUserDefaults standardUserDefaults] setObject:friends forKey:SPFriends];
-	[friendsController setSortDescriptors:[friendsController sortDescriptors]];
+	[friendsController rearrangeObjects];
 }
 
 #pragma mark -
