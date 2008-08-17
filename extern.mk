@@ -28,9 +28,9 @@ define unpack
 	}
 endef
 
-EVENT_VER=1.3d
+EVENT_VER=1.4.6-stable
 EVENT_URL=http://monkey.org/~provos/libevent-$(EVENT_VER).tar.gz
-EVENT_MD5=664a429247e7737162bd667e166b2761
+EVENT_MD5=aa117491800fb0c2583928a3fb7af591
 libevent-$(EVENT_VER).tar.gz:
 	$(call download,libevent,$(EVENT_VER),$(EVENT_URL),$(EVENT_MD5))
 libevent: libevent-build-$(EVENT_VER)/stamp
@@ -42,13 +42,7 @@ libevent-build-${EVENT_VER}/stamp: libevent-$(EVENT_VER).tar.gz
 	    ./configure --disable-shared \
 	                --enable-static \
 	                --prefix=$$cwd/libevent-install && \
-	    sed 's/^CFLAGS.*/& $$\(EXTERN_CFLAGS)/' sample/Makefile > sample/makefile.tmp && \
-	    mv sample/makefile.tmp sample/Makefile && \
-	    $(MAKE) libevent.la && \
-	    mkdir -p $$cwd/libevent-install/include && \
-	    cp -f evdns.h event.h evhttp.h $$cwd/libevent-install/include && \
-	    mkdir -p $$cwd/libevent-install/lib && \
-	    cp -f .libs/libevent.a $$cwd/libevent-install/lib
+	    $(MAKE) && $(MAKE) install
 	touch libevent-build-${EVENT_VER}/stamp
 
 EXPAT_VER=2.0.1
