@@ -410,6 +410,7 @@
         NSMutableDictionary *arrangedItem = nil;
         NSMutableArray *children = [item objectForKey:@"children"];
         if (children) {
+            // it's a folder. check for matches inside it
             NSArray *arrangedChildren = [self recursivelyFilterArray:children
                                                             onString:filterString
                                                        flatStructure:flatFlag];
@@ -423,13 +424,11 @@
                 }
             }
         }
-        else {
-            if ([filterString length] == 0 ||
-               [filename rangeOfString:filterString options:NSCaseInsensitiveSearch].location != NSNotFound ||
-               (flatFlag && 
-                [[item objectForKey:@"Path"] rangeOfString:filterString options:NSCaseInsensitiveSearch].location != NSNotFound)) {
-                arrangedItem = [NSMutableDictionary dictionary];
-            }
+        if (!arrangedItem && ([filterString length] == 0 || 
+            [filename rangeOfString:filterString options:NSCaseInsensitiveSearch].location != NSNotFound || 
+            (flatFlag && [[item objectForKey:@"Path"] rangeOfString:filterString options:NSCaseInsensitiveSearch].location != NSNotFound)))
+        {
+            arrangedItem = [NSMutableDictionary dictionary];
         }
 
         if (arrangedItem) {
