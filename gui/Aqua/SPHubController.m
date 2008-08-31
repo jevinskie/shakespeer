@@ -647,17 +647,20 @@
 
 - (IBAction)bookmarkHub:(id)sender
 {
-    BOOL result = [[SPBookmarkController sharedBookmarkController] addBookmarkWithName:address
-                                                                               address:address
-                                                                                  nick:nick
-                                                                              password:@""
-                                                                           description:descriptionString
-                                                                           autoconnect:NO
-                                                                              encoding:nil];
-    if (result)
-        [self addStatusMessage:[NSString stringWithFormat:@"Hub %@ added to bookmarks\n", address]];
-    else
+    NSDictionary *existingBookmark = [[SPBookmarkController sharedBookmarkController] bookmarkForHub:address];
+    if (existingBookmark != nil) 
         [self addStatusMessage:[NSString stringWithFormat:@"Hub %@ already added to bookmarks\n", address]];
+    else {
+        BOOL result = [[SPBookmarkController sharedBookmarkController] addBookmarkWithName:address
+                                                                                   address:address
+                                                                                      nick:nick
+                                                                                  password:@""
+                                                                               description:descriptionString
+                                                                               autoconnect:NO
+                                                                                  encoding:nil];
+        if (result)
+            [self addStatusMessage:[NSString stringWithFormat:@"Hub %@ added to bookmarks\n", address]];
+    }
 }
 
 - (IBAction)sendMessage:(id)sender
