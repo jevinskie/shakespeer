@@ -113,12 +113,17 @@ static SPApplicationController *sharedApplicationController = nil;
         sp = sp_create(NULL);
         sp_register_callbacks(sp);
         
-        // TODO: Use "Downloads" in home folder on Leopard
-        NSString *defaultDownloadFolder = [@"~/Desktop/ShakesPeer Downloads" stringByExpandingTildeInPath];
+        NSString *defaultDownloadFolder;
+        SInt32 version;
+        Gestalt(gestaltSystemVersionMinor, &version);
+        if (version < 5)
+            defaultDownloadFolder = @"~/Desktop/Shakespeer Downloads";
+        else
+            defaultDownloadFolder = @"~/Downloads/Shakespeer Downloads";
         // TODO: The user shouldn't have to care about "incomplete folder", we should use
         // a folder in application support instead
-        NSString *defaultIncompleteFolder = [@"~/Desktop/ShakesPeer Downloads/Incomplete" stringByExpandingTildeInPath];
-        
+        NSString *defaultIncompleteFolder = [[defaultDownloadFolder stringByExpandingTildeInPath] stringByAppendingPathComponent:@"Incomplete"];
+ 
         NSDictionary *appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
                                      @"Bookmarks", SPPrefsLastSidebarItem,
                                      @"IdentityItem", SPPrefsLastPrefPane,
