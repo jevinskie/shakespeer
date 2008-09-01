@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0A343A3E0E6BD838003CBF20 /* NSTextView-ChatFormattingAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A343A3D0E6BD838003CBF20 /* NSTextView-ChatFormattingAdditions.m */; };
 		280313FE0AD9D258000CC734 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 280313FD0AD9D258000CC734 /* Credits.rtf */; };
 		280316500AD9DF58000CC734 /* ToolbarAdvancedSearch.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 2803164F0AD9DF58000CC734 /* ToolbarAdvancedSearch.tiff */; };
 		280316B60AD9DFE7000CC734 /* ToolbarConnect.tif in Resources */ = {isa = PBXBuildFile; fileRef = 280316B50AD9DFE7000CC734 /* ToolbarConnect.tif */; };
@@ -175,6 +176,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0A343A3C0E6BD838003CBF20 /* NSTextView-ChatFormattingAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSTextView-ChatFormattingAdditions.h"; sourceTree = "<group>"; };
+		0A343A3D0E6BD838003CBF20 /* NSTextView-ChatFormattingAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSTextView-ChatFormattingAdditions.m"; sourceTree = "<group>"; };
 		280313FD0AD9D258000CC734 /* Credits.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = Credits.rtf; path = Resources/Credits.rtf; sourceTree = "<group>"; };
 		2803164F0AD9DF58000CC734 /* ToolbarAdvancedSearch.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = ToolbarAdvancedSearch.tiff; path = Resources/Images/ToolbarAdvancedSearch.tiff; sourceTree = "<group>"; };
 		280316B50AD9DFE7000CC734 /* ToolbarConnect.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = ToolbarConnect.tif; path = Resources/Images/ToolbarConnect.tif; sourceTree = "<group>"; };
@@ -581,6 +584,8 @@
 		FF3DB09F0DF5E03400C2284F /* Categories & Reusable Subclasses */ = {
 			isa = PBXGroup;
 			children = (
+				0A343A3C0E6BD838003CBF20 /* NSTextView-ChatFormattingAdditions.h */,
+				0A343A3D0E6BD838003CBF20 /* NSTextView-ChatFormattingAdditions.m */,
 				FC7E1AC2097E6B3E0087431A /* MenuButton.h */,
 				FC7E1AC3097E6B3E0087431A /* MenuButton.m */,
 				28F0ACF70A29E7E100FFEC99 /* MHSysTree.h */,
@@ -831,6 +836,7 @@
 				2894F7410D6308D100D8B355 /* UKCrashReporter.m in Sources */,
 				28E086420D8418E0006CF70A /* SPFriendsController.m in Sources */,
 				28C2C1530DF17EDD001AAA51 /* NSMenu-MassRemovalAdditions.m in Sources */,
+				0A343A3E0E6BD838003CBF20 /* NSTextView-ChatFormattingAdditions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

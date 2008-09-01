@@ -28,6 +28,8 @@
 #import "SPSideBar.h"
 #import "SPNotificationNames.h"
 #import "SPUserDefaultKeys.h"
+#import "NSTextView-ChatFormattingAdditions.h"
+#import "NSStringExtensions.h"
 
 @implementation SPChatWindowController
 
@@ -122,65 +124,9 @@
 
 - (void)addChatMessage:(NSString *)theMessage fromNick:(NSString *)theNick
 {
-    NSString *dateString = [[NSDate date] descriptionWithCalendarFormat:@"%H:%M"
-                                                               timeZone:nil
-                                                                 locale:nil];
-
-    BOOL meMessage = NO;
-    NSString *msg;
-    if ([theMessage hasPrefix:@"/me "]) {
-        msg = [NSString stringWithFormat:@"[%@] %@ %@\n",
-                dateString, theNick, [theMessage substringWithRange:NSMakeRange(4, [theMessage length] - 4)]];
-        meMessage = TRUE;
-    }
-    else {
-        msg = [NSString stringWithFormat:@"[%@] <%@> %@\n", dateString, theNick, theMessage];
-    }
-
-    NSMutableAttributedString *attrmsg = [[NSMutableAttributedString alloc] initWithString:msg];
-
-    NSColor *textColor;
-    if ([theNick isEqualToString:myNick])
-        textColor = [NSColor blueColor];
-    
-    // See if the author of this message is a friend.
-    // If so, color the friend's name in purple.
-    else {
-        BOOL isFriend = NO;
-        NSArray *friends = [[NSUserDefaults standardUserDefaults] arrayForKey:SPFriends];
-        NSEnumerator *e = [friends objectEnumerator];
-        NSMutableDictionary *friend = nil;
-        while ((friend = [e nextObject])) {
-            NSString *friendName = [friend objectForKey:@"name"];
-            if ([friendName isEqualToString:theNick]) {
-                isFriend = YES;
-                break;
-            }
-        }
-        
-        if (isFriend) 
-            textColor = [NSColor purpleColor];
-        else
-            textColor = [NSColor redColor];
-    }
-    if (meMessage) {
-        unsigned int dateLength = [dateString length] + 3;
-        [attrmsg addAttribute:NSForegroundColorAttributeName
-                        value:textColor
-                        range:NSMakeRange(dateLength, [attrmsg length] - dateLength)];
-    }
-    else {
-        [attrmsg addAttribute:NSForegroundColorAttributeName
-                        value:textColor
-                        range:NSMakeRange([dateString length] + 3, 2 + [theNick length])];
-    }
-
-    [attrmsg detectURLs:[NSColor blueColor]];
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsShowSmileyIcons])
-        [attrmsg replaceSmilies];
-    [[chatTextView textStorage] appendAttributedString:attrmsg];
-    [chatTextView scrollRangeToVisible:NSMakeRange([[chatTextView textStorage] length], 0)];
-    [attrmsg release];
+    [chatTextView addPublicMessage:theMessage
+                          fromNick:theNick 
+                            myNick:myNick];
 }
 
 - (void)privateMessageNotification:(NSNotification *)aNotification
@@ -217,9 +163,9 @@
         [attrmsg addAttribute:NSForegroundColorAttributeName
                         value:[NSColor orangeColor]
                         range:NSMakeRange(dateLength, [attrmsg length] - dateLength)];
-        [[chatTextView textStorage] appendAttributedString:attrmsg];
-        [chatTextView scrollRangeToVisible:NSMakeRange([[chatTextView textStorage] length], 0)];
+        [chatTextView addChatMessage:attrmsg];
         [attrmsg release];
+        [[SPMainWindowController sharedMainWindowController] highlightItem:self];
     }
 }
 
@@ -244,40 +190,13 @@
         
         // COMMAND: /np
         if ([cmd isEqualToString:@"/np"]) {
-            // Display the current playing track in iTunes
-            NSString *path = [[NSBundle mainBundle] pathForResource:@"np" ofType:@"scpt"];
-            if (path != nil) {
-                // Create the URL for the script
-                NSURL* url = [NSURL fileURLWithPath:path];
-                if (url != nil) {
-                    // Set up an error dict and the script
-                    NSDictionary *errors;
-                    NSAppleScript* appleScript = [[NSAppleScript alloc] initWithContentsOfURL:url error:&errors];
-                    if (appleScript != nil) {
-                        // Run the script
-                        NSAppleEventDescriptor *returnDescriptor = [appleScript executeAndReturnError:&errors];
-                        [appleScript release];
-                        if (returnDescriptor != nil) {
-                            // We got some results
-                            NSString *theTitle = [[returnDescriptor descriptorAtIndex:1] stringValue];
-                            NSString *theArtist = [[returnDescriptor descriptorAtIndex:2] stringValue];
-                            NSString *theMessage;
-                            if (!theTitle || !theArtist)
-                                theMessage = @"/me isn't listening to anything";
-                            else
-                                theMessage = [NSString stringWithFormat:@"/me is listening to %@ by %@", theTitle, theArtist];
-                            [[SPApplicationController sharedApplicationController] sendPrivateMessage:theMessage
-                                                                                               toNick:nick
-                                                                                                  hub:hubAddress];
-                            [self addChatMessage:theMessage fromNick:myNick];
-                        }
-                        else {
-                            // Something went wrong
-                            NSLog(@"Script error: %@", [errors objectForKey: @"NSAppleScriptErrorMessage"]);
-                        } // returnDescriptor
-                    } // appleScript
-                } // url
-            } // path
+            
+            NSString *theMessage = [NSString stringWithNowPlayingMessage];
+            
+            [[SPApplicationController sharedApplicationController] sendPrivateMessage:theMessage 
+                                                                               toNick:nick 
+                                                                                  hub:hubAddress];
+            [self addChatMessage:theMessage fromNick:myNick];
         } // np
     }
     else {

@@ -112,6 +112,40 @@
     return [self stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 }
 
++ (NSString *)stringWithNowPlayingMessage {
+    // Display the current playing track in iTunes
+    
+    // Define a base message, which will be returned if there's an error, or if 
+    // nothing is playing.
+    NSString *theMessage = @"/me isn't listening to anything";
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"np" ofType:@"scpt"];
+    if (path != nil) {
+        // Create the URL for the script
+        NSURL* url = [NSURL fileURLWithPath:path];
+        if (url != nil) {
+            // Set up an error dict and the script
+            NSDictionary *errors;
+            NSAppleScript* appleScript = [[NSAppleScript alloc] initWithContentsOfURL:url error:&errors];
+            if (appleScript != nil) {
+                // Run the script
+                NSAppleEventDescriptor *returnDescriptor = [appleScript executeAndReturnError:&errors];
+                [appleScript release];
+                if (returnDescriptor != nil) {
+                    // We got some results
+                    NSString *theTitle = [[returnDescriptor descriptorAtIndex:1] stringValue];
+                    NSString *theArtist = [[returnDescriptor descriptorAtIndex:2] stringValue];
+                    if (theTitle && theArtist)
+                        theMessage = [NSString stringWithFormat:@"/me is listening to %@ by %@", theTitle, theArtist];
+                } else {
+                    // Something went wrong
+                    NSLog(@"Script error: %@", [errors objectForKey: @"NSAppleScriptErrorMessage"]);
+                } // returndescriptor
+            } // applescript
+        } // url
+    } // path
+    return theMessage;
+}
+
 @end
 
 @implementation NSMutableAttributedString (ShakesPeerExtensions)

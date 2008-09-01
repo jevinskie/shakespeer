@@ -34,6 +34,8 @@
 #import "NSMenu-UserCommandAdditions.h"
 #import "SPGrowlBridge.h"
 #import "SPSideBar.h"
+#import "NSTextView-ChatFormattingAdditions.h"
+#import "NSStringExtensions.h"
 
 #import "SPNotificationNames.h"
 #import "SPUserDefaultKeys.h"
@@ -357,6 +359,25 @@
 
 
 #pragma mark -
+
+#pragma mark Chat wrappers
+
+// These two functions are a way (probably not the only way, nor the best way) to solve the problem of 
+// having the last line in each of them duplicated in a half-dozen places within this file.
+-(void)addPublicMessage:(NSString *)aMessage fromNick:(NSString *)aNick
+{
+    [chatView addPublicMessage:aMessage
+                      fromNick:aNick
+                        myNick:nick];
+    [[SPMainWindowController sharedMainWindowController] highlightItem:self];
+}
+
+- (void)addStatusMessage:(NSString *)aMessage
+{
+    [chatView addStatusMessage:aMessage];
+    [[SPMainWindowController sharedMainWindowController] highlightItem:self];
+}
+
 #pragma mark Sphubd notifications
 
 - (SPUser *)findUserWithNick:(NSString *)aNick
@@ -458,102 +479,12 @@
     }
 }
 
-- (void)addChatMessage:(NSMutableAttributedString *)attrString
-{
-    [attrString detectURLs:[NSColor blueColor]];
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsShowSmileyIcons]) {
-        [attrString replaceSmilies];
-    }
-    float oldPosition = [[[chatView enclosingScrollView] verticalScroller] floatValue];
-    [[chatView textStorage] appendAttributedString:attrString];
-    // If the user has scrolled to the bottom, adjust the scroller so it is once again at the bottom
-    // Otherwise, leave it alone.
-    // (some of us like to read back a bit in the chat :)
-    if (oldPosition == 1.0) {
-        [chatView scrollRangeToVisible:NSMakeRange([[chatView textStorage] length], 0)];
-    }
-    [[SPMainWindowController sharedMainWindowController] highlightItem:self];
-}
-
-- (void)addStatusMessage:(NSString *)aMessage
-{
-    NSMutableAttributedString *attrmsg = [[NSMutableAttributedString alloc] initWithString:aMessage];
-
-    [attrmsg addAttribute:NSForegroundColorAttributeName
-                    value:[NSColor orangeColor]
-                    range:NSMakeRange(0, [aMessage length])];
-    [self addChatMessage:attrmsg];
-    [attrmsg release];
-}
-
 - (void)publicMessageNotification:(NSNotification *)aNotification
 {
     if ([[[aNotification userInfo] objectForKey:@"hubAddress"] isEqualToString:address]) {
-        NSString *dateString = [[NSDate date] descriptionWithCalendarFormat:@"%H:%M"
-                                                                   timeZone:nil
-                                                                     locale:nil];
-
         NSString *aNick = [[aNotification userInfo] objectForKey:@"nick"];
         NSString *aMessage = [[aNotification userInfo] objectForKey:@"message"];
-        NSString *msg;
-        BOOL meMessage = NO;
-        if ([aMessage hasPrefix:@"/me "]) {
-            msg = [NSString stringWithFormat:@"[%@] %@ %@\n",
-                dateString, aNick, [aMessage substringWithRange:NSMakeRange(4, [aMessage length] - 4)]];
-            meMessage = TRUE;
-        }
-        else {
-            msg = [NSString stringWithFormat:@"[%@] <%@> %@\n", dateString, aNick, aMessage];
-        }
-        NSMutableAttributedString *attrmsg = [[[NSMutableAttributedString alloc] initWithString:msg] autorelease];
-
-        NSColor *textColor;
-        if ([aNick isEqualToString:nick]) {
-            textColor = [NSColor blueColor];
-        }
-        
-        // See if the author of this message is a friend.
-        // If so, color the friend's name in purple.
-        else {
-            BOOL isFriend = NO;
-            NSArray *friends = [[NSUserDefaults standardUserDefaults] arrayForKey:SPFriends];
-            NSEnumerator *e = [friends objectEnumerator];
-            NSMutableDictionary *friend = nil;
-            while ((friend = [e nextObject])) {
-                NSString *friendName = [friend objectForKey:@"name"];
-                if ([friendName isEqualToString:aNick]) {
-                    isFriend = YES;
-                    break;
-                }
-            }
-            
-            if (isFriend) {
-                textColor = [NSColor purpleColor];
-            }
-            else {
-                textColor = [NSColor redColor];
-            
-                if ([aMessage rangeOfString:nick options:NSCaseInsensitiveSearch].location != NSNotFound) {
-                    /* our nick was mentioned in chat */
-                    [[SPGrowlBridge sharedGrowlBridge] notifyWithName:SP_GROWL_NICK_IN_MAINCHAT 
-                                                          description:[NSString stringWithFormat:@"%@: %@", aNick, aMessage]];
-
-                }
-            }
-        }
-        unsigned int dateLength = [dateString length] + 3;
-        if (meMessage) {
-            [attrmsg addAttribute:NSForegroundColorAttributeName
-                            value:textColor
-                            range:NSMakeRange(dateLength, [attrmsg length] - dateLength)];
-        }
-        else {
-            [attrmsg addAttribute:NSForegroundColorAttributeName
-                            value:textColor
-                            range:NSMakeRange(dateLength, 2 + [aNick length])];
-        }
-
-        [self addChatMessage:attrmsg];
+        [self addPublicMessage:aMessage fromNick:aNick];
     }
 }
 
@@ -679,7 +610,7 @@
         
         // COMMAND: /clear
         else if ([cmd isEqualToString:@"/clear"]) {
-            [[chatView textStorage] setAttributedString:[[[NSMutableAttributedString alloc] initWithString:@""] autorelease]];
+            [chatView clear];
         }
         
         // COMMAND: /help
@@ -775,38 +706,9 @@
         
         // COMMAND: /np
         else if ([cmd isEqualToString:@"/np"]) {
-            // Display the current playing track in iTunes
-            NSString *path = [[NSBundle mainBundle] pathForResource:@"np" ofType:@"scpt"];
-            if (path != nil) {
-                // Create the URL for the script
-                NSURL* url = [NSURL fileURLWithPath:path];
-                if (url != nil) {
-                    // Set up an error dict and the script
-                    NSDictionary *errors;
-                    NSAppleScript* appleScript = [[NSAppleScript alloc] initWithContentsOfURL:url error:&errors];
-                    if (appleScript != nil) {
-                        // Run the script
-                        NSAppleEventDescriptor *returnDescriptor = [appleScript executeAndReturnError:&errors];
-                        [appleScript release];
-                        if (returnDescriptor != nil) {
-                            // We got some results
-                            NSString *theTitle = [[returnDescriptor descriptorAtIndex:1] stringValue];
-                            NSString *theArtist = [[returnDescriptor descriptorAtIndex:2] stringValue];
-                            NSString *theMessage;
-                            if (!theTitle || !theArtist)
-                                theMessage = @"/me isn't listening to anything";
-                            else
-                                theMessage = [NSString stringWithFormat:@"/me is listening to %@ by %@", theTitle, theArtist];
-                            [[SPApplicationController sharedApplicationController] sendPublicMessage:theMessage
-                                                                                               toHub:address];
-                        }
-                        else {
-                            // Something went wrong
-                            NSLog(@"Script error: %@", [errors objectForKey: @"NSAppleScriptErrorMessage"]);
-                        } // returnDescriptor
-                    } // appleScript
-                } // url
-            } // path
+            NSString *theMessage = [NSString stringWithNowPlayingMessage];
+            [[SPApplicationController sharedApplicationController] sendPublicMessage:theMessage 
+                                                                               toHub:address];
         } // np
         else {
             [self addStatusMessage:[NSString stringWithFormat:@"Unknown command: %@\n", cmd]];

@@ -48,7 +48,8 @@ SOURCES = \
 	main.m \
 	UKCrashReporter.m \
 	SPFriendsController.m \
-	NSMenu-MassRemovalAdditions.m
+	NSMenu-MassRemovalAdditions.m \
+	NSTextView-ChatFormattingAdditions.m 
 
 SPApplicationController.o SPClientBridge.o: $(TOP)/version.mk
 

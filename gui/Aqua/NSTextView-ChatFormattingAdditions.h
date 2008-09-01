@@ -1,6 +1,6 @@
-/* vim: ft=objc fdm=indent foldnestmax=1
+/* vim: ft=objc
  *
- * Copyright 2005 Martin Hedenfalk <martin@bzero.se>
+ * Copyright 2008 Kevan Carstensen <kevan@isnotajoke.com>
  *
  * This file is part of ShakesPeer.
  *
@@ -17,27 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with ShakesPeer; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
  */
 
 #import <Cocoa/Cocoa.h>
 
-@interface NSString (ShakesPeerExtensions)
 
-- (NSComparisonResult)numericalCompare:(NSString *)aString;
-- (NSString *)stringByDeletingLastWindowsPathComponent;
-- (NSString *)lastWindowsPathComponent;
-- (int)indexOfCharacter:(unichar)character fromIndex:(int)startIndex;
-- (int)occurencesOfString:(NSString *)aString;
-- (uint64_t)unsignedLongLongValue;
-- (NSAttributedString *)truncatedString:(NSLineBreakMode)mode;
-- (NSString *)stringWithoutWhitespace;
-+ (NSString *)stringWithNowPlayingMessage;
+@interface NSTextView (ChatFormattingAdditions) 
 
-@end
+// Stuff gets added to the NSTextView through this.
+- (void)addChatMessage:(NSMutableAttributedString *)aString;
 
-@interface NSMutableAttributedString (ShakesPeerExtensions)
+// Helpers for certain types of messages: they all eventually end up invoking
+// addChatMessage:, but they do a bit of formatting on the message first.
+- (void)addStatusMessage:(NSString *)aMessage;
 
-- (NSComparisonResult)compare:(NSMutableAttributedString *)aString;
+- (void)addPublicMessage:(NSString *)aMessage 
+                fromNick:(NSString *)aNick 
+				  myNick:(NSString *)myNick;
+
+- (void)clear;
 
 @end
-
