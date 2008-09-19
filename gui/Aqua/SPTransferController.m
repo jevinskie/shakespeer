@@ -191,7 +191,6 @@
     }
 
     [self willChangeValueForKey:@"transfers"];
-    [tr setStatus:aDirection == DIR_DOWNLOAD ? @"starting download" : @"starting upload"];
     [tr setState:aDirection == DIR_DOWNLOAD ? SPTransferState_Downloading : SPTransferState_Uploading];
     if (add) {
         [transfers addObject:tr];
@@ -289,8 +288,7 @@
             unsignedLongLongValue];
 
         [self willChangeValueForKey:@"transfers"];
-        [tr setStatus:[NSString stringWithFormat:@"%.1f%% ready",
-            (float)offset / (size ? size : 1) * 100]];
+        [tr setStatus:[NSNumber numberWithDouble: (double)offset / (size ? size : 1) * 100]];
         [tr setSpeed:[[[aNotification userInfo] objectForKey:@"bps"] intValue]];
         [tr setOffset:offset];
         [tr setSize:size];
@@ -530,11 +528,11 @@
     return 1.0;
 }
 
-- (void)setStatus:(NSString *)aStatusString
+- (void)setStatus:(NSNumber *)statusNumber
 {
-    if (status != aStatusString) {
+    if (status != statusNumber) {
         [status release];
-        status = [aStatusString retain];
+        status = [statusNumber retain];
     }
 }
 

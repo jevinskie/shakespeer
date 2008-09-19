@@ -22,69 +22,6 @@
 
 @class SPOutlineView;
 
-@interface SPQueueItem : NSObject
-{
-    NSString *target;
-    NSString *filename;
-    NSString *displayName;
-    NSString *path;
-    NSString *tth;
-    NSAttributedString *attributedTTH;
-    NSNumber *size;
-    NSNumber *priority;
-    NSAttributedString *priorityString;
-    NSAttributedString *status;
-
-    NSMutableDictionary *sources;
-    NSMutableArray *children;
-
-    BOOL isFilelist;
-    BOOL isDirectory;
-    BOOL isFinished;
-	
-	// when a download is requested to be removed by the user, this is set to make it
-	// easy to identify user-removed downloads from finished downloads later when the
-	// action is complete (it is aborted) and it needs to be removed from the table.
-	BOOL isWaitingToBeRemoved;
-}
-- (id)initWithTarget:(NSString *)aTarget;
-- (id)initWithTarget:(NSString *)aTarget displayName:(NSString *)aDisplayName;
-
-- (NSString *)filename;
-
-// usually the same as filename, unless the name needs to be pretty-printed, like filelists.
-- (NSString *)displayName;
-
-- (NSString *)path;
-- (NSString *)target;
-- (NSString *)tth;
-- (void)setTTH:(NSString *)aTTH;
-- (NSAttributedString *)attributedTTH;
-- (NSNumber *)size;
-- (NSNumber *)exactSize;
-- (void)setSize:(NSNumber *)aSize;
-- (NSNumber *)priority;
-- (NSAttributedString *)priorityString;
-- (void)setPriority:(NSNumber *)aPriority;
-- (NSAttributedString *)status;
-- (void)setStatus:(NSString *)aStatusString;
-- (void)addSource:(NSString *)sourcePath nick:(NSString *)nick;
-- (void)removeSourceForNick:(NSString *)nick;
-- (NSArray *)nicks;
-- (NSMutableArray *)children;
-- (NSString *)users;
-- (int)filetype;
-- (BOOL)isDirectory;
-- (void)setIsDirectory;
-- (BOOL)isFilelist;
-- (void)setIsFilelist:(BOOL)aFlag;
-- (BOOL)isFinished;
-- (void)setFinished;
-- (BOOL)isWaitingToBeRemoved;
-- (void)setIsWaitingToBeRemoved:(BOOL)waitingToBeRemoved;
-
-@end
-
 @interface SPQueueController : NSWindowController
 {
     IBOutlet NSView *queueView;
@@ -136,6 +73,7 @@
 - (void)clearAllFinishedDownloadsRecursivelyInArray:(NSMutableArray *)anArray;
 
 - (IBAction)setPriority:(id)sender;
+- (void)setStatusString:(NSString *)statusString forTarget:(NSString *)targetFilename;
 - (IBAction)searchByTTH:(id)sender;
 - (IBAction)searchForAlternates:(id)sender;
 - (IBAction)browseUsersFiles:(id)sender;

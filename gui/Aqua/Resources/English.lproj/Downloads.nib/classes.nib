@@ -1,68 +1,142 @@
-{
-    IBClasses = (
-        {
-            ACTIONS = {search = id; }; 
-            CLASS = FilteringArrayController; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSArrayController; 
-        }, 
-        {
-            ACTIONS = {"" = id; }; 
-            CLASS = FirstResponder; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSObject; 
-        }, 
-        {CLASS = SPOutlineView; LANGUAGE = ObjC; SUPERCLASS = NSOutlineView; }, 
-        {
-            ACTIONS = {
-                browseUsersFiles = id; 
-                clearAllFinishedDownloads = id; 
-                openSelected = id; 
-                removeFromQueue = id; 
-                removeSource = id; 
-                removeUserFromQueue = id; 
-                revealInFinder = id; 
-                searchByTTH = id; 
-                searchForAlternates = id; 
-                setPriority = id; 
-                toggleColumn = id; 
-            }; 
-            CLASS = SPQueueController; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                columnsMenu = NSMenu; 
-                menuBrowseUsersFiles = NSMenu; 
-                menuItemBrowseUsersFiles = NSMenuItem; 
-                menuItemRemoveQueue = NSMenuItem; 
-                menuItemRemoveSource = NSMenuItem; 
-                menuItemRemoveUserFromQueue = NSMenuItem; 
-                menuItemSearchByTTH = NSMenuItem; 
-                menuItemSearchForAlternates = NSMenuItem; 
-                menuPriorityHigh = NSMenuItem; 
-                menuPriorityHighest = NSMenuItem; 
-                menuPriorityLow = NSMenuItem; 
-                menuPriorityLowest = NSMenuItem; 
-                menuPriorityNormal = NSMenuItem; 
-                menuPriorityPaused = NSMenuItem; 
-                menuRemoveSource = NSMenu; 
-                menuRemoveUserFromQueue = NSMenu; 
-                queueMenu = NSMenu; 
-                queueView = NSView; 
-                tableView = SPOutlineView; 
-                tcExactSize = NSTableColumn; 
-                tcPath = NSTableColumn; 
-                tcPriority = NSTableColumn; 
-                tcSize = NSTableColumn; 
-                tcStatus = NSTableColumn; 
-                tcTTH = NSTableColumn; 
-                tcUsers = NSTableColumn; 
-            }; 
-            SUPERCLASS = NSWindowController; 
-        }, 
-        {CLASS = SPQueueItem; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = SPQueueSource; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = SPTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
-        {CLASS = XBorderedView; LANGUAGE = ObjC; SUPERCLASS = NSView; }
-    ); 
-    IBVersion = 1; 
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IBClasses</key>
+	<array>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenu</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>SPProgressIndicatorCell</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSLevelIndicatorCell</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key></key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>FirstResponder</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>SPOutlineView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSOutlineView</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>browseUsersFiles</key>
+				<string>id</string>
+				<key>clearAllFinishedDownloads</key>
+				<string>id</string>
+				<key>openSelected</key>
+				<string>id</string>
+				<key>removeFromQueue</key>
+				<string>id</string>
+				<key>removeSource</key>
+				<string>id</string>
+				<key>removeUserFromQueue</key>
+				<string>id</string>
+				<key>revealInFinder</key>
+				<string>id</string>
+				<key>searchByTTH</key>
+				<string>id</string>
+				<key>searchForAlternates</key>
+				<string>id</string>
+				<key>setPriority</key>
+				<string>id</string>
+				<key>toggleColumn</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>SPQueueController</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>columnsMenu</key>
+				<string>NSMenu</string>
+				<key>menuBrowseUsersFiles</key>
+				<string>NSMenu</string>
+				<key>menuItemBrowseUsersFiles</key>
+				<string>NSMenuItem</string>
+				<key>menuItemRemoveQueue</key>
+				<string>NSMenuItem</string>
+				<key>menuItemRemoveSource</key>
+				<string>NSMenuItem</string>
+				<key>menuItemRemoveUserFromQueue</key>
+				<string>NSMenuItem</string>
+				<key>menuItemSearchByTTH</key>
+				<string>NSMenuItem</string>
+				<key>menuItemSearchForAlternates</key>
+				<string>NSMenuItem</string>
+				<key>menuPriorityHigh</key>
+				<string>NSMenuItem</string>
+				<key>menuPriorityHighest</key>
+				<string>NSMenuItem</string>
+				<key>menuPriorityLow</key>
+				<string>NSMenuItem</string>
+				<key>menuPriorityLowest</key>
+				<string>NSMenuItem</string>
+				<key>menuPriorityNormal</key>
+				<string>NSMenuItem</string>
+				<key>menuPriorityPaused</key>
+				<string>NSMenuItem</string>
+				<key>menuRemoveSource</key>
+				<string>NSMenu</string>
+				<key>menuRemoveUserFromQueue</key>
+				<string>NSMenu</string>
+				<key>queueMenu</key>
+				<string>NSMenu</string>
+				<key>queueView</key>
+				<string>NSView</string>
+				<key>tableView</key>
+				<string>SPOutlineView</string>
+				<key>tcExactSize</key>
+				<string>NSTableColumn</string>
+				<key>tcPath</key>
+				<string>NSTableColumn</string>
+				<key>tcPriority</key>
+				<string>NSTableColumn</string>
+				<key>tcSize</key>
+				<string>NSTableColumn</string>
+				<key>tcStatus</key>
+				<string>NSTableColumn</string>
+				<key>tcTTH</key>
+				<string>NSTableColumn</string>
+				<key>tcUsers</key>
+				<string>NSTableColumn</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSWindowController</string>
+		</dict>
+	</array>
+	<key>IBVersion</key>
+	<string>1</string>
+</dict>
+</plist>

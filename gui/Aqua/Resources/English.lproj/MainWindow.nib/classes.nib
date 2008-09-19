@@ -42,6 +42,14 @@
 		</dict>
 		<dict>
 			<key>CLASS</key>
+			<string>SPProgressIndicatorCell</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSLevelIndicatorCell</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>FirstResponder</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>

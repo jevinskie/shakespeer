@@ -30,7 +30,7 @@
 @interface SPTransferItem : NSObject
 {
     NSString *nick;
-    NSString *status;
+    NSNumber *status;
     NSAttributedString *filename;
     NSAttributedString *pathname;
     uint64_t exactSize;
@@ -50,7 +50,7 @@
         hubAddress:(NSString *)aHubAddress
          direction:(int)aDirection;
 - (NSString *)nick;
-- (void)setStatus:(NSString *)aStatusString;
+- (void)setStatus:(NSNumber *)status;
 - (NSString *)targetFilename;
 - (NSString *)filename;
 - (void)setFilename:(NSString *)aFilename;

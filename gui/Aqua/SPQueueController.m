@@ -19,17 +19,15 @@
  */
 
 #import "SPQueueController.h"
+#import "SPQueueItem.h"
 #import "SPApplicationController.h"
 #import "NSStringExtensions.h"
 #import "SPMainWindowController.h"
 #import "SPTransformers.h"
-#import "SPLog.h"
-#import "SPOutlineView.h"
 #import "SPNotificationNames.h"
 #import "SPUserDefaultKeys.h"
 #import "NSMenu-MassRemovalAdditions.h"
-
-#include "util.h"
+#import "SPProgressIndicatorCell.h"
 
 @implementation SPQueueController
 
@@ -92,11 +90,6 @@
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(setPriorityNotification:)
                                                      name:SPNotificationSetPriority
-                                                   object:nil];
-
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(downloadStartingNotification:)
-                                                     name:SPNotificationDownloadStarting
                                                    object:nil];
 
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -652,6 +645,17 @@
                item:(id)item
 {
     SPQueueItem *qi = item;
+    
+    // Provide a status string for the inline progress bar
+    if ([cell isKindOfClass:[SPProgressIndicatorCell class]]) {
+        NSDictionary *fontAttributes = [NSDictionary dictionaryWithObjectsAndKeys:
+                                        [NSFont systemFontOfSize:11.0], NSFontAttributeName,
+                                        nil];
+        NSAttributedString *attributedStatusString = [[NSAttributedString alloc] initWithString:[qi statusString]
+                                                                                     attributes:fontAttributes];
+        [cell setAttributedStringValue:attributedStatusString];
+        [attributedStatusString release];
+    }
 
     if ([[tableColumn identifier] isEqualToString:@"filename"]) {
         share_type_t type = [qi filetype];
@@ -841,19 +845,13 @@
     }
 }
 
-- (void)setStatus:(NSString *)aStatusString forTarget:(NSString *)targetFilename
+- (void)setStatusString:(NSString *)statusString forTarget:(NSString *)targetFilename
 {
     SPQueueItem *qi = [self findItemWithTarget:targetFilename];
     if (qi) {
-        [qi setStatus:aStatusString];
+        [qi setStatusString:statusString];
         [tableView reloadData];
     }
-}
-
-- (void)downloadStartingNotification:(NSNotification *)aNotification
-{
-    NSString *targetFilename = [[aNotification userInfo] objectForKey:@"targetFilename"];
-    [self setStatus:@"Downloading" forTarget:targetFilename];
 }
 
 - (void)transferStatsNotification:(NSNotification *)aNotification
@@ -865,8 +863,8 @@
             unsignedLongLongValue];
         uint64_t size = [[[aNotification userInfo] objectForKey:@"size"]
             unsignedLongLongValue];
-
-        [qi setStatus:[NSString stringWithFormat:@"%.1f%% ready", (float)offset / (size ? size : 1) * 100]];
+        
+        [qi setStatus:[NSNumber numberWithFloat:(float)offset / (size ? size : 100) * 100]];
         [tableView reloadData];
     }
 }
@@ -874,258 +872,7 @@
 - (void)transferAbortedNotification:(NSNotification *)aNotification
 {
     NSString *targetFilename = [[aNotification userInfo] objectForKey:@"targetFilename"];
-    [self setStatus:@"Aborted" forTarget:targetFilename];
+    [self setStatusString:@"Aborted" forTarget:targetFilename];
 }
 
 @end
-
-@implementation SPQueueItem
-
-- (id)initWithTarget:(NSString *)aTarget
-{
-    if ((self = [super init])) {
-        target = [aTarget retain];
-        path = [[[aTarget stringByDeletingLastPathComponent] stringByAbbreviatingWithTildeInPath] retain];
-        filename = [[aTarget lastPathComponent] retain];
-        displayName = [filename retain];
-        size = [[NSNumber numberWithUnsignedLongLong:0] retain];
-        sources = [[NSMutableDictionary alloc] init];
-        [self setPriority:[NSNumber numberWithInt:3]]; /* Normal priority */
-        [self setStatus:@"Queued"];
-    }
-    return self;
-}
-
-- (id)initWithTarget:(NSString *)aTarget displayName:(NSString *)aDisplayName
-{
-    if ((self = [self initWithTarget:aTarget])) {
-        [displayName autorelease];
-        displayName = [aDisplayName copy];
-    }
-    
-    return self;
-}
-
-- (void)dealloc
-{
-    [target release];
-    [filename release];
-    [displayName release];
-    [path release];
-    [tth release];
-    [attributedTTH release];
-    [size release];
-    [priority release];
-    [priorityString release];
-    [sources release];
-    [children release];
-    [status release];
-    [super dealloc];
-}
-
-- (NSString *)filename
-{
-    return filename;
-}
-
-- (NSString *)displayName
-{
-    return displayName;
-}
-
-- (NSString *)path
-{
-    return path;
-}
-
-- (NSString *)target
-{
-    return target;
-}
-
-- (NSString *)tth
-{
-    return tth;
-}
-
-- (NSAttributedString *)attributedTTH
-{
-    return attributedTTH;
-}
-
-- (void)setTTH:(NSString *)aTTH
-{
-    if (aTTH != tth) {
-        [tth release];
-        tth = [aTTH retain];
-        [attributedTTH release];
-        attributedTTH = [tth truncatedString:NSLineBreakByTruncatingMiddle];
-    }
-}
-
-- (NSNumber *)size
-{
-    return size;
-}
-
-- (NSNumber *)exactSize
-{
-    return size;
-}
-
-- (void)setSize:(NSNumber *)aSize
-{
-    if (aSize != size) {
-        [size release];
-        size = [aSize retain];
-    }
-}
-
-- (void)addSource:(NSString *)sourcePath nick:(NSString *)nick
-{
-    [sources setObject:sourcePath forKey:nick];
-}
-
-- (void)removeSourceForNick:(NSString *)nick
-{
-    [sources removeObjectForKey:nick];
-}
-
-- (NSArray *)nicks
-{
-    return [sources allKeys];
-}
-
-- (NSMutableArray *)children
-{
-    return children;
-}
-
-- (void)setIsFilelist:(BOOL)aFlag
-{
-    isFilelist = aFlag;
-}
-
-- (BOOL)isFilelist
-{
-    return isFilelist;
-}
-
-- (void)setIsDirectory
-{
-    isDirectory = YES;
-    if (children == nil)
-        children = [[NSMutableArray alloc] init];
-}
-
-- (BOOL)isDirectory
-{
-    return isDirectory;
-}
-
-- (NSString *)users
-{
-    NSArray *nicks = [self nicks];
-
-    NSString *usersString = nil;
-    switch([nicks count]) {
-        case 0:
-            usersString = @"none";
-            break;
-        case 1:
-            usersString = [nicks objectAtIndex:0];
-            break;
-        case 2:
-            usersString = [NSString stringWithFormat:@"%@, %@", [nicks objectAtIndex:0], [nicks objectAtIndex:1]];
-            break;
-        case 3:
-            usersString = [NSString stringWithFormat:@"%@, %@, %@", [nicks objectAtIndex:0], [nicks objectAtIndex:1], [nicks objectAtIndex:2]];
-            break;
-        default:
-            usersString = [NSString stringWithFormat:@"%i users", [nicks count]];
-            break;
-    }
-    return [[usersString truncatedString:NSLineBreakByTruncatingTail] autorelease];
-}
-
-- (int)filetype
-{
-    return share_filetype([filename UTF8String]);
-}
-
-- (NSNumber *)priority
-{
-    return priority;
-}
-
-- (NSAttributedString *)priorityString
-{
-    return priorityString;
-}
-
-- (void)setPriority:(NSNumber *)aPriority
-{
-    if (aPriority != priority) {
-        [priority release];
-        priority = [aPriority retain];
-
-        [priorityString release];
-
-        switch([aPriority unsignedIntValue]) {
-            case 0:
-                priorityString = [@"Paused" truncatedString:NSLineBreakByTruncatingMiddle];
-                break;
-            case 1:
-                priorityString = [@"Lowest" truncatedString:NSLineBreakByTruncatingMiddle];
-                break;
-            case 2:
-                priorityString = [@"Low" truncatedString:NSLineBreakByTruncatingMiddle];
-                break;
-            case 4:
-                priorityString = [@"High" truncatedString:NSLineBreakByTruncatingMiddle];
-                break;
-            case 5:
-                priorityString = [@"Highest" truncatedString:NSLineBreakByTruncatingMiddle];
-                break;
-            case 3:
-           default:
-                priorityString = [@"Normal" truncatedString:NSLineBreakByTruncatingMiddle];
-                break;
-        }
-    }
-}
-
-- (void)setStatus:(NSString *)aStatusString
-{
-    [status release];
-    status = [aStatusString truncatedString:NSLineBreakByTruncatingTail];
-}
-
-- (NSAttributedString *)status
-{
-    return status;
-}
-
-- (void)setFinished
-{
-    [self setStatus:@"Finished"];
-    isFinished = YES;
-}
-
-- (BOOL)isFinished
-{
-    return isFinished;
-}
-
-- (BOOL)isWaitingToBeRemoved
-{
-    return isWaitingToBeRemoved;
-}
-
-- (void)setIsWaitingToBeRemoved:(BOOL)waitingToBeRemoved
-{
-    isWaitingToBeRemoved = waitingToBeRemoved;
-}
-
-@end
-

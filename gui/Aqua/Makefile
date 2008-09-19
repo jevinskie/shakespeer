@@ -49,7 +49,9 @@ SOURCES = \
 	UKCrashReporter.m \
 	SPFriendsController.m \
 	NSMenu-MassRemovalAdditions.m \
-	NSTextView-ChatFormattingAdditions.m 
+	NSTextView-ChatFormattingAdditions.m \
+	SPProgressIndicatorCell.m \
+	SPQueueItem.m
 
 SPApplicationController.o SPClientBridge.o: $(TOP)/version.mk
 

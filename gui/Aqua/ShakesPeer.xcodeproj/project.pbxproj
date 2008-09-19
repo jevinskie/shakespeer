@@ -14,6 +14,8 @@
 		280317550AD9E9D5000CC734 /* ToolbarDrawer.tif in Resources */ = {isa = PBXBuildFile; fileRef = 280317540AD9E9D5000CC734 /* ToolbarDrawer.tif */; };
 		2805B9090A02B6CE00F65FBC /* sphashd in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2805B9040A02B6AE00F65FBC /* sphashd */; };
 		2805B90A0A02B6CE00F65FBC /* sphubd in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2805B9050A02B6AE00F65FBC /* sphubd */; };
+		285D8F570E83DA6C008BF3AE /* SPProgressIndicatorCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 285D8F550E83DA6C008BF3AE /* SPProgressIndicatorCell.m */; };
+		285D8F5A0E83DA7B008BF3AE /* SPQueueItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 285D8F590E83DA7B008BF3AE /* SPQueueItem.m */; };
 		286B19EA0A2A1354001D9687 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 286B19E90A2A1354001D9687 /* Security.framework */; };
 		287851BA0A179F5D00A2992F /* minus.png in Resources */ = {isa = PBXBuildFile; fileRef = 287851B90A179F5D00A2992F /* minus.png */; };
 		287851BC0A179F6500A2992F /* plus.png in Resources */ = {isa = PBXBuildFile; fileRef = 287851BB0A179F6500A2992F /* plus.png */; };
@@ -184,6 +186,10 @@
 		280317540AD9E9D5000CC734 /* ToolbarDrawer.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = ToolbarDrawer.tif; path = Resources/Images/ToolbarDrawer.tif; sourceTree = "<group>"; };
 		2805B9040A02B6AE00F65FBC /* sphashd */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = sphashd; path = ../../sphubd/sphashd; sourceTree = SOURCE_ROOT; };
 		2805B9050A02B6AE00F65FBC /* sphubd */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = sphubd; path = ../../sphubd/sphubd; sourceTree = SOURCE_ROOT; };
+		285D8F550E83DA6C008BF3AE /* SPProgressIndicatorCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPProgressIndicatorCell.m; sourceTree = "<group>"; };
+		285D8F560E83DA6C008BF3AE /* SPProgressIndicatorCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPProgressIndicatorCell.h; sourceTree = "<group>"; };
+		285D8F580E83DA7B008BF3AE /* SPQueueItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPQueueItem.h; sourceTree = "<group>"; };
+		285D8F590E83DA7B008BF3AE /* SPQueueItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPQueueItem.m; sourceTree = "<group>"; };
 		286B19E90A2A1354001D9687 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		287851B90A179F5D00A2992F /* minus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = minus.png; path = Resources/Images/minus.png; sourceTree = "<group>"; };
 		287851BB0A179F6500A2992F /* plus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = plus.png; path = Resources/Images/plus.png; sourceTree = "<group>"; };
@@ -395,6 +401,10 @@
 		280318170ADA8800000CC734 /* Other sources */ = {
 			isa = PBXGroup;
 			children = (
+				285D8F580E83DA7B008BF3AE /* SPQueueItem.h */,
+				285D8F590E83DA7B008BF3AE /* SPQueueItem.m */,
+				285D8F560E83DA6C008BF3AE /* SPProgressIndicatorCell.h */,
+				285D8F550E83DA6C008BF3AE /* SPProgressIndicatorCell.m */,
 				28D1DFA20A2A023000F9F9EE /* SPKeychain.h */,
 				28D1DFA30A2A023000F9F9EE /* SPKeychain.m */,
 				FF05422C09CCB9070032DE2D /* SPClientBridge.h */,
@@ -837,6 +847,8 @@
 				28E086420D8418E0006CF70A /* SPFriendsController.m in Sources */,
 				28C2C1530DF17EDD001AAA51 /* NSMenu-MassRemovalAdditions.m in Sources */,
 				0A343A3E0E6BD838003CBF20 /* NSTextView-ChatFormattingAdditions.m in Sources */,
+				285D8F570E83DA6C008BF3AE /* SPProgressIndicatorCell.m in Sources */,
+				285D8F5A0E83DA7B008BF3AE /* SPQueueItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
