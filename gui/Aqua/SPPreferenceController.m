@@ -685,11 +685,11 @@ static float ToolbarHeightForWindow(NSWindow *window)
 
     [testConnectionProgress stopAnimation:self];
     if (status == TC_RET_OK) {
-        [testResults setTextColor:[NSColor greenColor]];
+        [testResults setTextColor:[NSColor colorWithCalibratedRed:0.0 green:0.78 blue:0.0 alpha:1.0]];
         [testResults setStringValue:@"Connection is OK"];
     }
     else {
-        [testResults setTextColor:[NSColor redColor]];
+        [testResults setTextColor:[NSColor colorWithCalibratedRed:0.78 green:0.0 blue:0.0 alpha:1.0]];
         NSString *errmsg = nil;
         if (status & TC_RET_PRIVPORT) {
             errmsg = @"Refused to test privileged port";
