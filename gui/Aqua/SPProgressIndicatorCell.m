@@ -23,10 +23,17 @@
 
 @implementation SPProgressIndicatorCell
 
+- (id)init
+{
+    if ((self = [super init])) {
+        attributedStringValue = [[NSAttributedString alloc] initWithString:@""];
+    }
+    
+    return self;
+}
+
 - (void)awakeFromNib
 {
-    attributedStringValue = [[NSAttributedString alloc] initWithString:@""];
-    
     // Setup our values programmatically to ensure consistency
     [self setLevelIndicatorStyle:NSContinuousCapacityLevelIndicatorStyle];
     [self setFloatValue:0.0];
@@ -42,17 +49,39 @@
     [super dealloc];
 }
 
+- (id)copyWithZone:(NSZone *)aZone
+{
+    SPProgressIndicatorCell *copy = [super copyWithZone:aZone];
+    copy->attributedStringValue = [attributedStringValue retain];
+    return copy;
+}
+
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
-    // Check if transfer is in progress
     float currentValue = [self floatValue];
-    if (currentValue > 1.0 && currentValue < 100.0) {
-        // Draw our progress bar
+    if (currentValue != 0.0 && currentValue < 100.0) {
+        // A transfer is in progress: draw the progress bar.
         [super drawWithFrame:cellFrame inView:controlView];
     }
 	else {
-        // Draw just the status string
-        [[self attributedStringValue] drawInRect:cellFrame];
+        // No transfer is in progress: draw a status string instead of the bar.
+        NSRect textRect = cellFrame;
+        textRect.size = [attributedStringValue size];
+        textRect.origin.x += 2; // Don't hug the left of the cell.
+        
+        NSMutableAttributedString *mas = [[NSMutableAttributedString alloc] initWithAttributedString:attributedStringValue];
+        NSRange fullRange = NSMakeRange(0, [attributedStringValue length]);
+        
+        if ([self isHighlighted] && 
+            [[controlView window] firstResponder] == controlView && 
+            [[NSApplication sharedApplication] isActive]) {
+            [mas addAttribute:NSForegroundColorAttributeName
+                        value:[NSColor highlightColor]
+                        range:fullRange];
+        }
+        
+        [self setAttributedStringValue:[mas autorelease]];
+        [attributedStringValue drawInRect:textRect];
     }
 }
 

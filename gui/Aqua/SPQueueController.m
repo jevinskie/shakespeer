@@ -654,6 +654,11 @@
         NSAttributedString *attributedStatusString = [[NSAttributedString alloc] initWithString:[qi statusString]
                                                                                      attributes:fontAttributes];
         [cell setAttributedStringValue:attributedStatusString];
+        // Turn off the progress display if the transfer isn't finished and isn't in progress
+        if ([[qi statusString] isEqualToString:@"Aborted"] ||
+            [[qi statusString] isEqualToString:@"Queued"])
+            [cell setFloatValue:0.0];
+        
         [attributedStatusString release];
     }
 
@@ -865,6 +870,7 @@
             unsignedLongLongValue];
         
         [qi setStatus:[NSNumber numberWithFloat:(float)offset / (size ? size : 100) * 100]];
+        [qi setStatusString:@"Downloading"];
         [tableView reloadData];
     }
 }
