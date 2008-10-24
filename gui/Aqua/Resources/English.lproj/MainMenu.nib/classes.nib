@@ -9,7 +9,7 @@
 			<dict>
 				<key>clearRecentHubs</key>
 				<string>id</string>
-				<key>closeCurrentSidebarItem</key>
+				<key>closeCurrentWindow</key>
 				<string>id</string>
 				<key>connectToBackendServer</key>
 				<string>id</string>
@@ -40,6 +40,8 @@
 				<key>showFriendsView</key>
 				<string>id</string>
 				<key>showLogfiles</key>
+				<string>id</string>
+				<key>showMainWindow</key>
 				<string>id</string>
 				<key>showPreferences</key>
 				<string>id</string>

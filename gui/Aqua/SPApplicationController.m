@@ -429,22 +429,28 @@ else {
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem
 {
     SEL action = [menuItem action];
+    BOOL mainWindowVisible = [[mainWindowController window] isVisible];
+    
     if (action == @selector(connectToBackendServer:))
         return !connectedToBackend;
-    else if (action == @selector(showConnectView:))
-        return connectedToBackend;
-    else if (action == @selector(showAdvancedSearch:))
-        return connectedToBackend;
-    else if (action == @selector(showBookmarkView:))
-        return connectedToBackend;
-    else if (action == @selector(showQueueView:))
-        return connectedToBackend;
-    else if (action == @selector(showTransferView:))
-        return connectedToBackend;
-    else if (action == @selector(closeCurrentSidebarItem:))
-        return connectedToBackend;
-    /* else if (menuItem == menuItemRecentHubs) */
-        /* return connectedToBackend; */
+    else if (action == @selector(showConnectView:) ||
+             action == @selector(showAdvancedSearch:) ||
+             action == @selector(showPublicHubsView:) ||
+             action == @selector(showFriendsView:) ||
+             action == @selector(showBookmarksView:) ||
+             action == @selector(showDownloadsView:) ||
+             action == @selector(showUploadsView:) ||
+             action == @selector(prevSidebarItem:) ||
+             action == @selector(nextSidebarItem:) ||
+             action == @selector(toggleDrawer:) ||
+             action == @selector(openRecentFilelist:) ||
+             action == @selector(recentOpenHub:))
+        return (connectedToBackend && mainWindowVisible);
+    else if (action == @selector(closeCurrentWindow:))
+        return [NSApp keyWindow] != nil;
+    else if (action == @selector(showMainWindow:))
+        return !mainWindowVisible;
+    
     return YES;
 }
 
@@ -890,6 +896,43 @@ else {
     [mainWindowController connectShow:sender];
 }
 
+- (IBAction)showAdvancedSearch:(id)sender
+{
+    [mainWindowController advSearchShow:sender];
+}
+
+- (IBAction)showServerMessages:(id)sender
+{
+    SPMessagePanel *mp = [SPMessagePanel sharedMessagePanel];
+    [mp show];
+}
+
+- (IBAction)rescanSharedFolders:(id)sender
+{
+    [[SPPreferenceController sharedPreferences] updateAllSharedPaths];
+}
+
+- (IBAction)showMainWindow:(id)sender
+{
+    [mainWindowController showWindow:self];
+}
+
+- (IBAction)closeCurrentWindow:(id)sender
+{
+    if ([[SPPreferenceController sharedPreferences] isKeyWindow]) {
+        [[SPPreferenceController sharedPreferences] close];
+    }
+    else if ([[SPMessagePanel sharedMessagePanel] isKeyWindow]) {
+        [[SPMessagePanel sharedMessagePanel] close];
+    }
+    else {
+        [[NSApp keyWindow] performClose:self];
+    }
+}
+
+#pragma mark -
+#pragma mark Sidebar actions
+
 - (IBAction)showPublicHubsView:(id)sender
 {
     [mainWindowController openHublist:self];
@@ -915,24 +958,6 @@ else {
     [mainWindowController openUploads:self];
 }
 
-- (IBAction)closeCurrentSidebarItem:(id)sender
-{
-    if ([[SPPreferenceController sharedPreferences] isKeyWindow]) {
-        [[SPPreferenceController sharedPreferences] close];
-    }
-    else if ([[SPMessagePanel sharedMessagePanel] isKeyWindow]) {
-        [[SPMessagePanel sharedMessagePanel] close];
-    }
-    else {
-        [mainWindowController closeCurrentSidebarItem];
-    }
-}
-
-- (IBAction)showAdvancedSearch:(id)sender
-{
-    [mainWindowController advSearchShow:sender];
-}
-
 - (IBAction)prevSidebarItem:(id)sender
 {
     [mainWindowController prevSidebarItem];
@@ -941,17 +966,6 @@ else {
 - (IBAction)nextSidebarItem:(id)sender
 {
     [mainWindowController nextSidebarItem];
-}
-
-- (IBAction)showServerMessages:(id)sender
-{
-    SPMessagePanel *mp = [SPMessagePanel sharedMessagePanel];
-    [mp show];
-}
-
-- (IBAction)rescanSharedFolders:(id)sender
-{
-    [[SPPreferenceController sharedPreferences] updateAllSharedPaths];
 }
 
 #pragma mark -
@@ -973,6 +987,15 @@ else {
 		// we clear any currently cached list on shutdown.
 		[[NSUserDefaults standardUserDefaults] setObject:[NSArray array] forKey:SPPrefsLastConnectedHubs];
 	}
+}
+
+- (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication
+                    hasVisibleWindows:(BOOL)flag
+{
+    if (!flag)
+        [[mainWindowController window] makeKeyAndOrderFront:nil];
+
+	return NO;
 }
 
 #pragma mark -

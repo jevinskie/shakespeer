@@ -62,7 +62,8 @@ void sendNotification(NSString *notificationName, NSString *key1, id arg1, ...);
 - (IBAction)showBookmarksView:(id)sender;
 - (IBAction)showDownloadsView:(id)sender;
 - (IBAction)showUploadsView:(id)sender;
-- (IBAction)closeCurrentSidebarItem:(id)sender;
+- (IBAction)showMainWindow:(id)sender;
+- (IBAction)closeCurrentWindow:(id)sender;
 - (IBAction)showAdvancedSearch:(id)sender;
 - (IBAction)rescanSharedFolders:(id)sender;
 
