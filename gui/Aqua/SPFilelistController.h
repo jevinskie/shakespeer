@@ -25,7 +25,7 @@
 
 @class SPOutlineView;
 
-@interface SPFilelistController : NSObject < SPSideBarItem >
+@interface SPFilelistController : NSObject <SPSideBarItem>
 {
     IBOutlet NSView *filelistView;
     IBOutlet SPOutlineView *filelist;

@@ -168,7 +168,7 @@
 #pragma mark -
 #pragma mark Sidebar support
 
-- (id)view
+- (NSView *)view
 {
     return queueView;
 }

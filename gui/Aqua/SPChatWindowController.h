@@ -22,7 +22,7 @@
 #import <Cocoa/Cocoa.h>
 #import "SPSideBar.h"
 
-@interface SPChatWindowController : NSObject < SPSideBarItem >
+@interface SPChatWindowController : NSObject <SPSideBarItem>
 {
     IBOutlet NSTextView *chatTextView;
     IBOutlet NSView *chatView;

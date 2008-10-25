@@ -26,7 +26,7 @@
 @class SPUser;
 
 /* There is one HubController created for each hub you're connected to. */
-@interface SPHubController : NSWindowController < SPSideBarItem >
+@interface SPHubController : NSWindowController <SPSideBarItem>
 {
     IBOutlet NSTextView *chatView;
     IBOutlet NSTextField *chatInput;

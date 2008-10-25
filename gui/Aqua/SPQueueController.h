@@ -19,10 +19,11 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "SPSideBar.h"
 
 @class SPOutlineView;
 
-@interface SPQueueController : NSWindowController
+@interface SPQueueController : NSWindowController <SPSideBarItem>
 {
     IBOutlet NSView *queueView;
     IBOutlet SPOutlineView *tableView;

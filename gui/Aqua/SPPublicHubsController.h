@@ -30,7 +30,7 @@
  * PublicHubsController is a subclass of NSTabViewItem. After initWithIdentifier: is called
  * it is ready to be put in an NSTabView.
  */
-@interface SPPublicHubsController : NSObject < SPSideBarItem >
+@interface SPPublicHubsController : NSObject <SPSideBarItem>
 {
     IBOutlet NSView *hubListView;
     IBOutlet FilteringArrayController *arrayController;

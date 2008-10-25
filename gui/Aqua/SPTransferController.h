@@ -65,7 +65,7 @@
 
 @end
 
-@interface SPTransferController : NSObject < SPSideBarItem >
+@interface SPTransferController : NSObject <SPSideBarItem>
 {
     NSMutableArray *transfers;
 

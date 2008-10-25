@@ -25,7 +25,7 @@
 
 @class SPOutlineView;
 
-@interface SPSearchWindowController : NSWindowController < SPSideBarItem >
+@interface SPSearchWindowController : NSWindowController <SPSideBarItem>
 {
     IBOutlet SPOutlineView *searchResultTable;
     IBOutlet NSTextField *statusField;

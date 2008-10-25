@@ -22,7 +22,7 @@
 #import <Cocoa/Cocoa.h>
 #import "SPSideBar.h"
 
-@interface SPBookmarkController : NSObject < SPSideBarItem >
+@interface SPBookmarkController : NSObject <SPSideBarItem>
 {
     IBOutlet NSView *bookmarkView;
     IBOutlet NSArrayController *arrayController;

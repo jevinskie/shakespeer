@@ -28,7 +28,7 @@ extern NSString *SP_GROWL_PRIVATE_MESSAGE;
 extern NSString *SP_GROWL_NICK_IN_MAINCHAT;
 extern NSString *SP_GROWL_DOWNLOAD_FINISHED;
 
-@interface SPGrowlBridge : NSObject < GrowlApplicationBridgeDelegate >
+@interface SPGrowlBridge : NSObject <GrowlApplicationBridgeDelegate>
 {
 }
 
