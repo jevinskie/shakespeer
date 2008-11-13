@@ -281,13 +281,11 @@ static int share_save_xml(share_t *share, const char *filename, xerr_t **err)
 
     DEBUG("saving XML filelist to %s...", filename);
     FILE *fp = fopen(filename, "w");
-    if(fp == 0)
-    {
+    if (fp == 0) {
         xerr_set(err, -1, "%s: %s", filename, strerror(errno));
         rc = -1;
     }
-    else
-    {
+    else {
         share_save_context_t ctx;
         memset(&ctx, 0, sizeof(share_save_context_t));
 
@@ -306,7 +304,9 @@ static int share_save_xml(share_t *share, const char *filename, xerr_t **err)
         fclose(fp);
 
         char *dest;
-        asprintf(&dest, "%s.bz2", filename);
+        int num_returned_bytes = asprintf(&dest, "%s.bz2", filename);
+        if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
         rc = bz2_encode(filename, dest, err);
         free(dest);
     }
@@ -321,22 +321,18 @@ int share_save(share_t *share, unsigned type)
     return_val_if_fail(share, -1);
     return_val_if_fail(type == FILELIST_XML, -1);
 
-    if((type & FILELIST_XML) == FILELIST_XML)
-    {
+    if ((type & FILELIST_XML) == FILELIST_XML) {
         char *xml_filename;
-        asprintf(&xml_filename, "%s/files.xml", global_working_directory);
-        if(!share->uptodate || access(xml_filename, F_OK) == -1)
-        {
+        int num_returned_bytes = asprintf(&xml_filename, "%s/files.xml", global_working_directory);
+        if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
+        if (!share->uptodate || access(xml_filename, F_OK) == -1)
             rc = share_save_xml(share, xml_filename, NULL);
-        }
         else
-        {
-            DEBUG("share up to date and file exists,"
-                    " skipping saving xml file");
-        }
+            DEBUG("share up to date and file exists, skipping saving xml file");
+
         free(xml_filename);
     }
-
 
     share->uptodate = (rc == 0 ? true : false);
 

@@ -168,19 +168,18 @@ static int cc_send_command_internal(cc_t *cc, int convert_from_utf8,
 
     int rc = -1;
     char *command = 0;
-    vasprintf(&command, fmt, ap);
-    if(convert_from_utf8)
-    {
+    int num_returned_bytes = vasprintf(&command, fmt, ap);
+    if (num_returned_bytes == -1)
+        DEBUG("vasprintf did not return anything");
+    if (convert_from_utf8) {
         return_val_if_fail(cc->hub, -1);
-        char *command_encoded = str_utf8_to_escaped_legacy(command,
-                cc->hub->encoding);
+        char *command_encoded = str_utf8_to_escaped_legacy(command, cc->hub->encoding);
         rc = cc_send_string(cc, command_encoded);
         free(command_encoded);
     }
     else
-    {
         rc = cc_send_string(cc, command);
-    }
+
     free(command);
 
     return rc;
@@ -468,8 +467,11 @@ cc_t *cc_find_by_target_directory(const char *target_directory)
     char *x;
     if(str_has_suffix(target_directory, "/"))
         x = strdup(target_directory);
-    else
-        asprintf(&x, "%s/", target_directory);
+    else {
+        int num_returned_bytes = asprintf(&x, "%s/", target_directory);
+        if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
+    }
 
     DEBUG("looking for transfers with prefix [%s]", x);
 

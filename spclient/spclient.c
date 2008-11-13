@@ -59,9 +59,10 @@ int sp_connect(sp_t *sp, const char *working_directory, const char *executable_p
     return_val_if_fail(working_directory, -1);
 
     char *socket_filename;
-    asprintf(&socket_filename, "%s/sphubd", working_directory);
-    int fd = io_exec_and_connect_unix(socket_filename,
-            executable_path, working_directory);
+    int num_returned_bytes = asprintf(&socket_filename, "%s/sphubd", working_directory);
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
+    int fd = io_exec_and_connect_unix(socket_filename, executable_path, working_directory);
     free(socket_filename);
 
     return sp_attach_io_channel(sp, fd);
@@ -151,7 +152,9 @@ int sp_send_command(sp_t *sp, const char *fmt, ...)
 
     va_start(ap, fmt);
     char *cmd;
-    vasprintf(&cmd, fmt, ap);
+    int num_returned_bytes = vasprintf(&cmd, fmt, ap);
+    if (num_returned_bytes == -1)
+        DEBUG("vasprintf did not return anything");
     rc = sp_send_string(sp, cmd);
     free(cmd);
     va_end(ap);

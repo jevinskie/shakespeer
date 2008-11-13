@@ -12,7 +12,7 @@ include $(TOP)/extern.mk
 # set to yes if you want to build the command line interface
 WANT_CLI ?= no
 
-CFLAGS+=-g -O3 -Wall -Werror -DVERSION=\"$(VERSION)\" -DPACKAGE=\"$(PACKAGE)\"
+CFLAGS+=-g -O3 -Wall -Werror -Wno-strict-aliasing -DVERSION=\"$(VERSION)\" -DPACKAGE=\"$(PACKAGE)\"
 CFLAGS+=-I$(TOP)/splib -I${TOP}/spclient
 
 os := $(shell uname)

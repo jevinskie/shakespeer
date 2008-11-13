@@ -89,7 +89,9 @@ BEGIN {
             printf("    va_list ap;\n");
             printf("    va_start(ap, %s);\n", argnames[i-1]);
             printf("    char *v_%s = 0;\n", argnames[i-1]);
-            printf("    vasprintf(&v_%s, %s, ap);\n", argnames[i-1], argnames[i-1]);
+            printf("    int num_returned_bytes = vasprintf(&v_%s, %s, ap);\n", argnames[i-1], argnames[i-1]);
+            printf("    if (num_returned_bytes == -1)\n");
+            printf("        DEBUG(\"asprintf did not return anything\");");
             printf("    va_end(ap);\n");
             argnames[i-1] = sprintf("v_%s", argnames[i-1]);
             argtypes[i-1] = "...";

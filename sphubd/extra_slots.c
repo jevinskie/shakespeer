@@ -159,12 +159,13 @@ int extra_slots_init(void)
 	DEBUG("opening database %s", SLOTS_DB_FILENAME);
 
 	char *fname;
-	asprintf(&fname, "%s/%s", global_working_directory, SLOTS_DB_FILENAME);
+	int num_returned_bytes = asprintf(&fname, "%s/%s", global_working_directory, SLOTS_DB_FILENAME);
+	if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
 	xs_fp = fopen(fname, "a+");
 	free(fname);
 
-	if(xs_fp)
-	{
+	if (xs_fp) {
 		xs_loading = true;
 		extra_slots_parse();
 		xs_loading = false;

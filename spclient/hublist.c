@@ -305,27 +305,24 @@ hublist_t *hl_parse_url(const char *address, const char *workdir, xerr_t **err)
     hublist_t *result = 0;
 
     uhttp = uhttp_init();
-    if(uhttp_open_url(uhttp, address) == 0)
-    {
+    if (uhttp_open_url(uhttp, address) == 0) {
         char *slash;
 
         slash = strrchr(address, '/');
-        if(slash == 0)
-        {
+        if (slash == 0) {
             xerr_set(err, -1, "invalid address: %s", address);
             return NULL;
         }
 
         uhttp_get(uhttp);
         int rc = uhttp_read_response_headers(uhttp);
-        if(rc == 200)
-        {
+        if (rc == 200) {
             char *ofname;
-            asprintf(&ofname, "%s/%s", workdir, slash+1);
-            if(uhttp_read_response_file(uhttp, ofname) == 0)
-            {
+            int num_returned_bytes = asprintf(&ofname, "%s/%s", workdir, slash + 1);
+            if (num_returned_bytes == -1)
+                DEBUG("asprintf did not return anything");
+            if (uhttp_read_response_file(uhttp, ofname) == 0)
                 result = hl_parse_file(ofname, err);
-            }
             free(ofname);
         }
         else
@@ -334,9 +331,7 @@ hublist_t *hl_parse_url(const char *address, const char *workdir, xerr_t **err)
         uhttp_cleanup(uhttp);
     }
     else
-    {
         xerr_set(err, -1, "failed to fetch hublist file");
-    }
 
     assert(err || result);
 
@@ -347,15 +342,16 @@ char *hl_get_current(void)
 {
     char *working_directory = get_working_directory();
     char *hublist_filename;
-    asprintf(&hublist_filename, "%s/PublicHubList.xml.bz2", working_directory);
-
-    if(access(hublist_filename, F_OK) != 0)
-    {
+    int num_returned_bytes;
+    num_returned_bytes = asprintf(&hublist_filename, "%s/PublicHubList.xml.bz2", working_directory);
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
+    if (access(hublist_filename, F_OK) != 0) {
         free(hublist_filename);
-        asprintf(&hublist_filename, "%s/PublicHubList.config.bz2",
-                working_directory);
-        if(access(hublist_filename, F_OK) != 0)
-        {
+        num_returned_bytes = asprintf(&hublist_filename, "%s/PublicHubList.config.bz2", working_directory);
+        if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
+        if (access(hublist_filename, F_OK) != 0) {
             free(hublist_filename);
             hublist_filename = NULL;
         }

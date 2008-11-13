@@ -71,14 +71,14 @@ static int hub_search_match_callback(const share_search_t *search,
     hub_search_data_t *hsd = data;
     hub_t *hub = hsd->hub;
     char *response = 0;
+    int num_returned_bytes;
 
     char *virtual_path = share_local_to_virtual_path(global_share, file);
 
     DEBUG("sending SR for %s", virtual_path);
 
-    if(file->type == SHARE_TYPE_DIRECTORY)
-    {
-        asprintf(&response, "$SR %s %s %u/%u\x05%s%s (%s:%d)%s%s|",
+    if (file->type == SHARE_TYPE_DIRECTORY) {
+        num_returned_bytes = asprintf(&response, "$SR %s %s %u/%u\x05%s%s (%s:%d)%s%s|",
                 hub->me->nick,
                 virtual_path,
 		hub_slots_free(), hub_slots_total(),
@@ -88,10 +88,11 @@ static int hub_search_match_callback(const share_search_t *search,
                 hub->port,
                 hsd->passive ? "\x05" : "",
                 hsd->passive ? hsd->dest.nick : "");
+        if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
     }
-    else
-    {
-        asprintf(&response, "$SR %s %s\x05%"PRIu64" %u/%u\x05%s%s (%s:%d)%s%s|",
+    else {
+        num_returned_bytes = asprintf(&response, "$SR %s %s\x05%"PRIu64" %u/%u\x05%s%s (%s:%d)%s%s|",
                 hub->me->nick,
                 virtual_path,
                 file->size,
@@ -102,12 +103,13 @@ static int hub_search_match_callback(const share_search_t *search,
                 hub->port,
                 hsd->passive ? "\x05" : "",
                 hsd->passive ? hsd->dest.nick : "");
+        if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
     }
 
     free(virtual_path);
 
-    if(hsd->passive)
-    {
+    if (hsd->passive) {
         /* searching nick is passive, send results to hub */
         if(hub_send_command(hub, "%s", response) == 0)
         {
@@ -738,7 +740,9 @@ static int hub_cmd_Lock(hub_t *hub, const char *args)
 
     char *key = nmdc_lock2key(args);
     char *cmd = 0;
-    asprintf(&cmd, "$Key %s|", key);
+    int num_returned_bytes = asprintf(&cmd, "$Key %s|", key);
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
     hub_send_string(hub, cmd);
     free(cmd);
     free(key);
@@ -793,8 +797,11 @@ static int hub_cmd_Usercommand(void *data, int argc, char **argv)
                 /* add a pipe (encoded) to end of command if none found */
                 if(str_has_suffix(details->argv[1], "&#124;"))
                     command = strdup(details->argv[1]);
-                else
-                    asprintf(&command, "%s&#124;", details->argv[1]);
+                else {
+                    int num_returned_bytes = asprintf(&command, "%s&#124;", details->argv[1]);
+                    if (num_returned_bytes == -1)
+                        DEBUG("asprintf did not return anything");
+                }
 
                 /* rest of command might need additional escaping */
                 char *escaped = nmdc_escape(command);

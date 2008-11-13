@@ -229,38 +229,26 @@ done:
 static char *share_scan_absolute_path(const char *dirpath,
         const char *filename)
 {
-#if 0
-    /* GError *utf_err = 0; */
-    char *utf8_filename = g_filename_to_utf8(filename, -1, NULL, NULL, NULL);
-    if(utf8_filename == 0)
-    {
-        WARNING("encoding conversion failed (skipping '%s/%s')",
-                /*utf_err->message,*/ dirpath, filename);
-        /* g_error_free(utf_err); */
-        /* utf_err = 0; */
-        return NULL;
-    }
-#endif
-
-    if(!g_utf8_validate(filename, -1, NULL))
-    {
+    if (!g_utf8_validate(filename, -1, NULL)) {
         WARNING("Unknown encoding in filename [%s]", filename);
         return NULL;
     }
+    
     /* FIXME: if filename is not in utf-8, try to convert from some
      * local encoding (locale) */
 
 #ifdef __APPLE__ /* FIXME: is this correct? */
     /* normalize the string (handles different decomposition) */
     /* Can we be sure this is on a HFS+ partition? Nope... */
-    char *utf8_filename = g_utf8_normalize(filename, -1,
-            G_NORMALIZE_DEFAULT);
+    char *utf8_filename = g_utf8_normalize(filename, -1, G_NORMALIZE_DEFAULT);
 #else
     char *utf8_filename = strdup(filename);
 #endif
 
     char *filepath;
-    asprintf(&filepath, "%s/%s", dirpath, utf8_filename);
+    int num_returned_bytes = asprintf(&filepath, "%s/%s", dirpath, utf8_filename);
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
     free(utf8_filename);
 
     return filepath;

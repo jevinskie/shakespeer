@@ -92,8 +92,7 @@ static void ui_send_stored_filelists_state(ui_t *ui)
     int limit = 100;
 
     fsdir = opendir(global_working_directory);
-    if(fsdir == 0)
-    {
+    if (fsdir == 0) {
         WARNING("%s: %s", global_working_directory, strerror(errno));
         return;
     }
@@ -115,7 +114,9 @@ static void ui_send_stored_filelists_state(ui_t *ui)
 	 */
 	struct stat stbuf;
 	char *path;
-	asprintf(&path, "%s/%s", global_working_directory, filename);
+	int num_returned_bytes = asprintf(&path, "%s/%s", global_working_directory, filename);
+	if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
 	if(stat(path, &stbuf) == 0)
 	{
 	    /* expire filelist after 24 hours */
@@ -494,7 +495,9 @@ static int ui_cb_download_filelist(ui_t *ui, const char *hub_address,
         {
             share_save(global_share, FILELIST_XML);
             char *xml_filename;
-            asprintf(&xml_filename, "%s/files.xml", global_working_directory);
+            int num_returned_bytes = asprintf(&xml_filename, "%s/files.xml", global_working_directory);
+            if (num_returned_bytes == -1)
+                DEBUG("asprintf did not return anything");
             ui_send_filelist_finished(NULL, hub->address, nick, xml_filename);
             free(xml_filename);
         }

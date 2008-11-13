@@ -24,6 +24,7 @@
 #include "dstring_url.h"
 #include "rx.h"
 #include "test_connection.h"
+#include "log.h"
 
 /* please don't abuse, otherwise I'll have to disable this feature */
 #define TC_BASE_URL "http://shakespeer.bzero.se/checkport"
@@ -60,21 +61,19 @@ static int test_connection_string(const char *string)
 
 int test_connection(int port)
 {
-    if(port <= 1024)
-    {
+    if (port <= 1024)
         return TC_RET_PRIVPORT;
-    }
 
     char *url = NULL;
-    asprintf(&url, "%s?port=%u", TC_BASE_URL, port);
+    int num_returned_bytes = asprintf(&url, "%s?port=%u", TC_BASE_URL, port);
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
 
-    if (url)
-    {
+    if (url) {
         dstring_t *ds = dstring_new_from_url(url);
         free(url);
 
-        if (ds)
-        {
+        if (ds) {
             int rc = test_connection_string(ds->string);
             dstring_free(ds, 1);
             return rc;

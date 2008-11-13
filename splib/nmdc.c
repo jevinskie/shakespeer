@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "dstring.h"
+#include "log.h"
 
 static int nmdc_char_need_quoting(char c)
 {
@@ -56,8 +57,9 @@ static char *nmdc_quote(char *str, int len)
 char *nmdc_makelock_pk(const char *id, const char *version)
 {
     char *lock_pk;
-    asprintf(&lock_pk, "EXTENDEDPROTOCOLABCABCABCABCABCABC Pk=%s%sABCABC",
-            id, version);
+    int num_returned_bytes = asprintf(&lock_pk, "EXTENDEDPROTOCOLABCABCABCABCABCABC Pk=%s%sABCABC", id, version);
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
 
     return lock_pk;
 }

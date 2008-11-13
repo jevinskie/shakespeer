@@ -327,34 +327,33 @@ int he3_decode(const char *ifilename, const char *ofilename, xerr_t **err)
     int maxlen;
     int rc = 0;
 
-    if(ifilename)
+    if (ifilename)
         fpIn = fopen(ifilename, "r");
     else
         fpIn = stdin;
 
-    if(fpIn == 0)
-    {
+    if (fpIn == 0) {
         xerr_set(err, -1, "%s: %s", ifilename, strerror(errno));
         return -1;
     }
 
-    fread(magic, 1, 4, fpIn);
-    if(memcmp(magic, "HE3\x0D", 4) != 0)
-    {
+    size_t bytes_read = fread(magic, 1, 4, fpIn);
+    if (bytes_read == 0)
+        DEBUG("fread did not return any bytes");
+    if (memcmp(magic, "HE3\x0D", 4) != 0) {
         xerr_set(err, -1, "wrong magic");
         fclose(fpIn);
         return -1;
     }
 
-    if(ofilename)
+    if (ofilename)
         fpOut = fopen(ofilename, "w");
     else
         fpOut = stdout;
 
-    if(fpOut == 0)
-    {
+    if (fpOut == 0) {
         xerr_set(err, -1, "%s: %s", ofilename, strerror(errno));
-        if(fpIn != stdin)
+        if (fpIn != stdin)
             fclose(fpIn);
         return -1;
     }
@@ -377,11 +376,10 @@ int he3_decode(const char *ifilename, const char *ofilename, xerr_t **err)
     /* read code lengths
      */
     maxlen = 0;
-    for(i = 0; i < ncodes; i++)
-    {
+    for (i = 0; i < ncodes; i++) {
         codetab[i].data = fgetc(fpIn);
         codetab[i].len = fgetc(fpIn);
-        if(codetab[i].len > maxlen)
+        if (codetab[i].len > maxlen)
             maxlen = codetab[i].len;
     }
 
@@ -393,8 +391,7 @@ int he3_decode(const char *ifilename, const char *ofilename, xerr_t **err)
     bitfile.fp = fpIn;
     bitfile.data = 0;
     bitfile.pos = 0;
-    for(i = 0; i < ncodes; i++)
-    {
+    for (i = 0; i < ncodes; i++) {
         codetab[i].code = bitfile_nget(&bitfile, codetab[i].len);
         decodetab[(1 << codetab[i].len) + codetab[i].code] = codetab[i].data;
     }
@@ -406,16 +403,14 @@ int he3_decode(const char *ifilename, const char *ofilename, xerr_t **err)
     calc_crc = 0;
     bitfile.data = 0;
     bitfile.pos = 0;
-    for(i = 0; i < len; i++)
-    {
+    for (i = 0; i < len; i++) {
         unsigned int pos = bitfile_get(&bitfile);
         unsigned int bytes = 1;
         unsigned int p;
 
-        while(1)
-        {
+        while(1) {
             p = (1 << bytes) + pos;
-            if(decodetab[p] != 0) /* can't write 0x00 !? */
+            if (decodetab[p] != 0) /* can't write 0x00 !? */
                 break;
             pos = (pos << 1) | bitfile_get(&bitfile);
             bytes++;
@@ -431,15 +426,14 @@ int he3_decode(const char *ifilename, const char *ofilename, xerr_t **err)
     }
     free(decodetab);
 
-    if(calc_crc != crc)
-    {
+    if (calc_crc != crc) {
         xerr_set(err, -1, "CRC error");
         rc = -1;
     }
 
-    if(fpIn != stdin)
+    if (fpIn != stdin)
         fclose(fpIn);
-    if(fpOut != stdout)
+    if (fpOut != stdout)
         fclose(fpOut);
     return rc;
 }

@@ -308,8 +308,9 @@ queue_db_open_logfile(void)
 
 	DEBUG("opening databases in file %s", QUEUE_DB_FILENAME);
 	char *qlog_filename;
-	asprintf(&qlog_filename, "%s/%s",
-		global_working_directory, QUEUE_DB_FILENAME);
+	int num_returned_bytes = asprintf(&qlog_filename, "%s/%s", global_working_directory, QUEUE_DB_FILENAME);
+	if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
 	q_store->fp = fopen(qlog_filename, "a+");
 	if(q_store->fp == NULL)
 		ERROR("%s: %s", qlog_filename, strerror(errno));
@@ -532,8 +533,9 @@ queue_target_add(const char *target_filename,
 
 		/* ok, missing or differing TTHs, make target filename unique */
 		free(unique_target_filename);
-		asprintf(&unique_target_filename, "%s-%i.%s",
-			base_filename, index++, extension);
+		int num_returned_bytes = asprintf(&unique_target_filename, "%s-%i.%s", base_filename, index++, extension);
+		if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
 	}
 
 	free(base_filename);
@@ -1054,29 +1056,28 @@ queue_db_normalize(void)
 	INFO("normalizing queue database");
 
 	char *tmpfile;
-	asprintf(&tmpfile, "%s/%s.tmp",
-		global_working_directory, QUEUE_DB_FILENAME);
+	int num_returned_bytes;
+	num_returned_bytes = asprintf(&tmpfile, "%s/%s.tmp", global_working_directory, QUEUE_DB_FILENAME);
+	if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
 	FILE *tmp_fp = fopen(tmpfile, "w"); /* truncate existing file */
-	if(tmp_fp == NULL)
-	{
-		ERROR("failed to open temporary queue database: %s",
-			strerror(errno));
+	if (tmp_fp == NULL) {
+		ERROR("failed to open temporary queue database: %s", strerror(errno));
 		free(tmpfile);
 		return;
 	}
 
 	int rc = queue_db_save(tmp_fp);
-	if(fclose(tmp_fp) == 0)
-	{
-		if(rc != 0)
-		{
+	if (fclose(tmp_fp) == 0) {
+		if (rc != 0) {
 			free(tmpfile);
 			return;
 		}
 
 		char *qlog_filename;
-		asprintf(&qlog_filename, "%s/%s",
-			global_working_directory, QUEUE_DB_FILENAME);
+		num_returned_bytes = asprintf(&qlog_filename, "%s/%s", global_working_directory, QUEUE_DB_FILENAME);
+		if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
 
 		INFO("atomically replacing queue database");
 

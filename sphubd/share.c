@@ -193,7 +193,7 @@ share_mountpoint_t *share_add_mountpoint(share_t *share, const char *local_root)
     return_val_if_fail(local_root, NULL);
 
     share_mountpoint_t *mp = share_lookup_local_root(share, local_root);
-    if(mp && strcmp(mp->local_root, local_root) == 0)
+    if (mp && strcmp(mp->local_root, local_root) == 0)
     {
         /* Mountpoint already exists, return it */
         return mp;
@@ -205,19 +205,14 @@ share_mountpoint_t *share_add_mountpoint(share_t *share, const char *local_root)
      *     /tmp is already shared and trying to add /tmp/foo
      */
     size_t len = strlen(local_root);
-    LIST_FOREACH(mp, &share->mountpoints, link)
-    {
-        if(str_has_prefix(mp->local_root, local_root) && mp->local_root[len] == '/')
-        {
-            WARNING("Subdirectory [%s] already shared (trying to add [%s])",
-                    mp->local_root, local_root);
+    LIST_FOREACH(mp, &share->mountpoints, link) {
+        if (str_has_prefix(mp->local_root, local_root) && mp->local_root[len] == '/') {
+            WARNING("Subdirectory [%s] already shared (trying to add [%s])", mp->local_root, local_root);
             return NULL;
         }
 
-        if(str_has_prefix(local_root, mp->local_root) && local_root[strlen(mp->local_root)] == '/')
-        {
-            WARNING("Parent directory [%s] already shared (trying to add [%s])",
-                    mp->local_root, local_root);
+        if (str_has_prefix(local_root, mp->local_root) && local_root[strlen(mp->local_root)] == '/') {
+            WARNING("Parent directory [%s] already shared (trying to add [%s])", mp->local_root, local_root);
             return NULL;
         }
     }
@@ -230,7 +225,7 @@ share_mountpoint_t *share_add_mountpoint(share_t *share, const char *local_root)
     /* Add a new mountpoint */
 
     const char *basename = strrchr(local_root, '/');
-    if(basename++ == 0)
+    if (basename++ == 0)
         basename = local_root;
 
     mp->virtual_root = strdup(basename);
@@ -240,18 +235,18 @@ share_mountpoint_t *share_add_mountpoint(share_t *share, const char *local_root)
     str_replace_set(mp->virtual_root, "$|", '_');
 
     int n;
-    for(n = 2; n < 100; n++)
-    {
+    for (n = 2; n < 100; n++) {
         /* check if this virtual root is already used */
-        share_mountpoint_t *old_mp = share_lookup_mountpoint(share,
-                mp->virtual_root);
+        share_mountpoint_t *old_mp = share_lookup_mountpoint(share, mp->virtual_root);
 
-        if(old_mp == NULL)
+        if (old_mp == NULL)
             /* virtual root is unused */
             break;
 
         free(mp->virtual_root);
-        asprintf(&mp->virtual_root, "%s-%i", basename, n);
+        int num_returned_bytes = asprintf(&mp->virtual_root, "%s-%i", basename, n);
+        if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
     }
 
 
@@ -467,15 +462,13 @@ char *share_translate_path(share_t *share, const char *virtual_path)
 {
     /* First look up the mountpoint from the virtual root */
     const char *slash = strchr(virtual_path, '\\');
-    if(slash == NULL)
+    if (slash == NULL)
         slash = virtual_path + strlen(virtual_path);
     char *virtual_root = xstrndup(virtual_path, slash - virtual_path);
 
     share_mountpoint_t *mp = share_lookup_mountpoint(share, virtual_root);
-    if(mp == 0)
-    {
-        DEBUG("Warning, can't find mount point for virtual root '%s'",
-                virtual_root);
+    if (mp == 0) {
+        DEBUG("Warning, can't find mount point for virtual root '%s'", virtual_root);
         free(virtual_root);
         return NULL;
     }
@@ -484,27 +477,15 @@ char *share_translate_path(share_t *share, const char *virtual_path)
     /* replace virtual_root with local_root and change "\" to "/" */
 
     char *npath;
-    if(*slash && *(slash + 1))
-        asprintf(&npath, "%s/%s", mp->local_root, slash + 1);
+    if (*slash && *(slash + 1)) {
+        int num_returned_bytes = asprintf(&npath, "%s/%s", mp->local_root, slash + 1);
+        if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
+    }
     else
         npath = xstrdup(mp->local_root);
+
     str_replace_set(npath, "\\", '/');
-
-#if 0
-// FIXME: This should not be done in this function
-#ifdef __APPLE__
-    /* Convert to maximally decomposed form (required for Mac OS X file system)
-     */
-    char *decomposed_utf8_path = g_utf8_normalize(npath, -1,
-            G_NORMALIZE_DEFAULT);
-    free(npath);
-#else
-    char *decomposed_utf8_path = npath;
-#endif
-
-    return decomposed_utf8_path;
-
-#endif
 
     return npath;
 }
@@ -516,8 +497,11 @@ char *share_local_to_virtual_path(share_t *share, share_file_t *file)
     return_val_if_fail(file->mp, NULL);
 
     char *virtual_path;
-    asprintf(&virtual_path, "%s%s", file->mp->virtual_root, file->partial_path);
+    int num_returned_bytes = asprintf(&virtual_path, "%s%s", file->mp->virtual_root, file->partial_path);
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
     str_replace_set(virtual_path, "/", '\\');
+    
     return virtual_path;
 }
 
@@ -571,7 +555,10 @@ char *share_complete_path(share_file_t *file)
 
     /* construct the complete local path */
     char *local_path;
-    asprintf(&local_path, "%s%s", file->mp->local_root, file->partial_path);
+    int num_returned_bytes = asprintf(&local_path, "%s%s", file->mp->local_root, file->partial_path);
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
+
     return local_path;
 }
 

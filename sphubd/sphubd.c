@@ -310,13 +310,16 @@ static void handle_download_finished_notification(nc_t *nc, const char *channel,
 
     char *source = 0;
     char *target = 0;
+    int num_returned_bytes;
 
     if(global_move_partial_directories || qd == NULL)
     {
-        asprintf(&source, "%s/%s",
-                global_incomplete_directory, notification->filename);
-        asprintf(&target, "%s/%s",
-                global_download_directory, notification->filename);
+        num_returned_bytes = asprintf(&source, "%s/%s", global_incomplete_directory, notification->filename);
+        if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
+        num_returned_bytes = asprintf(&target, "%s/%s", global_download_directory, notification->filename);
+        if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
 
         /* make sure the target directory exists */
         char *dir = strdup(target);
@@ -329,10 +332,12 @@ static void handle_download_finished_notification(nc_t *nc, const char *channel,
     else
     {
         return_if_fail(qd->nleft == 1);
-        asprintf(&source, "%s/%s",
-                global_incomplete_directory, qd->target_directory);
-        asprintf(&target, "%s/%s",
-                global_download_directory, qd->target_directory);
+        num_returned_bytes = asprintf(&source, "%s/%s", global_incomplete_directory, qd->target_directory);
+        if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
+        num_returned_bytes = asprintf(&target, "%s/%s", global_download_directory, qd->target_directory);
+        if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
     }
 
     DEBUG("moving [%s] to download directory [%s]", source, target);
@@ -351,8 +356,9 @@ static void handle_download_finished_notification(nc_t *nc, const char *channel,
         {
             /* the directory is complete, remove the (filesystem) directory */
             char *target_directory;
-            asprintf(&target_directory, "%s/%s",
-                    global_incomplete_directory, qd->target_directory);
+            num_returned_bytes = asprintf(&target_directory, "%s/%s", global_incomplete_directory, qd->target_directory);
+            if (num_returned_bytes == -1)
+                DEBUG("asprintf did not return anything");
             if(rmdir(target_directory) != 0)
             {
                 ui_send_status_message(NULL, NULL,
@@ -536,7 +542,9 @@ int main(int argc, char **argv)
 
     /* create a socket for user interface connections
      */
-    asprintf(&socket_filename, "%s/sphubd", global_working_directory);
+    int num_returned_bytes = asprintf(&socket_filename, "%s/sphubd", global_working_directory);
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
     int ui_fd = io_bind_unix_socket(socket_filename);
     if(ui_fd == -1)
         return 1;

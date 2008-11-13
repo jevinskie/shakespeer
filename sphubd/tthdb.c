@@ -213,7 +213,9 @@ void tth_store_init(void)
 	return_if_fail(global_tth_store == NULL);
 
 	char *tth_store_filename;
-	asprintf(&tth_store_filename, "%s/tth2.db", global_working_directory);
+	int num_returned_bytes = asprintf(&tth_store_filename, "%s/tth2.db", global_working_directory);
+	if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
 	global_tth_store = tth_load(tth_store_filename);
 	free(tth_store_filename);
 }

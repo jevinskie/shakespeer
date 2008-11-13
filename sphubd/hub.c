@@ -81,12 +81,14 @@ void hub_set_idle_timeout(hub_t *hub)
 static char *hub_make_tag(hub_t *hub)
 {
     char *tag = 0;
-    asprintf(&tag, "<%s V:%s,M:%c,H:%d/%d/%d,S:%d>",
+    int num_returned_bytes = asprintf(&tag, "<%s V:%s,M:%c,H:%d/%d/%d,S:%d>",
             global_id_tag,
             global_id_version,
             hub->me->passive ? 'P' : 'A',
             hub_count_normal(), hub_count_registered(), hub_count_operator(),
             hub_slots_total());
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
 
     return tag;
 }
@@ -110,7 +112,9 @@ int hub_send_command(hub_t *hub, const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
     char *command = 0;
-    vasprintf(&command, fmt, ap);
+    int num_returned_bytes = vasprintf(&command, fmt, ap);
+    if (num_returned_bytes == -1)
+        DEBUG("vasprintf did not return anything");
     char *command_encoded = str_utf8_to_escaped_legacy(command, hub->encoding);
     int rc = hub_send_string(hub, command_encoded);
     free(command_encoded);
@@ -144,13 +148,15 @@ void hub_send_myinfo(hub_t *hub)
 
     char *tag = hub_make_tag(hub);
     char *myinfo_string = 0;
-    asprintf(&myinfo_string, "$MyINFO $ALL %s %s%s$ $%s\x01$%s$%"PRIu64"$|",
+    int num_returned_bytes = asprintf(&myinfo_string, "$MyINFO $ALL %s %s%s$ $%s\x01$%s$%"PRIu64"$|",
             hub->me->nick,
             hub->me->description ? hub->me->description : "",
             tag,
             hub->me->speed,
             hub->me->email ? hub->me->email : "",
             stats.size);
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
     free(tag);
 
     if(hub->myinfo_string == NULL ||
@@ -459,14 +465,14 @@ void hub_search(hub_t *hub, search_request_t *request)
     return_if_fail(hub->logged_in);
 
     char *words_joined = 0;
-    if(request->tth)
-    {
-        asprintf(&words_joined, "TTH:%s", request->tth);
+    int num_returned_bytes;
+    if (request->tth) {
+        num_returned_bytes = asprintf(&words_joined, "TTH:%s", request->tth);
+        if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
     }
-    else
-    {
-        if(request->words == NULL)
-        {
+    else {
+        if (request->words == NULL) {
             WARNING("no search words?");
             return;
         }
@@ -474,29 +480,23 @@ void hub_search(hub_t *hub, search_request_t *request)
     }
 
     char *search_string = 0;
-    asprintf(&search_string, "%c?%c?%"PRIu64"?%u?%s",
+    num_returned_bytes = asprintf(&search_string, "%c?%c?%"PRIu64"?%u?%s",
             (request->size_restriction != SHARE_SIZE_NONE && request->type != SHARE_TYPE_TTH) ? 'T' : 'F',
             ((request->size_restriction == SHARE_SIZE_MIN ||
               (request->size_restriction == SHARE_SIZE_EQUAL && request->minsize)) &&
              request->type != SHARE_TYPE_TTH) ? 'F' : 'T',
             request->search_size, request->type, words_joined);
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
 
     int rc = -1;
-    if(hub->me->passive)
-    {
-        rc = hub_send_command(hub, "$Search Hub:%s %s|",
-                hub->me->nick, search_string);
-    }
+    if (hub->me->passive)
+        rc = hub_send_command(hub, "$Search Hub:%s %s|", hub->me->nick, search_string);
     else
-    {
-        rc = hub_send_command(hub, "$Search %s:%u %s|",
-                hub->me->ip, global_port, search_string);
-    }
+        rc = hub_send_command(hub, "$Search %s:%u %s|", hub->me->ip, global_port, search_string);
 
-    if(rc == 0)
-    {
+    if (rc == 0)
         hub_set_idle_timeout(hub);
-    }
 
     free(search_string);
     free(words_joined);

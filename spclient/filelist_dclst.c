@@ -48,35 +48,29 @@ static fl_dir_t *fl_parse_dclst_recursive(FILE *fp, char **saved,
     TAILQ_INIT(&dir->files);
     dir->path = strdup(path ? path : "");
 
-    while(1)
-    {
+    while (1) {
         char *line = 0;
-        if(saved && *saved)
-        {
+        if (saved && *saved) {
             line = *saved;
-            if(saved)
+            if (saved)
                 *saved = NULL;
         }
-        else
-        {
+        else {
             line = fl_dclst_read_line(fp);
-            if(line == NULL)
-            {
+            if (line == NULL)
                 break;
-            }
         }
         str_trim_end_inplace(line, NULL);
 
         int tabs = fl_indentation(line);
-        if(tabs < level)
-        {
+        if (tabs < level) {
             if(saved)
                 *saved = line;
             break;
         }
 
         char *pipe = strchr(line + tabs, '|');
-        if(pipe)
+        if (pipe)
             *pipe = 0;
 
         char *filename = line + tabs;
@@ -84,21 +78,22 @@ static fl_dir_t *fl_parse_dclst_recursive(FILE *fp, char **saved,
         fl_file_t *file = calloc(1, sizeof(fl_file_t));
         file->name = xstrdup(filename);
 
-        if(pipe)
-        {
+        if (pipe) {
             /* regular file */
             file->type = share_filetype(filename);
             file->size = strtoull(pipe + 1, NULL, 10);
             dir->size += file->size;
         }
-        else
-        {
+        else {
             /* directory */
             file->type = SHARE_TYPE_DIRECTORY;
 
             char *newpath;
-            if(path)
-                asprintf(&newpath, "%s\\%s", path, filename);
+            if (path) {
+                int num_returned_bytes = asprintf(&newpath, "%s\\%s", path, filename);
+                if (num_returned_bytes == -1)
+                    DEBUG("asprintf did not return anything");
+            }
             else
                 newpath = xstrdup(filename);
 

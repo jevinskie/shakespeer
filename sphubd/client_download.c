@@ -108,29 +108,24 @@ cc_request_download(cc_t *cc)
     return_val_if_fail(cc->current_queue == NULL || cc->fetch_leaves == 2, -1);
 
     queue_t *queue = cc->current_queue;
-    while(queue == NULL)
-    {
+    int num_returned_bytes;
+    while (queue == NULL) {
         queue = queue_get_next_source_for_nick(cc->nick);
-        if(queue == NULL)
-        {
+        if (queue == NULL) {
             /* no more files to download */
             return -1;
         }
 
         queue->offset = 0ULL;
 
-        if(queue->is_directory)
-        {
-            if(queue_resolve_directory(cc->nick, queue->source_filename,
-                        queue->target_filename, NULL) != 0)
-            {
+        if (queue->is_directory) {
+            if (queue_resolve_directory(cc->nick, queue->source_filename, queue->target_filename, NULL) != 0) {
                 /* Directory was not directly resolvable, but it should be! */
                 /* When the directory is added to the queue, it is directly
                  * resolved if the filelist is directly available. Otherwise
                  * the filelist is queued and should be downloaded before the
                  * directory. */
-                WARNING("unresolvable directory [%s] ???",
-                        queue->source_filename);
+                WARNING("unresolvable directory [%s] ???", queue->source_filename);
 
 		/* Apparently there is an inconsistency in the queue data.
 		 * Instead of risk looping forever trying to resolve the
@@ -139,21 +134,20 @@ cc_request_download(cc_t *cc)
                 queue_remove_directory(queue->target_filename);
             }
         }
-        else if(queue->is_filelist)
-        {
+        else if (queue->is_filelist) {
             char *safe_nick = strdup(cc->nick);
             str_replace_set(safe_nick, "/", '_');
 
-            if(cc->has_xmlbzlist)
-            {
-                asprintf(&queue->target_filename, "%s/files.xml.%s.bz2",
-                        global_working_directory, safe_nick);
+            if (cc->has_xmlbzlist) {
+                num_returned_bytes = asprintf(&queue->target_filename, "%s/files.xml.%s.bz2", global_working_directory, safe_nick);
+                if (num_returned_bytes == -1)
+                    DEBUG("asprintf did not return anything");
                 queue->source_filename = strdup("files.xml.bz2");
             }
-            else
-            {
-                asprintf(&queue->target_filename, "%s/MyList.%s.DcLst",
-                        global_working_directory, safe_nick);
+            else {
+                num_returned_bytes = asprintf(&queue->target_filename, "%s/MyList.%s.DcLst", global_working_directory, safe_nick);
+                if (num_returned_bytes == -1)
+                    DEBUG("asprintf did not return anything");
                 queue->source_filename = strdup("MyList.DcLst");
             }
             free(safe_nick);
@@ -165,33 +159,29 @@ cc_request_download(cc_t *cc)
             struct stat stbuf;
 
             char *target = 0;
-            asprintf(&target, "%s/%s",
-                    global_download_directory, queue->target_filename);
-
-	    /* Check if the file is already donwloaded
-	     */
-            if(stat(target, &stbuf) == 0)
-            {
-                INFO("local file in download dir already exists: [%s]",
-                        target);
+            num_returned_bytes = asprintf(&target, "%s/%s", global_download_directory, queue->target_filename);
+            if (num_returned_bytes == -1)
+                DEBUG("asprintf did not return anything");
+            
+            /* Check if the file is already downloaded */
+            if (stat(target, &stbuf) == 0) {
+                INFO("local file in download dir already exists: [%s]", target);
                 /* what if size differs? */
                 queue_remove_target(queue->target_filename);
                 free(target);
             }
-            else
-            {
+            else {
                 free(target);
-                asprintf(&target, "%s/%s",
-                        global_incomplete_directory, queue->target_filename);
+                num_returned_bytes = asprintf(&target, "%s/%s", global_incomplete_directory, queue->target_filename);
+                if (num_returned_bytes == -1)
+                    DEBUG("aasprintf did not return anything");
 
                 int rc = stat(target, &stbuf);
                 free(target);
-                if(rc == 0)
-                {
+                if (rc == 0) {
                     /* file already exists, resume */
                     queue->offset = stbuf.st_size;
-                    if(queue->offset >= queue->size)
-                    {
+                    if (queue->offset >= queue->size) {
                         INFO("local file has larger or equal size than remote,"
                                 " can't resume, removing queue");
 
@@ -200,14 +190,12 @@ cc_request_download(cc_t *cc)
 
                         queue_remove_target(queue->target_filename);
                     }
-                    else
-                    {
+                    else {
                         /* resume download */
                         break;
                     }
                 }
-                else
-                {
+                else {
                     /* regular file, doesn't already exist */
                     break;
                 }
@@ -221,13 +209,12 @@ cc_request_download(cc_t *cc)
     }
 
     cc->current_queue = queue;
-    if(cc_send_download_request(cc) != 0)
-    {
+    if (cc_send_download_request(cc) != 0) {
         cc_close_connection(cc);
         return -1;
     }
 
-    if(queue->is_filelist)
+    if (queue->is_filelist)
         cc->filesize = 0ULL;
     else
         cc->filesize = queue->size;
@@ -338,20 +325,19 @@ int cc_start_download(cc_t *cc)
     cc->bytes_done = 0;
 
     char *target = 0; /* complete, absolute target path in local filesystem */
+    int num_returned_bytes;
 
-    if(cc->fetch_leaves == 1)
-    {
-        asprintf(&target, "%s/%s.tthl",
-                global_incomplete_directory, cc->current_queue->target_filename);
+    if (cc->fetch_leaves == 1) {
+        num_returned_bytes = asprintf(&target, "%s/%s.tthl", global_incomplete_directory, cc->current_queue->target_filename);
+        if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
     }
-    else if(cc->current_queue->is_filelist)
-    {
+    else if (cc->current_queue->is_filelist)
         target = strdup(cc->current_queue->target_filename);
-    }
-    else
-    {
-        asprintf(&target, "%s/%s",
-               global_incomplete_directory, cc->current_queue->target_filename);
+    else {
+        num_returned_bytes = asprintf(&target, "%s/%s", global_incomplete_directory, cc->current_queue->target_filename);
+        if (num_returned_bytes == -1)
+            DEBUG("aasprintf did not return anything");
     }
 
     DEBUG("target: [%s]", target);

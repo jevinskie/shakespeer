@@ -60,7 +60,9 @@ int hc_send_command(hc_t *hc, const char *fmt, ...)
 
     va_list ap;
     va_start(ap, fmt);
-    vasprintf(&cmd, fmt, ap);
+    int num_returned_bytes = vasprintf(&cmd, fmt, ap);
+    if (num_returned_bytes == -1)
+        DEBUG("vasprintf did not return anything");
     va_end(ap);
 
     rc = hc_send_string(hc, cmd);
@@ -344,10 +346,8 @@ int main(int argc, char **argv)
 {
     const char *debug_level = "message";
     int c;
-    while((c = getopt(argc, argv, "w:d:")) != EOF)
-    {
-        switch(c)
-        {
+    while ((c = getopt(argc, argv, "w:d:")) != EOF) {
+        switch (c) {
             case 'w':
                 working_directory = verify_working_directory(optarg);
                 break;
@@ -361,8 +361,7 @@ int main(int argc, char **argv)
         }
     }
 
-    if(working_directory == NULL)
-    {
+    if (working_directory == NULL) {
         working_directory = get_working_directory();
     }
 
@@ -380,9 +379,11 @@ int main(int argc, char **argv)
     signal_add(&sigterm_event, NULL);
 
     /* create a socket for sphubd connections */
-    asprintf(&socket_filename, "%s/sphashd", working_directory);
+    int num_returned_bytes = asprintf(&socket_filename, "%s/sphashd", working_directory);
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
     int fd = io_bind_unix_socket(socket_filename); 
-    if(fd == -1)
+    if (fd == -1)
         return 1;
 
     /* add event handler to accept client connections */
@@ -391,39 +392,32 @@ int main(int argc, char **argv)
     event_add(&ev, NULL);
 
     /* set lower priority */
-    if(setpriority(PRIO_PROCESS, 0 /* current process */, 10) != 0)
-    {
+    if (setpriority(PRIO_PROCESS, 0 /* current process */, 10) != 0)
         WARNING("setpriority: %s (ignored)", strerror(errno));
-    }
 
     DEBUG("starting main loop");
-    while(1)
-    {
+    while(1) {
         event_loop(EVLOOP_NONBLOCK);
 
         /* loop through all client connections and see if we have something to do */
         int block = 1;
         hc_t *hc;
-        LIST_FOREACH(hc, &client_head, link)
-        {
-            if(hc->current_fd != -1 || TAILQ_FIRST(&hc->hash_queue_head))
-            {
+        LIST_FOREACH(hc, &client_head, link) {
+            if (hc->current_fd != -1 || TAILQ_FIRST(&hc->hash_queue_head)) {
                 share_hasher(hc);
                 block = 0;
             }
         }
 
-        if(block)
-        {
+        if (block) {
             /* nothing to do, block for one event */
             DEBUG("blocking for next event");
             event_loop(EVLOOP_ONCE);
         }
         else if(global_delay)
-        {
             usleep(global_delay);
-        }
     }
+    
     DEBUG("main loop finished");
 
     return 0;

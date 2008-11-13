@@ -139,33 +139,31 @@ void print_command(const char *command, const char *fmt, ...)
 
     va_list ap;
     va_start(ap, fmt);
-    vasprintf(&prestr, fmt, ap);
+    int num_returned_bytes = vasprintf(&prestr, fmt, ap);
+    if (num_returned_bytes == -1)
+        DEBUG("vasprintf did not return anything");
     va_end(ap);
 
-    if(str_has_prefix(command, "$Key"))
-    {
+    if (str_has_prefix(command, "$Key")) {
         char *hex = data_to_hex(command + 5, strlen(command + 5));
         DEBUG("%s $Key 0x%s|", prestr, hex);
         free(hex);
     }
-    else if(str_has_prefix(command, "$Lock"))
-    {
+    else if (str_has_prefix(command, "$Lock")) {
         char *hex = data_to_hex(command + 6, strlen(command + 6));
         DEBUG("%s $Lock %s|", prestr, hex);
         free(hex);
     }
-    else if(str_has_prefix(command, "add-hash$"))
-    {
-	char *f = strchr(command + 9, '$');
-	if(f)
-	{
-	    f = strchr(f + 1, '$');
-	    char *l = xstrndup(command, f - command);
-	    DEBUG("%s %s", prestr, l);
-	    free(l);
-	}
+    else if (str_has_prefix(command, "add-hash$")) {
+	    char *f = strchr(command + 9, '$');
+	    if(f) {
+	        f = strchr(f + 1, '$');
+	        char *l = xstrndup(command, f - command);
+	        DEBUG("%s %s", prestr, l);
+	        free(l);
+	    }
     }
-    else if(str_has_prefix(command, "$MyPass"))
+    else if (str_has_prefix(command, "$MyPass"))
         DEBUG("%s $MyPass ...|", prestr);
     else
         DEBUG("%s %s", prestr, command);
@@ -176,13 +174,13 @@ void print_command(const char *command, const char *fmt, ...)
 char *tilde_expand_path(const char *path)
 {
     return_val_if_fail(path, NULL);
-    if(path[0] == '~' && (path[1] == '/' || path[1] == 0))
-    {
+    if (path[0] == '~' && (path[1] == '/' || path[1] == 0)) {
         const char *home = getenv("HOME");
-        if(home)
-        {
+        if (home) {
             char *ret;
-            asprintf(&ret, "%s%s", home, path + 1);
+            int num_returned_bytes = asprintf(&ret, "%s%s", home, path + 1);
+            if (num_returned_bytes == -1)
+                DEBUG("vasprintf did not return anything");
             return ret;
         }
     }
@@ -194,15 +192,16 @@ char *absolute_path(const char *path)
     return_val_if_fail(path, NULL);
 
     char *abspath = NULL;
-    if(path[0] == '~')
-    {
+    if (path[0] == '~')
         abspath = tilde_expand_path(path);
-    }
-    else if(path[0] != '/')
-    {
+    else if (path[0] != '/') {
         char cwd[MAXPATHLEN];
-        getcwd(cwd, MAXPATHLEN);
-        asprintf(&abspath, "%s/%s", cwd, path);
+        char *returned_buf = getcwd(cwd, MAXPATHLEN);
+        if (!returned_buf)
+            DEBUG("getcwd did not return a valid path");
+        int num_returned_bytes = asprintf(&abspath, "%s/%s", cwd, path);
+        if (num_returned_bytes == -1)
+            DEBUG("vasprintf did not return anything");
     }
     else
         abspath = strdup(path);
@@ -292,8 +291,11 @@ void set_corelimit(int enabled)
     {
         WARNING("getrlimit(RLIMIT_CORE): %s", strerror(errno));
     }
-    chdir("/");
-    chdir("/tmp");
+    int result = chdir("/");
+    if (result == -1)
+        DEBUG("chdir could not change directory");
+    result = chdir("/tmp");
+        DEBUG("chdir could not change directory");
 }
 
 int
@@ -320,10 +322,16 @@ sp_daemonize(void)
 	close(1);
 	close(2);
 	int fd = open("/dev/null", O_RDWR);
-	dup(fd);
-	dup(fd);
+	int result = dup(fd);
+	if (result == -1)
+	    DEBUG("dup did not return a valid file descriptor");
+	result = dup(fd);
+	if (result == -1)
+	    DEBUG("dup did not return a valid file descriptor");
 
-	chdir("/");
+	result = chdir("/");
+	if (result == -1)
+	    DEBUG("chdir could not change directory");
 
 	set_corelimit(COREDUMPS_ENABLED); /* enable coredumps */
 
@@ -342,7 +350,9 @@ pid_t sp_get_pid(const char *workdir, const char *appname)
     return_val_if_fail(workdir && appname, 0);
 
     char *pidfile;
-    asprintf(&pidfile, "%s/%s.pid", workdir, appname);
+    int num_returned_bytes = asprintf(&pidfile, "%s/%s.pid", workdir, appname);
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
 
     pid_t pid = -1;
 
@@ -377,28 +387,24 @@ int sp_write_pid(const char *workdir, const char *appname)
     return_val_if_fail(workdir && appname, -1);
 
     char *pidfile;
-    asprintf(&pidfile, "%s/%s.pid", workdir, appname);
+    int num_returned_bytes = asprintf(&pidfile, "%s/%s.pid", workdir, appname);
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
 
     FILE *fp = fopen(pidfile, "w");
-    if(fp == NULL)
-    {
+    if (fp == NULL)
         WARNING("failed to open pidfile '%s': %s", pidfile, strerror(errno));
-    }
     else
-    {
         fprintf(fp, "%u\n", getpid());
-    }
 
     free(pidfile);
-    if(fp)
-    {
+    
+    if (fp) {
         fclose(fp);
         return 0;
     }
     else
-    {
         return -1;
-    }
 }
 
 void sp_remove_pid(const char *workdir, const char *appname)
@@ -406,7 +412,9 @@ void sp_remove_pid(const char *workdir, const char *appname)
     return_if_fail(workdir && appname);
 
     char *pidfile = 0;
-    asprintf(&pidfile, "%s/%s.pid", workdir, appname);
+    int num_returned_bytes = asprintf(&pidfile, "%s/%s.pid", workdir, appname);
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
     unlink(pidfile); /* ignore errors */
     free(pidfile);
 }
@@ -468,40 +476,38 @@ share_type_t share_filetype(const char *filename)
 char *str_shorten_path(const char *path, int maxlen)
 {
     char *p = strdup(path);
-    while(1)
-    {
-        if(strlen(p) <= maxlen)
+    while (1) {
+        if (strlen(p) <= maxlen)
             break;
 
         char *fs = strchr(p, '/'); /* first slash */
         char *ss = NULL;           /* second slash */
-        if(fs)
-        {
+        if (fs) {
             char *sse = fs;
-            while(1)
-            {
+            while (1) {
                 ss = strchr(++sse, '/');
-                if(ss == NULL || strcmp(sse, "/.../") != 0)
-                {
+                if (ss == NULL || strcmp(sse, "/.../") != 0) {
                     ss = NULL;
                     break;
                 }
                 sse = ss;
             }
         }
-        if(ss == NULL || fs == p)
-        {
+        if (ss == NULL || fs == p) {
             char *tmp;
-            asprintf(&tmp, "...%s", p + strlen(p) - (maxlen - 3));
+            int num_returned_bytes = asprintf(&tmp, "...%s", p + strlen(p) - (maxlen - 3));
+            if (num_returned_bytes == -1)
+                DEBUG("asprintf did not return anything");
             free(p);
             p = tmp;
             break;
         }
-        else
-        {
+        else {
             char *tmp = xstrndup(p, fs - p);
             char *tmp2;
-            asprintf(&tmp2, "%s/...%s", tmp, ss);
+            int num_returned_bytes = asprintf(&tmp2, "%s/...%s", tmp, ss);
+            if (num_returned_bytes == -1)
+                DEBUG("vasprintf did not return anything");
             free(tmp);
             free(p);
             p = tmp2;
@@ -521,21 +527,24 @@ char *find_filelist(const char *working_directory, const char *nick)
     return_val_if_fail(working_directory, NULL);
     return_val_if_fail(nick, NULL);
 
+    int num_returned_bytes;
     char *xnick = strdup(nick);
     str_replace_set(xnick, "/", '_');
 
     /* first check for an xml filelist */
     char *filelist_path;
-    asprintf(&filelist_path, "%s/files.xml.%s.bz2", working_directory, xnick);
-
-    if(access(filelist_path, F_OK) != 0)
-    {
+    num_returned_bytes = asprintf(&filelist_path, "%s/files.xml.%s.bz2", working_directory, xnick);
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
+        
+    if (access(filelist_path, F_OK) != 0) {
         /* nope, look for a dclst filelist */
         free(filelist_path);
-        asprintf(&filelist_path, "%s/MyList.%s.DcLst", working_directory, xnick);
+        num_returned_bytes = asprintf(&filelist_path, "%s/MyList.%s.DcLst", working_directory, xnick);
+        if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
 
-        if(access(filelist_path, F_OK) != 0)
-        {
+        if (access(filelist_path, F_OK) != 0) {
             free(filelist_path);
             filelist_path = NULL;
         }

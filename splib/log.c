@@ -115,7 +115,9 @@ static void sp_glog_func(int log_level, const char *message)
 void sp_vlog(int level, const char *fmt, va_list ap)
 {
     char *msg;
-    vasprintf(&msg, fmt, ap);
+    int num_returned_bytes = vasprintf(&msg, fmt, ap);
+    if (num_returned_bytes == -1)
+        DEBUG("vasprintf did not return anything");
     sp_glog_func(level, msg);
     free(msg);
 }
@@ -132,54 +134,50 @@ void sp_log(int level, const char *fmt, ...)
 static void sp_log_rotate(const char *logfile)
 {
     struct stat sb;
+    int num_returned_bytes;
     int rc = stat(logfile, &sb);
-    if(rc == 0 && sb.st_size > sp_log_max_bytes)
-    {
+    if (rc == 0 && sb.st_size > sp_log_max_bytes) {
         int i;
-        for(i = 0; i < SP_LOG_MAX_FILES; i++)
-        {
+        for (i = 0; i < SP_LOG_MAX_FILES; i++) {
             char *tmp;
-            asprintf(&tmp, "%s.%i", logfile, i);
+            num_returned_bytes = asprintf(&tmp, "%s.%i", logfile, i);
+            if (num_returned_bytes == -1)
+                DEBUG("asprintf did not return anything");
             int exists = access(tmp, F_OK);
             free(tmp);
-            if(exists != 0)
-            {
+            if (exists != 0)
                 break;
-            }
         }
         int maxi = i;
-        if(maxi == SP_LOG_MAX_FILES)
-        {
+        if (maxi == SP_LOG_MAX_FILES) {
             char *tmp;
-            asprintf(&tmp, "%s.%i", logfile, SP_LOG_MAX_FILES - 1);
-            if(unlink(tmp) != 0)
-            {
-                /* g_warning("%s: %s", tmp, strerror(errno)); */
-            }
+            num_returned_bytes = asprintf(&tmp, "%s.%i", logfile, SP_LOG_MAX_FILES - 1);
+            if (num_returned_bytes == -1)
+                DEBUG("asprintf did not return anything");
+            unlink(tmp);
             free(tmp);
             --maxi;
         }
-        for(i = maxi; i > 0; i--)
-        {
+        for (i = maxi; i > 0; i--) {
             char *prev;
             char *next;
-            asprintf(&prev, "%s.%i", logfile, i - 1);
-            asprintf(&next, "%s.%i", logfile, i);
+            num_returned_bytes = asprintf(&prev, "%s.%i", logfile, i - 1);
+            if (num_returned_bytes == -1)
+                DEBUG("asprintf did not return anything");
+            num_returned_bytes = asprintf(&next, "%s.%i", logfile, i);
+            if (num_returned_bytes == -1)
+                DEBUG("asprintf did not return anything");
 
-            if(rename(prev, next) != 0)
-            {
-                /* g_warning("%s: %s", prev, strerror(errno)); */
-            }
+            rename(prev, next);
             free(prev);
             free(next);
         }
 
         char *next;
-        asprintf(&next, "%s.0", logfile);
-        if(rename(logfile, next) != 0)
-        {
-            /* g_warning("%s: %s", logfile, strerror(errno)); */
-        }
+        num_returned_bytes = asprintf(&next, "%s.0", logfile);
+        if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
+        rename(logfile, next);
         free(next);
     }
 }
@@ -227,27 +225,30 @@ int sp_log_init(const char *workdir, const char *prefix)
 {
     /* special case when upgrading from 0.3 to 0.4 */
     char *old_logfile;
-    asprintf(&old_logfile, "%s/log-%s", workdir, prefix);
+    int num_returned_bytes;
+    num_returned_bytes = asprintf(&old_logfile, "%s/log-%s", workdir, prefix);
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
     unlink(old_logfile); /* ignore errors */
     free(old_logfile);
 
-    if(logfp == NULL)
-    {
+    if (logfp == NULL) {
         return_val_if_fail(workdir && prefix, -1);
         char *forced_workdir = 0;
 #ifdef __APPLE__
         /* if we're using the default working directory on Mac OS X, force the
          * logfiles into ~/Library/Logs (yes, this is a hack) */
         char *default_workdir = get_working_directory();
-        if(strcmp(default_workdir, workdir) == 0)
-        {
+        if (strcmp(default_workdir, workdir) == 0) {
             forced_workdir = verify_working_directory("~/Library/Logs");
-            if(forced_workdir)
+            if (forced_workdir)
                 workdir = forced_workdir;
         }
         free(default_workdir);
 #endif
-        asprintf(&logfile, "%s/%s.log", workdir, prefix);
+        num_returned_bytes = asprintf(&logfile, "%s/%s.log", workdir, prefix);
+        if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
         free(forced_workdir);
         sp_log_reinit();
     }

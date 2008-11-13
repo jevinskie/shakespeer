@@ -165,7 +165,9 @@ int uhttp_add_header(uhttp_t *uhttp, const char *fmt, ...)
     va_list ap;
 
     va_start(ap, fmt);
-    vasprintf(&str, fmt, ap);
+    int num_returned_bytes = vasprintf(&str, fmt, ap);
+    if (num_returned_bytes == -1)
+        DEBUG("vasprintf did not return anything");
 
     uhttp->headers = (char **)realloc(uhttp->headers,
             (uhttp->nheaders+1) * sizeof(char *));
@@ -469,7 +471,9 @@ int uhttp_send_string(uhttp_t *uhttp, const char *fmt, ...)
     int rc;
 
     va_start(ap, fmt);
-    vasprintf(&str, fmt, ap);
+    int num_returned_bytes = vasprintf(&str, fmt, ap);
+    if (num_returned_bytes == -1)
+        DEBUG("vasprintf did not return anything");
     va_end(ap);
 
     size_t l = strlen(str);

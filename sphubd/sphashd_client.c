@@ -54,7 +54,9 @@ int hs_send_command(hs_t *hs, const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
     char *command = 0;
-    vasprintf(&command, fmt, ap);
+    int num_returned_bytes = vasprintf(&command, fmt, ap);
+    if (num_returned_bytes == -1)
+        DEBUG("vasprintf did not return anything");
     int rc = hs_send_string(hs, command);
     free(command);
     va_end(ap);
@@ -300,9 +302,14 @@ int hs_start(void)
 {
     char *sphashd_socket_filename = 0;
     char *sphashd_path = 0;
+    int num_returned_bytes;
 
-    asprintf(&sphashd_socket_filename, "%s/sphashd", global_working_directory);
-    asprintf(&sphashd_path, "%s/sphashd", argv0_path);
+    num_returned_bytes = asprintf(&sphashd_socket_filename, "%s/sphashd", global_working_directory);
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
+    num_returned_bytes = asprintf(&sphashd_path, "%s/sphashd", argv0_path);
+    if (num_returned_bytes == -1)
+        DEBUG("asprintf did not return anything");
 
     int fd = io_exec_and_connect_unix(sphashd_socket_filename,
             sphashd_path, global_working_directory);

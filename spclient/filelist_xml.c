@@ -31,33 +31,29 @@ static void fl_xml_parse_start_tag(void *user_data,
     /* the current directory is at the top of the stack */
     fl_dir_t *curdir = LIST_FIRST(&ctx->dir_stack);
     assert(curdir);
+    
+    int num_returned_bytes;
 
-    if(strcasecmp(el, "Directory") == 0)
-    {
+    if (strcasecmp(el, "Directory") == 0) {
         int i;
         const char *dirname = 0;
-        for(i = 0; attr && attr[i]; i += 2)
-        {
-            if(strcasecmp(attr[i], "Name") == 0)
-            {
+        for (i = 0; attr && attr[i]; i += 2) {
+            if(strcasecmp(attr[i], "Name") == 0) {
                 dirname = attr[i + 1];
                 break;
             }
         }
 
-        if(dirname == 0)
-        {
+        if (dirname == 0)
             WARNING("Missing Name attribute in Directory tag");
-        }
-        else
-        {
+        else {
             fl_dir_t *dir = calloc(1, sizeof(fl_dir_t));
-	    TAILQ_INIT(&dir->files);
-            asprintf(&dir->path, "%s%s%s",
-                    curdir->path, *curdir->path ? "\\" : "", dirname);
+            TAILQ_INIT(&dir->files);
+            int num_returned_bytes = asprintf(&dir->path, "%s%s%s", curdir->path, *curdir->path ? "\\" : "", dirname);
+            if (num_returned_bytes == -1)
+                DEBUG("asprintf did not return anything");
 
-            if(ctx->file_callback == NULL)
-            {
+            if (ctx->file_callback == NULL) {
                 fl_file_t *f = calloc(1, sizeof(fl_file_t));
                 f->name = strdup(dirname);
                 f->type = SHARE_TYPE_DIRECTORY;
@@ -71,40 +67,31 @@ static void fl_xml_parse_start_tag(void *user_data,
             LIST_INSERT_HEAD(&ctx->dir_stack, dir, link);
         }
     }
-    else if(strcasecmp(el, "File") == 0)
-    {
+    else if (strcasecmp(el, "File") == 0) {
         const char *name = 0, *tth = 0;
         uint64_t size = 0;
 
         int i;
-        for(i = 0; attr && attr[i]; i += 2)
-        {
+        for (i = 0; attr && attr[i]; i += 2) {
             if(strcmp(attr[i], "Name") == 0)
-            {
                 name = attr[i + 1];
-            }
             else if(strcmp(attr[i], "Size") == 0)
-            {
                 size = strtoull(attr[i + 1], NULL, 10);
-            }
             else if(strcmp(attr[i], "TTH") == 0)
-            {
                 tth = attr[i + 1];
-            }
         }
 
-        if(ctx->file_callback)
-        {
-            if(name && tth)
-            {
+        if (ctx->file_callback) {
+            if (name && tth) {
                 char *path = 0;
-                asprintf(&path, "%s\\%s", curdir->path, name);
+                num_returned_bytes = asprintf(&path, "%s\\%s", curdir->path, name);
+                if (num_returned_bytes == -1)
+                    DEBUG("asprintf did not return anything");
                 ctx->file_callback(path, tth, size, ctx->user_data);
                 free(path);
             }
         }
-        else
-        {
+        else {
 	    /* If no callback wants to handle the file, we collect
 	     * all files in a list to be processed later.
 	     */

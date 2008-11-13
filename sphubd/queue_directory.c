@@ -39,10 +39,13 @@ static void queue_resolve_directory_recursively(const char *nick,
         unsigned *nfiles_p)
 {
     fl_file_t *file;
+    int num_returned_bytes;
     TAILQ_FOREACH(file, &root->files, link)
     {
         char *target;
-        asprintf(&target, "%s/%s", directory, file->name);
+        num_returned_bytes = asprintf(&target, "%s/%s", directory, file->name);
+        if (num_returned_bytes == -1)
+            DEBUG("asprintf did not return anything");
 
         if(file->dir)
         {
@@ -52,7 +55,9 @@ static void queue_resolve_directory_recursively(const char *nick,
         else
         {
             char *source;
-            asprintf(&source, "%s\\%s", root->path, file->name);
+            num_returned_bytes = asprintf(&source, "%s\\%s", root->path, file->name);
+            if (num_returned_bytes == -1)
+                DEBUG("asprintf did not return anything");
 
             queue_add_internal(nick, source, file->size, target,
                     file->tth, 0, target_directory);

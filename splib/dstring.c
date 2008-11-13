@@ -22,6 +22,7 @@
 
 #include "dstring.h"
 #include "xstr.h"
+#include "log.h"
 
 static void dstring_expand(dstring_t *dstring, unsigned needed)
 {
@@ -94,7 +95,9 @@ void dstring_append_format(dstring_t *dstring, const char *fmt, ...)
     char *tmp = 0;
 
     va_start(ap, fmt);
-    vasprintf(&tmp, fmt, ap);
+    int num_returned_bytes = vasprintf(&tmp, fmt, ap);
+    if (num_returned_bytes == -1)
+        DEBUG("vasprintf did not return anything");
     va_end(ap);
 
     dstring_append(dstring, tmp);

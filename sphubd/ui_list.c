@@ -317,7 +317,9 @@ static void ui_broadcast_command_GFunc(ui_t *ui, void *user_data)
 static void ui_vsend_command(ui_t *ui, const char *fmt, va_list ap)
 {
     char *command = 0;
-    vasprintf(&command, fmt, ap);
+    int num_returned_bytes = vasprintf(&command, fmt, ap);
+    if (num_returned_bytes == -1)
+        DEBUG("vasprintf did not return anything");
     /* XXX: memory leak if this fails */
     /* return_if_fail(g_utf8_validate(command, -1, NULL)); */
     if(ui)

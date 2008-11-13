@@ -30,6 +30,7 @@
 #include <stdlib.h>
 
 #include "xerr.h"
+#include "log.h"
 
 const char *xerr_msg(xerr_t *xerr)
 {
@@ -48,7 +49,9 @@ void xerr_set(xerr_t **xerr, int code, const char *fmt, ...)
     (*xerr)->message = 0;
     va_list ap;
     va_start(ap, fmt);
-    vasprintf(&(*xerr)->message, fmt, ap);
+    int num_returned_bytes = vasprintf(&(*xerr)->message, fmt, ap);
+    if (num_returned_bytes == -1)
+        DEBUG("vasprintf did not return anything");
     va_end(ap);
 
     (*xerr)->code = code;
