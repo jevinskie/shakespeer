@@ -1,3 +1,19 @@
+New in version 0.9.11:
+
+* Automatic port forwarding using UPnP/NAT-PMP, which should solve network problems for many users
+* The main window can now be closed and reopened
+* All transfers now uses a progressbar instead of percentage numbers to indicate progress
+* Added support for magnet links
+* It is now possible to disable automatic rescanning of shares
+* If one of your friends is mentioned in a chat, the name is now highlighted
+* Fixed an issue where folders weren't displayed when filtering file lists
+* Terabyte measures now uses two decimals instead of one
+* Fixed an issue where duplicate users occured in the user list
+* Bookmarks are no longer duplicated when adding them using the "/fav" command
+* The default download folder is now ~/Downloads on Mac OS X 10.5 Leopard
+* Tweaked the colors of the connection health indicator in preferences, to be a bit easier on the eyes
+* Rearranged the keyboard shortcuts for the various main views, and added a shortcut for Friends
+
 New in version 0.9.10:
 
 * Fixed a nasty bug in 0.9.9, which caused ShakesPeer to crash
@@ -202,4 +218,3 @@ New in version 0.7.1:
 * Reworked the /me command
 * Fixed offset bug in resumed downloads (all resumed downloads so far has been corrupt!)
 * Updating is highly recommended!
-
