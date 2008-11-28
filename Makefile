@@ -10,7 +10,12 @@ check-local:
 clean-local:
 
 config.mk: configure ${TOP}/support/configure.sub
+ifeq ($(BUILD_PROFILE),release)
+	@echo "forcing build of all external dependencies in release build"
+	echo "ICONV_CONST=const" >config.mk
+else
 	CFLAGS="$(EXTERN_CFLAGS)" sh ./configure
+endif
 
 REPO		?= shakespeer
 REPO_URL	?= http://shakespeer.googlecode.com/svn
