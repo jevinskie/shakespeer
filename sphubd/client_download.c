@@ -164,9 +164,8 @@ cc_request_download(cc_t *cc)
                 DEBUG("asprintf did not return anything");
             
             /* Check if the file is already downloaded */
-            if (stat(target, &stbuf) == 0) {
+            if (stat(target, &stbuf) == 0 && queue->size == stbuf.st_size) {
                 INFO("local file in download dir already exists: [%s]", target);
-                /* what if size differs? */
                 queue_remove_target(queue->target_filename);
                 free(target);
             }
