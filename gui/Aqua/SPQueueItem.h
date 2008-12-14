@@ -17,6 +17,13 @@
 
 #import <Cocoa/Cocoa.h>
 
+typedef enum {
+    eQueuedState,
+    eDownloadingState,
+    eFinishedState,
+    eAbortedState
+} SPQueueItemStates;
+
 @interface SPQueueItem : NSObject
 {
     NSString *target;
@@ -36,12 +43,13 @@
     
     BOOL isFilelist;
     BOOL isDirectory;
-    BOOL isFinished;
 	
 	// when a download is requested to be removed by the user, this is set to make it
 	// easy to identify user-removed downloads from finished downloads later when the
 	// action is complete (it is aborted) and it needs to be removed from the table.
 	BOOL isWaitingToBeRemoved;
+	 
+	int state;
 }
 - (id)initWithTarget:(NSString *)aTarget;
 - (id)initWithTarget:(NSString *)aTarget displayName:(NSString *)aDisplayName;
@@ -80,8 +88,9 @@
 - (BOOL)isFilelist;
 - (void)setIsFilelist:(BOOL)aFlag;
 - (BOOL)isFinished;
-- (void)setFinished;
 - (BOOL)isWaitingToBeRemoved;
 - (void)setIsWaitingToBeRemoved:(BOOL)waitingToBeRemoved;
+- (BOOL)inProgress;
+- (void)setState:(SPQueueItemStates)aState;
 
 @end

@@ -651,12 +651,11 @@
         NSDictionary *fontAttributes = [NSDictionary dictionaryWithObjectsAndKeys:
                                         [NSFont systemFontOfSize:11.0], NSFontAttributeName,
                                         nil];
-        NSAttributedString *attributedStatusString = [[NSAttributedString alloc] initWithString:[qi statusString]
-                                                                                     attributes:fontAttributes];
+        NSMutableAttributedString *attributedStatusString = [[NSMutableAttributedString alloc] initWithString:[qi statusString]
+                                                                                                   attributes:fontAttributes];
         [cell setAttributedStringValue:attributedStatusString];
-        // Turn off the progress display if the transfer isn't finished and isn't in progress
-        if ([[qi statusString] isEqualToString:@"Aborted"] ||
-            [[qi statusString] isEqualToString:@"Queued"])
+        
+        if (![qi inProgress] && ![qi isFinished])
             [cell setFloatValue:0.0];
         
         [attributedStatusString release];
@@ -783,7 +782,7 @@
 
 - (void)setFinished:(SPQueueItem *)qi
 {
-    [qi setFinished];
+    [qi setState:eFinishedState];
 
     if ([qi isDirectory]) {
         NSEnumerator *e = [[qi children] objectEnumerator];
@@ -850,15 +849,6 @@
     }
 }
 
-- (void)setStatusString:(NSString *)statusString forTarget:(NSString *)targetFilename
-{
-    SPQueueItem *qi = [self findItemWithTarget:targetFilename];
-    if (qi) {
-        [qi setStatusString:statusString];
-        [tableView reloadData];
-    }
-}
-
 - (void)transferStatsNotification:(NSNotification *)aNotification
 {
     NSString *targetFilename = [[aNotification userInfo] objectForKey:@"targetFilename"];
@@ -870,7 +860,7 @@
             unsignedLongLongValue];
         
         [qi setStatus:[NSNumber numberWithFloat:(float)offset / (size ? size : 100) * 100]];
-        [qi setStatusString:@"Downloading"];
+        [qi setState:eDownloadingState];
         [tableView reloadData];
     }
 }
@@ -878,7 +868,10 @@
 - (void)transferAbortedNotification:(NSNotification *)aNotification
 {
     NSString *targetFilename = [[aNotification userInfo] objectForKey:@"targetFilename"];
-    [self setStatusString:@"Aborted" forTarget:targetFilename];
+    SPQueueItem *qi = [self findItemWithTarget:targetFilename];
+    if (qi)
+        [qi setState:eAbortedState];
+    [tableView reloadData];
 }
 
 @end

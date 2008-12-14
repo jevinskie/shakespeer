@@ -74,7 +74,6 @@
 - (void)clearAllFinishedDownloadsRecursivelyInArray:(NSMutableArray *)anArray;
 
 - (IBAction)setPriority:(id)sender;
-- (void)setStatusString:(NSString *)statusString forTarget:(NSString *)targetFilename;
 - (IBAction)searchByTTH:(id)sender;
 - (IBAction)searchForAlternates:(id)sender;
 - (IBAction)browseUsersFiles:(id)sender;

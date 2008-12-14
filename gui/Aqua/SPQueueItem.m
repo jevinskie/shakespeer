@@ -32,7 +32,7 @@
         size = [[NSNumber numberWithUnsignedLongLong:0] retain];
         sources = [[NSMutableDictionary alloc] init];
         [self setPriority:[NSNumber numberWithInt:3]]; /* Normal priority */
-        [self setStatusString:@"Queued"];
+        [self setState:eQueuedState];
     }
     
     return self;
@@ -266,16 +266,9 @@
     return statusString;
 }
 
-- (void)setFinished
-{
-    [self setStatus:[NSNumber numberWithFloat:100.0]];
-    [self setStatusString:@"Finished"];
-    isFinished = YES;
-}
-
 - (BOOL)isFinished
 {
-    return isFinished;
+    return (state == eFinishedState);
 }
 
 - (BOOL)isWaitingToBeRemoved
@@ -286,6 +279,28 @@
 - (void)setIsWaitingToBeRemoved:(BOOL)waitingToBeRemoved
 {
     isWaitingToBeRemoved = waitingToBeRemoved;
+}
+
+- (BOOL)inProgress
+{
+    return (state == eDownloadingState);
+}
+
+- (void)setState:(SPQueueItemStates)aState {
+    if (aState == eFinishedState) {
+        [self setStatusString:@"Finished"];
+        [self setStatus:[NSNumber numberWithFloat:100.0]];
+    }
+    else if (aState == eDownloadingState) {
+        [self setStatusString:@"Downloading"];
+    }
+    else if (aState == eAbortedState) {
+        [self setStatusString:@"Aborted"];
+    }
+    else {
+        [self setStatusString:@"Queued"];
+    }
+    state = aState;
 }
 
 @end
