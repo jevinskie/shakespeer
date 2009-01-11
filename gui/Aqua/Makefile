@@ -127,7 +127,6 @@ app_bundle.stamp: ShakesPeer
 	mkdir -p $(RES)/English.lproj
 	cp -f Resources/Info.plist ShakesPeer.app/Contents
 	cp -fR Resources/English.lproj/*[^~].nib $(RES)/English.lproj
-	cp -f Resources/English.lproj/InfoPlist.strings $(RES)/English.lproj
 	cp -f Resources/English.lproj/UKCrashReporter.strings $(RES)/English.lproj
 	cp -f Resources/Credits.rtf $(RES)
 	cp -f Resources/Images/*.png $(RES)
