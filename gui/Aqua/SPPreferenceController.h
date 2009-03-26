@@ -115,5 +115,5 @@
 - (void)updateNameAndIconForDownloadFolder;
 - (void)updateNameAndIconForIncompleteFolder;
 - (void)setDefaultMagnetHandler:(id)sender;
-
+- (NSPredicate *)predicateFromSelectedPaths;
 @end

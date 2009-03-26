@@ -382,7 +382,9 @@ static float ToolbarHeightForWindow(NSWindow *window)
         [menu removeAllItemsButFirst];
         
         // Populate the menu from our set of duplicate paths
-        NSEnumerator *e = [[duplicatePaths allObjects] objectEnumerator];
+        NSArray *a = [[duplicatePaths allObjects] filteredArrayUsingPredicate:[self predicateFromSelectedPaths]];
+
+        NSEnumerator *e = [a objectEnumerator];
         NSString *currentPath = nil;
         
         while ((currentPath = [e nextObject])) {
@@ -752,4 +754,16 @@ static float ToolbarHeightForWindow(NSWindow *window)
     NSLog(@"Setting %@ as default magnet link handler", magnetHandlerIdentifier);
 }
 
+- (NSPredicate *)predicateFromSelectedPaths 
+{    
+    NSEnumerator *e = [[sharedPathsController selectedObjects] objectEnumerator];
+    NSDictionary *row = nil;
+    NSMutableArray *preds = [NSMutableArray array];
+    
+    while ((row = [e nextObject])) {
+        [preds addObject:[NSPredicate predicateWithFormat:@"SELF contains[cd] %@", 
+                          [row objectForKey:@"path"]]];
+    }
+    return [NSCompoundPredicate orPredicateWithSubpredicates:preds];
+}
 @end
