@@ -47,12 +47,14 @@
                                                               selector:@selector(caseInsensitiveCompare:)] autorelease];
         [filelist setSortDescriptors:[NSArray arrayWithObjects:sd1, sd2, nil]];
 
-	xerr_t *err = NULL;
+        xerr_t *err = NULL;
+        fl_dir_t *root = NULL;
+
         root = fl_parse([aPath UTF8String], &err);
         if (root == NULL) {
-	    [[SPMainWindowController sharedMainWindowController]
-         setStatusMessage:[NSString stringWithFormat:@"Failed to load %@'s filelist: %s", aNick, xerr_msg(err)]];
-	    xerr_free(err);
+            [[SPMainWindowController sharedMainWindowController] 
+             setStatusMessage:[NSString stringWithFormat:@"Failed to load %@'s filelist: %s", aNick, xerr_msg(err)]];
+            xerr_free(err);
         }
         else {
             rootItems = [[self setFiles:root] retain];

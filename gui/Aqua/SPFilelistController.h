@@ -44,8 +44,7 @@
 
     NSString *nick;
     NSString *hubAddress;
-
-    fl_dir_t *root;
+    
 }
 - (id)initWithFile:(NSString *)aPath nick:(NSString *)aNick hub:(NSString *)aHubAddress;
 - (void)unbindControllers;

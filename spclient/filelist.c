@@ -90,12 +90,14 @@ fl_dir_t *fl_parse(const char *filename, xerr_t **err)
     }
 
     /* FIXME: should pass the xerr_t to the parse functions too */
+    fl_dir_t *list;
     if(type == FILELIST_DCLST)
-        return fl_parse_dclst(filename_noext);
+        list = fl_parse_dclst(filename_noext);
     else
-        return fl_parse_xml(filename_noext);
+        list = fl_parse_xml(filename_noext);
 
     free(filename_noext);
+    return list;
 }
 
 static void fl_free_file(fl_file_t *flf)
