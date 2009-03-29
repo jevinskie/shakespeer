@@ -185,7 +185,9 @@
     [searchString release];
     [searchSize release];
     [searchResults release];
+    [arrangedSearchResults release];
     [searchResultsDelta release];
+    [searchResultsIndex release];
     [hubAddress release];
     
     [tcNick release];
