@@ -283,7 +283,7 @@ static SPApplicationController *sharedApplicationController = nil;
     if ([[NSUserDefaults standardUserDefaults] boolForKey:SPPrefsConnectRemotely] == YES) {
         remoteSphubdAddress = [[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsRemoteSphubdAddress];
     }
-
+    
     if (remoteSphubdAddress && [remoteSphubdAddress length] > 0) {
         if (sp_connect_remote(sp, [remoteSphubdAddress UTF8String]) != 0) {
             SPLog(@"Failed to connect to remote sphubd");
@@ -291,25 +291,20 @@ static SPApplicationController *sharedApplicationController = nil;
             return NO;
         }
     }
-else { 
-#ifdef BUILD_PROFILE
-            NSString *executable = @"sphubd";
-#else
-            NSString *executable = @"debug-sphubd.sh";
-#endif
+    else {
+        NSString *executable = @"sphubd";
         NSString *launchPath = [NSString stringWithFormat:@"%@/%@",
-                [[NSBundle mainBundle] resourcePath], executable];
+                                [[NSBundle mainBundle] resourcePath], executable];
         const char *workDir = "~/Library/Application Support/ShakesPeer";
-
+        
         if (sp_connect(sp, workDir, [launchPath UTF8String]) != 0) {
             NSLog(@"Failed to execute sphubd");
-            return NO;
         }
     }
-
+    
     /* TODO: this is just silly! We should not use any libevent stuff here! */
     sp->output = evbuffer_new();
-
+    
     /* Attach the socket to the run loop */
     CFSocketContext spContext;
     spContext.version = 0;
@@ -317,9 +312,9 @@ else {
     spContext.retain = nil;
     spContext.release = nil;
     spContext.copyDescription = nil;
-
+    
     sphubdSocket = CFSocketCreateWithNative(kCFAllocatorDefault, sp->fd,
-            kCFSocketReadCallBack | kCFSocketWriteCallBack, sp_callback, &spContext);
+                                            kCFSocketReadCallBack | kCFSocketWriteCallBack, sp_callback, &spContext);
     if (sphubdSocket == NULL) {
         NSLog(@"Failed to create a CFSocket");
         return NO;
@@ -327,14 +322,14 @@ else {
     sp->user_data = sphubdSocket;
     sphubdRunLoopSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, sphubdSocket, 0);
     CFRunLoopAddSource(CFRunLoopGetCurrent(), sphubdRunLoopSource, kCFRunLoopDefaultMode);
-
+    
     /* disable the write callback (only enable if sp_send_string returns EAGAIN, see SPClientBridge.m) */
     CFSocketDisableCallBacks(sphubdSocket, kCFSocketWriteCallBack);
-
+    
     [self setLogLevel:[[NSUserDefaults standardUserDefaults] stringForKey:SPPrefsLogLevel]];
     int num_shared_paths= [[[NSUserDefaults standardUserDefaults] arrayForKey:SPPrefsSharedPaths] count];
     sp_send_expect_shared_paths(sp, num_shared_paths);
-
+    
     return YES;
 }
 

@@ -41,7 +41,6 @@
 		28E0863F0D841873006CF70A /* Friends.nib in Resources */ = {isa = PBXBuildFile; fileRef = 28E0863D0D841873006CF70A /* Friends.nib */; };
 		28E086420D8418E0006CF70A /* SPFriendsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28E086400D8418E0006CF70A /* SPFriendsController.m */; };
 		28F0ACFA0A29E7E100FFEC99 /* MHSysTree.m in Sources */ = {isa = PBXBuildFile; fileRef = 28F0ACF80A29E7E100FFEC99 /* MHSysTree.m */; };
-		9A0DC08F0BBC475200229BA0 /* debug-sphubd.sh in Resources */ = {isa = PBXBuildFile; fileRef = 9A0DC08E0BBC475200229BA0 /* debug-sphubd.sh */; };
 		FC7E1A8A097E6ADC0087431A /* AdvancedItem.png in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A56097E6ADC0087431A /* AdvancedItem.png */; };
 		FC7E1A8B097E6ADC0087431A /* bookmarks.png in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A57097E6ADC0087431A /* bookmarks.png */; };
 		FC7E1A8C097E6ADC0087431A /* ButtonContextUp.tiff in Resources */ = {isa = PBXBuildFile; fileRef = FC7E1A58097E6ADC0087431A /* ButtonContextUp.tiff */; };
@@ -219,7 +218,6 @@
 		28E086410D8418E0006CF70A /* SPFriendsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPFriendsController.h; sourceTree = "<group>"; };
 		28F0ACF70A29E7E100FFEC99 /* MHSysTree.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MHSysTree.h; sourceTree = "<group>"; };
 		28F0ACF80A29E7E100FFEC99 /* MHSysTree.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = MHSysTree.m; sourceTree = "<group>"; usesTabs = 0; };
-		9A0DC08E0BBC475200229BA0 /* debug-sphubd.sh */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.script.sh; name = "debug-sphubd.sh"; path = "Resources/debug-sphubd.sh"; sourceTree = "<group>"; };
 		FC7E1A23097E6A2E0087431A /* ShakesPeer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShakesPeer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC7E1A26097E6A2F0087431A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = Info.plist; path = Resources/Info.plist; sourceTree = "<group>"; };
 		FC7E1A56097E6ADC0087431A /* AdvancedItem.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = AdvancedItem.png; path = Resources/Images/AdvancedItem.png; sourceTree = "<group>"; };
@@ -463,7 +461,6 @@
 		28C7E8220B1DF3E900C8DD15 /* Scripts */ = {
 			isa = PBXGroup;
 			children = (
-				9A0DC08E0BBC475200229BA0 /* debug-sphubd.sh */,
 				28C7E8270B1DF40300C8DD15 /* np.scpt */,
 			);
 			name = Scripts;
@@ -778,7 +775,6 @@
 				28C74ED40ADBECDF00BACE5C /* PublicHubs.nib in Resources */,
 				28C74ED50ADBECDF00BACE5C /* SearchWindow.nib in Resources */,
 				28C74ED60ADBECDF00BACE5C /* Uploads.nib in Resources */,
-				9A0DC08F0BBC475200229BA0 /* debug-sphubd.sh in Resources */,
 				28E0863F0D841873006CF70A /* Friends.nib in Resources */,
 				FFB855CC0E504E9100E11C53 /* SPNetworkPortController.m in Resources */,
 			);
