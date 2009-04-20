@@ -1,5 +1,5 @@
 #include "log.h"
-#include "SPlog.h"
+#include "SPLog.h"
 
 void SPLogMessage(NSString *fmt, ...);
 void SPLogMessage(NSString *fmt, ...)
