@@ -9,8 +9,9 @@
 - (NSMenu *)menuForEvent:(NSEvent *)event
 {
     NSPoint where = [self convertPoint:[event locationInWindow] fromView:nil];
-    int row = [self rowAtPoint:where];
-    int col = [self columnAtPoint:where];
+    NSInteger row = [self rowAtPoint:where];
+    NSInteger col = [self columnAtPoint:where];
+    id rowIndexes = [NSIndexSet indexSetWithIndex:row];
 
     if (row >= 0) {
         NSTableColumn *column = nil;
@@ -20,17 +21,14 @@
         if ([self numberOfSelectedRows] <= 1) {
             if ([[self delegate] respondsToSelector:@selector(tableView:shouldSelectRow:)]) {
                 if ([[self delegate] tableView:self shouldSelectRow:row])
-                    [self selectRow:row byExtendingSelection:NO];
+                    [self selectRowIndexes:rowIndexes byExtendingSelection:NO];
             }
             else {
-                [self selectRow:row byExtendingSelection:NO];
+                [self selectRowIndexes:rowIndexes byExtendingSelection:NO];
             }
         }
 
-        if ([[self dataSource] respondsToSelector:@selector(tableView:menuForTableColumn:row:)])
-            return [[self dataSource] tableView:self menuForTableColumn:column row:row];
-        else
-            return [self menu];
+        return [self menu];
     }
 
     [self deselectAll:nil];

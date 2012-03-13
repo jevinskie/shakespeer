@@ -27,7 +27,7 @@ void sendNotification(NSString *notificationName, NSString *key1, id arg1, ...);
 
 @class SPMainWindowController;
 
-@interface SPApplicationController : NSObject
+@interface SPApplicationController : NSObject <NSApplicationDelegate>
 {
     BOOL connectedToBackend;
     SPMainWindowController *mainWindowController;

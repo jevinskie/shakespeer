@@ -99,7 +99,7 @@
 
 - (NSString *)title
 {
-    return [NSString stringWithFormat:[NSString stringWithFormat:@"%@@%@", nick, hubname]];
+    return [NSString stringWithFormat:@"%@@%@", nick, hubname];
 }
 
 - (NSMenu *)menu

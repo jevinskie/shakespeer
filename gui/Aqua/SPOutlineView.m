@@ -43,10 +43,11 @@
 {
     NSPoint where = [self convertPoint:[event locationInWindow] fromView:nil];
     int row = [self rowAtPoint:where];
+    id indexes = [NSIndexSet indexSetWithIndex:row];
 
     if (row >= 0) {
         if ([self numberOfSelectedRows] <= 1)
-            [self selectRow:row byExtendingSelection:NO];
+            [self selectRowIndexes:indexes byExtendingSelection:NO];
 
         return [self menu];
     }
@@ -125,7 +126,9 @@
             /* scroll to and select the appropriate row, then end the search
                to imitate the behaviour in Finder */
             [self scrollRowToVisible:[self rowForItem:currentItem]];
-            [self selectRow:[self rowForItem:currentItem] byExtendingSelection:NO];
+            int row = [self rowForItem:currentItem];
+            id indexes = [NSIndexSet indexSetWithIndex:row];
+            [self selectRowIndexes:indexes byExtendingSelection:NO];
             eventHandled = YES;
             break;
         }

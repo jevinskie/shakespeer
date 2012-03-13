@@ -30,7 +30,7 @@
 # define U_INT64_TO_LE(x) htole64((x))
 #elif defined(__APPLE__)
 # include <machine/byte_order.h>
-# define U_INT64_TO_LE(x) NXSwapHostLongLongToLittle((x))
+# define U_INT64_TO_LE(x) OSSwapHostToLittleInt64((x))
 #elif defined(__linux__)
 # include <endian.h>
 # include <byteswap.h>

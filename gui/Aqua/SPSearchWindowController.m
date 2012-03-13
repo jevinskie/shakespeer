@@ -329,7 +329,7 @@
 
     NSIndexSet *selectedIndices = [searchResultTable selectedRowIndexes];
     NSMutableArray *nicks = [NSMutableArray arrayWithCapacity:[selectedIndices count]];
-    unsigned int i = [selectedIndices firstIndex];
+    NSUInteger i = [selectedIndices firstIndex];
     while (i != NSNotFound) {
         NSDictionary *sr = [searchResultTable itemAtRow:i];
         if ([sr objectForKey:@"children"] == nil) {
@@ -425,7 +425,7 @@
 - (void)doubleClickAction:(id)sender
 {
     NSIndexSet *selectedIndices = [searchResultTable selectedRowIndexes];
-    unsigned int i = [selectedIndices firstIndex];
+    NSUInteger i = [selectedIndices firstIndex];
     if (i != NSNotFound) {
         NSDictionary *item = [searchResultTable itemAtRow:i];
         if ([item objectForKey:@"children"]) {
@@ -443,7 +443,7 @@
 - (IBAction)downloadFile:(id)sender
 {
     NSIndexSet *selectedIndices = [searchResultTable selectedRowIndexes];
-    unsigned int i = [selectedIndices firstIndex];
+    NSUInteger i = [selectedIndices firstIndex];
     while (i != NSNotFound) {
         NSDictionary *sr = [searchResultTable itemAtRow:i];
 
@@ -492,7 +492,7 @@
 - (IBAction)downloadParentDirectory:(id)sender
 {
     NSIndexSet *selectedIndices = [searchResultTable selectedRowIndexes];
-    unsigned int i = [selectedIndices firstIndex];
+    NSUInteger i = [selectedIndices firstIndex];
     if (i != NSNotFound) {
         NSDictionary *sr = [searchResultTable itemAtRow:i];
 
@@ -512,7 +512,7 @@
 {
     NSIndexSet *selectedIndices = [searchResultTable selectedRowIndexes];
     NSMutableDictionary *requests = [NSMutableDictionary dictionaryWithCapacity:[selectedIndices count]];
-    unsigned int i = [selectedIndices firstIndex];
+    NSUInteger i = [selectedIndices firstIndex];
     while (i != NSNotFound) {
         NSDictionary *sr = [searchResultTable itemAtRow:i];
         if ([sr objectForKey:@"children"] == nil) {
@@ -546,7 +546,7 @@
 - (IBAction)copyTTH:(id)sender
 {
     NSIndexSet *selectedIndices = [searchResultTable selectedRowIndexes];
-    unsigned int i = [selectedIndices firstIndex];
+    NSUInteger i = [selectedIndices firstIndex];
     if (i != NSNotFound) {
         NSDictionary *sr = [searchResultTable itemAtRow:i];
         NSString *tth = [sr objectForKey:@"tth"];
@@ -562,7 +562,7 @@
 {
     NSIndexSet *selectedIndices = [searchResultTable selectedRowIndexes];
     NSMutableDictionary *requests = [NSMutableDictionary dictionaryWithCapacity:[selectedIndices count]];
-    unsigned int i = [selectedIndices firstIndex];
+    NSUInteger i = [selectedIndices firstIndex];
     while (i != NSNotFound) {
         NSDictionary *sr = [searchResultTable itemAtRow:i];
         if ([sr objectForKey:@"children"] == nil) {
@@ -758,7 +758,7 @@
     /* get a unique set of selected hubs */
     NSIndexSet *selectedIndices = [searchResultTable selectedRowIndexes];
     NSMutableSet *uniqueHubs = [[NSMutableSet alloc] init];
-    unsigned int i = [selectedIndices firstIndex];
+    NSUInteger i = [selectedIndices firstIndex];
     while (i != NSNotFound) {
         NSDictionary *sr = [searchResultTable itemAtRow:i];
         [uniqueHubs addObject:[sr objectForKey:@"hub"]];

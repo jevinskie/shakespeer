@@ -7,7 +7,7 @@
 #import "URLTextView.h"
 
 static NSCursor *sHandCursor = nil;
-static NSRectArray NSCopyRectArray(NSRectArray inSomeRects, int inArraySize);
+static NSRectArray NSCopyRectArray(NSRectArray inSomeRects, NSUInteger inArraySize);
 static BOOL NSMouseInRects(NSPoint inPoint, NSRectArray inSomeRects, int inArraySize, BOOL inFlipped);
 
 @implementation URLTextView
@@ -37,7 +37,7 @@ static BOOL NSMouseInRects(NSPoint inPoint, NSRectArray inSomeRects, int inArray
     NSRange linkRange;
     NSRectArray linkRects;
     NSURL *linkURL = nil;
-    unsigned int linkCount;
+    NSUInteger linkCount = 0;
 
     // Tracking state
     BOOL inRects;
@@ -136,7 +136,7 @@ static BOOL NSMouseInRects(NSPoint inPoint, NSRectArray inSomeRects, int inArray
     NSRange charRange;
     NSRange linkRange;
     NSRectArray linkRects;
-    unsigned int linkCount;
+    NSUInteger linkCount = 0;
     unsigned int scanLoc;
     unsigned int index;
 
@@ -169,7 +169,7 @@ static BOOL NSMouseInRects(NSPoint inPoint, NSRectArray inSomeRects, int inArray
 
 @end
 
-NSRectArray NSCopyRectArray(NSRectArray inSomeRects, int inArraySize)
+NSRectArray NSCopyRectArray(NSRectArray inSomeRects, NSUInteger inArraySize)
 {
     NSRectArray array;
 

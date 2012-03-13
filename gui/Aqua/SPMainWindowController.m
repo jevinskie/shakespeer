@@ -637,11 +637,11 @@
         return;
     
     if ([sender state] == NSOffState) {
-        [sender setState:NSOnState];
+        [(NSCell *) sender setState:NSOnState];
         [transferDrawerTable addTableColumn:tc];
     }
     else {
-        [sender setState:NSOffState];
+        [(NSCell *) sender setState:NSOffState];
         [transferDrawerTable removeTableColumn:tc];
     }
 }

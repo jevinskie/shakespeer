@@ -77,39 +77,38 @@ ShakesPeer: TCMPortMapper.framework \
 	$(CC) $(OBJS) -o $@ $(CFLAGS) $(UB_CFLAGS) $(LDFLAGS) $(LIBS) \
 	$(FRAMEWORKS) -bind_at_load
 
-GROWL_VERSION=1.1.4
+GROWL_VERSION=1.3.1
 
-Growl-$(GROWL_VERSION)-SDK.dmg:
-	ftp http://growl.info/files/Growl-$(GROWL_VERSION)-SDK.dmg
+Growl-$(GROWL_VERSION)-SDK.zip:
+	ftp http://growl.cachefly.net/Growl-$(GROWL_VERSION)-SDK.zip
 
-Growl.framework: Growl-$(GROWL_VERSION)-SDK.dmg
-	p=`hdiutil attach Growl-$(GROWL_VERSION)-SDK.dmg | \
-		sed -n 's/^\/dev\/disk.*[[:space:]]*Apple_HFS[[:space:]]*\(.*\)/\1/p'` && \
-	cp -RP "$$p/Frameworks/Growl.framework" . && \
-	hdiutil detach "$$p"
+Growl.framework: Growl-$(GROWL_VERSION)-SDK.zip
+	unzip Growl-$(GROWL_VERSION)-SDK.zip && \
+	cp -RP Growl-$(GROWL_VERSION)-SDK/Framework/Growl.framework . && \
+	rm -rf Growl-$(GROWL_VERSION)-SDK
 
-PORTMAP_VERSION=1.0-r5
+PORTMAP_VERSION=1.3.1-r46
 
 TCMPortMapper-$(PORTMAP_VERSION).zip:
 	curl http://tcmportmapper.googlecode.com/files/TCMPortMapper-$(PORTMAP_VERSION).zip \
 		>TCMPortMapper-$(PORTMAP_VERSION).zip
 
-TCMPortMapper.framework: TCMPortMapper-$(PORTMAP_VERSION).zip
+TCMPortMapper.framework:
 	mkdir TCMPortMapper && \
 	unzip TCMPortMapper-$(PORTMAP_VERSION).zip -d TCMPortMapper && \
 	rm "TCMPortMapper/TCMPortMapper.framework/Resources/OUItoCompany.plist" && \
 	cp -RP TCMPortMapper/TCMPortMapper.framework . && \
 	rm -rf TCMPortMapper
 
-SPARKLE_VERSION=1.1
+SPARKLE_VERSION=1.5b6
 
-Sparkle-$(SPARKLE_VERSION).zip:
-	ftp http://www.andymatuschak.org/files/Sparkle-$(SPARKLE_VERSION).zip
+Sparkle\ $(SPARKLE_VERSION).zip:
+	ftp http://sparkle.andymatuschak.org/files/Sparkle%20$(SPARKLE_VERSION).zip
 
-Sparkle.framework: Sparkle-$(SPARKLE_VERSION).zip
+Sparkle.framework: Sparkle\ $(SPARKLE_VERSION).zip
 	mkdir Sparkle && \
-	unzip Sparkle-$(SPARKLE_VERSION).zip -d Sparkle && \
-	cp -RP "Sparkle/Extras/English-Only Framework/Sparkle.framework" . && \
+	unzip Sparkle\ $(SPARKLE_VERSION).zip -d Sparkle && \
+	cp -RP "Sparkle/Sparkle.framework" . && \
 	rm -rf Sparkle
 
 APP=ShakesPeer.app

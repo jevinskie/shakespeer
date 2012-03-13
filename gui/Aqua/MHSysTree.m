@@ -29,9 +29,9 @@
 
 RB_GENERATE(id_tree, rb_entry, entry, id_cmp);
 
-int id_cmp(struct rb_entry *a, struct rb_entry *b)
+NSUInteger id_cmp(struct rb_entry *a, struct rb_entry *b)
 {
-    return (int)[a->obj performSelector:@selector(compare:) withObject:b->obj];
+    return (NSUInteger)[a->obj performSelector:@selector(compare:) withObject:b->obj];
 }
 
 - (id)init

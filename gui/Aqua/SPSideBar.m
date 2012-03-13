@@ -53,7 +53,7 @@
         [delegate sideBar:self didSelectItem:[tabViewItem identifier]];
 }
 
-- (BOOL)tableView:(NSTableView *)aTableView shouldSelectRow:(int)rowIndex
+- (BOOL)tableView:(NSTableView *)aTableView shouldSelectRow:(NSInteger)rowIndex
 {
     id item = [items objectAtIndex:rowIndex];
     return ! [item isKindOfClass:[NSString class]];
@@ -62,7 +62,7 @@
 - (void)selectionDidChange:(NSNotification *)aNotification
 {
     NSIndexSet *selectedIndexes = [self selectedRowIndexes];
-    unsigned int selectedIndex = [selectedIndexes firstIndex];
+    NSUInteger selectedIndex = [selectedIndexes firstIndex];
     if (selectedIndex != NSNotFound)
         [self displayItem:[items objectAtIndex:selectedIndex]];
 }
@@ -168,15 +168,15 @@
     }
 }
 
-- (unsigned int)numberOfItemsInSection:(NSString *)aSection
+- (NSUInteger)numberOfItemsInSection:(NSString *)aSection
 {
-    unsigned int index = [items indexOfObject:aSection];
+    NSUInteger index = [items indexOfObject:aSection];
     
     if (index == NSNotFound)
         return 0;
     
-    unsigned int i = index + 1;
-    unsigned int n = 0;
+    NSUInteger i = index + 1;
+    NSUInteger n = 0;
     while (i < [items count]) {
         if ([[items objectAtIndex:i] isKindOfClass:[NSString class]])
             break;
@@ -189,7 +189,7 @@
 
 - (NSArray *)itemsInSection:(NSString *)aSection
 {
-    unsigned int startIndex = [items indexOfObject:aSection];
+    NSUInteger startIndex = [items indexOfObject:aSection];
     if (startIndex == NSNotFound)
         return nil;
     NSRange range;
@@ -227,7 +227,7 @@
 - (void)displayItem:(id)anItem
 {
     /* Is the item in the tabView? */
-    int index =  [tabView indexOfTabViewItemWithIdentifier:anItem];
+    NSUInteger index =  [tabView indexOfTabViewItemWithIdentifier:anItem];
     if (index != NSNotFound) {
         [tabView selectTabViewItemAtIndex:index];
         [self selectRowIndexes:[NSIndexSet indexSetWithIndex:[items indexOfObject:anItem]]
@@ -240,7 +240,7 @@
 
 - (void)removeItem:(id)anItem
 {
-    int index = [tabView indexOfTabViewItemWithIdentifier:anItem];
+    NSUInteger index = [tabView indexOfTabViewItemWithIdentifier:anItem];
     if (index != NSNotFound) {
         NSTabViewItem *tabViewItem = [tabView tabViewItemAtIndex:index];
         [tabView removeTabViewItem:tabViewItem];
@@ -275,7 +275,7 @@
     [self reloadData];
 }
 
-- (NSDragOperation)tableView:(NSTableView *)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op 
+- (NSDragOperation)tableView:(NSTableView *)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op 
 {
     // never allow drops between items in the sidebar
     if (op == NSTableViewDropAbove) {
@@ -345,13 +345,13 @@
     }
 }
 
-- (int)numberOfRowsInTableView:(NSTableView*)tableView
+- (NSInteger)numberOfRowsInTableView:(NSTableView*)tableView
 {       
     return [items count];
 }
 
 - (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)aTableColumn
-            row:(int)rowIndex
+            row:(NSInteger)rowIndex
 {
     return [items objectAtIndex:rowIndex];
 }

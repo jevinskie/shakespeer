@@ -285,10 +285,10 @@ NSString *SPPublicHubDataType = @"SPPublicHubDataType";
 	NSString *prefix = [NSString stringWithFormat:@"%s/PublicHublist", working_directory];
 
 	// remove old files
-	[[NSFileManager defaultManager] removeFileAtPath:[NSString stringWithFormat:@"%@.xml", prefix] handler:nil];
-	[[NSFileManager defaultManager] removeFileAtPath:[NSString stringWithFormat:@"%@.xml.bz2", prefix] handler:nil];
-	[[NSFileManager defaultManager] removeFileAtPath:[NSString stringWithFormat:@"%@.config", prefix] handler:nil];
-	[[NSFileManager defaultManager] removeFileAtPath:[NSString stringWithFormat:@"%@.config.bz2", prefix] handler:nil];
+  [[NSFileManager defaultManager] removeItemAtPath:[NSString stringWithFormat:@"%@.xml", prefix] error:nil];
+  [[NSFileManager defaultManager] removeItemAtPath:[NSString stringWithFormat:@"%@.xml.bz2", prefix] error:nil];
+  [[NSFileManager defaultManager] removeItemAtPath:[NSString stringWithFormat:@"%@.config", prefix] error:nil];
+  [[NSFileManager defaultManager] removeItemAtPath:[NSString stringWithFormat:@"%@.config.bz2", prefix] error:nil];
 
 	if([[hublistURL path] hasSuffix:@".xml.bz2"])
 	    hublistPath = [NSString stringWithFormat:@"%@.xml.bz2", prefix];

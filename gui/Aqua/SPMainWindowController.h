@@ -27,7 +27,7 @@
 @class SPTransferController;
 @class MenuButton;
 
-@interface SPMainWindowController : NSWindowController
+@interface SPMainWindowController : NSWindowController <NSToolbarDelegate>
 {
     NSToolbar *toolbar;
 	

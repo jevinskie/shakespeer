@@ -445,11 +445,11 @@
         return;
     
     if ([sender state] == NSOffState) {
-        [sender setState:NSOnState];
+        [(NSCell *)sender setState:NSOnState];
         [transferTable addTableColumn:tc];
     }
     else {
-        [sender setState:NSOffState];
+        [(NSCell *)sender setState:NSOffState];
         [transferTable removeTableColumn:tc];
     }
 }
@@ -528,11 +528,11 @@
     return 1.0;
 }
 
-- (void)setStatus:(NSNumber *)statusNumber
+- (void)setStatus:(NSObject *)aStatus
 {
-    if (status != statusNumber) {
+    if (status != aStatus) {
         [status release];
-        status = [statusNumber retain];
+        status = [aStatus retain];
     }
 }
 

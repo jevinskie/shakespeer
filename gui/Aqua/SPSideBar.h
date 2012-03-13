@@ -53,7 +53,7 @@
 
 @end
 
-@interface SPSideBar : NSTableView
+@interface SPSideBar : NSTableView <NSTabViewDelegate, NSTableViewDataSource, NSTableViewDelegate>
 {
     IBOutlet NSTabView *tabView;
     id delegate;
@@ -72,7 +72,7 @@
 - (void)addItem:(id <SPSideBarItem>)anItem toSection:(NSString *)aSection;
 - (void)addSection:(NSString *)aSection;
 - (BOOL)hasSection:(NSString *)aSection;
-- (unsigned int)numberOfItemsInSection:(NSString *)aSection;
+- (NSUInteger)numberOfItemsInSection:(NSString *)aSection;
 - (NSArray *)itemsInSection:(NSString *)aSection;
 - (void)setDelegate:(id)aDelegate;
 - (id)itemWithTitle:(NSString *)aTitle;

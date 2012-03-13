@@ -86,7 +86,7 @@ static SPApplicationController *sharedApplicationController = nil;
     return self;
 }
 
-- (unsigned)retainCount
+- (NSUInteger)retainCount
 {
     return UINT_MAX; // denotes an object that cannot be released
 }
@@ -178,8 +178,8 @@ static SPApplicationController *sharedApplicationController = nil;
         
         if ([[NSUserDefaults standardUserDefaults] stringForKey:@"firstRun"] == nil) {
             NSLog(@"first run: creating default download folders");
-            [[NSFileManager defaultManager] createDirectoryAtPath:defaultDownloadFolder attributes:nil];
-            [[NSFileManager defaultManager] createDirectoryAtPath:defaultIncompleteFolder attributes:nil];
+            [[NSFileManager defaultManager] createDirectoryAtPath:defaultDownloadFolder withIntermediateDirectories:NO attributes:nil error:nil];
+            [[NSFileManager defaultManager] createDirectoryAtPath:defaultIncompleteFolder withIntermediateDirectories:NO attributes:nil error:nil];
             [[NSUserDefaults standardUserDefaults] setObject:@"NO" forKey:@"firstRun"];
         }
         

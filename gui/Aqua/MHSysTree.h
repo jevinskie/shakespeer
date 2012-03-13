@@ -42,7 +42,7 @@ struct rb_entry
     RB_HEAD(id_tree, rb_entry) root;
 }
 
-int id_cmp(struct rb_entry *a, struct rb_entry *b);
+NSUInteger id_cmp(struct rb_entry *a, struct rb_entry *b);
 
 RB_PROTOTYPE(id_tree, rb_entry, entry, id_cmp);
 

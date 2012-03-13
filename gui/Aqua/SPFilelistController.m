@@ -339,7 +339,7 @@
 - (IBAction)downloadSelectedItems:(id)sender
 {
     NSIndexSet *selectedIndexes = [filelist selectedRowIndexes];
-    unsigned int i = [selectedIndexes firstIndex];
+    NSUInteger i = [selectedIndexes firstIndex];
     while (i != NSNotFound) {
         NSDictionary *item = [filelist itemAtRow:i];
         [self downloadItem:item];
@@ -350,7 +350,7 @@
 - (IBAction)copyMagnet:(id)sender
 {
     NSIndexSet *selectedIndexes = [filelist selectedRowIndexes];
-    unsigned int i = [selectedIndexes firstIndex];
+    NSUInteger i = [selectedIndexes firstIndex];
     if (i != NSNotFound) {
         NSDictionary *item = [filelist itemAtRow:i];
         NSString *hash = [item objectForKey:@"TTH"];
@@ -372,7 +372,7 @@
     if (item == magnetMenu)
     {
         NSIndexSet *selectedIndexes = [filelist selectedRowIndexes];
-        unsigned int i = [selectedIndexes firstIndex];
+        NSUInteger i = [selectedIndexes firstIndex];
         if (i != NSNotFound) {
             NSDictionary *row = [filelist itemAtRow:i];
             NSString *hash = [row objectForKey:@"TTH"];

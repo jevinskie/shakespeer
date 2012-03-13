@@ -207,7 +207,7 @@
         /* create unique set of nicks */
         NSMutableSet *nicks = [[NSMutableSet alloc] init];
         NSIndexSet *selectedIndices = [tableView selectedRowIndexes];
-        unsigned int i = [selectedIndices firstIndex];
+        NSUInteger i = [selectedIndices firstIndex];
         while (i != NSNotFound) {
             SPQueueItem *qi = [tableView itemAtRow:i];
             [nicks addObjectsFromArray:[qi nicks]];
@@ -254,7 +254,7 @@
     if (sender == menuItemSearchByTTH) {
         /* only enable if there is any TTH available */
         NSIndexSet *selectedIndices = [tableView selectedRowIndexes];
-        unsigned int i = [selectedIndices firstIndex];
+        NSUInteger i = [selectedIndices firstIndex];
         BOOL hasTTH = NO;
         while (i != NSNotFound) {
             SPQueueItem *qi = [tableView itemAtRow:i];
@@ -367,7 +367,7 @@
 - (IBAction)removeFromQueue:(id)sender
 {
     NSIndexSet *selectedIndices = [tableView selectedRowIndexes];
-    unsigned int i = [selectedIndices firstIndex];
+    NSUInteger i = [selectedIndices firstIndex];
     while (i != NSNotFound) {
         SPQueueItem *qi = [tableView itemAtRow:i];
         
@@ -403,7 +403,7 @@
     NSString *aNick = [sender title];
     if (aNick) {
         NSIndexSet *selectedIndices = [tableView selectedRowIndexes];
-        unsigned int i = [selectedIndices firstIndex];
+        NSUInteger i = [selectedIndices firstIndex];
         while (i != NSNotFound) {
             SPQueueItem *qi = [tableView itemAtRow:i];
 
@@ -454,7 +454,7 @@
 - (IBAction)setPriority:(id)sender
 {
     NSIndexSet *selectedIndices = [tableView selectedRowIndexes];
-    unsigned int i = [selectedIndices firstIndex];
+    NSUInteger i = [selectedIndices firstIndex];
     while (i != NSNotFound) {
         SPQueueItem *qi = [tableView itemAtRow:i];
 
@@ -472,7 +472,7 @@
 - (IBAction)searchByTTH:(id)sender
 {
     NSIndexSet *selectedIndices = [tableView selectedRowIndexes];
-    unsigned int i = [selectedIndices firstIndex];
+    NSUInteger i = [selectedIndices firstIndex];
     while (i != NSNotFound) {
         SPQueueItem *qi = [tableView itemAtRow:i];
 
@@ -492,7 +492,7 @@
 - (IBAction)searchForAlternates:(id)sender
 {
     NSIndexSet *selectedIndices = [tableView selectedRowIndexes];
-    unsigned int i = [selectedIndices firstIndex];
+    NSUInteger i = [selectedIndices firstIndex];
     while (i != NSNotFound) {
         SPQueueItem *qi = [tableView itemAtRow:i];
 
@@ -540,11 +540,11 @@
         return;
 
     if ([sender state] == NSOffState) {
-        [sender setState:NSOnState];
+        [(NSCell *) sender setState:NSOnState];
         [tableView addTableColumn:tc];
     }
     else {
-        [sender setState:NSOffState];
+        [(NSCell *) sender setState:NSOffState];
         [tableView removeTableColumn:tc];
     }
 }
@@ -552,7 +552,7 @@
 - (IBAction)openSelected:(id)sender
 {
     NSIndexSet *selectedIndices = [tableView selectedRowIndexes];
-    unsigned int i = [selectedIndices firstIndex];
+    NSUInteger i = [selectedIndices firstIndex];
     while (i != NSNotFound) {
         SPQueueItem *qi = [tableView itemAtRow:i];
 
@@ -568,7 +568,7 @@
 - (IBAction)revealInFinder:(id)sender
 {
     NSIndexSet *selectedIndices = [tableView selectedRowIndexes];
-    unsigned int i = [selectedIndices firstIndex];
+    NSUInteger i = [selectedIndices firstIndex];
     while (i != NSNotFound) {
         SPQueueItem *qi = [tableView itemAtRow:i];
 

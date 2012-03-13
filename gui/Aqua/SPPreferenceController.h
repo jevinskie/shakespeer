@@ -21,7 +21,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface SPPreferenceController : NSWindowController
+@interface SPPreferenceController : NSWindowController <NSToolbarDelegate>
 {
     // Identity
     IBOutlet NSView *identityView;
