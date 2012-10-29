@@ -57,7 +57,7 @@ SPApplicationController.o SPClientBridge.o: $(TOP)/version.mk
 
 OBJS=$(SOURCES:.m=.o)
 
-CFLAGS+=-pipe -fobjc-exceptions -fpascal-strings -fobjc-direct-dispatch -F.
+CFLAGS+=-pipe -fobjc-exceptions -fpascal-strings -F.
 ifeq ($(BUILD_PROFILE),release)
 CFLAGS += -DBUILD_PROFILE=$(BUILD_PROFILE)
 endif
